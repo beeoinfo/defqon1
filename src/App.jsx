@@ -203,16 +203,17 @@ export default function App() {
 
   const [view, setView] = useState("lineup");
   const [selectedDay, setSelectedDay] = useState(() => loadViewPreferences()?.selectedDay || defaultDay);
-  const [selectedStage, setSelectedStage] = useState(() => loadViewPreferences()?.selectedStage || "All scenes");
+  const [selectedStage, setSelectedStage] = useState(() => loadViewPreferences()?.selectedStage || "All stages");
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState(() => loadFavorites());
+  const [hasAutoExpandedSearchScope, setHasAutoExpandedSearchScope] = useState(false);
 
   const days = useMemo(() => getDays(entries), []);
   const stages = useMemo(() => getStages(entries, selectedDay), [selectedDay]);
 
   useEffect(() => {
-    if (selectedStage !== "All scenes" && !stages.includes(selectedStage)) {
-      setSelectedStage("All scenes");
+    if (selectedStage !== "All stages" && !stages.includes(selectedStage)) {
+      setSelectedStage("All stages");
     }
   }, [selectedStage, stages]);
 
@@ -241,7 +242,7 @@ export default function App() {
 
     return {
       mode: `${selectedDay} • ${selectedStage}`,
-      scenes: countVisibleStages(sourceEntries),
+      stages: countVisibleStages(sourceEntries),
       artists: sourceEntries.length,
     };
   }, [view, favoriteEntries, visibleEntries]);
@@ -257,6 +258,21 @@ export default function App() {
     });
   }, [selectedDay, selectedStage]);
 
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
+      setHasAutoExpandedSearchScope(false);
+      return;
+    }
+
+    if (!hasAutoExpandedSearchScope) {
+      setSelectedDay("All days");
+      setSelectedStage("All stages");
+      setHasAutoExpandedSearchScope(true);
+    }
+  }, [query, hasAutoExpandedSearchScope]);
+
   const toggleFavorite = (entryId) => {
     setFavorites((prev) =>
       prev.includes(entryId)
@@ -267,14 +283,9 @@ export default function App() {
 
   const resetLocalData = () => {
     setSelectedDay(defaultDay);
-    setSelectedStage("All scenes");
+    setSelectedStage("All stages");
     setQuery("");
-
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(FAVORITES_STORAGE_KEY);
-    }
-
-    setFavorites([]);
+    setHasAutoExpandedSearchScope(false);
   };
 
   return (
@@ -282,23 +293,17 @@ export default function App() {
       <header className="hero">
         <div className="hero__inner">
           <div className="hero__content">
-            <div className="eyebrow">
-              <Flame size={14} />
-              <span>Defqon.1 2026 planner</span>
-            </div>
-
-            <h1>Line-up planner</h1>
+            <h1>Defqon.1 2026 planner</h1>
 
             <p className="hero__text">
-              Recherche, favoris et suggestions intelligentes pour voir rapidement
-              où un artiste joue aussi ailleurs.
+              Research, favorites and smart suggestions to quickly see where an artist performs elsewhere.
             </p>
           </div>
 
           <div className="hero__summary">
-            <SummaryCard icon={CalendarDays} label="Contexte" value={summary.mode} />
-            <SummaryCard icon={Disc3} label="Scènes" value={summary.scenes} />
-            <SummaryCard icon={Music2} label="Artistes" value={summary.artists} />
+            <SummaryCard icon={CalendarDays} label="Context" value={summary.mode} />
+            <SummaryCard icon={Disc3} label="Stages" value={summary.stages} />
+            <SummaryCard icon={Music2} label="Artists" value={summary.artists} />
           </div>
         </div>
       </header>
@@ -310,7 +315,10 @@ export default function App() {
               <button
                 type="button"
                 className={view === "lineup" ? "tab tab--active" : "tab"}
-                onClick={() => setView("lineup")}
+                onClick={() => {
+                  setView("lineup");
+                  setHasAutoExpandedSearchScope(false);
+                }}
               >
                 Line-up
               </button>
@@ -321,10 +329,11 @@ export default function App() {
                   setView("favorites");
                   setQuery("");
                   setSelectedDay("All days");
-                  setSelectedStage("All scenes");
+                  setSelectedStage("All stages");
+                  setHasAutoExpandedSearchScope(false);
                 }}
               >
-                Mes favoris
+                Favorites
               </button>
             </div>
 
@@ -348,7 +357,7 @@ export default function App() {
 
           <div className="filters-block">
             <div className="filters-group">
-              <div className="filters-group__label">Jours</div>
+              <div className="filters-group__label">Days</div>
 
               <div className="filters-row">
                 <StageBadge
@@ -383,13 +392,13 @@ export default function App() {
             </div>
 
             <div className="filters-group">
-              <div className="filters-group__label">Scènes</div>
+              <div className="filters-group__label">Stages</div>
 
               <div className="filters-row">
                 <StageBadge
-                  label="All scenes"
-                  active={selectedStage === "All scenes"}
-                  onClick={() => setSelectedStage("All scenes")}
+                  label="All stages"
+                  active={selectedStage === "All stages"}
+                  onClick={() => setSelectedStage("All stages")}
                   theme={{
                     accent: "#ffffff",
                     accentSoft: "rgba(255,255,255,0.08)",
@@ -539,6 +548,7 @@ export default function App() {
                           <div className="card-list">
                             {stageEntries.map((entry) => {
                               const alternatives = findAlternativeEntries(entry, entries);
+                              const hasAlternatives = alternatives.length > 0;
 
                               return (
                                 <article key={entry.id} className="entry-card">
@@ -565,14 +575,12 @@ export default function App() {
                                     ))}
                                   </div>
 
-                                  <div className="suggestions">
-                                    <div className="suggestions__title">
-                                      Cet artiste joue aussi ailleurs
-                                    </div>
+                                  {hasAlternatives && (
+                                    <div className="suggestions">
+                                      <div className="suggestions__title">
+                                        This artist also performs elsewhere
+                                      </div>
 
-                                    {alternatives.length === 0 ? (
-                                      <p className="muted">Aucune autre occurrence trouvée.</p>
-                                    ) : (
                                       <div className="suggestion-list">
                                         {alternatives.map((alternative) => {
                                           const sharedArtists = getAlternativeMatchSummary(entry, alternative);
@@ -599,8 +607,8 @@ export default function App() {
                                           );
                                         })}
                                       </div>
-                                    )}
-                                  </div>
+                                    </div>
+                                  )}
                                 </article>
                               );
                             })}

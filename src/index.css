@@ -433,15 +433,37 @@ select {
   }
 
   .stage-panel__header,
-  .entry-card__top,
-  .suggestion-card,
-  .toolbar__top {
-    flex-direction: column;
+  .suggestion-card {
+    flex-direction: row;
     align-items: stretch;
   }
 
-  .star-button,
-  .ghost-button {
+  .toolbar__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .entry-card__top {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .entry-card__top > :first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .entry-card__top .star-button {
+    flex-shrink: 0;
     align-self: flex-start;
+    margin-left: 0;
+  }
+
+  .ghost-button {
+    align-self: auto;
   }
 }

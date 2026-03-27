@@ -75,7 +75,7 @@ export function filterEntries(entries, { query, day, stage }) {
     result = result.filter((entry) => entry.day === day);
   }
 
-  if (stage !== "All scenes") {
+  if (stage !== "All stages") {
     result = result.filter((entry) => entry.stage === stage);
   }
 
