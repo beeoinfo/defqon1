@@ -2,137 +2,6586 @@
   "meta": {
     "festival": "Defqon.1",
     "edition": 2026,
-    "version": "v1-seed",
+    "version": "full-lineup",
     "generatedAt": "2026-03-27T00:00:00Z",
     "schemaVersion": 1
   },
   "entries": [
     {
-      "id": "friday-red-warface-x-restricted",
-      "day": "Friday",
-      "dayOrder": 2,
-      "stage": "RED",
-      "rawName": "Warface x Restricted",
-      "displayName": "Warface x Restricted",
-      "artists": ["Warface", "Restricted"],
-      "artistTokens": ["warface", "restricted"],
-      "startAt": null,
-      "endAt": null,
-      "timeLabel": null
-    },
-    {
-      "id": "sunday-blue-warface",
-      "day": "Sunday",
-      "dayOrder": 4,
+      "day": "Thursday",
+      "dayOrder": 1,
       "stage": "BLUE",
-      "rawName": "Warface",
-      "displayName": "Warface",
-      "artists": ["Warface"],
-      "artistTokens": ["warface"],
+      "rawName": "Coone",
+      "displayName": "Coone",
+      "artists": [
+        "Coone"
+      ],
+      "artistTokens": [
+        "coone"
+      ],
+      "id": "thursday-blue-coone",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "sunday-green-restricted",
-      "day": "Sunday",
-      "dayOrder": 4,
-      "stage": "GREEN",
-      "rawName": "Restricted",
-      "displayName": "Restricted",
-      "artists": ["Restricted"],
-      "artistTokens": ["restricted"],
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLUE",
+      "rawName": "D-Block & S-te-Fan",
+      "displayName": "D-Block & S-te-Fan",
+      "artists": [
+        "D-Block",
+        "S-te-Fan"
+      ],
+      "artistTokens": [
+        "d-block",
+        "s-te-fan"
+      ],
+      "id": "thursday-blue-d-block-s-te-fan",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "sunday-magenta-the-pitcher-slim-shore",
-      "day": "Sunday",
-      "dayOrder": 4,
-      "stage": "MAGENTA",
-      "rawName": "The Pitcher & Slim Shore present This is who we are!",
-      "displayName": "The Pitcher & Slim Shore present This is who we are!",
-      "artists": ["The Pitcher", "Slim Shore"],
-      "artistTokens": ["the-pitcher", "slim-shore"],
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLUE",
+      "rawName": "D-Sturb",
+      "displayName": "D-Sturb",
+      "artists": [
+        "D-Sturb"
+      ],
+      "artistTokens": [
+        "d-sturb"
+      ],
+      "id": "thursday-blue-d-sturb",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "friday-uv-bass-shock",
-      "day": "Friday",
-      "dayOrder": 2,
-      "stage": "U.V.",
-      "rawName": "Bass Shock (Bass Modulators & Aftershock)",
-      "displayName": "Bass Shock (Bass Modulators & Aftershock)",
-      "artists": ["Bass Shock", "Bass Modulators", "Aftershock"],
-      "artistTokens": ["bass-shock", "bass-modulators", "aftershock"],
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLUE",
+      "rawName": "DJ Isaac",
+      "displayName": "DJ Isaac",
+      "artists": [
+        "DJ Isaac"
+      ],
+      "artistTokens": [
+        "dj-isaac"
+      ],
+      "id": "thursday-blue-dj-isaac",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "saturday-black-hardcore-italia",
-      "day": "Saturday",
-      "dayOrder": 3,
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLUE",
+      "rawName": "Ran-D & Adaro",
+      "displayName": "Ran-D & Adaro",
+      "artists": [
+        "Ran-D",
+        "Adaro"
+      ],
+      "artistTokens": [
+        "ran-d",
+        "adaro"
+      ],
+      "id": "thursday-blue-ran-d-adaro",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLUE",
+      "rawName": "Villain",
+      "displayName": "Villain",
+      "artists": [
+        "Villain"
+      ],
+      "artistTokens": [
+        "villain"
+      ],
+      "id": "thursday-blue-villain",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
       "stage": "BLACK",
-      "rawName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
-      "displayName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
-      "artists": ["Hardcore Italia", "Mad Dog", "Art of Fighters", "Noize Suppressor", "Tommyknocker"],
-      "artistTokens": ["hardcore-italia", "mad-dog", "art-of-fighters", "noize-suppressor", "tommyknocker"],
+      "rawName": "AniMe",
+      "displayName": "AniMe",
+      "artists": [
+        "AniMe"
+      ],
+      "artistTokens": [
+        "anime"
+      ],
+      "id": "thursday-black-anime",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "friday-blue-cryex-bloodlust-omnya",
-      "day": "Friday",
-      "dayOrder": 2,
-      "stage": "BLUE",
-      "rawName": "End of Line: Cryex / Bloodlust / Omnya",
-      "displayName": "End of Line: Cryex / Bloodlust / Omnya",
-      "artists": ["End of Line", "Cryex", "Bloodlust", "Omnya"],
-      "artistTokens": ["end-of-line", "cryex", "bloodlust", "omnya"],
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "Evil Activities",
+      "displayName": "Evil Activities",
+      "artists": [
+        "Evil Activities"
+      ],
+      "artistTokens": [
+        "evil-activities"
+      ],
+      "id": "thursday-black-evil-activities",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "thursday-indigo-mutilator-adjuzt",
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "Gezellige Uptempo",
+      "displayName": "Gezellige Uptempo",
+      "artists": [
+        "Gezellige Uptempo"
+      ],
+      "artistTokens": [
+        "gezellige-uptempo"
+      ],
+      "id": "thursday-black-gezellige-uptempo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "Miss K8",
+      "displayName": "Miss K8",
+      "artists": [
+        "Miss K8"
+      ],
+      "artistTokens": [
+        "miss-k8"
+      ],
+      "id": "thursday-black-miss-k8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "Noxiouz",
+      "displayName": "Noxiouz",
+      "artists": [
+        "Noxiouz"
+      ],
+      "artistTokens": [
+        "noxiouz"
+      ],
+      "id": "thursday-black-noxiouz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "The Spotlight with Hysta",
+      "displayName": "The Spotlight with Hysta",
+      "artists": [
+        "The Spotlight with Hysta"
+      ],
+      "artistTokens": [
+        "the-spotlight-with-hysta"
+      ],
+      "id": "thursday-black-the-spotlight-with-hysta",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "BLACK",
+      "rawName": "Da Mouth of Madness",
+      "displayName": "Da Mouth of Madness",
+      "artists": [
+        "Da Mouth of Madness"
+      ],
+      "artistTokens": [
+        "da-mouth-of-madness"
+      ],
+      "id": "thursday-black-da-mouth-of-madness",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Cryex",
+      "displayName": "Cryex",
+      "artists": [
+        "Cryex"
+      ],
+      "artistTokens": [
+        "cryex"
+      ],
+      "id": "thursday-indigo-cryex",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Deluzion",
+      "displayName": "Deluzion",
+      "artists": [
+        "Deluzion"
+      ],
+      "artistTokens": [
+        "deluzion"
+      ],
+      "id": "thursday-indigo-deluzion",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Faceless / Sanctuary / Dark Entities",
+      "displayName": "Faceless / Sanctuary / Dark Entities",
+      "artists": [
+        "Faceless",
+        "Sanctuary",
+        "Dark Entities"
+      ],
+      "artistTokens": [
+        "faceless",
+        "sanctuary",
+        "dark-entities"
+      ],
+      "id": "thursday-indigo-faceless-sanctuary-dark-entities",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
       "day": "Thursday",
       "dayOrder": 1,
       "stage": "INDIGO",
       "rawName": "Mutilator & Adjuzt",
       "displayName": "Mutilator & Adjuzt",
-      "artists": ["Mutilator", "Adjuzt"],
-      "artistTokens": ["mutilator", "adjuzt"],
+      "artists": [
+        "Mutilator",
+        "Adjuzt"
+      ],
+      "artistTokens": [
+        "mutilator",
+        "adjuzt"
+      ],
+      "id": "thursday-indigo-mutilator-adjuzt",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "sunday-blue-krowdexx",
-      "day": "Sunday",
-      "dayOrder": 4,
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Rejecta",
+      "displayName": "Rejecta",
+      "artists": [
+        "Rejecta"
+      ],
+      "artistTokens": [
+        "rejecta"
+      ],
+      "id": "thursday-indigo-rejecta",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Spitnoise & Unlocked",
+      "displayName": "Spitnoise & Unlocked",
+      "artists": [
+        "Spitnoise",
+        "Unlocked"
+      ],
+      "artistTokens": [
+        "spitnoise",
+        "unlocked"
+      ],
+      "id": "thursday-indigo-spitnoise-unlocked",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Synergy & Flo",
+      "displayName": "Synergy & Flo",
+      "artists": [
+        "Synergy",
+        "Flo"
+      ],
+      "artistTokens": [
+        "synergy",
+        "flo"
+      ],
+      "id": "thursday-indigo-synergy-flo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Da Tweekaz",
+      "displayName": "Da Tweekaz",
+      "artists": [
+        "Da Tweekaz"
+      ],
+      "artistTokens": [
+        "da-tweekaz"
+      ],
+      "id": "friday-red-da-tweekaz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Darren Styles",
+      "displayName": "Darren Styles",
+      "artists": [
+        "Darren Styles"
+      ],
+      "artistTokens": [
+        "darren-styles"
+      ],
+      "id": "friday-red-darren-styles",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Jay Reeve & Ecstatic ft Synergy",
+      "displayName": "Jay Reeve & Ecstatic ft Synergy",
+      "artists": [
+        "Jay Reeve",
+        "Ecstatic",
+        "Synergy"
+      ],
+      "artistTokens": [
+        "jay-reeve",
+        "ecstatic",
+        "synergy"
+      ],
+      "id": "friday-red-jay-reeve-ecstatic-ft-synergy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "RED Race winner",
+      "displayName": "RED Race winner",
+      "artists": [
+        "RED Race winner"
+      ],
+      "artistTokens": [
+        "red-race-winner"
+      ],
+      "id": "friday-red-red-race-winner",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Rejecta & Adaro",
+      "displayName": "Rejecta & Adaro",
+      "artists": [
+        "Rejecta",
+        "Adaro"
+      ],
+      "artistTokens": [
+        "rejecta",
+        "adaro"
+      ],
+      "id": "friday-red-rejecta-adaro",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Sickmode",
+      "displayName": "Sickmode",
+      "artists": [
+        "Sickmode"
+      ],
+      "artistTokens": [
+        "sickmode"
+      ],
+      "id": "friday-red-sickmode",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Sound Rush",
+      "displayName": "Sound Rush",
+      "artists": [
+        "Sound Rush"
+      ],
+      "artistTokens": [
+        "sound-rush"
+      ],
+      "id": "friday-red-sound-rush",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Sub Zero Project",
+      "displayName": "Sub Zero Project",
+      "artists": [
+        "Sub Zero Project"
+      ],
+      "artistTokens": [
+        "sub-zero-project"
+      ],
+      "id": "friday-red-sub-zero-project",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "The Opening Ceremony with Outsiders",
+      "displayName": "The Opening Ceremony with Outsiders",
+      "artists": [
+        "The Opening Ceremony with Outsiders"
+      ],
+      "artistTokens": [
+        "the-opening-ceremony-with-outsiders"
+      ],
+      "id": "friday-red-the-opening-ceremony-with-outsiders",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "The Purge & Mandy",
+      "displayName": "The Purge & Mandy",
+      "artists": [
+        "The Purge",
+        "Mandy"
+      ],
+      "artistTokens": [
+        "the-purge",
+        "mandy"
+      ],
+      "id": "friday-red-the-purge-mandy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "The Spotlight with Brennan Heart",
+      "displayName": "The Spotlight with Brennan Heart",
+      "artists": [
+        "The Spotlight with Brennan Heart"
+      ],
+      "artistTokens": [
+        "the-spotlight-with-brennan-heart"
+      ],
+      "id": "friday-red-the-spotlight-with-brennan-heart",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "The Straikerz “All On Red”",
+      "displayName": "The Straikerz “All On Red”",
+      "artists": [
+        "The Straikerz “All On Red”"
+      ],
+      "artistTokens": [
+        "the-straikerz-all-on-red"
+      ],
+      "id": "friday-red-the-straikerz-all-on-red",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Warface x Restricted",
+      "displayName": "Warface x Restricted",
+      "artists": [
+        "Warface",
+        "Restricted"
+      ],
+      "artistTokens": [
+        "warface",
+        "restricted"
+      ],
+      "id": "friday-red-warface-x-restricted",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Villain & DV8",
+      "displayName": "Villain & DV8",
+      "artists": [
+        "Villain",
+        "DV8"
+      ],
+      "artistTokens": [
+        "villain",
+        "dv8"
+      ],
+      "id": "friday-red-villain-dv8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
       "stage": "BLUE",
-      "rawName": "Krowdexx",
-      "displayName": "Krowdexx",
-      "artists": ["Krowdexx"],
-      "artistTokens": ["krowdexx"],
+      "rawName": "Aversion",
+      "displayName": "Aversion",
+      "artists": [
+        "Aversion"
+      ],
+      "artistTokens": [
+        "aversion"
+      ],
+      "id": "friday-blue-aversion",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
     },
     {
-      "id": "saturday-blue-riot-shift",
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "B-Frontliner",
+      "displayName": "B-Frontliner",
+      "artists": [
+        "B-Frontliner"
+      ],
+      "artistTokens": [
+        "b-frontliner"
+      ],
+      "id": "friday-blue-b-frontliner",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Chain Reaction & Luna “The Classic Journey”",
+      "displayName": "Chain Reaction & Luna “The Classic Journey”",
+      "artists": [
+        "Chain Reaction",
+        "Luna “The Classic Journey”"
+      ],
+      "artistTokens": [
+        "chain-reaction",
+        "luna-the-classic-journey"
+      ],
+      "id": "friday-blue-chain-reaction-luna-the-classic-journey",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Devin Wild – Among the noise",
+      "displayName": "Devin Wild – Among the noise",
+      "artists": [
+        "Devin Wild – Among the noise"
+      ],
+      "artistTokens": [
+        "devin-wild-among-the-noise"
+      ],
+      "id": "friday-blue-devin-wild-among-the-noise",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Digital Punk",
+      "displayName": "Digital Punk",
+      "artists": [
+        "Digital Punk"
+      ],
+      "artistTokens": [
+        "digital-punk"
+      ],
+      "id": "friday-blue-digital-punk",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "E-Force & Wolv",
+      "displayName": "E-Force & Wolv",
+      "artists": [
+        "E-Force",
+        "Wolv"
+      ],
+      "artistTokens": [
+        "e-force",
+        "wolv"
+      ],
+      "id": "friday-blue-e-force-wolv",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "End of Line: Cryex / Bloodlust / Omnya",
+      "displayName": "End of Line: Cryex / Bloodlust / Omnya",
+      "artists": [
+        "End of Line: Cryex",
+        "Bloodlust",
+        "Omnya"
+      ],
+      "artistTokens": [
+        "end-of-line-cryex",
+        "bloodlust",
+        "omnya"
+      ],
+      "id": "friday-blue-end-of-line-cryex-bloodlust-omnya",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Holy Priest",
+      "displayName": "Holy Priest",
+      "artists": [
+        "Holy Priest"
+      ],
+      "artistTokens": [
+        "holy-priest"
+      ],
+      "id": "friday-blue-holy-priest",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Kronos: Choose Your Era",
+      "displayName": "Kronos: Choose Your Era",
+      "artists": [
+        "Kronos: Choose Your Era"
+      ],
+      "artistTokens": [
+        "kronos-choose-your-era"
+      ],
+      "id": "friday-blue-kronos-choose-your-era",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Mutilator",
+      "displayName": "Mutilator",
+      "artists": [
+        "Mutilator"
+      ],
+      "artistTokens": [
+        "mutilator"
+      ],
+      "id": "friday-blue-mutilator",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Radical Redemption “The Return to the Tribe”",
+      "displayName": "Radical Redemption “The Return to the Tribe”",
+      "artists": [
+        "Radical Redemption “The Return to the Tribe”"
+      ],
+      "artistTokens": [
+        "radical-redemption-the-return-to-the-tribe"
+      ],
+      "id": "friday-blue-radical-redemption-the-return-to-the-tribe",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "The Saints",
+      "displayName": "The Saints",
+      "artists": [
+        "The Saints"
+      ],
+      "artistTokens": [
+        "the-saints"
+      ],
+      "id": "friday-blue-the-saints",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Unresolved",
+      "displayName": "Unresolved",
+      "artists": [
+        "Unresolved"
+      ],
+      "artistTokens": [
+        "unresolved"
+      ],
+      "id": "friday-blue-unresolved",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "Livid",
+      "displayName": "Livid",
+      "artists": [
+        "Livid"
+      ],
+      "artistTokens": [
+        "livid"
+      ],
+      "id": "friday-blue-livid",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE Night",
+      "rawName": "Rebelion Encore",
+      "displayName": "Rebelion Encore",
+      "artists": [
+        "Rebelion Encore"
+      ],
+      "artistTokens": [
+        "rebelion-encore"
+      ],
+      "id": "friday-blue-night-rebelion-encore",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Angerfist",
+      "displayName": "Angerfist",
+      "artists": [
+        "Angerfist"
+      ],
+      "artistTokens": [
+        "angerfist"
+      ],
+      "id": "friday-black-angerfist",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Bulletproof",
+      "displayName": "Bulletproof",
+      "artists": [
+        "Bulletproof"
+      ],
+      "artistTokens": [
+        "bulletproof"
+      ],
+      "id": "friday-black-bulletproof",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Dr. Peacock",
+      "displayName": "Dr. Peacock",
+      "artists": [
+        "Dr. Peacock"
+      ],
+      "artistTokens": [
+        "dr-peacock"
+      ],
+      "id": "friday-black-dr-peacock",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "EZG – Maximaal!",
+      "displayName": "EZG – Maximaal!",
+      "artists": [
+        "EZG – Maximaal!"
+      ],
+      "artistTokens": [
+        "ezg-maximaal"
+      ],
+      "id": "friday-black-ezg-maximaal",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Namara",
+      "displayName": "Namara",
+      "artists": [
+        "Namara"
+      ],
+      "artistTokens": [
+        "namara"
+      ],
+      "id": "friday-black-namara",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Noiseflow",
+      "displayName": "Noiseflow",
+      "artists": [
+        "Noiseflow"
+      ],
+      "artistTokens": [
+        "noiseflow"
+      ],
+      "id": "friday-black-noiseflow",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Noiseflow & Cyber Gunz & Schlot presents The Great Krach Show",
+      "displayName": "Noiseflow & Cyber Gunz & Schlot presents The Great Krach Show",
+      "artists": [
+        "Noiseflow",
+        "Cyber Gunz",
+        "Schlot",
+        "The Great Krach Show"
+      ],
+      "artistTokens": [
+        "noiseflow",
+        "cyber-gunz",
+        "schlot",
+        "the-great-krach-show"
+      ],
+      "id": "friday-black-noiseflow-cyber-gunz-schlot-presents-the-great-krach-show",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Partyraiser",
+      "displayName": "Partyraiser",
+      "artists": [
+        "Partyraiser"
+      ],
+      "artistTokens": [
+        "partyraiser"
+      ],
+      "id": "friday-black-partyraiser",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Restrained",
+      "displayName": "Restrained",
+      "artists": [
+        "Restrained"
+      ],
+      "artistTokens": [
+        "restrained"
+      ],
+      "id": "friday-black-restrained",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Rosbeek & Manifest Destiny",
+      "displayName": "Rosbeek & Manifest Destiny",
+      "artists": [
+        "Rosbeek",
+        "Manifest Destiny"
+      ],
+      "artistTokens": [
+        "rosbeek",
+        "manifest-destiny"
+      ],
+      "id": "friday-black-rosbeek-manifest-destiny",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Slaughterhouse",
+      "displayName": "Slaughterhouse",
+      "artists": [
+        "Slaughterhouse"
+      ],
+      "artistTokens": [
+        "slaughterhouse"
+      ],
+      "id": "friday-black-slaughterhouse",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Tha Playah & Never Surrender",
+      "displayName": "Tha Playah & Never Surrender",
+      "artists": [
+        "Tha Playah",
+        "Never Surrender"
+      ],
+      "artistTokens": [
+        "tha-playah",
+        "never-surrender"
+      ],
+      "id": "friday-black-tha-playah-never-surrender",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLACK",
+      "rawName": "Nolz & Robs",
+      "displayName": "Nolz & Robs",
+      "artists": [
+        "Nolz",
+        "Robs"
+      ],
+      "artistTokens": [
+        "nolz",
+        "robs"
+      ],
+      "id": "friday-black-nolz-robs",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Anamorphic",
+      "displayName": "Anamorphic",
+      "artists": [
+        "Anamorphic"
+      ],
+      "artistTokens": [
+        "anamorphic"
+      ],
+      "id": "friday-uv-anamorphic",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Atmozfears",
+      "displayName": "Atmozfears",
+      "artists": [
+        "Atmozfears"
+      ],
+      "artistTokens": [
+        "atmozfears"
+      ],
+      "id": "friday-uv-atmozfears",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Audiofreq",
+      "displayName": "Audiofreq",
+      "artists": [
+        "Audiofreq"
+      ],
+      "artistTokens": [
+        "audiofreq"
+      ],
+      "id": "friday-uv-audiofreq",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Bass Shock (Bass Modulators & Aftershock)",
+      "displayName": "Bass Shock (Bass Modulators & Aftershock)",
+      "artists": [
+        "Bass Shock (Bass Modulators",
+        "Aftershock)"
+      ],
+      "artistTokens": [
+        "bass-shock-bass-modulators",
+        "aftershock"
+      ],
+      "id": "friday-uv-bass-shock-bass-modulators-aftershock",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Kutski & Gammer",
+      "displayName": "Kutski & Gammer",
+      "artists": [
+        "Kutski",
+        "Gammer"
+      ],
+      "artistTokens": [
+        "kutski",
+        "gammer"
+      ],
+      "id": "friday-uv-kutski-gammer",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Maxtreme",
+      "displayName": "Maxtreme",
+      "artists": [
+        "Maxtreme"
+      ],
+      "artistTokens": [
+        "maxtreme"
+      ],
+      "id": "friday-uv-maxtreme",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "More Kords presents Zaagphoric",
+      "displayName": "More Kords presents Zaagphoric",
+      "artists": [
+        "More Kords",
+        "Zaagphoric"
+      ],
+      "artistTokens": [
+        "more-kords",
+        "zaagphoric"
+      ],
+      "id": "friday-uv-more-kords-presents-zaagphoric",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Noisecontrollers Two Decades",
+      "displayName": "Noisecontrollers Two Decades",
+      "artists": [
+        "Noisecontrollers Two Decades"
+      ],
+      "artistTokens": [
+        "noisecontrollers-two-decades"
+      ],
+      "id": "friday-uv-noisecontrollers-two-decades",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Solstice",
+      "displayName": "Solstice",
+      "artists": [
+        "Solstice"
+      ],
+      "artistTokens": [
+        "solstice"
+      ],
+      "id": "friday-uv-solstice",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "This is Sefa",
+      "displayName": "This is Sefa",
+      "artists": [
+        "This is Sefa"
+      ],
+      "artistTokens": [
+        "this-is-sefa"
+      ],
+      "id": "friday-uv-this-is-sefa",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Toneshifterz",
+      "displayName": "Toneshifterz",
+      "artists": [
+        "Toneshifterz"
+      ],
+      "artistTokens": [
+        "toneshifterz"
+      ],
+      "id": "friday-uv-toneshifterz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Used Crossover set",
+      "displayName": "Used Crossover set",
+      "artists": [
+        "Used Crossover set"
+      ],
+      "artistTokens": [
+        "used-crossover-set"
+      ],
+      "id": "friday-uv-used-crossover-set",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "DL & Synergy",
+      "displayName": "DL & Synergy",
+      "artists": [
+        "DL",
+        "Synergy"
+      ],
+      "artistTokens": [
+        "dl",
+        "synergy"
+      ],
+      "id": "friday-uv-dl-synergy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Alpha Twins",
+      "displayName": "Alpha Twins",
+      "artists": [
+        "Alpha Twins"
+      ],
+      "artistTokens": [
+        "alpha-twins"
+      ],
+      "id": "friday-magenta-alpha-twins",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Artic",
+      "displayName": "Artic",
+      "artists": [
+        "Artic"
+      ],
+      "artistTokens": [
+        "artic"
+      ],
+      "id": "friday-magenta-artic",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Bass Chaserz – De Reünie",
+      "displayName": "Bass Chaserz – De Reünie",
+      "artists": [
+        "Bass Chaserz – De Reünie"
+      ],
+      "artistTokens": [
+        "bass-chaserz-de-re-nie"
+      ],
+      "id": "friday-magenta-bass-chaserz-de-re-nie",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Crypsis",
+      "displayName": "Crypsis",
+      "artists": [
+        "Crypsis"
+      ],
+      "artistTokens": [
+        "crypsis"
+      ],
+      "id": "friday-magenta-crypsis",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "DJ Thera",
+      "displayName": "DJ Thera",
+      "artists": [
+        "DJ Thera"
+      ],
+      "artistTokens": [
+        "dj-thera"
+      ],
+      "id": "friday-magenta-dj-thera",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "E-Force",
+      "displayName": "E-Force",
+      "artists": [
+        "E-Force"
+      ],
+      "artistTokens": [
+        "e-force"
+      ],
+      "id": "friday-magenta-e-force",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Jason Payne presents GOLDSCHOOL",
+      "displayName": "Jason Payne presents GOLDSCHOOL",
+      "artists": [
+        "Jason Payne",
+        "GOLDSCHOOL"
+      ],
+      "artistTokens": [
+        "jason-payne",
+        "goldschool"
+      ],
+      "id": "friday-magenta-jason-payne-presents-goldschool",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Mind Dimension",
+      "displayName": "Mind Dimension",
+      "artists": [
+        "Mind Dimension"
+      ],
+      "artistTokens": [
+        "mind-dimension"
+      ],
+      "id": "friday-magenta-mind-dimension",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "OUTBREAK",
+      "displayName": "OUTBREAK",
+      "artists": [
+        "OUTBREAK"
+      ],
+      "artistTokens": [
+        "outbreak"
+      ],
+      "id": "friday-magenta-outbreak",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Regain",
+      "displayName": "Regain",
+      "artists": [
+        "Regain"
+      ],
+      "artistTokens": [
+        "regain"
+      ],
+      "id": "friday-magenta-regain",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Sub Sonik “My True DNA”",
+      "displayName": "Sub Sonik “My True DNA”",
+      "artists": [
+        "Sub Sonik “My True DNA”"
+      ],
+      "artistTokens": [
+        "sub-sonik-my-true-dna"
+      ],
+      "id": "friday-magenta-sub-sonik-my-true-dna",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Titan",
+      "displayName": "Titan",
+      "artists": [
+        "Titan"
+      ],
+      "artistTokens": [
+        "titan"
+      ],
+      "id": "friday-magenta-titan",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "MAGENTA",
+      "rawName": "Da Syndrome",
+      "displayName": "Da Syndrome",
+      "artists": [
+        "Da Syndrome"
+      ],
+      "artistTokens": [
+        "da-syndrome"
+      ],
+      "id": "friday-magenta-da-syndrome",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Activator (a.k.a. T78) & A*S*Y*S",
+      "displayName": "Activator (a.k.a. T78) & A*S*Y*S",
+      "artists": [
+        "Activator (a.k.a. T78)",
+        "A*S*Y*S"
+      ],
+      "artistTokens": [
+        "activator-aka-t78",
+        "a-s-y-s"
+      ],
+      "id": "friday-green-activator-aka-t78-a-s-y-s",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Anime & Jazzy",
+      "displayName": "Anime & Jazzy",
+      "artists": [
+        "Anime",
+        "Jazzy"
+      ],
+      "artistTokens": [
+        "anime",
+        "jazzy"
+      ],
+      "id": "friday-green-anime-jazzy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "AREA ØNE",
+      "displayName": "AREA ØNE",
+      "artists": [
+        "AREA ØNE"
+      ],
+      "artistTokens": [
+        "area-ne"
+      ],
+      "id": "friday-green-area-ne",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "BLNK",
+      "displayName": "BLNK",
+      "artists": [
+        "BLNK"
+      ],
+      "artistTokens": [
+        "blnk"
+      ],
+      "id": "friday-green-blnk",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Charlie Sparks",
+      "displayName": "Charlie Sparks",
+      "artists": [
+        "Charlie Sparks"
+      ],
+      "artistTokens": [
+        "charlie-sparks"
+      ],
+      "id": "friday-green-charlie-sparks",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "IMHAPPY",
+      "displayName": "IMHAPPY",
+      "artists": [
+        "IMHAPPY"
+      ],
+      "artistTokens": [
+        "imhappy"
+      ],
+      "id": "friday-green-imhappy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "JO3Y3T",
+      "displayName": "JO3Y3T",
+      "artists": [
+        "JO3Y3T"
+      ],
+      "artistTokens": [
+        "jo3y3t"
+      ],
+      "id": "friday-green-jo3y3t",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Manji",
+      "displayName": "Manji",
+      "artists": [
+        "Manji"
+      ],
+      "artistTokens": [
+        "manji"
+      ],
+      "id": "friday-green-manji",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Onlynumbers",
+      "displayName": "Onlynumbers",
+      "artists": [
+        "Onlynumbers"
+      ],
+      "artistTokens": [
+        "onlynumbers"
+      ],
+      "id": "friday-green-onlynumbers",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Stanne",
+      "displayName": "Stanne",
+      "artists": [
+        "Stanne"
+      ],
+      "artistTokens": [
+        "stanne"
+      ],
+      "id": "friday-green-stanne",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "Vieze Asbak",
+      "displayName": "Vieze Asbak",
+      "artists": [
+        "Vieze Asbak"
+      ],
+      "artistTokens": [
+        "vieze-asbak"
+      ],
+      "id": "friday-green-vieze-asbak",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GREEN",
+      "rawName": "XRTN",
+      "displayName": "XRTN",
+      "artists": [
+        "XRTN"
+      ],
+      "artistTokens": [
+        "xrtn"
+      ],
+      "id": "friday-green-xrtn",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "99PRBLMZ",
+      "displayName": "99PRBLMZ",
+      "artists": [
+        "99PRBLMZ"
+      ],
+      "artistTokens": [
+        "99prblmz"
+      ],
+      "id": "friday-yellow-99prblmz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Aradia",
+      "displayName": "Aradia",
+      "artists": [
+        "Aradia"
+      ],
+      "artistTokens": [
+        "aradia"
+      ],
+      "id": "friday-yellow-aradia",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Complex",
+      "displayName": "Complex",
+      "artists": [
+        "Complex"
+      ],
+      "artistTokens": [
+        "complex"
+      ],
+      "id": "friday-yellow-complex",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Cryogenic",
+      "displayName": "Cryogenic",
+      "artists": [
+        "Cryogenic"
+      ],
+      "artistTokens": [
+        "cryogenic"
+      ],
+      "id": "friday-yellow-cryogenic",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Doris",
+      "displayName": "Doris",
+      "artists": [
+        "Doris"
+      ],
+      "artistTokens": [
+        "doris"
+      ],
+      "id": "friday-yellow-doris",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Double Trouble",
+      "displayName": "Double Trouble",
+      "artists": [
+        "Double Trouble"
+      ],
+      "artistTokens": [
+        "double-trouble"
+      ],
+      "id": "friday-yellow-double-trouble",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Remzcore",
+      "displayName": "Remzcore",
+      "artists": [
+        "Remzcore"
+      ],
+      "artistTokens": [
+        "remzcore"
+      ],
+      "id": "friday-yellow-remzcore",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Samynator & UDOW",
+      "displayName": "Samynator & UDOW",
+      "artists": [
+        "Samynator",
+        "UDOW"
+      ],
+      "artistTokens": [
+        "samynator",
+        "udow"
+      ],
+      "id": "friday-yellow-samynator-udow",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "T.M.O.",
+      "displayName": "T.M.O.",
+      "artists": [
+        "T.M.O."
+      ],
+      "artistTokens": [
+        "tmo"
+      ],
+      "id": "friday-yellow-tmo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Tharken",
+      "displayName": "Tharken",
+      "artists": [
+        "Tharken"
+      ],
+      "artistTokens": [
+        "tharken"
+      ],
+      "id": "friday-yellow-tharken",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Tharoza – Live or Die",
+      "displayName": "Tharoza – Live or Die",
+      "artists": [
+        "Tharoza – Live or Die"
+      ],
+      "artistTokens": [
+        "tharoza-live-or-die"
+      ],
+      "id": "friday-yellow-tharoza-live-or-die",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "The Sickest Squad & D’ort",
+      "displayName": "The Sickest Squad & D’ort",
+      "artists": [
+        "The Sickest Squad",
+        "D’ort"
+      ],
+      "artistTokens": [
+        "the-sickest-squad",
+        "dort"
+      ],
+      "id": "friday-yellow-the-sickest-squad-dort",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Vandal",
+      "displayName": "Vandal",
+      "artists": [
+        "Vandal"
+      ],
+      "artistTokens": [
+        "vandal"
+      ],
+      "id": "friday-yellow-vandal",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "YELLOW",
+      "rawName": "Robs & Flo",
+      "displayName": "Robs & Flo",
+      "artists": [
+        "Robs",
+        "Flo"
+      ],
+      "artistTokens": [
+        "robs",
+        "flo"
+      ],
+      "id": "friday-yellow-robs-flo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Amnesys & Nico & Tetta",
+      "displayName": "Amnesys & Nico & Tetta",
+      "artists": [
+        "Amnesys",
+        "Nico",
+        "Tetta"
+      ],
+      "artistTokens": [
+        "amnesys",
+        "nico",
+        "tetta"
+      ],
+      "id": "friday-gold-amnesys-nico-tetta",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Destructive Tendencies",
+      "displayName": "Destructive Tendencies",
+      "artists": [
+        "Destructive Tendencies"
+      ],
+      "artistTokens": [
+        "destructive-tendencies"
+      ],
+      "id": "friday-gold-destructive-tendencies",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "DJ Rob & MC Joe",
+      "displayName": "DJ Rob & MC Joe",
+      "artists": [
+        "DJ Rob",
+        "MC Joe"
+      ],
+      "artistTokens": [
+        "dj-rob",
+        "mc-joe"
+      ],
+      "id": "friday-gold-dj-rob-mc-joe",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Dune",
+      "displayName": "Dune",
+      "artists": [
+        "Dune"
+      ],
+      "artistTokens": [
+        "dune"
+      ],
+      "id": "friday-gold-dune",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Marc Acardipane",
+      "displayName": "Marc Acardipane",
+      "artists": [
+        "Marc Acardipane"
+      ],
+      "artistTokens": [
+        "marc-acardipane"
+      ],
+      "id": "friday-gold-marc-acardipane",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Miss Monica",
+      "displayName": "Miss Monica",
+      "artists": [
+        "Miss Monica"
+      ],
+      "artistTokens": [
+        "miss-monica"
+      ],
+      "id": "friday-gold-miss-monica",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Noize Suppressor",
+      "displayName": "Noize Suppressor",
+      "artists": [
+        "Noize Suppressor"
+      ],
+      "artistTokens": [
+        "noize-suppressor"
+      ],
+      "id": "friday-gold-noize-suppressor",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Party Animals vs Flamman & Abraxas",
+      "displayName": "Party Animals vs Flamman & Abraxas",
+      "artists": [
+        "Party Animals",
+        "Flamman",
+        "Abraxas"
+      ],
+      "artistTokens": [
+        "party-animals",
+        "flamman",
+        "abraxas"
+      ],
+      "id": "friday-gold-party-animals-vs-flamman-abraxas",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "The Viper",
+      "displayName": "The Viper",
+      "artists": [
+        "The Viper"
+      ],
+      "artistTokens": [
+        "the-viper"
+      ],
+      "id": "friday-gold-the-viper",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Vince & DJ Ruffian",
+      "displayName": "Vince & DJ Ruffian",
+      "artists": [
+        "Vince",
+        "DJ Ruffian"
+      ],
+      "artistTokens": [
+        "vince",
+        "dj-ruffian"
+      ],
+      "id": "friday-gold-vince-dj-ruffian",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "GOLD",
+      "rawName": "Ruffian",
+      "displayName": "Ruffian",
+      "artists": [
+        "Ruffian"
+      ],
+      "artistTokens": [
+        "ruffian"
+      ],
+      "id": "friday-gold-ruffian",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Argy",
+      "displayName": "Argy",
+      "artists": [
+        "Argy"
+      ],
+      "artistTokens": [
+        "argy"
+      ],
+      "id": "friday-orange-argy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "David Forbes",
+      "displayName": "David Forbes",
+      "artists": [
+        "David Forbes"
+      ],
+      "artistTokens": [
+        "david-forbes"
+      ],
+      "id": "friday-orange-david-forbes",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "DJ Thera pres. Tranceparency",
+      "displayName": "DJ Thera pres. Tranceparency",
+      "artists": [
+        "DJ Thera",
+        "Tranceparency"
+      ],
+      "artistTokens": [
+        "dj-thera",
+        "tranceparency"
+      ],
+      "id": "friday-orange-dj-thera-pres-tranceparency",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Geck-o “The Soul Shaker”",
+      "displayName": "Geck-o “The Soul Shaker”",
+      "artists": [
+        "Geck-o “The Soul Shaker”"
+      ],
+      "artistTokens": [
+        "geck-o-the-soul-shaker"
+      ],
+      "id": "friday-orange-geck-o-the-soul-shaker",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Marcel Woods",
+      "displayName": "Marcel Woods",
+      "artists": [
+        "Marcel Woods"
+      ],
+      "artistTokens": [
+        "marcel-woods"
+      ],
+      "id": "friday-orange-marcel-woods",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Olive Anguz",
+      "displayName": "Olive Anguz",
+      "artists": [
+        "Olive Anguz"
+      ],
+      "artistTokens": [
+        "olive-anguz"
+      ],
+      "id": "friday-orange-olive-anguz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Panteros666",
+      "displayName": "Panteros666",
+      "artists": [
+        "Panteros666"
+      ],
+      "artistTokens": [
+        "panteros666"
+      ],
+      "id": "friday-orange-panteros666",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Steve Hill & Francesco Zeta",
+      "displayName": "Steve Hill & Francesco Zeta",
+      "artists": [
+        "Steve Hill",
+        "Francesco Zeta"
+      ],
+      "artistTokens": [
+        "steve-hill",
+        "francesco-zeta"
+      ],
+      "id": "friday-orange-steve-hill-francesco-zeta",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "UBERJAKD",
+      "displayName": "UBERJAKD",
+      "artists": [
+        "UBERJAKD"
+      ],
+      "artistTokens": [
+        "uberjakd"
+      ],
+      "id": "friday-orange-uberjakd",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "ORANGE",
+      "rawName": "Will Atkinson",
+      "displayName": "Will Atkinson",
+      "artists": [
+        "Will Atkinson"
+      ],
+      "artistTokens": [
+        "will-atkinson"
+      ],
+      "id": "friday-orange-will-atkinson",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "ARK8",
+      "displayName": "ARK8",
+      "artists": [
+        "ARK8"
+      ],
+      "artistTokens": [
+        "ark8"
+      ],
+      "id": "friday-purple-ark8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Distress",
+      "displayName": "Distress",
+      "artists": [
+        "Distress"
+      ],
+      "artistTokens": [
+        "distress"
+      ],
+      "id": "friday-purple-distress",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Harderclass Hardcore Contest",
+      "displayName": "Harderclass Hardcore Contest",
+      "artists": [
+        "Harderclass Hardcore Contest"
+      ],
+      "artistTokens": [
+        "harderclass-hardcore-contest"
+      ],
+      "id": "friday-purple-harderclass-hardcore-contest",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "HETZKINEN",
+      "displayName": "HETZKINEN",
+      "artists": [
+        "HETZKINEN"
+      ],
+      "artistTokens": [
+        "hetzkinen"
+      ],
+      "id": "friday-purple-hetzkinen",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Modesto",
+      "displayName": "Modesto",
+      "artists": [
+        "Modesto"
+      ],
+      "artistTokens": [
+        "modesto"
+      ],
+      "id": "friday-purple-modesto",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Nexor",
+      "displayName": "Nexor",
+      "artists": [
+        "Nexor"
+      ],
+      "artistTokens": [
+        "nexor"
+      ],
+      "id": "friday-purple-nexor",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Nocturnal",
+      "displayName": "Nocturnal",
+      "artists": [
+        "Nocturnal"
+      ],
+      "artistTokens": [
+        "nocturnal"
+      ],
+      "id": "friday-purple-nocturnal",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Rayzen",
+      "displayName": "Rayzen",
+      "artists": [
+        "Rayzen"
+      ],
+      "artistTokens": [
+        "rayzen"
+      ],
+      "id": "friday-purple-rayzen",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Resilience & Refold",
+      "displayName": "Resilience & Refold",
+      "artists": [
+        "Resilience",
+        "Refold"
+      ],
+      "artistTokens": [
+        "resilience",
+        "refold"
+      ],
+      "id": "friday-purple-resilience-refold",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Simox",
+      "displayName": "Simox",
+      "artists": [
+        "Simox"
+      ],
+      "artistTokens": [
+        "simox"
+      ],
+      "id": "friday-purple-simox",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "PURPLE",
+      "rawName": "Barricade",
+      "displayName": "Barricade",
+      "artists": [
+        "Barricade"
+      ],
+      "artistTokens": [
+        "barricade"
+      ],
+      "id": "friday-purple-barricade",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Bioweapon",
+      "displayName": "Bioweapon",
+      "artists": [
+        "Bioweapon"
+      ],
+      "artistTokens": [
+        "bioweapon"
+      ],
+      "id": "saturday-red-bioweapon",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "D-Sturb",
+      "displayName": "D-Sturb",
+      "artists": [
+        "D-Sturb"
+      ],
+      "artistTokens": [
+        "d-sturb"
+      ],
+      "id": "saturday-red-d-sturb",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Dual Damage & Mish",
+      "displayName": "Dual Damage & Mish",
+      "artists": [
+        "Dual Damage",
+        "Mish"
+      ],
+      "artistTokens": [
+        "dual-damage",
+        "mish"
+      ],
+      "id": "saturday-red-dual-damage-mish",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Frontliner & Max Enforcer",
+      "displayName": "Frontliner & Max Enforcer",
+      "artists": [
+        "Frontliner",
+        "Max Enforcer"
+      ],
+      "artistTokens": [
+        "frontliner",
+        "max-enforcer"
+      ],
+      "id": "saturday-red-frontliner-max-enforcer",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Galactixx",
+      "displayName": "Galactixx",
+      "artists": [
+        "Galactixx"
+      ],
+      "artistTokens": [
+        "galactixx"
+      ],
+      "id": "saturday-red-galactixx",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Mark With a K & MC Chucky B2B Deepack",
+      "displayName": "Mark With a K & MC Chucky B2B Deepack",
+      "artists": [
+        "Mark With a K",
+        "MC Chucky B2B Deepack"
+      ],
+      "artistTokens": [
+        "mark-with-a-k",
+        "mc-chucky-b2b-deepack"
+      ],
+      "id": "saturday-red-mark-with-a-k-mc-chucky-b2b-deepack",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "POWER HOUR",
+      "displayName": "POWER HOUR",
+      "artists": [
+        "POWER HOUR"
+      ],
+      "artistTokens": [
+        "power-hour"
+      ],
+      "id": "saturday-red-power-hour",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Serzo & D-Charged",
+      "displayName": "Serzo & D-Charged",
+      "artists": [
+        "Serzo",
+        "D-Charged"
+      ],
+      "artistTokens": [
+        "serzo",
+        "d-charged"
+      ],
+      "id": "saturday-red-serzo-d-charged",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Showtek",
+      "displayName": "Showtek",
+      "artists": [
+        "Showtek"
+      ],
+      "artistTokens": [
+        "showtek"
+      ],
+      "id": "saturday-red-showtek",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "The Endshow",
+      "displayName": "The Endshow",
+      "artists": [
+        "The Endshow"
+      ],
+      "artistTokens": [
+        "the-endshow"
+      ],
+      "id": "saturday-red-the-endshow",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "The Warming-up with Creeds & Geck-o",
+      "displayName": "The Warming-up with Creeds & Geck-o",
+      "artists": [
+        "The Warming-up with Creeds",
+        "Geck-o"
+      ],
+      "artistTokens": [
+        "the-warming-up-with-creeds",
+        "geck-o"
+      ],
+      "id": "saturday-red-the-warming-up-with-creeds-geck-o",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Vertile",
+      "displayName": "Vertile",
+      "artists": [
+        "Vertile"
+      ],
+      "artistTokens": [
+        "vertile"
+      ],
+      "id": "saturday-red-vertile",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Warrior Workout",
+      "displayName": "Warrior Workout",
+      "artists": [
+        "Warrior Workout"
+      ],
+      "artistTokens": [
+        "warrior-workout"
+      ],
+      "id": "saturday-red-warrior-workout",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Zatox & Mad Dog",
+      "displayName": "Zatox & Mad Dog",
+      "artists": [
+        "Zatox",
+        "Mad Dog"
+      ],
+      "artistTokens": [
+        "zatox",
+        "mad-dog"
+      ],
+      "id": "saturday-red-zatox-mad-dog",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "RED",
+      "rawName": "Villain & DV8",
+      "displayName": "Villain & DV8",
+      "artists": [
+        "Villain",
+        "DV8"
+      ],
+      "artistTokens": [
+        "villain",
+        "dv8"
+      ],
+      "id": "saturday-red-villain-dv8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Act of Rage",
+      "displayName": "Act of Rage",
+      "artists": [
+        "Act of Rage"
+      ],
+      "artistTokens": [
+        "act-of-rage"
+      ],
+      "id": "saturday-blue-act-of-rage",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Anderex",
+      "displayName": "Anderex",
+      "artists": [
+        "Anderex"
+      ],
+      "artistTokens": [
+        "anderex"
+      ],
+      "id": "saturday-blue-anderex",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Coldax & Damaxy",
+      "displayName": "Coldax & Damaxy",
+      "artists": [
+        "Coldax",
+        "Damaxy"
+      ],
+      "artistTokens": [
+        "coldax",
+        "damaxy"
+      ],
+      "id": "saturday-blue-coldax-damaxy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Element & Vasto & The Smiler",
+      "displayName": "Element & Vasto & The Smiler",
+      "artists": [
+        "Element",
+        "Vasto",
+        "The Smiler"
+      ],
+      "artistTokens": [
+        "element",
+        "vasto",
+        "the-smiler"
+      ],
+      "id": "saturday-blue-element-vasto-the-smiler",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "ERABREAK & Level One",
+      "displayName": "ERABREAK & Level One",
+      "artists": [
+        "ERABREAK",
+        "Level One"
+      ],
+      "artistTokens": [
+        "erabreak",
+        "level-one"
+      ],
+      "id": "saturday-blue-erabreak-level-one",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Hard Driver",
+      "displayName": "Hard Driver",
+      "artists": [
+        "Hard Driver"
+      ],
+      "artistTokens": [
+        "hard-driver"
+      ],
+      "id": "saturday-blue-hard-driver",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Infliction & BMBERJCK",
+      "displayName": "Infliction & BMBERJCK",
+      "artists": [
+        "Infliction",
+        "BMBERJCK"
+      ],
+      "artistTokens": [
+        "infliction",
+        "bmberjck"
+      ],
+      "id": "saturday-blue-infliction-bmberjck",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Regain & Nightcraft: Forsaken Two",
+      "displayName": "Regain & Nightcraft: Forsaken Two",
+      "artists": [
+        "Regain",
+        "Nightcraft: Forsaken Two"
+      ],
+      "artistTokens": [
+        "regain",
+        "nightcraft-forsaken-two"
+      ],
+      "id": "saturday-blue-regain-nightcraft-forsaken-two",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Revelation LIVE",
+      "displayName": "Revelation LIVE",
+      "artists": [
+        "Revelation LIVE"
+      ],
+      "artistTokens": [
+        "revelation-live"
+      ],
+      "id": "saturday-blue-revelation-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
       "day": "Saturday",
       "dayOrder": 3,
       "stage": "BLUE",
       "rawName": "Riot Shift",
       "displayName": "Riot Shift",
-      "artists": ["Riot Shift"],
-      "artistTokens": ["riot-shift"],
+      "artists": [
+        "Riot Shift"
+      ],
+      "artistTokens": [
+        "riot-shift"
+      ],
+      "id": "saturday-blue-riot-shift",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "The Purge & GRAVEDGR",
+      "displayName": "The Purge & GRAVEDGR",
+      "artists": [
+        "The Purge",
+        "GRAVEDGR"
+      ],
+      "artistTokens": [
+        "the-purge",
+        "gravedgr"
+      ],
+      "id": "saturday-blue-the-purge-gravedgr",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "TOZA",
+      "displayName": "TOZA",
+      "artists": [
+        "TOZA"
+      ],
+      "artistTokens": [
+        "toza"
+      ],
+      "id": "saturday-blue-toza",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Vexxed",
+      "displayName": "Vexxed",
+      "artists": [
+        "Vexxed"
+      ],
+      "artistTokens": [
+        "vexxed"
+      ],
+      "id": "saturday-blue-vexxed",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Livid",
+      "displayName": "Livid",
+      "artists": [
+        "Livid"
+      ],
+      "artistTokens": [
+        "livid"
+      ],
+      "id": "saturday-blue-livid",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE Night",
+      "rawName": "Phuture Noize",
+      "displayName": "Phuture Noize",
+      "artists": [
+        "Phuture Noize"
+      ],
+      "artistTokens": [
+        "phuture-noize"
+      ],
+      "id": "saturday-blue-night-phuture-noize",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Barber & Unproven",
+      "displayName": "Barber & Unproven",
+      "artists": [
+        "Barber",
+        "Unproven"
+      ],
+      "artistTokens": [
+        "barber",
+        "unproven"
+      ],
+      "id": "saturday-black-barber-unproven",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Billx",
+      "displayName": "Billx",
+      "artists": [
+        "Billx"
+      ],
+      "artistTokens": [
+        "billx"
+      ],
+      "id": "saturday-black-billx",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
+      "displayName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
+      "artists": [
+        "Hardcore Italia: Mad Dog",
+        "Art of Fighters",
+        "Noize Suppressor",
+        "Tommyknocker"
+      ],
+      "artistTokens": [
+        "hardcore-italia-mad-dog",
+        "art-of-fighters",
+        "noize-suppressor",
+        "tommyknocker"
+      ],
+      "id": "saturday-black-hardcore-italia-mad-dog-art-of-fighters-noize-suppressor-tommyknocker",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Karun & Gridkiller",
+      "displayName": "Karun & Gridkiller",
+      "artists": [
+        "Karun",
+        "Gridkiller"
+      ],
+      "artistTokens": [
+        "karun",
+        "gridkiller"
+      ],
+      "id": "saturday-black-karun-gridkiller",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Lekkerfaces & Pinotello",
+      "displayName": "Lekkerfaces & Pinotello",
+      "artists": [
+        "Lekkerfaces",
+        "Pinotello"
+      ],
+      "artistTokens": [
+        "lekkerfaces",
+        "pinotello"
+      ],
+      "id": "saturday-black-lekkerfaces-pinotello",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Lunakorpz",
+      "displayName": "Lunakorpz",
+      "artists": [
+        "Lunakorpz"
+      ],
+      "artistTokens": [
+        "lunakorpz"
+      ],
+      "id": "saturday-black-lunakorpz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Neophyte",
+      "displayName": "Neophyte",
+      "artists": [
+        "Neophyte"
+      ],
+      "artistTokens": [
+        "neophyte"
+      ],
+      "id": "saturday-black-neophyte",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Sakyra",
+      "displayName": "Sakyra",
+      "artists": [
+        "Sakyra"
+      ],
+      "artistTokens": [
+        "sakyra"
+      ],
+      "id": "saturday-black-sakyra",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Satirized",
+      "displayName": "Satirized",
+      "artists": [
+        "Satirized"
+      ],
+      "artistTokens": [
+        "satirized"
+      ],
+      "id": "saturday-black-satirized",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "The Dope Doctor",
+      "displayName": "The Dope Doctor",
+      "artists": [
+        "The Dope Doctor"
+      ],
+      "artistTokens": [
+        "the-dope-doctor"
+      ],
+      "id": "saturday-black-the-dope-doctor",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Yoshiko & Juliëx",
+      "displayName": "Yoshiko & Juliëx",
+      "artists": [
+        "Yoshiko",
+        "Juliëx"
+      ],
+      "artistTokens": [
+        "yoshiko",
+        "juli-x"
+      ],
+      "id": "saturday-black-yoshiko-juli-x",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Da Mouth of Madness & Tha Watcher",
+      "displayName": "Da Mouth of Madness & Tha Watcher",
+      "artists": [
+        "Da Mouth of Madness",
+        "Tha Watcher"
+      ],
+      "artistTokens": [
+        "da-mouth-of-madness",
+        "tha-watcher"
+      ],
+      "id": "saturday-black-da-mouth-of-madness-tha-watcher",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Adrenalize",
+      "displayName": "Adrenalize",
+      "artists": [
+        "Adrenalize"
+      ],
+      "artistTokens": [
+        "adrenalize"
+      ],
+      "id": "saturday-uv-adrenalize",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "AVI8",
+      "displayName": "AVI8",
+      "artists": [
+        "AVI8"
+      ],
+      "artistTokens": [
+        "avi8"
+      ],
+      "id": "saturday-uv-avi8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Ben Nicky presents Xtreme",
+      "displayName": "Ben Nicky presents Xtreme",
+      "artists": [
+        "Ben Nicky",
+        "Xtreme"
+      ],
+      "artistTokens": [
+        "ben-nicky",
+        "xtreme"
+      ],
+      "id": "saturday-uv-ben-nicky-presents-xtreme",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "DEEZL: AEON",
+      "displayName": "DEEZL: AEON",
+      "artists": [
+        "DEEZL: AEON"
+      ],
+      "artistTokens": [
+        "deezl-aeon"
+      ],
+      "id": "saturday-uv-deezl-aeon",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Digital Madness",
+      "displayName": "Digital Madness",
+      "artists": [
+        "Digital Madness"
+      ],
+      "artistTokens": [
+        "digital-madness"
+      ],
+      "id": "saturday-uv-digital-madness",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "DÂVINØ",
+      "displayName": "DÂVINØ",
+      "artists": [
+        "DÂVINØ"
+      ],
+      "artistTokens": [
+        "d-vin"
+      ],
+      "id": "saturday-uv-d-vin",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "KELTEK & Demi Kanon",
+      "displayName": "KELTEK & Demi Kanon",
+      "artists": [
+        "KELTEK",
+        "Demi Kanon"
+      ],
+      "artistTokens": [
+        "keltek",
+        "demi-kanon"
+      ],
+      "id": "saturday-uv-keltek-demi-kanon",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Primeshock",
+      "displayName": "Primeshock",
+      "artists": [
+        "Primeshock"
+      ],
+      "artistTokens": [
+        "primeshock"
+      ],
+      "id": "saturday-uv-primeshock",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Synthsoldier",
+      "displayName": "Synthsoldier",
+      "artists": [
+        "Synthsoldier"
+      ],
+      "artistTokens": [
+        "synthsoldier"
+      ],
+      "id": "saturday-uv-synthsoldier",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Wasted Penguinz",
+      "displayName": "Wasted Penguinz",
+      "artists": [
+        "Wasted Penguinz"
+      ],
+      "artistTokens": [
+        "wasted-penguinz"
+      ],
+      "id": "saturday-uv-wasted-penguinz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "Wildstylez",
+      "displayName": "Wildstylez",
+      "artists": [
+        "Wildstylez"
+      ],
+      "artistTokens": [
+        "wildstylez"
+      ],
+      "id": "saturday-uv-wildstylez",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "U.V.",
+      "rawName": "DL & Synergy",
+      "displayName": "DL & Synergy",
+      "artists": [
+        "DL",
+        "Synergy"
+      ],
+      "artistTokens": [
+        "dl",
+        "synergy"
+      ],
+      "id": "saturday-uv-dl-synergy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "A-lusion",
+      "displayName": "A-lusion",
+      "artists": [
+        "A-lusion"
+      ],
+      "artistTokens": [
+        "a-lusion"
+      ],
+      "id": "saturday-magenta-a-lusion",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Activator",
+      "displayName": "Activator",
+      "artists": [
+        "Activator"
+      ],
+      "artistTokens": [
+        "activator"
+      ],
+      "id": "saturday-magenta-activator",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Clive King",
+      "displayName": "Clive King",
+      "artists": [
+        "Clive King"
+      ],
+      "artistTokens": [
+        "clive-king"
+      ],
+      "id": "saturday-magenta-clive-king",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Davide Sonar",
+      "displayName": "Davide Sonar",
+      "artists": [
+        "Davide Sonar"
+      ],
+      "artistTokens": [
+        "davide-sonar"
+      ],
+      "id": "saturday-magenta-davide-sonar",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "DJ Stephanie",
+      "displayName": "DJ Stephanie",
+      "artists": [
+        "DJ Stephanie"
+      ],
+      "artistTokens": [
+        "dj-stephanie"
+      ],
+      "id": "saturday-magenta-dj-stephanie",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "JDX",
+      "displayName": "JDX",
+      "artists": [
+        "JDX"
+      ],
+      "artistTokens": [
+        "jdx"
+      ],
+      "id": "saturday-magenta-jdx",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Qlubtempo Parade: Luna / Pavo / DJ Pila",
+      "displayName": "Qlubtempo Parade: Luna / Pavo / DJ Pila",
+      "artists": [
+        "Qlubtempo Parade: Luna",
+        "Pavo",
+        "DJ Pila"
+      ],
+      "artistTokens": [
+        "qlubtempo-parade-luna",
+        "pavo",
+        "dj-pila"
+      ],
+      "id": "saturday-magenta-qlubtempo-parade-luna-pavo-dj-pila",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Tatanka",
+      "displayName": "Tatanka",
+      "artists": [
+        "Tatanka"
+      ],
+      "artistTokens": [
+        "tatanka"
+      ],
+      "id": "saturday-magenta-tatanka",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "The Beholder & Balistic",
+      "displayName": "The Beholder & Balistic",
+      "artists": [
+        "The Beholder",
+        "Balistic"
+      ],
+      "artistTokens": [
+        "the-beholder",
+        "balistic"
+      ],
+      "id": "saturday-magenta-the-beholder-balistic",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Yoji Biomehanika & Scot Project",
+      "displayName": "Yoji Biomehanika & Scot Project",
+      "artists": [
+        "Yoji Biomehanika",
+        "Scot Project"
+      ],
+      "artistTokens": [
+        "yoji-biomehanika",
+        "scot-project"
+      ],
+      "id": "saturday-magenta-yoji-biomehanika-scot-project",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Zany",
+      "displayName": "Zany",
+      "artists": [
+        "Zany"
+      ],
+      "artistTokens": [
+        "zany"
+      ],
+      "id": "saturday-magenta-zany",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "MAGENTA",
+      "rawName": "Ruffian",
+      "displayName": "Ruffian",
+      "artists": [
+        "Ruffian"
+      ],
+      "artistTokens": [
+        "ruffian"
+      ],
+      "id": "saturday-magenta-ruffian",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Chapter V",
+      "displayName": "Chapter V",
+      "artists": [
+        "Chapter V"
+      ],
+      "artistTokens": [
+        "chapter-v"
+      ],
+      "id": "saturday-indigo-chapter-v",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Dark Entities",
+      "displayName": "Dark Entities",
+      "artists": [
+        "Dark Entities"
+      ],
+      "artistTokens": [
+        "dark-entities"
+      ],
+      "id": "saturday-indigo-dark-entities",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Detailed",
+      "displayName": "Detailed",
+      "artists": [
+        "Detailed"
+      ],
+      "artistTokens": [
+        "detailed"
+      ],
+      "id": "saturday-indigo-detailed",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "EZG",
+      "displayName": "EZG",
+      "artists": [
+        "EZG"
+      ],
+      "artistTokens": [
+        "ezg"
+      ],
+      "id": "saturday-indigo-ezg",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Onyx",
+      "displayName": "Onyx",
+      "artists": [
+        "Onyx"
+      ],
+      "artistTokens": [
+        "onyx"
+      ],
+      "id": "saturday-indigo-onyx",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Sanctuary",
+      "displayName": "Sanctuary",
+      "artists": [
+        "Sanctuary"
+      ],
+      "artistTokens": [
+        "sanctuary"
+      ],
+      "id": "saturday-indigo-sanctuary",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Sparkz",
+      "displayName": "Sparkz",
+      "artists": [
+        "Sparkz"
+      ],
+      "artistTokens": [
+        "sparkz"
+      ],
+      "id": "saturday-indigo-sparkz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Spectre",
+      "displayName": "Spectre",
+      "artists": [
+        "Spectre"
+      ],
+      "artistTokens": [
+        "spectre"
+      ],
+      "id": "saturday-indigo-spectre",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Spitfire",
+      "displayName": "Spitfire",
+      "artists": [
+        "Spitfire"
+      ],
+      "artistTokens": [
+        "spitfire"
+      ],
+      "id": "saturday-indigo-spitfire",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Spoontechnicians",
+      "displayName": "Spoontechnicians",
+      "artists": [
+        "Spoontechnicians"
+      ],
+      "artistTokens": [
+        "spoontechnicians"
+      ],
+      "id": "saturday-indigo-spoontechnicians",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Unique",
+      "displayName": "Unique",
+      "artists": [
+        "Unique"
+      ],
+      "artistTokens": [
+        "unique"
+      ],
+      "id": "saturday-indigo-unique",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "INDIGO",
+      "rawName": "Unload",
+      "displayName": "Unload",
+      "artists": [
+        "Unload"
+      ],
+      "artistTokens": [
+        "unload"
+      ],
+      "id": "saturday-indigo-unload",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Aalst",
+      "displayName": "Aalst",
+      "artists": [
+        "Aalst"
+      ],
+      "artistTokens": [
+        "aalst"
+      ],
+      "id": "saturday-yellow-aalst",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Akimbo",
+      "displayName": "Akimbo",
+      "artists": [
+        "Akimbo"
+      ],
+      "artistTokens": [
+        "akimbo"
+      ],
+      "id": "saturday-yellow-akimbo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "D-Frek & Maissouille",
+      "displayName": "D-Frek & Maissouille",
+      "artists": [
+        "D-Frek",
+        "Maissouille"
+      ],
+      "artistTokens": [
+        "d-frek",
+        "maissouille"
+      ],
+      "id": "saturday-yellow-d-frek-maissouille",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Ditzkickz",
+      "displayName": "Ditzkickz",
+      "artists": [
+        "Ditzkickz"
+      ],
+      "artistTokens": [
+        "ditzkickz"
+      ],
+      "id": "saturday-yellow-ditzkickz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Dr.Z",
+      "displayName": "Dr.Z",
+      "artists": [
+        "Dr.Z"
+      ],
+      "artistTokens": [
+        "drz"
+      ],
+      "id": "saturday-yellow-drz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "DRS & The Herbalist",
+      "displayName": "DRS & The Herbalist",
+      "artists": [
+        "DRS",
+        "The Herbalist"
+      ],
+      "artistTokens": [
+        "drs",
+        "the-herbalist"
+      ],
+      "id": "saturday-yellow-drs-the-herbalist",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Equal2",
+      "displayName": "Equal2",
+      "artists": [
+        "Equal2"
+      ],
+      "artistTokens": [
+        "equal2"
+      ],
+      "id": "saturday-yellow-equal2",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Invaderz",
+      "displayName": "Invaderz",
+      "artists": [
+        "Invaderz"
+      ],
+      "artistTokens": [
+        "invaderz"
+      ],
+      "id": "saturday-yellow-invaderz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Jur Terreur pres. Rave Nation LIVE",
+      "displayName": "Jur Terreur pres. Rave Nation LIVE",
+      "artists": [
+        "Jur Terreur",
+        "Rave Nation LIVE"
+      ],
+      "artistTokens": [
+        "jur-terreur",
+        "rave-nation-live"
+      ],
+      "id": "saturday-yellow-jur-terreur-pres-rave-nation-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Levenkhan",
+      "displayName": "Levenkhan",
+      "artists": [
+        "Levenkhan"
+      ],
+      "artistTokens": [
+        "levenkhan"
+      ],
+      "id": "saturday-yellow-levenkhan",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Missy & Dimma",
+      "displayName": "Missy & Dimma",
+      "artists": [
+        "Missy",
+        "Dimma"
+      ],
+      "artistTokens": [
+        "missy",
+        "dimma"
+      ],
+      "id": "saturday-yellow-missy-dimma",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Revellers",
+      "displayName": "Revellers",
+      "artists": [
+        "Revellers"
+      ],
+      "artistTokens": [
+        "revellers"
+      ],
+      "id": "saturday-yellow-revellers",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Screecher & Deviation",
+      "displayName": "Screecher & Deviation",
+      "artists": [
+        "Screecher",
+        "Deviation"
+      ],
+      "artistTokens": [
+        "screecher",
+        "deviation"
+      ],
+      "id": "saturday-yellow-screecher-deviation",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Spitnoise – Bounce of Steel",
+      "displayName": "Spitnoise – Bounce of Steel",
+      "artists": [
+        "Spitnoise – Bounce of Steel"
+      ],
+      "artistTokens": [
+        "spitnoise-bounce-of-steel"
+      ],
+      "id": "saturday-yellow-spitnoise-bounce-of-steel",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Tukkertempo pres. Kick Therapy LIVE",
+      "displayName": "Tukkertempo pres. Kick Therapy LIVE",
+      "artists": [
+        "Tukkertempo",
+        "Kick Therapy LIVE"
+      ],
+      "artistTokens": [
+        "tukkertempo",
+        "kick-therapy-live"
+      ],
+      "id": "saturday-yellow-tukkertempo-pres-kick-therapy-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "YELLOW",
+      "rawName": "Robs",
+      "displayName": "Robs",
+      "artists": [
+        "Robs"
+      ],
+      "artistTokens": [
+        "robs"
+      ],
+      "id": "saturday-yellow-robs",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Buzz Fuzz & Gizmo",
+      "displayName": "Buzz Fuzz & Gizmo",
+      "artists": [
+        "Buzz Fuzz",
+        "Gizmo"
+      ],
+      "artistTokens": [
+        "buzz-fuzz",
+        "gizmo"
+      ],
+      "id": "saturday-gold-buzz-fuzz-gizmo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "DJ J.D.A.",
+      "displayName": "DJ J.D.A.",
+      "artists": [
+        "DJ J.D.A."
+      ],
+      "artistTokens": [
+        "dj-jda"
+      ],
+      "id": "saturday-gold-dj-jda",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Franky Jones",
+      "displayName": "Franky Jones",
+      "artists": [
+        "Franky Jones"
+      ],
+      "artistTokens": [
+        "franky-jones"
+      ],
+      "id": "saturday-gold-franky-jones",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "G-Town Madness",
+      "displayName": "G-Town Madness",
+      "artists": [
+        "G-Town Madness"
+      ],
+      "artistTokens": [
+        "g-town-madness"
+      ],
+      "id": "saturday-gold-g-town-madness",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Nosferatu",
+      "displayName": "Nosferatu",
+      "artists": [
+        "Nosferatu"
+      ],
+      "artistTokens": [
+        "nosferatu"
+      ],
+      "id": "saturday-gold-nosferatu",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Ruffneck & Ophidian",
+      "displayName": "Ruffneck & Ophidian",
+      "artists": [
+        "Ruffneck",
+        "Ophidian"
+      ],
+      "artistTokens": [
+        "ruffneck",
+        "ophidian"
+      ],
+      "id": "saturday-gold-ruffneck-ophidian",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "T-GO & TO-B",
+      "displayName": "T-GO & TO-B",
+      "artists": [
+        "T-GO",
+        "TO-B"
+      ],
+      "artistTokens": [
+        "t-go",
+        "to-b"
+      ],
+      "id": "saturday-gold-t-go-to-b",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "The Masochist",
+      "displayName": "The Masochist",
+      "artists": [
+        "The Masochist"
+      ],
+      "artistTokens": [
+        "the-masochist"
+      ],
+      "id": "saturday-gold-the-masochist",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Unexist",
+      "displayName": "Unexist",
+      "artists": [
+        "Unexist"
+      ],
+      "artistTokens": [
+        "unexist"
+      ],
+      "id": "saturday-gold-unexist",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Vandal!sm & Rob Gee",
+      "displayName": "Vandal!sm & Rob Gee",
+      "artists": [
+        "Vandal!sm",
+        "Rob Gee"
+      ],
+      "artistTokens": [
+        "vandalsm",
+        "rob-gee"
+      ],
+      "id": "saturday-gold-vandalsm-rob-gee",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "GOLD",
+      "rawName": "Alee & Da Syndrome",
+      "displayName": "Alee & Da Syndrome",
+      "artists": [
+        "Alee",
+        "Da Syndrome"
+      ],
+      "artistTokens": [
+        "alee",
+        "da-syndrome"
+      ],
+      "id": "saturday-gold-alee-da-syndrome",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Chaos Project & Furyan",
+      "displayName": "Chaos Project & Furyan",
+      "artists": [
+        "Chaos Project",
+        "Furyan"
+      ],
+      "artistTokens": [
+        "chaos-project",
+        "furyan"
+      ],
+      "id": "saturday-silver-chaos-project-furyan",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Dither",
+      "displayName": "Dither",
+      "artists": [
+        "Dither"
+      ],
+      "artistTokens": [
+        "dither"
+      ],
+      "id": "saturday-silver-dither",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Dolphin & The DJ Producer",
+      "displayName": "Dolphin & The DJ Producer",
+      "artists": [
+        "Dolphin",
+        "The DJ Producer"
+      ],
+      "artistTokens": [
+        "dolphin",
+        "the-dj-producer"
+      ],
+      "id": "saturday-silver-dolphin-the-dj-producer",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Enzyme X",
+      "displayName": "Enzyme X",
+      "artists": [
+        "Enzyme X"
+      ],
+      "artistTokens": [
+        "enzyme-x"
+      ],
+      "id": "saturday-silver-enzyme-x",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Folie à Deux",
+      "displayName": "Folie à Deux",
+      "artists": [
+        "Folie à Deux"
+      ],
+      "artistTokens": [
+        "folie-deux"
+      ],
+      "id": "saturday-silver-folie-deux",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Krista Bourgeois LIVE",
+      "displayName": "Krista Bourgeois LIVE",
+      "artists": [
+        "Krista Bourgeois LIVE"
+      ],
+      "artistTokens": [
+        "krista-bourgeois-live"
+      ],
+      "id": "saturday-silver-krista-bourgeois-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "N-Vitral – Industrial Rave",
+      "displayName": "N-Vitral – Industrial Rave",
+      "artists": [
+        "N-Vitral – Industrial Rave"
+      ],
+      "artistTokens": [
+        "n-vitral-industrial-rave"
+      ],
+      "id": "saturday-silver-n-vitral-industrial-rave",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Noisekick",
+      "displayName": "Noisekick",
+      "artists": [
+        "Noisekick"
+      ],
+      "artistTokens": [
+        "noisekick"
+      ],
+      "id": "saturday-silver-noisekick",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Sandy Warez vs Todiefor",
+      "displayName": "Sandy Warez vs Todiefor",
+      "artists": [
+        "Sandy Warez",
+        "Todiefor"
+      ],
+      "artistTokens": [
+        "sandy-warez",
+        "todiefor"
+      ],
+      "id": "saturday-silver-sandy-warez-vs-todiefor",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "Stormtrooper",
+      "displayName": "Stormtrooper",
+      "artists": [
+        "Stormtrooper"
+      ],
+      "artistTokens": [
+        "stormtrooper"
+      ],
+      "id": "saturday-silver-stormtrooper",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "SILVER",
+      "rawName": "The Outside Agency",
+      "displayName": "The Outside Agency",
+      "artists": [
+        "The Outside Agency"
+      ],
+      "artistTokens": [
+        "the-outside-agency"
+      ],
+      "id": "saturday-silver-the-outside-agency",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "D-Venn",
+      "displayName": "D-Venn",
+      "artists": [
+        "D-Venn"
+      ],
+      "artistTokens": [
+        "d-venn"
+      ],
+      "id": "saturday-purple-d-venn",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Earsquaker",
+      "displayName": "Earsquaker",
+      "artists": [
+        "Earsquaker"
+      ],
+      "artistTokens": [
+        "earsquaker"
+      ],
+      "id": "saturday-purple-earsquaker",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Flout Mania",
+      "displayName": "Flout Mania",
+      "artists": [
+        "Flout Mania"
+      ],
+      "artistTokens": [
+        "flout-mania"
+      ],
+      "id": "saturday-purple-flout-mania",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Harder Class Hardstyle Contest",
+      "displayName": "Harder Class Hardstyle Contest",
+      "artists": [
+        "Harder Class Hardstyle Contest"
+      ],
+      "artistTokens": [
+        "harder-class-hardstyle-contest"
+      ],
+      "id": "saturday-purple-harder-class-hardstyle-contest",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Incult",
+      "displayName": "Incult",
+      "artists": [
+        "Incult"
+      ],
+      "artistTokens": [
+        "incult"
+      ],
+      "id": "saturday-purple-incult",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Innercirle Showcase",
+      "displayName": "Innercirle Showcase",
+      "artists": [
+        "Innercirle Showcase"
+      ],
+      "artistTokens": [
+        "innercirle-showcase"
+      ],
+      "id": "saturday-purple-innercirle-showcase",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Spoontech Emergence Showcase by NSIDE & STORAH",
+      "displayName": "Spoontech Emergence Showcase by NSIDE & STORAH",
+      "artists": [
+        "Spoontech Emergence Showcase by NSIDE",
+        "STORAH"
+      ],
+      "artistTokens": [
+        "spoontech-emergence-showcase-by-nside",
+        "storah"
+      ],
+      "id": "saturday-purple-spoontech-emergence-showcase-by-nside-storah",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Strikeblood",
+      "displayName": "Strikeblood",
+      "artists": [
+        "Strikeblood"
+      ],
+      "artistTokens": [
+        "strikeblood"
+      ],
+      "id": "saturday-purple-strikeblood",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Twintigerz",
+      "displayName": "Twintigerz",
+      "artists": [
+        "Twintigerz"
+      ],
+      "artistTokens": [
+        "twintigerz"
+      ],
+      "id": "saturday-purple-twintigerz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "PURPLE",
+      "rawName": "Activate",
+      "displayName": "Activate",
+      "artists": [
+        "Activate"
+      ],
+      "artistTokens": [
+        "activate"
+      ],
+      "id": "saturday-purple-activate",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED",
+      "rawName": "GPF presents: ERROR_404: NORMAL MUSIC NOT FOUND.",
+      "displayName": "GPF presents: ERROR_404: NORMAL MUSIC NOT FOUND.",
+      "artists": [
+        "GPF presents: ERROR_404: NORMAL MUSIC NOT FOUND."
+      ],
+      "artistTokens": [
+        "gpf-presents-error-404-normal-music-not-found"
+      ],
+      "id": "sunday-red-gpf-presents-error-404-normal-music-not-found",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED Closing Ceremony",
+      "rawName": "4444 of a Kind",
+      "displayName": "4444 of a Kind",
+      "artists": [
+        "4444 of a Kind"
+      ],
+      "artistTokens": [
+        "4444-of-a-kind"
+      ],
+      "id": "sunday-red-closing-ceremony-4444-of-a-kind",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED Closing Ceremony",
+      "rawName": "Gunz For Hire – XV The Underground Kings",
+      "displayName": "Gunz For Hire – XV The Underground Kings",
+      "artists": [
+        "Gunz For Hire – XV The Underground Kings"
+      ],
+      "artistTokens": [
+        "gunz-for-hire-xv-the-underground-kings"
+      ],
+      "id": "sunday-red-closing-ceremony-gunz-for-hire-xv-the-underground-kings",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED Closing Ceremony",
+      "rawName": "The Defqon.1 Legends",
+      "displayName": "The Defqon.1 Legends",
+      "artists": [
+        "The Defqon.1 Legends"
+      ],
+      "artistTokens": [
+        "the-defqon1-legends"
+      ],
+      "id": "sunday-red-closing-ceremony-the-defqon1-legends",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED Closing Ceremony",
+      "rawName": "The Closing Ritual",
+      "displayName": "The Closing Ritual",
+      "artists": [
+        "The Closing Ritual"
+      ],
+      "artistTokens": [
+        "the-closing-ritual"
+      ],
+      "id": "sunday-red-closing-ceremony-the-closing-ritual",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "RED Closing Ceremony",
+      "rawName": "Villain",
+      "displayName": "Villain",
+      "artists": [
+        "Villain"
+      ],
+      "artistTokens": [
+        "villain"
+      ],
+      "id": "sunday-red-closing-ceremony-villain",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Adjuzt",
+      "displayName": "Adjuzt",
+      "artists": [
+        "Adjuzt"
+      ],
+      "artistTokens": [
+        "adjuzt"
+      ],
+      "id": "sunday-blue-adjuzt",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "B-Front",
+      "displayName": "B-Front",
+      "artists": [
+        "B-Front"
+      ],
+      "artistTokens": [
+        "b-front"
+      ],
+      "id": "sunday-blue-b-front",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Chapter V & Dikke Baap",
+      "displayName": "Chapter V & Dikke Baap",
+      "artists": [
+        "Chapter V",
+        "Dikke Baap"
+      ],
+      "artistTokens": [
+        "chapter-v",
+        "dikke-baap"
+      ],
+      "id": "sunday-blue-chapter-v-dikke-baap",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Krowdexx",
+      "displayName": "Krowdexx",
+      "artists": [
+        "Krowdexx"
+      ],
+      "artistTokens": [
+        "krowdexx"
+      ],
+      "id": "sunday-blue-krowdexx",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Kruelty",
+      "displayName": "Kruelty",
+      "artists": [
+        "Kruelty"
+      ],
+      "artistTokens": [
+        "kruelty"
+      ],
+      "id": "sunday-blue-kruelty",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Rooler",
+      "displayName": "Rooler",
+      "artists": [
+        "Rooler"
+      ],
+      "artistTokens": [
+        "rooler"
+      ],
+      "id": "sunday-blue-rooler",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "So Juice / Fraw / Exproz",
+      "displayName": "So Juice / Fraw / Exproz",
+      "artists": [
+        "So Juice",
+        "Fraw",
+        "Exproz"
+      ],
+      "artistTokens": [
+        "so-juice",
+        "fraw",
+        "exproz"
+      ],
+      "id": "sunday-blue-so-juice-fraw-exproz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Vertile: Everything Changes LIVE",
+      "displayName": "Vertile: Everything Changes LIVE",
+      "artists": [
+        "Vertile: Everything Changes LIVE"
+      ],
+      "artistTokens": [
+        "vertile-everything-changes-live"
+      ],
+      "id": "sunday-blue-vertile-everything-changes-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Warface",
+      "displayName": "Warface",
+      "artists": [
+        "Warface"
+      ],
+      "artistTokens": [
+        "warface"
+      ],
+      "id": "sunday-blue-warface",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Zelecter",
+      "displayName": "Zelecter",
+      "artists": [
+        "Zelecter"
+      ],
+      "artistTokens": [
+        "zelecter"
+      ],
+      "id": "sunday-blue-zelecter",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Livid & Nolz",
+      "displayName": "Livid & Nolz",
+      "artists": [
+        "Livid",
+        "Nolz"
+      ],
+      "artistTokens": [
+        "livid",
+        "nolz"
+      ],
+      "id": "sunday-blue-livid-nolz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Charly Lownoise & Mental Theo",
+      "displayName": "Charly Lownoise & Mental Theo",
+      "artists": [
+        "Charly Lownoise",
+        "Mental Theo"
+      ],
+      "artistTokens": [
+        "charly-lownoise",
+        "mental-theo"
+      ],
+      "id": "sunday-black-charly-lownoise-mental-theo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Dimitri K & Deadly Guns",
+      "displayName": "Dimitri K & Deadly Guns",
+      "artists": [
+        "Dimitri K",
+        "Deadly Guns"
+      ],
+      "artistTokens": [
+        "dimitri-k",
+        "deadly-guns"
+      ],
+      "id": "sunday-black-dimitri-k-deadly-guns",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Endymion",
+      "displayName": "Endymion",
+      "artists": [
+        "Endymion"
+      ],
+      "artistTokens": [
+        "endymion"
+      ],
+      "id": "sunday-black-endymion",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Korsakoff",
+      "displayName": "Korsakoff",
+      "artists": [
+        "Korsakoff"
+      ],
+      "artistTokens": [
+        "korsakoff"
+      ],
+      "id": "sunday-black-korsakoff",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Lil Texas & Dr Donk",
+      "displayName": "Lil Texas & Dr Donk",
+      "artists": [
+        "Lil Texas",
+        "Dr Donk"
+      ],
+      "artistTokens": [
+        "lil-texas",
+        "dr-donk"
+      ],
+      "id": "sunday-black-lil-texas-dr-donk",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Major Conspiracy pres. Uptemparty LIVE",
+      "displayName": "Major Conspiracy pres. Uptemparty LIVE",
+      "artists": [
+        "Major Conspiracy",
+        "Uptemparty LIVE"
+      ],
+      "artistTokens": [
+        "major-conspiracy",
+        "uptemparty-live"
+      ],
+      "id": "sunday-black-major-conspiracy-pres-uptemparty-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Nosferatu & D-Fence",
+      "displayName": "Nosferatu & D-Fence",
+      "artists": [
+        "Nosferatu",
+        "D-Fence"
+      ],
+      "artistTokens": [
+        "nosferatu",
+        "d-fence"
+      ],
+      "id": "sunday-black-nosferatu-d-fence",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Promo",
+      "displayName": "Promo",
+      "artists": [
+        "Promo"
+      ],
+      "artistTokens": [
+        "promo"
+      ],
+      "id": "sunday-black-promo",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "The Viper & Mad-E-Fact",
+      "displayName": "The Viper & Mad-E-Fact",
+      "artists": [
+        "The Viper",
+        "Mad-E-Fact"
+      ],
+      "artistTokens": [
+        "the-viper",
+        "mad-e-fact"
+      ],
+      "id": "sunday-black-the-viper-mad-e-fact",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLACK",
+      "rawName": "Alee",
+      "displayName": "Alee",
+      "artists": [
+        "Alee"
+      ],
+      "artistTokens": [
+        "alee"
+      ],
+      "id": "sunday-black-alee",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "GLDY LX & Da Syndrome",
+      "displayName": "GLDY LX & Da Syndrome",
+      "artists": [
+        "GLDY LX",
+        "Da Syndrome"
+      ],
+      "artistTokens": [
+        "gldy-lx",
+        "da-syndrome"
+      ],
+      "id": "sunday-uv-gldy-lx-da-syndrome",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "LARSTIG / GASDROP / Bass Chaserz / De Kraaien",
+      "displayName": "LARSTIG / GASDROP / Bass Chaserz / De Kraaien",
+      "artists": [
+        "LARSTIG",
+        "GASDROP",
+        "Bass Chaserz",
+        "De Kraaien"
+      ],
+      "artistTokens": [
+        "larstig",
+        "gasdrop",
+        "bass-chaserz",
+        "de-kraaien"
+      ],
+      "id": "sunday-uv-larstig-gasdrop-bass-chaserz-de-kraaien",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Leprince “Big Sing a Long”",
+      "displayName": "Leprince “Big Sing a Long”",
+      "artists": [
+        "Leprince “Big Sing a Long”"
+      ],
+      "artistTokens": [
+        "leprince-big-sing-a-long"
+      ],
+      "id": "sunday-uv-leprince-big-sing-a-long",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "LNY TNZ x Jebroer",
+      "displayName": "LNY TNZ x Jebroer",
+      "artists": [
+        "LNY TNZ",
+        "Jebroer"
+      ],
+      "artistTokens": [
+        "lny-tnz",
+        "jebroer"
+      ],
+      "id": "sunday-uv-lny-tnz-x-jebroer",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Lost Identity & Teknoclash",
+      "displayName": "Lost Identity & Teknoclash",
+      "artists": [
+        "Lost Identity",
+        "Teknoclash"
+      ],
+      "artistTokens": [
+        "lost-identity",
+        "teknoclash"
+      ],
+      "id": "sunday-uv-lost-identity-teknoclash",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Pat B vs Dark-E",
+      "displayName": "Pat B vs Dark-E",
+      "artists": [
+        "Pat B",
+        "Dark-E"
+      ],
+      "artistTokens": [
+        "pat-b",
+        "dark-e"
+      ],
+      "id": "sunday-uv-pat-b-vs-dark-e",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Paul Elstak",
+      "displayName": "Paul Elstak",
+      "artists": [
+        "Paul Elstak"
+      ],
+      "artistTokens": [
+        "paul-elstak"
+      ],
+      "id": "sunday-uv-paul-elstak",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Ruthless / Dr. Rude / Hans Glock",
+      "displayName": "Ruthless / Dr. Rude / Hans Glock",
+      "artists": [
+        "Ruthless",
+        "Dr. Rude",
+        "Hans Glock"
+      ],
+      "artistTokens": [
+        "ruthless",
+        "dr-rude",
+        "hans-glock"
+      ],
+      "id": "sunday-uv-ruthless-dr-rude-hans-glock",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "The Darkraver & The Most Obvious Mystery Guest",
+      "displayName": "The Darkraver & The Most Obvious Mystery Guest",
+      "artists": [
+        "The Darkraver",
+        "The Most Obvious Mystery Guest"
+      ],
+      "artistTokens": [
+        "the-darkraver",
+        "the-most-obvious-mystery-guest"
+      ],
+      "id": "sunday-uv-the-darkraver-the-most-obvious-mystery-guest",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Unicorn on K",
+      "displayName": "Unicorn on K",
+      "artists": [
+        "Unicorn on K"
+      ],
+      "artistTokens": [
+        "unicorn-on-k"
+      ],
+      "id": "sunday-uv-unicorn-on-k",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Unicorn on K & Opgekonkerd presents Rainbow Colors",
+      "displayName": "Unicorn on K & Opgekonkerd presents Rainbow Colors",
+      "artists": [
+        "Unicorn on K",
+        "Opgekonkerd",
+        "Rainbow Colors"
+      ],
+      "artistTokens": [
+        "unicorn-on-k",
+        "opgekonkerd",
+        "rainbow-colors"
+      ],
+      "id": "sunday-uv-unicorn-on-k-opgekonkerd-presents-rainbow-colors",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "U.V.",
+      "rawName": "Da Syndrome & Boogshe",
+      "displayName": "Da Syndrome & Boogshe",
+      "artists": [
+        "Da Syndrome",
+        "Boogshe"
+      ],
+      "artistTokens": [
+        "da-syndrome",
+        "boogshe"
+      ],
+      "id": "sunday-uv-da-syndrome-boogshe",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Audiotricz LIVE",
+      "displayName": "Audiotricz LIVE",
+      "artists": [
+        "Audiotricz LIVE"
+      ],
+      "artistTokens": [
+        "audiotricz-live"
+      ],
+      "id": "sunday-magenta-audiotricz-live",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Bass Modulators",
+      "displayName": "Bass Modulators",
+      "artists": [
+        "Bass Modulators"
+      ],
+      "artistTokens": [
+        "bass-modulators"
+      ],
+      "id": "sunday-magenta-bass-modulators",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Cyber",
+      "displayName": "Cyber",
+      "artists": [
+        "Cyber"
+      ],
+      "artistTokens": [
+        "cyber"
+      ],
+      "id": "sunday-magenta-cyber",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Josh & Wesz",
+      "displayName": "Josh & Wesz",
+      "artists": [
+        "Josh",
+        "Wesz"
+      ],
+      "artistTokens": [
+        "josh",
+        "wesz"
+      ],
+      "id": "sunday-magenta-josh-wesz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Low-E / Alter Egosz / Alphaverb",
+      "displayName": "Low-E / Alter Egosz / Alphaverb",
+      "artists": [
+        "Low-E",
+        "Alter Egosz",
+        "Alphaverb"
+      ],
+      "artistTokens": [
+        "low-e",
+        "alter-egosz",
+        "alphaverb"
+      ],
+      "id": "sunday-magenta-low-e-alter-egosz-alphaverb",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Omegatypez",
+      "displayName": "Omegatypez",
+      "artists": [
+        "Omegatypez"
+      ],
+      "artistTokens": [
+        "omegatypez"
+      ],
+      "id": "sunday-magenta-omegatypez",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Psyko Punkz",
+      "displayName": "Psyko Punkz",
+      "artists": [
+        "Psyko Punkz"
+      ],
+      "artistTokens": [
+        "psyko-punkz"
+      ],
+      "id": "sunday-magenta-psyko-punkz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "The Pitcher & Slim Shore present This is who we are!",
+      "displayName": "The Pitcher & Slim Shore present This is who we are!",
+      "artists": [
+        "The Pitcher",
+        "Slim Shore present This is who we are!"
+      ],
+      "artistTokens": [
+        "the-pitcher",
+        "slim-shore-present-this-is-who-we-are"
+      ],
+      "id": "sunday-magenta-the-pitcher-slim-shore-present-this-is-who-we-are",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "Wildstylez – Back 2 Basics",
+      "displayName": "Wildstylez – Back 2 Basics",
+      "artists": [
+        "Wildstylez – Back 2 Basics"
+      ],
+      "artistTokens": [
+        "wildstylez-back-2-basics"
+      ],
+      "id": "sunday-magenta-wildstylez-back-2-basics",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "DV8",
+      "displayName": "DV8",
+      "artists": [
+        "DV8"
+      ],
+      "artistTokens": [
+        "dv8"
+      ],
+      "id": "sunday-magenta-dv8",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Catalyst",
+      "displayName": "Catalyst",
+      "artists": [
+        "Catalyst"
+      ],
+      "artistTokens": [
+        "catalyst"
+      ],
+      "id": "sunday-green-catalyst",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Cynthia Spiering",
+      "displayName": "Cynthia Spiering",
+      "artists": [
+        "Cynthia Spiering"
+      ],
+      "artistTokens": [
+        "cynthia-spiering"
+      ],
+      "id": "sunday-green-cynthia-spiering",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "elMefti",
+      "displayName": "elMefti",
+      "artists": [
+        "elMefti"
+      ],
+      "artistTokens": [
+        "elmefti"
+      ],
+      "id": "sunday-green-elmefti",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Junkie Kid",
+      "displayName": "Junkie Kid",
+      "artists": [
+        "Junkie Kid"
+      ],
+      "artistTokens": [
+        "junkie-kid"
+      ],
+      "id": "sunday-green-junkie-kid",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Niotech",
+      "displayName": "Niotech",
+      "artists": [
+        "Niotech"
+      ],
+      "artistTokens": [
+        "niotech"
+      ],
+      "id": "sunday-green-niotech",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Restricted",
+      "displayName": "Restricted",
+      "artists": [
+        "Restricted"
+      ],
+      "artistTokens": [
+        "restricted"
+      ],
+      "id": "sunday-green-restricted",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Samuel Moriero",
+      "displayName": "Samuel Moriero",
+      "artists": [
+        "Samuel Moriero"
+      ],
+      "artistTokens": [
+        "samuel-moriero"
+      ],
+      "id": "sunday-green-samuel-moriero",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Vortek’s",
+      "displayName": "Vortek’s",
+      "artists": [
+        "Vortek’s"
+      ],
+      "artistTokens": [
+        "vorteks"
+      ],
+      "id": "sunday-green-vorteks",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Zapravka",
+      "displayName": "Zapravka",
+      "artists": [
+        "Zapravka"
+      ],
+      "artistTokens": [
+        "zapravka"
+      ],
+      "id": "sunday-green-zapravka",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Abaddon pure domination ft. MC Reckless",
+      "displayName": "Abaddon pure domination ft. MC Reckless",
+      "artists": [
+        "Abaddon pure domination ft. MC Reckless"
+      ],
+      "artistTokens": [
+        "abaddon-pure-domination-ft-mc-reckless"
+      ],
+      "id": "sunday-yellow-abaddon-pure-domination-ft-mc-reckless",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Amigo – Uptempo Fiesta",
+      "displayName": "Amigo – Uptempo Fiesta",
+      "artists": [
+        "Amigo – Uptempo Fiesta"
+      ],
+      "artistTokens": [
+        "amigo-uptempo-fiesta"
+      ],
+      "id": "sunday-yellow-amigo-uptempo-fiesta",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Chaotic Hostility",
+      "displayName": "Chaotic Hostility",
+      "artists": [
+        "Chaotic Hostility"
+      ],
+      "artistTokens": [
+        "chaotic-hostility"
+      ],
+      "id": "sunday-yellow-chaotic-hostility",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Eraized",
+      "displayName": "Eraized",
+      "artists": [
+        "Eraized"
+      ],
+      "artistTokens": [
+        "eraized"
+      ],
+      "id": "sunday-yellow-eraized",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Guizcore",
+      "displayName": "Guizcore",
+      "artists": [
+        "Guizcore"
+      ],
+      "artistTokens": [
+        "guizcore"
+      ],
+      "id": "sunday-yellow-guizcore",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Kili",
+      "displayName": "Kili",
+      "artists": [
+        "Kili"
+      ],
+      "artistTokens": [
+        "kili"
+      ],
+      "id": "sunday-yellow-kili",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Revealer",
+      "displayName": "Revealer",
+      "artists": [
+        "Revealer"
+      ],
+      "artistTokens": [
+        "revealer"
+      ],
+      "id": "sunday-yellow-revealer",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Roosterz",
+      "displayName": "Roosterz",
+      "artists": [
+        "Roosterz"
+      ],
+      "artistTokens": [
+        "roosterz"
+      ],
+      "id": "sunday-yellow-roosterz",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "S-Kill",
+      "displayName": "S-Kill",
+      "artists": [
+        "S-Kill"
+      ],
+      "artistTokens": [
+        "s-kill"
+      ],
+      "id": "sunday-yellow-s-kill",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Soulblast",
+      "displayName": "Soulblast",
+      "artists": [
+        "Soulblast"
+      ],
+      "artistTokens": [
+        "soulblast"
+      ],
+      "id": "sunday-yellow-soulblast",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "Unlocked",
+      "displayName": "Unlocked",
+      "artists": [
+        "Unlocked"
+      ],
+      "artistTokens": [
+        "unlocked"
+      ],
+      "id": "sunday-yellow-unlocked",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "YELLOW",
+      "rawName": "RG",
+      "displayName": "RG",
+      "artists": [
+        "RG"
+      ],
+      "artistTokens": [
+        "rg"
+      ],
+      "id": "sunday-yellow-rg",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Art of Fighters",
+      "displayName": "Art of Fighters",
+      "artists": [
+        "Art of Fighters"
+      ],
+      "artistTokens": [
+        "art-of-fighters"
+      ],
+      "id": "sunday-gold-art-of-fighters",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Catscan",
+      "displayName": "Catscan",
+      "artists": [
+        "Catscan"
+      ],
+      "artistTokens": [
+        "catscan"
+      ],
+      "id": "sunday-gold-catscan",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Critical Mass",
+      "displayName": "Critical Mass",
+      "artists": [
+        "Critical Mass"
+      ],
+      "artistTokens": [
+        "critical-mass"
+      ],
+      "id": "sunday-gold-critical-mass",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Ode to Bass-D",
+      "displayName": "Ode to Bass-D",
+      "artists": [
+        "Ode to Bass-D"
+      ],
+      "artistTokens": [
+        "ode-to-bass-d"
+      ],
+      "id": "sunday-gold-ode-to-bass-d",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Panic & Exertion",
+      "displayName": "Panic & Exertion",
+      "artists": [
+        "Panic",
+        "Exertion"
+      ],
+      "artistTokens": [
+        "panic",
+        "exertion"
+      ],
+      "id": "sunday-gold-panic-exertion",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Potato & DJ Francois",
+      "displayName": "Potato & DJ Francois",
+      "artists": [
+        "Potato",
+        "DJ Francois"
+      ],
+      "artistTokens": [
+        "potato",
+        "dj-francois"
+      ],
+      "id": "sunday-gold-potato-dj-francois",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Reeza & Juno B – House of Madness",
+      "displayName": "Reeza & Juno B – House of Madness",
+      "artists": [
+        "Reeza",
+        "Juno B – House of Madness"
+      ],
+      "artistTokens": [
+        "reeza",
+        "juno-b-house-of-madness"
+      ],
+      "id": "sunday-gold-reeza-juno-b-house-of-madness",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Steve-D",
+      "displayName": "Steve-D",
+      "artists": [
+        "Steve-D"
+      ],
+      "artistTokens": [
+        "steve-d"
+      ],
+      "id": "sunday-gold-steve-d",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Sunny D",
+      "displayName": "Sunny D",
+      "artists": [
+        "Sunny D"
+      ],
+      "artistTokens": [
+        "sunny-d"
+      ],
+      "id": "sunday-gold-sunny-d",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Tha Playah",
+      "displayName": "Tha Playah",
+      "artists": [
+        "Tha Playah"
+      ],
+      "artistTokens": [
+        "tha-playah"
+      ],
+      "id": "sunday-gold-tha-playah",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GOLD",
+      "rawName": "Da Mouth of Madness",
+      "displayName": "Da Mouth of Madness",
+      "artists": [
+        "Da Mouth of Madness"
+      ],
+      "artistTokens": [
+        "da-mouth-of-madness"
+      ],
+      "id": "sunday-gold-da-mouth-of-madness",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Fight Switch",
+      "displayName": "Fight Switch",
+      "artists": [
+        "Fight Switch"
+      ],
+      "artistTokens": [
+        "fight-switch"
+      ],
+      "id": "sunday-pink-fight-switch",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Murdock",
+      "displayName": "Murdock",
+      "artists": [
+        "Murdock"
+      ],
+      "artistTokens": [
+        "murdock"
+      ],
+      "id": "sunday-pink-murdock",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "NCT",
+      "displayName": "NCT",
+      "artists": [
+        "NCT"
+      ],
+      "artistTokens": [
+        "nct"
+      ],
+      "id": "sunday-pink-nct",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Rataplan",
+      "displayName": "Rataplan",
+      "artists": [
+        "Rataplan"
+      ],
+      "artistTokens": [
+        "rataplan"
+      ],
+      "id": "sunday-pink-rataplan",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Redpill",
+      "displayName": "Redpill",
+      "artists": [
+        "Redpill"
+      ],
+      "artistTokens": [
+        "redpill"
+      ],
+      "id": "sunday-pink-redpill",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Sins of Pandora",
+      "displayName": "Sins of Pandora",
+      "artists": [
+        "Sins of Pandora"
+      ],
+      "artistTokens": [
+        "sins-of-pandora"
+      ],
+      "id": "sunday-pink-sins-of-pandora",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "T & Sugah",
+      "displayName": "T & Sugah",
+      "artists": [
+        "T",
+        "Sugah"
+      ],
+      "artistTokens": [
+        "t",
+        "sugah"
+      ],
+      "id": "sunday-pink-t-sugah",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Tantron",
+      "displayName": "Tantron",
+      "artists": [
+        "Tantron"
+      ],
+      "artistTokens": [
+        "tantron"
+      ],
+      "id": "sunday-pink-tantron",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "Wes S & $avvy",
+      "displayName": "Wes S & $avvy",
+      "artists": [
+        "Wes S",
+        "$avvy"
+      ],
+      "artistTokens": [
+        "wes-s",
+        "avvy"
+      ],
+      "id": "sunday-pink-wes-s-avvy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PINK",
+      "rawName": "MCHUCK",
+      "displayName": "MCHUCK",
+      "artists": [
+        "MCHUCK"
+      ],
+      "artistTokens": [
+        "mchuck"
+      ],
+      "id": "sunday-pink-mchuck",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Aranxa",
+      "displayName": "Aranxa",
+      "artists": [
+        "Aranxa"
+      ],
+      "artistTokens": [
+        "aranxa"
+      ],
+      "id": "sunday-purple-aranxa",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Insuspect & MC Primax",
+      "displayName": "Insuspect & MC Primax",
+      "artists": [
+        "Insuspect",
+        "MC Primax"
+      ],
+      "artistTokens": [
+        "insuspect",
+        "mc-primax"
+      ],
+      "id": "sunday-purple-insuspect-mc-primax",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Josha",
+      "displayName": "Josha",
+      "artists": [
+        "Josha"
+      ],
+      "artistTokens": [
+        "josha"
+      ],
+      "id": "sunday-purple-josha",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "KidEast",
+      "displayName": "KidEast",
+      "artists": [
+        "KidEast"
+      ],
+      "artistTokens": [
+        "kideast"
+      ],
+      "id": "sunday-purple-kideast",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Miss Isa",
+      "displayName": "Miss Isa",
+      "artists": [
+        "Miss Isa"
+      ],
+      "artistTokens": [
+        "miss-isa"
+      ],
+      "id": "sunday-purple-miss-isa",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "MT",
+      "displayName": "MT",
+      "artists": [
+        "MT"
+      ],
+      "artistTokens": [
+        "mt"
+      ],
+      "id": "sunday-purple-mt",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Resensed",
+      "displayName": "Resensed",
+      "artists": [
+        "Resensed"
+      ],
+      "artistTokens": [
+        "resensed"
+      ],
+      "id": "sunday-purple-resensed",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Stugats",
+      "displayName": "Stugats",
+      "artists": [
+        "Stugats"
+      ],
+      "artistTokens": [
+        "stugats"
+      ],
+      "id": "sunday-purple-stugats",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Svenergy",
+      "displayName": "Svenergy",
+      "artists": [
+        "Svenergy"
+      ],
+      "artistTokens": [
+        "svenergy"
+      ],
+      "id": "sunday-purple-svenergy",
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "PURPLE",
+      "rawName": "Activate",
+      "displayName": "Activate",
+      "artists": [
+        "Activate"
+      ],
+      "artistTokens": [
+        "activate"
+      ],
+      "id": "sunday-purple-activate",
       "startAt": null,
       "endAt": null,
       "timeLabel": null
