@@ -304,6 +304,7 @@ select {
 .muted {
   color: var(--text-soft);
   font-size: 0.92rem;
+  margin-bottom: 0;
 }
 
 .stage-pill {

@@ -583,7 +583,6 @@ export default function App() {
 
                                       <div className="suggestion-list">
                                         {alternatives.map((alternative) => {
-                                          const sharedArtists = getAlternativeMatchSummary(entry, alternative);
                                           const isAlternativeFavorite = favorites.includes(alternative.id);
 
                                           return (
@@ -592,9 +591,6 @@ export default function App() {
                                                 <strong>{alternative.displayName}</strong>
                                                 <p className="muted">
                                                   {alternative.stage} • {alternative.day}
-                                                </p>
-                                                <p className="muted">
-                                                  Match : {sharedArtists.join(", ")}
                                                 </p>
                                               </div>
 
