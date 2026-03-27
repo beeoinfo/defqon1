@@ -7,7 +7,7 @@ export default function LineupView({ groupedEntries, favorites, toggleFavorite }
   return (
     <section className="content-grid">
       {Object.keys(groupedEntries).length === 0 ? (
-        <EmptyState text="Aucune entrée trouvée." />
+        <EmptyState text="No entries found." />
       ) : (
         Object.entries(groupedEntries).map(([day, dayStages]) => (
           <section key={day} className="day-section">
@@ -23,7 +23,8 @@ export default function LineupView({ groupedEntries, favorites, toggleFavorite }
                     className="stage-panel"
                     style={{
                       borderColor: theme.accentBorder,
-                      background: `linear-gradient(180deg, ${theme.accentSoft}, rgba(255,255,255,0.03))`,
+                      // Use a solid tint for stable backgrounds aligned with the stage colour
+                      background: theme.accentSoft,
                     }}
                   >
                     <div className="stage-panel__header">
@@ -38,7 +39,10 @@ export default function LineupView({ groupedEntries, favorites, toggleFavorite }
                           {stage}
                         </span>
                       </div>
-                      <span>{stageEntries.length} artiste(s)</span>
+                      <span>
+                        {stageEntries.length}{' '}
+                        {stageEntries.length === 1 ? 'artist' : 'artists'}
+                      </span>
                     </div>
                     <div className="card-list">
                       {stageEntries.map((entry) => {

@@ -1,4 +1,8 @@
+/* Import the Asimovian font for headings and base text */
+@import url('https://fonts.googleapis.com/css2?family=Asimovian&display=swap');
+
 :root {
+  /* Use Asimovian as the primary font with sensible fallbacks */
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: rgba(255, 255, 255, 0.92);
   background: #09090b;
@@ -30,11 +34,7 @@ body,
 
 body {
   min-width: 320px;
-  background:
-    radial-gradient(circle at top right, rgba(239, 68, 68, 0.18), transparent 25%),
-    radial-gradient(circle at left, rgba(59, 130, 246, 0.12), transparent 22%),
-    radial-gradient(circle at bottom, rgba(168, 85, 247, 0.12), transparent 20%),
-    #09090b;
+  background: #09090b;
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -82,6 +82,19 @@ select {
 .hero h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.hero h1,
+.day-section__header h2,
+.stage-panel__header h2,
+.stage-panel__header h3,
+.entry-card h3,
+.stage-pill,
+.filter-badge,
+.tab,
+.ghost-button,
+.summary-card__label {
+  font-family: "Asimovian", Inter, system-ui, sans-serif;
 }
 
 .hero__text {
@@ -178,6 +191,9 @@ select {
   gap: 8px;
 }
 
+/* Hover states for buttons and filters. Only non-active tabs and unselected badges
+   change background on hover. Active tabs and selected badges maintain their
+   appearance to avoid contrast issues. */
 .ghost-button:hover,
 .star-button:hover,
 .filter-badge:not(.filter-badge--active):hover,
@@ -185,13 +201,15 @@ select {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Selected badges pop slightly above others. */
 .filter-badge--active {
   transform: translateY(-1px);
 }
 
+/* Active tabs retain their normal style on hover to prevent dark text on a dark background. */
 .tab--active:hover {
-  background: #ffffff;
-  color: #111111;
+  background: inherit;
+  color: inherit;
 }
 
 .search-row {
@@ -379,7 +397,7 @@ select {
 }
 
 .suggestions__title {
-  font-weight: 700;
+  font-style: italic;
   margin-bottom: 12px;
 }
 

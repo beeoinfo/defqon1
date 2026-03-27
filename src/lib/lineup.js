@@ -1,3 +1,5 @@
+import { getCanonicalStageName } from "./stageThemes";
+
 export const FAVORITES_STORAGE_KEY = "defqon1-favorites";
 export const VIEW_STORAGE_KEY = "defqon1-view";
 
@@ -59,13 +61,30 @@ export function getDefaultDay(entries) {
   return days[0] || "Thursday";
 }
 
+/**
+ * Returns only canonical stage badges.
+ * Example:
+ * - BLUE
+ * - BLUE Night
+ * => only BLUE badge
+ */
 export function getStages(entries, dayFilter = "All days") {
   const filtered =
     dayFilter === "All days"
       ? entries
       : entries.filter((entry) => entry.day === dayFilter);
 
-  return Array.from(new Set(filtered.map((entry) => entry.stage)));
+  return Array.from(
+    new Set(filtered.map((entry) => getCanonicalStageName(entry.stage)))
+  );
+}
+
+export function matchesSelectedStage(entryStage, selectedStage) {
+  if (selectedStage === "All stages") {
+    return true;
+  }
+
+  return getCanonicalStageName(entryStage) === selectedStage;
 }
 
 export function filterEntries(entries, { query, day, stage }) {
@@ -76,7 +95,9 @@ export function filterEntries(entries, { query, day, stage }) {
   }
 
   if (stage !== "All stages") {
-    result = result.filter((entry) => entry.stage === stage);
+    result = result.filter((entry) =>
+      matchesSelectedStage(entry.stage, stage)
+    );
   }
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -86,7 +107,9 @@ export function filterEntries(entries, { query, day, stage }) {
       return (
         entry.rawName.toLowerCase().includes(normalizedQuery) ||
         entry.displayName.toLowerCase().includes(normalizedQuery) ||
-        entry.artists.some((artist) => artist.toLowerCase().includes(normalizedQuery)) ||
+        entry.artists.some((artist) =>
+          artist.toLowerCase().includes(normalizedQuery)
+        ) ||
         entry.artistTokens.some((token) => token.includes(normalizedQuery))
       );
     });
@@ -95,6 +118,15 @@ export function filterEntries(entries, { query, day, stage }) {
   return result;
 }
 
+/**
+ * Important:
+ * Group by the REAL stage name, not the canonical one.
+ * That way:
+ * - selecting BLUE badge
+ * - still shows two cards:
+ *   - BLUE
+ *   - BLUE Night
+ */
 export function groupEntriesByDayAndStage(entries) {
   return entries.reduce((acc, entry) => {
     if (!acc[entry.day]) {
@@ -144,7 +176,10 @@ export function saveFavorites(favorites) {
   }
 
   try {
-    window.localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+    window.localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify(favorites)
+    );
   } catch {
     // Ignore storage errors
   }
@@ -169,7 +204,10 @@ export function saveViewPreferences(preferences) {
   }
 
   try {
-    window.localStorage.setItem(VIEW_STORAGE_KEY, JSON.stringify(preferences));
+    window.localStorage.setItem(
+      VIEW_STORAGE_KEY,
+      JSON.stringify(preferences)
+    );
   } catch {
     // Ignore storage errors
   }
@@ -191,7 +229,11 @@ export function findAlternativeEntries(targetEntry, allEntries) {
 
       return entry.artistTokens.some((token) => targetTokens.has(token));
     })
-    .sort((a, b) => (a.dayOrder ?? 999) - (b.dayOrder ?? 999) || a.stage.localeCompare(b.stage));
+    .sort(
+      (a, b) =>
+        (a.dayOrder ?? 999) - (b.dayOrder ?? 999) ||
+        a.stage.localeCompare(b.stage)
+    );
 }
 
 export function getAlternativeMatchSummary(targetEntry, alternativeEntry) {
@@ -202,6 +244,11 @@ export function getAlternativeMatchSummary(targetEntry, alternativeEntry) {
   );
 }
 
+/**
+ * Count real visible stage cards, not canonical stage badges.
+ * Example:
+ * if BLUE + BLUE Night are both visible, count = 2
+ */
 export function countVisibleStages(entries) {
   return new Set(entries.map((entry) => `${entry.day}__${entry.stage}`)).size;
 }

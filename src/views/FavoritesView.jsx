@@ -2,13 +2,19 @@ import React from 'react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getStageTheme } from '../lib/stageThemes';
-import { findAlternativeEntries, getAlternativeMatchSummary } from '../lib/lineup';
+import { findAlternativeEntries } from '../lib/lineup';
 
-export default function FavoritesView({ groupedFavorites, entries, favorites, toggleFavorite }) {
+export default function FavoritesView({
+  groupedFavorites,
+  filteredFavoriteEntries,
+  entries,
+  favorites,
+  toggleFavorite,
+}) {
   return (
     <section className="favorites-view">
-      {favorites.length === 0 ? (
-        <EmptyState text="Aucun favori pour le moment." />
+      {filteredFavoriteEntries.length === 0 ? (
+        <EmptyState text="No favorites found for the current filters." />
       ) : (
         Object.entries(groupedFavorites).map(([day, dayStages]) => (
           <section key={day} className="day-section">
@@ -19,12 +25,13 @@ export default function FavoritesView({ groupedFavorites, entries, favorites, to
               {Object.entries(dayStages).map(([stage, stageEntries]) => {
                 const theme = getStageTheme(stage);
                 return (
-                  <section
+                    <section
                     key={`${day}-${stage}`}
                     className="stage-panel"
                     style={{
                       borderColor: theme.accentBorder,
-                      background: `linear-gradient(180deg, ${theme.accentSoft}, rgba(255,255,255,0.03))`,
+                      // Use a solid tint for stable backgrounds aligned with the stage colour
+                      background: theme.accentSoft,
                     }}
                   >
                     <div className="stage-panel__header">
@@ -39,10 +46,13 @@ export default function FavoritesView({ groupedFavorites, entries, favorites, to
                           {stage}
                         </span>
                       </div>
-                      <span>{stageEntries.length} favori(s)</span>
+                        <span>
+                          {stageEntries.length}{' '}
+                          {stageEntries.length === 1 ? 'favorite' : 'favorites'}
+                        </span>
                     </div>
                     <div className="card-list">
-                      {stageEntries.map((entry) => {
+                        {stageEntries.map((entry) => {
                         const alternatives = findAlternativeEntries(entry, entries);
                         const hasAlternatives = alternatives.length > 0;
                         return (
@@ -74,20 +84,15 @@ export default function FavoritesView({ groupedFavorites, entries, favorites, to
                                 </div>
                                 <div className="suggestion-list">
                                   {alternatives.map((alternative) => {
-                                    const sharedArtists = getAlternativeMatchSummary(entry, alternative);
-                                    const isAlternativeFavorite = favorites.includes(alternative.id);
-                                    return (
+                                const isAlternativeFavorite = favorites.includes(alternative.id);
+                                return (
                                       <div key={alternative.id} className="suggestion-card">
                                         <div>
                                           <strong>{alternative.displayName}</strong>
                                           <p className="muted">
                                             {alternative.stage} • {alternative.day}
                                           </p>
-                                          {sharedArtists.length > 0 && (
-                                            <p className="muted">
-                                              Match : {sharedArtists.join(', ')}
-                                            </p>
-                                          )}
+                                          {/* No match details displayed in suggestions */}
                                         </div>
                                         <FavoriteStar
                                           active={isAlternativeFavorite}

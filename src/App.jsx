@@ -8,11 +8,8 @@ import {
 } from 'lucide-react';
 import lineupData from './data/lineup.json';
 import {
-  FAVORITES_STORAGE_KEY,
   countVisibleStages,
   filterEntries,
-  findAlternativeEntries,
-  getAlternativeMatchSummary,
   getDays,
   getDefaultDay,
   getFavoriteEntries,
@@ -21,6 +18,7 @@ import {
   groupFavoritesByDayAndStage,
   loadFavorites,
   loadViewPreferences,
+  matchesSelectedStage,
   saveFavorites,
   saveViewPreferences,
   validateLineupPayload,
@@ -73,18 +71,51 @@ export default function App() {
     return getFavoriteEntries(entries, favorites);
   }, [favorites]);
 
+  const filteredFavoriteEntries = useMemo(() => {
+    let result = favoriteEntries;
+
+    if (selectedDay !== 'All days') {
+      result = result.filter((entry) => entry.day === selectedDay);
+    }
+
+    if (selectedStage !== 'All stages') {
+      result = result.filter((entry) =>
+        matchesSelectedStage(entry.stage, selectedStage)
+      );
+    }
+
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (normalizedQuery) {
+      result = result.filter((entry) => {
+        return (
+          entry.rawName.toLowerCase().includes(normalizedQuery) ||
+          entry.displayName.toLowerCase().includes(normalizedQuery) ||
+          entry.artists.some((artist) =>
+            artist.toLowerCase().includes(normalizedQuery)
+          ) ||
+          entry.artistTokens.some((token) => token.includes(normalizedQuery))
+        );
+      });
+    }
+
+    return result;
+  }, [favoriteEntries, selectedDay, selectedStage, query]);
+
   const groupedFavorites = useMemo(() => {
-    return groupFavoritesByDayAndStage(favoriteEntries);
-  }, [favoriteEntries]);
+    return groupFavoritesByDayAndStage(filteredFavoriteEntries);
+  }, [filteredFavoriteEntries]);
 
   const summary = useMemo(() => {
-    const sourceEntries = view === 'favorites' ? favoriteEntries : visibleEntries;
+    const sourceEntries =
+      view === 'favorites' ? filteredFavoriteEntries : visibleEntries;
+
     return {
       mode: `${selectedDay} • ${selectedStage}`,
       stages: countVisibleStages(sourceEntries),
       artists: sourceEntries.length,
     };
-  }, [view, favoriteEntries, visibleEntries]);
+  }, [view, filteredFavoriteEntries, visibleEntries, selectedDay, selectedStage]);
 
   useEffect(() => {
     saveFavorites(favorites);
@@ -132,7 +163,7 @@ export default function App() {
           <div className="hero__content">
             <h1>Defqon.1 2026 planner</h1>
             <p className="hero__text">
-              Research, favorites and smart suggestions to quickly see where an artist performs elsewhere.
+              Search, favorites and smart suggestions to quickly see where an artist performs elsewhere.
             </p>
           </div>
           <div className="hero__summary">
@@ -182,7 +213,7 @@ export default function App() {
                 className="search-input"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Recherche : artiste, duo, showcase, alias..."
+                placeholder="Search: artist, duo, showcase, alias..."
               />
             </div>
           </div>
@@ -256,6 +287,7 @@ export default function App() {
         ) : (
           <FavoritesView
             groupedFavorites={groupedFavorites}
+            filteredFavoriteEntries={filteredFavoriteEntries}
             entries={entries}
             favorites={favorites}
             toggleFavorite={toggleFavorite}
