@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "festival": "Defqon.1",
+    "edition": 2026,
+    "version": "v1-seed",
+    "generatedAt": "2026-03-27T00:00:00Z",
+    "schemaVersion": 1
+  },
+  "entries": [
+    {
+      "id": "friday-red-warface-x-restricted",
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "RED",
+      "rawName": "Warface x Restricted",
+      "displayName": "Warface x Restricted",
+      "artists": ["Warface", "Restricted"],
+      "artistTokens": ["warface", "restricted"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "sunday-blue-warface",
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Warface",
+      "displayName": "Warface",
+      "artists": ["Warface"],
+      "artistTokens": ["warface"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "sunday-green-restricted",
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "GREEN",
+      "rawName": "Restricted",
+      "displayName": "Restricted",
+      "artists": ["Restricted"],
+      "artistTokens": ["restricted"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "sunday-magenta-the-pitcher-slim-shore",
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "MAGENTA",
+      "rawName": "The Pitcher & Slim Shore present This is who we are!",
+      "displayName": "The Pitcher & Slim Shore present This is who we are!",
+      "artists": ["The Pitcher", "Slim Shore"],
+      "artistTokens": ["the-pitcher", "slim-shore"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "friday-uv-bass-shock",
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "U.V.",
+      "rawName": "Bass Shock (Bass Modulators & Aftershock)",
+      "displayName": "Bass Shock (Bass Modulators & Aftershock)",
+      "artists": ["Bass Shock", "Bass Modulators", "Aftershock"],
+      "artistTokens": ["bass-shock", "bass-modulators", "aftershock"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "saturday-black-hardcore-italia",
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLACK",
+      "rawName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
+      "displayName": "Hardcore Italia: Mad Dog / Art of Fighters / Noize Suppressor / Tommyknocker",
+      "artists": ["Hardcore Italia", "Mad Dog", "Art of Fighters", "Noize Suppressor", "Tommyknocker"],
+      "artistTokens": ["hardcore-italia", "mad-dog", "art-of-fighters", "noize-suppressor", "tommyknocker"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "friday-blue-cryex-bloodlust-omnya",
+      "day": "Friday",
+      "dayOrder": 2,
+      "stage": "BLUE",
+      "rawName": "End of Line: Cryex / Bloodlust / Omnya",
+      "displayName": "End of Line: Cryex / Bloodlust / Omnya",
+      "artists": ["End of Line", "Cryex", "Bloodlust", "Omnya"],
+      "artistTokens": ["end-of-line", "cryex", "bloodlust", "omnya"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "thursday-indigo-mutilator-adjuzt",
+      "day": "Thursday",
+      "dayOrder": 1,
+      "stage": "INDIGO",
+      "rawName": "Mutilator & Adjuzt",
+      "displayName": "Mutilator & Adjuzt",
+      "artists": ["Mutilator", "Adjuzt"],
+      "artistTokens": ["mutilator", "adjuzt"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "sunday-blue-krowdexx",
+      "day": "Sunday",
+      "dayOrder": 4,
+      "stage": "BLUE",
+      "rawName": "Krowdexx",
+      "displayName": "Krowdexx",
+      "artists": ["Krowdexx"],
+      "artistTokens": ["krowdexx"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    },
+    {
+      "id": "saturday-blue-riot-shift",
+      "day": "Saturday",
+      "dayOrder": 3,
+      "stage": "BLUE",
+      "rawName": "Riot Shift",
+      "displayName": "Riot Shift",
+      "artists": ["Riot Shift"],
+      "artistTokens": ["riot-shift"],
+      "startAt": null,
+      "endAt": null,
+      "timeLabel": null
+    }
+  ]
+}
