@@ -6,45 +6,95 @@ import {
   RotateCcw,
   Search,
 } from 'lucide-react';
-import lineupData from './data/lineup.json';
 import {
   countVisibleStages,
   filterEntries,
+  filterReviewFavorites,
   getDays,
   getDefaultDay,
-  getFavoriteEntries,
   getStages,
   groupEntriesByDayAndStage,
   groupFavoritesByDayAndStage,
   loadFavorites,
   loadViewPreferences,
-  matchesSelectedStage,
+  removeFavoriteByEntryId,
+  removeFavoriteByKey,
+  resolveFavoriteItems,
   saveFavorites,
   saveViewPreferences,
+  upsertFavoriteEntry,
   validateLineupPayload,
 } from './lib/lineup';
 import { getStageTheme } from './lib/stageThemes';
 import StageBadge from './components/StageBadge';
 import SummaryCard from './components/SummaryCard';
-import FavoriteStar from './components/FavoriteStar';
 import EmptyState from './components/EmptyState';
 import LineupView from './views/LineupView';
 import FavoritesView from './views/FavoritesView';
 import './index.css';
 
-validateLineupPayload(lineupData);
+function extractLineupEntries(moduleValue) {
+  const payload = moduleValue?.default ?? moduleValue ?? null;
 
-const entries = lineupData.entries;
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload?.entries)) {
+    return payload.entries;
+  }
+
+  return [];
+}
+
+const lineupModules = import.meta.glob('./data/*_defqon_lineup.json', {
+  eager: true,
+});
+
+const lineupKeys = Object.keys(lineupModules).sort();
+const latestKey = lineupKeys.at(-1) ?? null;
+const previousKey = lineupKeys.length > 1 ? lineupKeys.at(-2) : null;
+
+const entries = latestKey ? extractLineupEntries(lineupModules[latestKey]) : [];
+const previousEntries = previousKey
+  ? extractLineupEntries(lineupModules[previousKey])
+  : [];
+
+const hasLineup = entries.length > 0;
+
+if (hasLineup) {
+  validateLineupPayload(entries);
+}
 
 export default function App() {
   const defaultDay = useMemo(() => getDefaultDay(entries), []);
+  const entriesById = useMemo(
+    () => new Map(entries.map((entry) => [entry.id, entry])),
+    []
+  );
 
   const [view, setView] = useState('lineup');
-  const [selectedDay, setSelectedDay] = useState(() => loadViewPreferences()?.selectedDay || defaultDay);
-  const [selectedStage, setSelectedStage] = useState(() => loadViewPreferences()?.selectedStage || 'All stages');
+  const [selectedDay, setSelectedDay] = useState(
+    () => loadViewPreferences()?.selectedDay || defaultDay
+  );
+  const [selectedStage, setSelectedStage] = useState(
+    () => loadViewPreferences()?.selectedStage || 'All stages'
+  );
   const [query, setQuery] = useState('');
-  const [favorites, setFavorites] = useState(() => loadFavorites());
+  const [favoriteItems, setFavoriteItems] = useState(() =>
+    loadFavorites(entries, previousEntries)
+  );
   const [hasAutoExpandedSearchScope, setHasAutoExpandedSearchScope] = useState(false);
+
+  const favoriteResolution = useMemo(
+    () => resolveFavoriteItems(entries, favoriteItems),
+    [favoriteItems]
+  );
+
+  const favoriteIds = favoriteResolution.ids;
+  const favoriteEntries = favoriteResolution.entries;
+  const reviewFavorites = favoriteResolution.reviewItems;
+  const reviewCount = reviewFavorites.length;
 
   const days = useMemo(() => getDays(entries), []);
   const stages = useMemo(() => getStages(entries, selectedDay), [selectedDay]);
@@ -67,40 +117,21 @@ export default function App() {
     return groupEntriesByDayAndStage(visibleEntries);
   }, [visibleEntries]);
 
-  const favoriteEntries = useMemo(() => {
-    return getFavoriteEntries(entries, favorites);
-  }, [favorites]);
-
   const filteredFavoriteEntries = useMemo(() => {
-    let result = favoriteEntries;
+    return filterEntries(favoriteEntries, {
+      query,
+      day: selectedDay,
+      stage: selectedStage,
+    });
+  }, [favoriteEntries, query, selectedDay, selectedStage]);
 
-    if (selectedDay !== 'All days') {
-      result = result.filter((entry) => entry.day === selectedDay);
-    }
-
-    if (selectedStage !== 'All stages') {
-      result = result.filter((entry) =>
-        matchesSelectedStage(entry.stage, selectedStage)
-      );
-    }
-
-    const normalizedQuery = query.trim().toLowerCase();
-
-    if (normalizedQuery) {
-      result = result.filter((entry) => {
-        return (
-          entry.rawName.toLowerCase().includes(normalizedQuery) ||
-          entry.displayName.toLowerCase().includes(normalizedQuery) ||
-          entry.artists.some((artist) =>
-            artist.toLowerCase().includes(normalizedQuery)
-          ) ||
-          entry.artistTokens.some((token) => token.includes(normalizedQuery))
-        );
-      });
-    }
-
-    return result;
-  }, [favoriteEntries, selectedDay, selectedStage, query]);
+  const filteredReviewFavorites = useMemo(() => {
+    return filterReviewFavorites(reviewFavorites, {
+      query,
+      day: selectedDay,
+      stage: selectedStage,
+    });
+  }, [reviewFavorites, query, selectedDay, selectedStage]);
 
   const groupedFavorites = useMemo(() => {
     return groupFavoritesByDayAndStage(filteredFavoriteEntries);
@@ -113,13 +144,23 @@ export default function App() {
     return {
       mode: `${selectedDay} • ${selectedStage}`,
       stages: countVisibleStages(sourceEntries),
-      artists: sourceEntries.length,
+      artists:
+        view === 'favorites'
+          ? filteredFavoriteEntries.length + filteredReviewFavorites.length
+          : sourceEntries.length,
     };
-  }, [view, filteredFavoriteEntries, visibleEntries, selectedDay, selectedStage]);
+  }, [
+    view,
+    filteredFavoriteEntries,
+    filteredReviewFavorites,
+    visibleEntries,
+    selectedDay,
+    selectedStage,
+  ]);
 
   useEffect(() => {
-    saveFavorites(favorites);
-  }, [favorites]);
+    saveFavorites(favoriteItems);
+  }, [favoriteItems]);
 
   useEffect(() => {
     saveViewPreferences({
@@ -144,9 +185,29 @@ export default function App() {
   }, [query, hasAutoExpandedSearchScope]);
 
   const toggleFavorite = (entryId) => {
-    setFavorites((prev) =>
-      prev.includes(entryId) ? prev.filter((id) => id !== entryId) : [...prev, entryId]
-    );
+    const entry = entriesById.get(entryId);
+
+    if (!entry) {
+      return;
+    }
+
+    setFavoriteItems((prev) => {
+      const isAlreadyFavorite = prev.some(
+        (item) =>
+          item.id === entry.id ||
+          (item.hash && entry.hash && item.hash === entry.hash)
+      );
+
+      if (isAlreadyFavorite) {
+        return removeFavoriteByEntryId(prev, entryId);
+      }
+
+      return upsertFavoriteEntry(prev, entry);
+    });
+  };
+
+  const removeReviewFavorite = (favoriteKey) => {
+    setFavoriteItems((prev) => removeFavoriteByKey(prev, favoriteKey));
   };
 
   const resetLocalData = () => {
@@ -155,6 +216,10 @@ export default function App() {
     setQuery('');
     setHasAutoExpandedSearchScope(false);
   };
+
+  if (!hasLineup) {
+    return <EmptyState text="No lineup detected" />;
+  }
 
   return (
     <div className="app-shell">
@@ -173,6 +238,7 @@ export default function App() {
           </div>
         </div>
       </header>
+
       <main className="page">
         <section className="toolbar">
           <div className="toolbar__top">
@@ -187,9 +253,14 @@ export default function App() {
               >
                 Line-up
               </button>
+
               <button
                 type="button"
-                className={view === 'favorites' ? 'tab tab--active' : 'tab'}
+                className={
+                  view === 'favorites'
+                    ? `tab tab--active${reviewCount > 0 ? ' tab--with-badge' : ''}`
+                    : `tab${reviewCount > 0 ? ' tab--with-badge' : ''}`
+                }
                 onClick={() => {
                   setView('favorites');
                   setQuery('');
@@ -198,14 +269,21 @@ export default function App() {
                   setHasAutoExpandedSearchScope(false);
                 }}
               >
-                Favorites
+                <span className="tab__text">Favorites</span>
+                {reviewCount > 0 && (
+                  <span className="tab__badge tab__badge--corner">
+                    {reviewCount}
+                  </span>
+                )}
               </button>
             </div>
+
             <button type="button" className="ghost-button" onClick={resetLocalData}>
               <RotateCcw size={14} />
               <span>Reset</span>
             </button>
           </div>
+
           <div className="search-row">
             <div className="search-input-wrap">
               <Search size={16} className="search-input__icon" />
@@ -217,6 +295,7 @@ export default function App() {
               />
             </div>
           </div>
+
           <div className="filters-block">
             <div className="filters-group">
               <div className="filters-group__label">Days</div>
@@ -250,6 +329,7 @@ export default function App() {
                 ))}
               </div>
             </div>
+
             <div className="filters-group">
               <div className="filters-group__label">Stages</div>
               <div className="filters-row">
@@ -278,19 +358,22 @@ export default function App() {
             </div>
           </div>
         </section>
+
         {view === 'lineup' ? (
           <LineupView
             groupedEntries={groupedVisibleEntries}
-            favorites={favorites}
+            favorites={favoriteIds}
             toggleFavorite={toggleFavorite}
           />
         ) : (
           <FavoritesView
             groupedFavorites={groupedFavorites}
             filteredFavoriteEntries={filteredFavoriteEntries}
+            filteredReviewFavorites={filteredReviewFavorites}
             entries={entries}
-            favorites={favorites}
+            favorites={favoriteIds}
             toggleFavorite={toggleFavorite}
+            removeReviewFavorite={removeReviewFavorite}
           />
         )}
       </main>
