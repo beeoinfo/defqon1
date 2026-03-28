@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCcw, X } from 'lucide-react';
-import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '../lib/presetAvatars';
+import {
+  getRandomPresetAvatarIndex,
+  resolveProfileAvatarUrl,
+} from '../lib/presetAvatars';
 import {
   signOutCurrentUser,
   updateProfileAccount,
@@ -99,9 +102,7 @@ export default function ProfileModal({
     setErrorMessage('');
     setAvatarFile(null);
     setAvatarMode('preset');
-    setAvatarPreset((currentPreset) =>
-      getRandomPresetAvatarIndex(currentPreset)
-    );
+    setAvatarPreset((currentPreset) => getRandomPresetAvatarIndex(currentPreset));
   };
 
   const handleSubmit = async (event) => {
@@ -208,7 +209,6 @@ export default function ProfileModal({
                   hidden
                 />
               </label>
-
             </div>
           </div>
 
@@ -257,7 +257,7 @@ export default function ProfileModal({
                 className="button-primary"
                 disabled={isBusy || !hasChanges}
               >
-                {isBusy ? "Saving..." : "Save profile"}
+                {isBusy ? 'Saving...' : 'Save profile'}
               </button>
             </div>
           </div>

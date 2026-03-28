@@ -5,6 +5,7 @@ import {
   Music2,
   RotateCcw,
   Search,
+  Settings2,
   UserRound,
 } from 'lucide-react';
 import {
@@ -38,6 +39,7 @@ import SummaryCard from './components/SummaryCard';
 import EmptyState from './components/EmptyState';
 import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
+import AdvancedSettingsModal from './components/AdvancedSettingsModal';
 import LineupView from './views/LineupView';
 import FavoritesView from './views/FavoritesView';
 import './index.css';
@@ -56,30 +58,58 @@ function extractLineupEntries(moduleValue) {
   return [];
 }
 
+function formatLineupLabel(path) {
+  const fileName = path.split('/').pop() ?? path;
+  const match = fileName.match(
+    /^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_defqon_lineup\.json$/
+  );
+
+  if (!match) {
+    return fileName;
+  }
+
+  const [, year, month, day, hour, minute] = match;
+  return `${day}/${month}/${year} · ${hour}:${minute}`;
+}
+
 const lineupModules = import.meta.glob('./data/*_defqon_lineup.json', {
   eager: true,
 });
 
-const lineupKeys = Object.keys(lineupModules).sort();
-const latestKey = lineupKeys.at(-1) ?? null;
-const previousKey = lineupKeys.length > 1 ? lineupKeys.at(-2) : null;
+const lineupKeysAsc = Object.keys(lineupModules).sort();
+const latestKey = lineupKeysAsc.at(-1) ?? null;
 
-const entries = latestKey ? extractLineupEntries(lineupModules[latestKey]) : [];
-const previousEntries = previousKey
-  ? extractLineupEntries(lineupModules[previousKey])
-  : [];
+const lineupSources = [...lineupKeysAsc]
+  .reverse()
+  .map((key) => ({
+    key,
+    label: formatLineupLabel(key),
+    entries: extractLineupEntries(lineupModules[key]),
+    isLatest: key === latestKey,
+  }));
 
-const hasLineup = entries.length > 0;
-
-if (hasLineup) {
-  validateLineupPayload(entries);
+for (const lineupSource of lineupSources) {
+  if (lineupSource.entries.length > 0) {
+    validateLineupPayload(lineupSource.entries);
+  }
 }
 
+const hasLineup = lineupSources.length > 0;
+
 export default function App() {
-  const defaultDay = useMemo(() => getDefaultDay(entries), []);
+  const [selectedLineupKey, setSelectedLineupKey] = useState(latestKey);
+  const selectedLineup =
+    lineupSources.find((lineup) => lineup.key === selectedLineupKey) ??
+    lineupSources[0] ??
+    null;
+  const selectedEntries = selectedLineup?.entries ?? [];
+  const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
+  const favoritesReadOnly = !isLatestLineupSelected;
+
+  const defaultDay = useMemo(() => getDefaultDay(selectedEntries), [selectedEntries]);
   const entriesById = useMemo(
-    () => new Map(entries.map((entry) => [entry.id, entry])),
-    []
+    () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
+    [selectedEntries]
   );
 
   const [view, setView] = useState('lineup');
@@ -99,11 +129,12 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState('login');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
 
   const favoriteResolution = useMemo(
-    () => resolveFavoriteItems(entries, favoriteItems),
-    [favoriteItems]
+    () => resolveFavoriteItems(selectedEntries, favoriteItems),
+    [selectedEntries, favoriteItems]
   );
 
   const favoriteIds = favoriteResolution.ids;
@@ -111,21 +142,33 @@ export default function App() {
   const reviewFavorites = favoriteResolution.reviewItems;
   const reviewCount = reviewFavorites.length;
 
-  const days = useMemo(() => getDays(entries), []);
-  const stages = useMemo(() => getStages(entries, selectedDay), [selectedDay]);
+  const days = useMemo(() => getDays(selectedEntries), [selectedEntries]);
+  const stages = useMemo(
+    () => getStages(selectedEntries, selectedDay),
+    [selectedEntries, selectedDay]
+  );
 
   const profileAvatarSrc = authUser
     ? resolveProfileAvatarUrl(profile) || getPresetAvatarUrl(1)
     : '';
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  const profileDisplayName = authUser
+    ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
+      profile?.username ||
+      'Your profile'
+    : 'Login / Sign up';
 
-    window.localStorage.removeItem('defqon1-favorites');
-    window.sessionStorage.removeItem('defqon1-favorites');
-  }, []);
+  const profileDisplayUsername = authUser
+    ? profile?.username
+      ? `@${profile.username}`
+      : authUser?.email ?? ''
+    : 'Sync your favorites';
+
+  useEffect(() => {
+    if (selectedDay !== 'All days' && !days.includes(selectedDay)) {
+      setSelectedDay(getDefaultDay(selectedEntries));
+    }
+  }, [selectedDay, days, selectedEntries]);
 
   useEffect(() => {
     if (selectedStage !== 'All stages' && !stages.includes(selectedStage)) {
@@ -134,12 +177,12 @@ export default function App() {
   }, [selectedStage, stages]);
 
   const visibleEntries = useMemo(() => {
-    return filterEntries(entries, {
+    return filterEntries(selectedEntries, {
       query,
       day: selectedDay,
       stage: selectedStage,
     });
-  }, [query, selectedDay, selectedStage]);
+  }, [selectedEntries, query, selectedDay, selectedStage]);
 
   const groupedVisibleEntries = useMemo(() => {
     return groupEntriesByDayAndStage(visibleEntries);
@@ -288,7 +331,7 @@ export default function App() {
       setHasAutoExpandedSearchScope(false);
     }
 
-    if (pendingAction.type === 'toggle-favorite') {
+    if (pendingAction.type === 'toggle-favorite' && isLatestLineupSelected) {
       const entry = entriesById.get(pendingAction.entryId);
 
       if (entry) {
@@ -308,7 +351,7 @@ export default function App() {
       }
     }
 
-    if (pendingAction.type === 'remove-review-favorite') {
+    if (pendingAction.type === 'remove-review-favorite' && isLatestLineupSelected) {
       setFavoriteItems((prev) =>
         removeFavoriteByKey(prev, pendingAction.favoriteKey)
       );
@@ -316,7 +359,7 @@ export default function App() {
 
     setPendingAction(null);
     setIsAuthModalOpen(false);
-  }, [authUser, isAccountReady, pendingAction, entriesById]);
+  }, [authUser, isAccountReady, pendingAction, entriesById, isLatestLineupSelected]);
 
   const requestAuth = (action, defaultTab = 'login') => {
     setPendingAction(action);
@@ -353,6 +396,10 @@ export default function App() {
   };
 
   const toggleFavorite = (entryId) => {
+    if (favoritesReadOnly) {
+      return;
+    }
+
     if (!authUser) {
       requestAuth({ type: 'toggle-favorite', entryId });
       return;
@@ -380,7 +427,7 @@ export default function App() {
   };
 
   const removeReviewFavorite = (favoriteKey) => {
-    if (!authUser) {
+    if (favoritesReadOnly || !authUser) {
       return;
     }
 
@@ -394,7 +441,7 @@ export default function App() {
     setHasAutoExpandedSearchScope(false);
   };
 
-  if (!hasLineup) {
+  if (!hasLineup || !selectedLineup) {
     return <EmptyState text="No lineup detected" />;
   }
 
@@ -406,20 +453,29 @@ export default function App() {
             <div className="hero__top">
               <button
                 type="button"
-                className="profile-trigger"
+                className="profile-summary"
                 onClick={handleProfileClick}
                 aria-label={authUser ? 'Open profile' : 'Login or sign up'}
                 title={authUser ? 'Open profile' : 'Login or sign up'}
               >
-                {authUser ? (
-                  <img
-                    src={profileAvatarSrc}
-                    alt="User avatar"
-                    className="profile-trigger__image"
-                  />
-                ) : (
-                  <UserRound size={18} />
-                )}
+                <span className="profile-summary__avatar">
+                  {authUser ? (
+                    <img
+                      src={profileAvatarSrc}
+                      alt="User avatar"
+                      className="profile-trigger__image"
+                    />
+                  ) : (
+                    <UserRound size={18} />
+                  )}
+                </span>
+
+                <span className="profile-summary__content">
+                  <span className="profile-summary__name">{profileDisplayName}</span>
+                  <span className="profile-summary__username">
+                    {profileDisplayUsername}
+                  </span>
+                </span>
               </button>
             </div>
 
@@ -472,6 +528,17 @@ export default function App() {
                 <span>Reset</span>
               </button>
             </div>
+
+            {favoritesReadOnly && (
+              <div className="toolbar__meta">
+                <div className="archive-banner">
+                  <strong>Archive mode enabled.</strong>
+                  <span>
+                    You are browsing an older lineup. Favorites are disabled until you switch back to the latest lineup or you refresh the browser.
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="search-row">
               <div className="search-input-wrap">
@@ -548,24 +615,54 @@ export default function App() {
             </div>
           </section>
 
-          {view === 'lineup' ? (
-            <LineupView
-              groupedEntries={groupedVisibleEntries}
-              favorites={favoriteIds}
-              toggleFavorite={toggleFavorite}
-            />
-          ) : (
-            <FavoritesView
-              groupedFavorites={groupedFavorites}
-              filteredFavoriteEntries={filteredFavoriteEntries}
-              filteredReviewFavorites={filteredReviewFavorites}
-              entries={entries}
-              favorites={favoriteIds}
-              toggleFavorite={toggleFavorite}
-              removeReviewFavorite={removeReviewFavorite}
-            />
-          )}
+          <div className={favoritesReadOnly ? 'favorites-readonly' : ''}>
+            {view === 'lineup' ? (
+              <LineupView
+                groupedEntries={groupedVisibleEntries}
+                favorites={favoriteIds}
+                toggleFavorite={toggleFavorite}
+              />
+            ) : (
+              <FavoritesView
+                groupedFavorites={groupedFavorites}
+                filteredFavoriteEntries={filteredFavoriteEntries}
+                filteredReviewFavorites={filteredReviewFavorites}
+                entries={selectedEntries}
+                favorites={favoriteIds}
+                toggleFavorite={toggleFavorite}
+                removeReviewFavorite={removeReviewFavorite}
+              />
+            )}
+          </div>
         </main>
+
+        <footer className="site-footer">
+          <div className="site-footer__inner">
+            <div className="site-footer__brand">
+              <strong>Made with 🩷 by Dylan Bergozza</strong>
+              <span className="muted">
+                Defqon.1 planner · beta · more footer content later
+              </span>
+            </div>
+
+            <div className="site-footer__links">
+              <span>About</span>
+              <span>Roadmap</span>
+              <span>Support</span>
+              <span>Legal</span>
+            </div>
+
+            <button
+              type="button"
+              className="footer-settings-button"
+              onClick={() => setIsAdvancedSettingsOpen(true)}
+              title="Advanced settings"
+              aria-label="Advanced settings"
+            >
+              <Settings2 size={16} />
+            </button>
+          </div>
+        </footer>
       </div>
 
       <AuthModal
@@ -593,6 +690,22 @@ export default function App() {
           setView('lineup');
           setIsProfileModalOpen(false);
         }}
+      />
+
+      <AdvancedSettingsModal
+        open={isAdvancedSettingsOpen}
+        lineups={lineupSources}
+        selectedLineupKey={selectedLineupKey}
+        onSelectLineup={(lineupKey) => {
+          setSelectedLineupKey(lineupKey);
+          setSelectedDay(getDefaultDay(
+            lineupSources.find((lineup) => lineup.key === lineupKey)?.entries ?? []
+          ));
+          setSelectedStage('All stages');
+          setQuery('');
+          setHasAutoExpandedSearchScope(false);
+        }}
+        onClose={() => setIsAdvancedSettingsOpen(false)}
       />
     </>
   );
