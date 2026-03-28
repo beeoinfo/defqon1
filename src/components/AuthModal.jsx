@@ -1,0 +1,240 @@
+import { useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import {
+  isSupabaseConfigured,
+  signInWithEmail,
+  signUpWithEmail,
+  validateEmail,
+  validatePassword,
+  validateUsername,
+} from '../lib/supabase';
+
+export default function AuthModal({
+  open,
+  defaultTab = 'login',
+  onClose,
+  onSuccess,
+}) {
+  const [tab, setTab] = useState(defaultTab);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isBusy, setIsBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      setTab(defaultTab);
+      setErrorMessage('');
+      setSuccessMessage('');
+      setPassword('');
+    }
+  }, [open, defaultTab]);
+
+  if (!open) {
+    return null;
+  }
+
+  const isSignup = tab === 'signup';
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (!isSupabaseConfigured()) {
+      setErrorMessage('Supabase is not configured.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage('Password is required.');
+      return;
+    }
+
+    if (isSignup && !validateUsername(username)) {
+      setErrorMessage(
+        'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
+      );
+      return;
+    }
+
+    if (isSignup && !validatePassword(password)) {
+      setErrorMessage(
+        'Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.'
+      );
+      return;
+    }
+
+    if (isSignup && (!firstName.trim() || !lastName.trim())) {
+      setErrorMessage('First name and last name are required.');
+      return;
+    }
+
+    setIsBusy(true);
+
+    try {
+      if (isSignup) {
+        const result = await signUpWithEmail({
+          firstName,
+          lastName,
+          username,
+          email,
+          password,
+        });
+
+        if (result.session && result.user) {
+          onSuccess?.(result.user);
+          return;
+        }
+
+        setSuccessMessage(
+          'Account created. Check your email to confirm your address, then come back to log in.'
+        );
+        setTab('login');
+        setPassword('');
+        return;
+      }
+
+      const user = await signInWithEmail({
+        email,
+        password,
+      });
+
+      onSuccess?.(user);
+    } catch (error) {
+      setErrorMessage(error.message || 'Something went wrong.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-panel" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-panel__header">
+          <div>
+            <h2>{isSignup ? 'Create your account' : 'Welcome back'}</h2>
+            <p className="muted">
+              Save your favorites and sync them across devices.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="modal-tabs">
+          <button
+            type="button"
+            className={tab === 'login' ? 'modal-tab modal-tab--active' : 'modal-tab'}
+            onClick={() => {
+              setTab('login');
+              setErrorMessage('');
+              setSuccessMessage('');
+            }}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className={tab === 'signup' ? 'modal-tab modal-tab--active' : 'modal-tab'}
+            onClick={() => {
+              setTab('signup');
+              setErrorMessage('');
+              setSuccessMessage('');
+            }}
+          >
+            Sign up
+          </button>
+        </div>
+
+        <form className="form-grid" onSubmit={handleSubmit}>
+          {isSignup && (
+            <>
+              <label className="field">
+                <span>First name</span>
+                <input
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  autoComplete="given-name"
+                />
+              </label>
+
+              <label className="field">
+                <span>Last name</span>
+                <input
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  autoComplete="family-name"
+                />
+              </label>
+
+              <label className="field">
+                <span>Username</span>
+                <input
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  autoComplete="username"
+                />
+              </label>
+            </>
+          )}
+
+          <label className="field">
+            <span>Email</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+            />
+          </label>
+
+          <label className="field">
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete={isSignup ? 'new-password' : 'current-password'}
+            />
+          </label>
+
+          {isSignup && (
+            <p className="form-help">
+              Minimum 8 characters with uppercase, lowercase, number and symbol.
+            </p>
+          )}
+
+          {successMessage && <div className="form-success">{successMessage}</div>}
+          {errorMessage && <div className="form-error">{errorMessage}</div>}
+
+          <div className="modal-actions">
+            <button type="submit" className="button-primary" disabled={isBusy}>
+              {isBusy
+                ? 'Please wait...'
+                : isSignup
+                  ? 'Create account'
+                  : 'Login'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
