@@ -3,13 +3,20 @@ import { Copy, LogOut, Plus, Users } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 import { normalizeTribeCode } from '../lib/supabase';
 
-export default function TribeView({
-  tribe,
-  isBusy,
-  onCreateTribe,
-  onJoinTribe,
-  onLeaveTribe,
-}) {
+/**
+ * View for managing tribes (groups of friends). Users can create a
+ * tribe, join by code or leave an existing tribe. This component
+ * mirrors the original logic and UI so that functionality remains
+ * unchanged while the surrounding layout has been refactored.
+ *
+ * Props:
+ *   tribe (object|null): The current tribe bundle or null if none.
+ *   isBusy (boolean): Whether an async tribe operation is in flight.
+ *   onCreateTribe (function): Handler to create a new tribe.
+ *   onJoinTribe (function): Handler to join a tribe by code.
+ *   onLeaveTribe (function): Handler to leave the current tribe.
+ */
+export default function TribeView({ tribe, isBusy, onCreateTribe, onJoinTribe, onLeaveTribe }) {
   const [joinCode, setJoinCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [leaveArmed, setLeaveArmed] = useState(false);
@@ -18,7 +25,6 @@ export default function TribeView({
   const handleCreate = async () => {
     setErrorMessage('');
     setCopyFeedback('');
-
     try {
       await onCreateTribe();
     } catch (error) {
@@ -30,7 +36,6 @@ export default function TribeView({
     event.preventDefault();
     setErrorMessage('');
     setCopyFeedback('');
-
     try {
       await onJoinTribe(joinCode);
       setJoinCode('');
@@ -44,10 +49,8 @@ export default function TribeView({
       setLeaveArmed(true);
       return;
     }
-
     setErrorMessage('');
     setCopyFeedback('');
-
     try {
       await onLeaveTribe();
       setLeaveArmed(false);
@@ -60,7 +63,6 @@ export default function TribeView({
     if (!tribe?.code) {
       return;
     }
-
     try {
       await navigator.clipboard.writeText(tribe.code);
       setCopyFeedback('Code copied.');
@@ -78,11 +80,9 @@ export default function TribeView({
               <Plus size={18} />
               <h2>Create a tribe</h2>
             </div>
-
             <p className="muted">
               Start a new tribe, get a unique code, then share it with your friends.
             </p>
-
             <button
               type="button"
               className="button-primary"
@@ -92,17 +92,12 @@ export default function TribeView({
               {isBusy ? 'Creating...' : 'Create tribe'}
             </button>
           </article>
-
           <article className="tribe-card">
             <div className="tribe-card__header">
               <Users size={18} />
               <h2>Join a tribe</h2>
             </div>
-
-            <p className="muted">
-              Enter a code shared by another member.
-            </p>
-
+            <p className="muted">Enter a code shared by another member.</p>
             <form className="tribe-join-form" onSubmit={handleJoin}>
               <input
                 className="search-input"
@@ -111,7 +106,6 @@ export default function TribeView({
                 placeholder="Enter code"
                 maxLength={8}
               />
-
               <button
                 type="submit"
                 className="button-secondary"
@@ -122,16 +116,13 @@ export default function TribeView({
             </form>
           </article>
         </div>
-
         {errorMessage && <div className="form-error">{errorMessage}</div>}
-
         <div className="tribe-coming-soon">
           <EmptyState text="Tribe space created. The shared lineup content comes next." />
         </div>
       </section>
     );
   }
-
   return (
     <section className="tribe-view">
       <article className="tribe-card tribe-card--active">
@@ -139,12 +130,10 @@ export default function TribeView({
           <Users size={18} />
           <h2>Your tribe</h2>
         </div>
-
         <div className="tribe-code-block">
           <span className="tribe-code-block__label">Invite code</span>
           <strong className="tribe-code">{tribe.code}</strong>
         </div>
-
         <div className="tribe-stats">
           <span className="tribe-stat">
             Role: <strong>{tribe.isOwner ? 'Owner' : 'Member'}</strong>
@@ -153,13 +142,11 @@ export default function TribeView({
             Members: <strong>{tribe.memberCount}</strong>
           </span>
         </div>
-
         <div className="tribe-actions">
           <button type="button" className="button-secondary" onClick={handleCopyCode}>
             <Copy size={16} />
             <span>Copy code</span>
           </button>
-
           <button
             type="button"
             className={leaveArmed ? 'button-danger' : 'button-secondary'}
@@ -170,17 +157,14 @@ export default function TribeView({
             <span>{leaveArmed ? 'Confirm leave' : 'Leave tribe'}</span>
           </button>
         </div>
-
         {leaveArmed && (
           <p className="tribe-warning">
             This action is protected to avoid mistakes. Click again to confirm.
           </p>
         )}
-
         {copyFeedback && <div className="form-success">{copyFeedback}</div>}
         {errorMessage && <div className="form-error">{errorMessage}</div>}
       </article>
-
       <div className="tribe-coming-soon">
         <EmptyState text="Tribe space ready. Shared favorites and tribe lineup views come next." />
       </div>

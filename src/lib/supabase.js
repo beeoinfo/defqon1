@@ -1,48 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 import { getRandomPresetAvatarIndex } from './presetAvatars';
 
+// Initialise the Supabase client if the URL and anon key are provided
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : null;
+  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
+// Validation regexes for usernames, passwords and emails
 const USERNAME_REGEX = /^[a-z0-9._-]{3,30}$/;
-const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const AVATAR_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-]);
+const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 
 function ensureSupabase() {
   if (!supabase) {
     throw new Error('Supabase is not configured.');
   }
-
   return supabase;
 }
 
 function dedupeFavoriteItems(items) {
   const seen = new Set();
-
   return items.filter((item) => {
     const key =
-      item.favoriteKey ??
-      item.hash ??
-      item.id ??
-      `${item.daySlug}-${item.stageSlug}-${item.artistSlug}`;
-
+      item.favoriteKey ?? item.hash ?? item.id ?? `${item.daySlug}-${item.stageSlug}-${item.artistSlug}`;
     if (!key || seen.has(key)) {
       return false;
     }
-
     seen.add(key);
     return true;
   });
@@ -52,17 +39,14 @@ function fileToImage(file) {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const image = new Image();
-
     image.onload = () => {
       URL.revokeObjectURL(objectUrl);
       resolve(image);
     };
-
     image.onerror = () => {
       URL.revokeObjectURL(objectUrl);
       reject(new Error('Could not read the selected image.'));
     };
-
     image.src = objectUrl;
   });
 }
@@ -72,28 +56,17 @@ async function convertImageToWebp(file) {
   const canvas = document.createElement('canvas');
   canvas.width = image.naturalWidth;
   canvas.height = image.naturalHeight;
-
   const context = canvas.getContext('2d');
-
   if (!context) {
     throw new Error('Could not process the selected image.');
   }
-
   context.drawImage(image, 0, 0);
-
-  const blob = await new Promise((resolve) =>
-    canvas.toBlob(resolve, 'image/webp', 0.9)
-  );
-
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.9));
   if (!blob) {
     throw new Error('Could not convert the selected image.');
   }
-
   const baseName = file.name.replace(/\.[^.]+$/, '') || 'avatar';
-
-  return new File([blob], `${baseName}.webp`, {
-    type: 'image/webp',
-  });
+  return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
 }
 
 export function isSupabaseConfigured() {
@@ -101,15 +74,11 @@ export function isSupabaseConfigured() {
 }
 
 export function normalizeUsername(value) {
-  return String(value ?? '')
-    .trim()
-    .toLowerCase();
+  return String(value ?? '').trim().toLowerCase();
 }
 
 export function normalizeEmail(value) {
-  return String(value ?? '')
-    .trim()
-    .toLowerCase();
+  return String(value ?? '').trim().toLowerCase();
 }
 
 export function validateUsername(value) {
@@ -127,51 +96,36 @@ export function validateEmail(value) {
 export async function isUsernameAvailable(username) {
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
-
   const { data, error } = await client.rpc('is_username_available', {
     username_input: normalizedUsername,
   });
-
   if (error) {
     throw error;
   }
-
   return Boolean(data);
 }
 
-export async function signUpWithEmail({
-  firstName,
-  lastName,
-  username,
-  email,
-  password,
-}) {
+export async function signUpWithEmail({ firstName, lastName, username, email, password }) {
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
   const normalizedEmail = normalizeEmail(email);
-
   if (!validateUsername(normalizedUsername)) {
     throw new Error(
       'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
     );
   }
-
   if (!validateEmail(normalizedEmail)) {
     throw new Error('Please enter a valid email address.');
   }
-
   if (!validatePassword(password)) {
     throw new Error(
       'Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.'
     );
   }
-
   const isAvailable = await isUsernameAvailable(normalizedUsername);
-
   if (!isAvailable) {
     throw new Error('This username is already taken.');
   }
-
   const { data, error } = await client.auth.signUp({
     email: normalizedEmail,
     password,
@@ -183,11 +137,9 @@ export async function signUpWithEmail({
       },
     },
   });
-
   if (error) {
     throw error;
   }
-
   return {
     user: data.user ?? null,
     session: data.session ?? null,
@@ -198,27 +150,19 @@ export async function signUpWithEmail({
 export async function signInWithEmail({ email, password }) {
   const client = ensureSupabase();
   const normalizedEmail = normalizeEmail(email);
-
   if (!validateEmail(normalizedEmail)) {
     throw new Error('Please enter a valid email address.');
   }
-
-  const { data, error } = await client.auth.signInWithPassword({
-    email: normalizedEmail,
-    password,
-  });
-
+  const { data, error } = await client.auth.signInWithPassword({ email: normalizedEmail, password });
   if (error) {
     throw error;
   }
-
   return data.user;
 }
 
 export async function signOutCurrentUser() {
   const client = ensureSupabase();
   const { error } = await client.auth.signOut();
-
   if (error) {
     throw error;
   }
@@ -226,39 +170,30 @@ export async function signOutCurrentUser() {
 
 export async function getCurrentUser() {
   const client = ensureSupabase();
-
   const { data: sessionData, error: sessionError } = await client.auth.getSession();
-
   if (sessionError) {
     const message = String(sessionError.message || '').toLowerCase();
-
     if (message.includes('auth session missing')) {
       return null;
     }
-
     throw sessionError;
   }
-
   const session = sessionData?.session ?? null;
-
   if (!session) {
     return null;
   }
-
   return session.user ?? null;
 }
 
 function buildProfilePayloadFromUser(user) {
   const metadata = user?.user_metadata ?? {};
-
   return {
     id: user.id,
     auth_email: user.email ?? '',
     first_name: String(metadata.first_name ?? '').trim(),
     last_name: String(metadata.last_name ?? '').trim(),
     username: normalizeUsername(
-      metadata.username ??
-        (user.email ? user.email.split('@')[0] : `user-${user.id.slice(0, 8)}`)
+      metadata.username ?? (user.email ? user.email.split('@')[0] : `user-${user.id.slice(0, 8)}`)
     ),
     avatar_kind: 'preset',
     avatar_preset: getRandomPresetAvatarIndex(),
@@ -267,72 +202,46 @@ function buildProfilePayloadFromUser(user) {
 
 async function ensureProfileRow(user) {
   const client = ensureSupabase();
-
   const { data: existingProfile, error: existingError } = await client
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .maybeSingle();
-
   if (existingError) {
     throw existingError;
   }
-
   if (existingProfile) {
     return existingProfile;
   }
-
   const payload = buildProfilePayloadFromUser(user);
-
-  const { error: insertError } = await client
-    .from('profiles')
-    .insert(payload);
-
+  const { error: insertError } = await client.from('profiles').insert(payload);
   if (insertError) {
     throw insertError;
   }
-
   const { data: createdProfile, error: createdProfileError } = await client
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .maybeSingle();
-
   if (createdProfileError) {
     throw createdProfileError;
   }
-
   return createdProfile;
 }
 
 export async function loadAccountBundle(userId, authUser = null) {
   const client = ensureSupabase();
-
-  const profile = authUser
-    ? await ensureProfileRow(authUser)
-    : (
-        await client
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle()
-      ).data ?? null;
-
+  const profile = authUser ? await ensureProfileRow(authUser) : (await client.from('profiles').select('*').eq('id', userId).maybeSingle()).data ?? null;
   const { data: favorites, error: favoritesError } = await client
     .from('user_favorites')
     .select('favorite_key, snapshot')
     .eq('user_id', userId);
-
   if (favoritesError) {
     throw favoritesError;
   }
-
   return {
     profile,
-    favorites: (favorites ?? []).map((row) => ({
-      ...row.snapshot,
-      favoriteKey: row.favorite_key,
-    })),
+    favorites: (favorites ?? []).map((row) => ({ ...row.snapshot, favoriteKey: row.favorite_key })),
   };
 }
 
@@ -343,99 +252,61 @@ export function mergeFavoriteItems(localItems, remoteItems) {
 export async function syncFavoriteSnapshots(userId, favoriteItems) {
   const client = ensureSupabase();
   const cleanItems = dedupeFavoriteItems(favoriteItems ?? []);
-
   const { data: existingRows, error: existingError } = await client
     .from('user_favorites')
     .select('favorite_key')
     .eq('user_id', userId);
-
   if (existingError) {
     throw existingError;
   }
-
   if (cleanItems.length > 0) {
-    const rows = cleanItems.map((item) => ({
-      user_id: userId,
-      favorite_key: item.favoriteKey,
-      snapshot: item,
-    }));
-
+    const rows = cleanItems.map((item) => ({ user_id: userId, favorite_key: item.favoriteKey, snapshot: item }));
     const { error: upsertError } = await client
       .from('user_favorites')
-      .upsert(rows, {
-        onConflict: 'user_id,favorite_key',
-      });
-
+      .upsert(rows, { onConflict: 'user_id,favorite_key' });
     if (upsertError) {
       throw upsertError;
     }
   }
-
   const keepKeys = new Set(cleanItems.map((item) => item.favoriteKey));
   const deleteKeys = (existingRows ?? [])
     .map((row) => row.favorite_key)
     .filter((favoriteKey) => !keepKeys.has(favoriteKey));
-
   if (deleteKeys.length > 0) {
     const { error: deleteError } = await client
       .from('user_favorites')
       .delete()
       .eq('user_id', userId)
       .in('favorite_key', deleteKeys);
-
     if (deleteError) {
       throw deleteError;
     }
   }
 }
 
-export async function uploadAvatar({
-  userId,
-  file,
-  currentAvatarPath,
-}) {
+export async function uploadAvatar({ userId, file, currentAvatarPath }) {
   const client = ensureSupabase();
-
   if (!file) {
-    return {
-      avatar_path: currentAvatarPath ?? null,
-      avatar_url: null,
-    };
+    return { avatar_path: currentAvatarPath ?? null, avatar_url: null };
   }
-
   if (!AVATAR_TYPES.has(file.type)) {
     throw new Error('Avatar must be a JPEG, PNG, GIF or WEBP file.');
   }
-
   const preparedFile =
-    file.type === 'image/jpeg' || file.type === 'image/png'
-      ? await convertImageToWebp(file)
-      : file;
-
+    file.type === 'image/jpeg' || file.type === 'image/png' ? await convertImageToWebp(file) : file;
   const extension = preparedFile.type === 'image/gif' ? 'gif' : 'webp';
   const avatarPath = `${userId}/avatar.${extension}`;
-
   const { error: uploadError } = await client.storage
     .from('avatars')
-    .upload(avatarPath, preparedFile, {
-      upsert: true,
-      contentType: preparedFile.type,
-    });
-
+    .upload(avatarPath, preparedFile, { upsert: true, contentType: preparedFile.type });
   if (uploadError) {
     throw uploadError;
   }
-
   if (currentAvatarPath && currentAvatarPath !== avatarPath) {
     await client.storage.from('avatars').remove([currentAvatarPath]);
   }
-
   const { data } = client.storage.from('avatars').getPublicUrl(avatarPath);
-
-  return {
-    avatar_path: avatarPath,
-    avatar_url: data.publicUrl,
-  };
+  return { avatar_path: avatarPath, avatar_url: data.publicUrl };
 }
 
 export async function updateProfileAccount({
@@ -450,38 +321,25 @@ export async function updateProfileAccount({
 }) {
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
-
   if (!validateUsername(normalizedUsername)) {
     throw new Error(
       'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
     );
   }
-
-  if (
-    currentProfile?.username &&
-    normalizeUsername(currentProfile.username) !== normalizedUsername
-  ) {
+  if (currentProfile?.username && normalizeUsername(currentProfile.username) !== normalizedUsername) {
     const isAvailable = await isUsernameAvailable(normalizedUsername);
-
     if (!isAvailable) {
       throw new Error('This username is already taken.');
     }
   }
-
   let avatarPayload = {
     avatar_kind: currentProfile?.avatar_kind ?? 'preset',
     avatar_preset: currentProfile?.avatar_preset ?? 1,
     avatar_path: currentProfile?.avatar_path ?? null,
     avatar_url: currentProfile?.avatar_url ?? null,
   };
-
   if (avatarMode === 'upload' && avatarFile) {
-    const uploadedAvatar = await uploadAvatar({
-      userId,
-      file: avatarFile,
-      currentAvatarPath: currentProfile?.avatar_path ?? null,
-    });
-
+    const uploadedAvatar = await uploadAvatar({ userId, file: avatarFile, currentAvatarPath: currentProfile?.avatar_path ?? null });
     avatarPayload = {
       avatar_kind: 'upload',
       avatar_preset: currentProfile?.avatar_preset ?? 1,
@@ -489,12 +347,10 @@ export async function updateProfileAccount({
       avatar_url: uploadedAvatar.avatar_url ?? null,
     };
   }
-
   if (avatarMode === 'preset') {
     if (currentProfile?.avatar_path) {
       await client.storage.from('avatars').remove([currentProfile.avatar_path]);
     }
-
     avatarPayload = {
       avatar_kind: 'preset',
       avatar_preset: avatarPreset,
@@ -502,7 +358,6 @@ export async function updateProfileAccount({
       avatar_url: null,
     };
   }
-
   const updatePayload = {
     first_name: String(firstName ?? '').trim(),
     last_name: String(lastName ?? '').trim(),
@@ -512,16 +367,13 @@ export async function updateProfileAccount({
     avatar_path: avatarPayload.avatar_path,
     avatar_url: avatarPayload.avatar_url,
   };
-
   const { error: profileError } = await client
     .from('profiles')
     .update(updatePayload)
     .eq('id', userId);
-
   if (profileError) {
     throw profileError;
   }
-
   const { error: authError } = await client.auth.updateUser({
     data: {
       first_name: updatePayload.first_name,
@@ -532,21 +384,17 @@ export async function updateProfileAccount({
       avatar_url: updatePayload.avatar_url,
     },
   });
-
   if (authError) {
     throw authError;
   }
-
   const { data: refreshedProfile, error: refreshedProfileError } = await client
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .maybeSingle();
-
   if (refreshedProfileError) {
     throw refreshedProfileError;
   }
-
   return refreshedProfile;
 }
 
@@ -559,44 +407,77 @@ export function normalizeTribeCode(value) {
 
 export async function loadTribeBundle(userId) {
   const client = ensureSupabase();
-
   const { data: membership, error: membershipError } = await client
     .from('tribe_members')
     .select('tribe_id, role')
     .eq('user_id', userId)
     .maybeSingle();
-
   if (membershipError) {
     throw membershipError;
   }
-
   if (!membership) {
     return null;
   }
-
   const { data: tribe, error: tribeError } = await client
     .from('tribes')
     .select('id, code, owner_user_id, created_at')
     .eq('id', membership.tribe_id)
     .maybeSingle();
-
   if (tribeError) {
     throw tribeError;
   }
-
   if (!tribe) {
     return null;
   }
-
   const { count, error: countError } = await client
     .from('tribe_members')
     .select('user_id', { count: 'exact', head: true })
     .eq('tribe_id', tribe.id);
-
   if (countError) {
     throw countError;
   }
-
+  const { data: tribeMembers, error: tribeMembersError } = await client
+    .from('tribe_members')
+    .select('user_id, role')
+    .eq('tribe_id', tribe.id);
+  if (tribeMembersError) {
+    throw tribeMembersError;
+  }
+  const memberUserIds = Array.from(
+    new Set((tribeMembers ?? []).map((member) => member.user_id).filter(Boolean))
+  );
+  let memberProfiles = [];
+  let memberFavorites = [];
+  if (memberUserIds.length > 0) {
+    const [{ data: profiles, error: profilesError }, { data: favorites, error: favoritesError }] =
+      await Promise.all([
+        client
+          .from('profiles')
+          .select(
+            'id, first_name, last_name, username, avatar_kind, avatar_preset, avatar_url, avatar_path'
+          )
+          .in('id', memberUserIds),
+        client
+          .from('user_favorites')
+          .select('user_id, favorite_key, snapshot')
+          .in('user_id', memberUserIds),
+      ]);
+    if (profilesError) {
+      throw profilesError;
+    }
+    if (favoritesError) {
+      throw favoritesError;
+    }
+    memberProfiles = profiles ?? [];
+    memberFavorites = favorites ?? [];
+  }
+  const profilesById = new Map(memberProfiles.map((profile) => [profile.id, profile]));
+  const favoritesByUserId = memberFavorites.reduce((acc, row) => {
+    const current = acc.get(row.user_id) ?? [];
+    current.push({ ...row.snapshot, favoriteKey: row.favorite_key });
+    acc.set(row.user_id, current);
+    return acc;
+  }, new Map());
   return {
     tribeId: tribe.id,
     code: tribe.code,
@@ -605,60 +486,50 @@ export async function loadTribeBundle(userId) {
     role: membership.role,
     isOwner: membership.role === 'owner',
     memberCount: count ?? 1,
+    members: (tribeMembers ?? []).map((member) => ({
+      userId: member.user_id,
+      role: member.role,
+      profile: profilesById.get(member.user_id) ?? null,
+      favorites: favoritesByUserId.get(member.user_id) ?? [],
+    })),
   };
 }
 
 export async function createCurrentUserTribe() {
   const client = ensureSupabase();
-
   const { error } = await client.rpc('create_current_user_tribe');
-
   if (error) {
     throw error;
   }
-
   const user = await getCurrentUser();
-
   if (!user) {
     throw new Error('Authentication required.');
   }
-
   return loadTribeBundle(user.id);
 }
 
 export async function joinCurrentUserTribeByCode(code) {
   const client = ensureSupabase();
   const normalizedCode = normalizeTribeCode(code);
-
   if (!normalizedCode) {
     throw new Error('Please enter a tribe code.');
   }
-
-  const { error } = await client.rpc('join_current_user_tribe', {
-    code_input: normalizedCode,
-  });
-
+  const { error } = await client.rpc('join_current_user_tribe', { code_input: normalizedCode });
   if (error) {
     throw error;
   }
-
   const user = await getCurrentUser();
-
   if (!user) {
     throw new Error('Authentication required.');
   }
-
   return loadTribeBundle(user.id);
 }
 
 export async function leaveCurrentUserTribe() {
   const client = ensureSupabase();
-
   const { error } = await client.rpc('leave_current_user_tribe');
-
   if (error) {
     throw error;
   }
-
   return null;
 }

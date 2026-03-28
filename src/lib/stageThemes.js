@@ -1,8 +1,8 @@
 function buildTheme(accent) {
   return {
     accent,
-    accentSoft: `${accent}24`,
-    accentBorder: `${accent}55`,
+    accentSoft: `${accent}33`,
+    accentBorder: `${accent}66`,
     accentText: "#FFFFFF", // Inactive stage badges
     activeText: "#111111", // Active stage badges + stage card pills
   };
@@ -36,10 +36,8 @@ export function getCanonicalStageName(stage) {
   if (!stage || typeof stage !== "string") {
     return stage;
   }
-
   const value = stage.trim();
   const upper = value.toUpperCase();
-
   const canonicalStages = [
     "RED",
     "BLUE",
@@ -55,19 +53,13 @@ export function getCanonicalStageName(stage) {
     "ORANGE",
     "SILVER",
   ];
-
-  const match = canonicalStages.find((stageName) =>
-    upper.startsWith(stageName.toUpperCase())
-  );
-
+  const match = canonicalStages.find((stageName) => upper.startsWith(stageName.toUpperCase()));
   if (match) {
     return match;
   }
-
   if (upper.includes("CLOSING")) {
     return "RED";
   }
-
   return value;
 }
 

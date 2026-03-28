@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
-  CalendarDays,
-  Disc3,
-  Music2,
-  RotateCcw,
+  Music2 as MusicIcon,
+  Star as StarIcon,
+  Users as UsersIcon,
   Search,
-  Settings2,
   UserRound,
+  ChevronDown,
+  X,
+  RotateCcw,
 } from 'lucide-react';
 import {
   countVisibleStages,
   filterEntries,
   filterReviewFavorites,
   getDays,
-  getDefaultDay,
   getStages,
   groupEntriesByDayAndStage,
   groupFavoritesByDayAndStage,
@@ -38,52 +38,47 @@ import {
 } from './lib/supabase';
 import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
 import { getStageTheme } from './lib/stageThemes';
-import StageBadge from './components/StageBadge';
-import SummaryCard from './components/SummaryCard';
+import StageBadge, { getStageBadgeStyles } from './components/StageBadge';
+import logoMark from './assets/logo.svg';
+import FavoriteStar from './components/FavoriteStar';
 import EmptyState from './components/EmptyState';
 import AuthModal from './components/AuthModal';
-import ProfileModal from './components/ProfileModal';
-import AdvancedSettingsModal from './components/AdvancedSettingsModal';
 import LineupView from './views/LineupView';
-import FavoritesView from './views/FavoritesView';
+import ReviewsView from './views/ReviewsView';
 import TribeView from './views/TribeView';
+import ProfileSettingsView from './views/ProfileSettingsView';
 import './index.css';
 
+// Load all lineup JSON modules at build time. Each module may export
+// either an array of entries or an object with an `entries` array.
 function extractLineupEntries(moduleValue) {
   const payload = moduleValue?.default ?? moduleValue ?? null;
-
   if (Array.isArray(payload)) {
     return payload;
   }
-
   if (Array.isArray(payload?.entries)) {
     return payload.entries;
   }
-
   return [];
 }
 
 function formatLineupLabel(path) {
   const fileName = path.split('/').pop() ?? path;
-  const match = fileName.match(
-    /^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_defqon_lineup\.json$/
-  );
-
+  const match = fileName.match(/^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_defqon_lineup\.json$/);
   if (!match) {
     return fileName;
   }
-
   const [, year, month, day, hour, minute] = match;
   return `${day}/${month}/${year} · ${hour}:${minute}`;
 }
 
+// Eagerly import all lineup JSON files from the data folder. When the
+// project is built each JSON is bundled alongside the JS.
 const lineupModules = import.meta.glob('./data/*_defqon_lineup.json', {
   eager: true,
 });
-
 const lineupKeysAsc = Object.keys(lineupModules).sort();
 const latestKey = lineupKeysAsc.at(-1) ?? null;
-
 const lineupSources = [...lineupKeysAsc]
   .reverse()
   .map((key) => ({
@@ -92,32 +87,30 @@ const lineupSources = [...lineupKeysAsc]
     entries: extractLineupEntries(lineupModules[key]),
     isLatest: key === latestKey,
   }));
-
 for (const lineupSource of lineupSources) {
   if (lineupSource.entries.length > 0) {
     validateLineupPayload(lineupSource.entries);
   }
 }
-
 const hasLineup = lineupSources.length > 0;
 
 export default function App() {
+  // Which lineup JSON is selected
   const [selectedLineupKey, setSelectedLineupKey] = useState(latestKey);
   const selectedLineup =
-    lineupSources.find((lineup) => lineup.key === selectedLineupKey) ??
-    lineupSources[0] ??
-    null;
+    lineupSources.find((lineup) => lineup.key === selectedLineupKey) ?? lineupSources[0] ?? null;
   const selectedEntries = selectedLineup?.entries ?? [];
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
   const favoritesReadOnly = !isLatestLineupSelected;
-
-  const defaultDay = useMemo(() => getDefaultDay(selectedEntries), [selectedEntries]);
+  // Precompute entry map for quick lookup
   const entriesById = useMemo(
     () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
     [selectedEntries]
   );
-
-  const [view, setView] = useState('lineup');
+  // Always default to "All days". The default day used to be the first day of the
+  // lineup, but we want to start with all days selected by default. Only if the
+  // user previously chose a specific day via view preferences do we restore it.
+  const defaultDay = 'All days';
   const [selectedDay, setSelectedDay] = useState(
     () => loadViewPreferences()?.selectedDay || defaultDay
   );
@@ -125,177 +118,215 @@ export default function App() {
     () => loadViewPreferences()?.selectedStage || 'All stages'
   );
   const [query, setQuery] = useState('');
+  // Manage favourite items and filter
   const [favoriteItems, setFavoriteItems] = useState([]);
-  const [hasAutoExpandedSearchScope, setHasAutoExpandedSearchScope] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showTribeOnly, setShowTribeOnly] = useState(false);
+  // View state: lineup, reviews, tribe, profileSettings
+  const [view, setView] = useState('lineup');
 
+  // Local UI state for filter drawers
+  // Only one filter drawer can be open at a time: 'day', 'stage' or null
+  const [openDrawer, setOpenDrawer] = useState(null);
+  const searchInputRef = useRef(null);
+  // Supabase auth and account
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [tribe, setTribe] = useState(null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(!isSupabaseConfigured());
+  // Auth modal
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState('login');
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isAdvancedSettingsOpen, setIsAdvancedSettingsOpen] = useState(false);
+  // State to track pending actions waiting for authentication
   const [pendingAction, setPendingAction] = useState(null);
+  // Whether search has auto expanded the filter scope
+  const [hasAutoExpandedSearchScope, setHasAutoExpandedSearchScope] = useState(false);
 
+  // Resolve favourites into ids, entries and review items
   const favoriteResolution = useMemo(
     () => resolveFavoriteItems(selectedEntries, favoriteItems),
     [selectedEntries, favoriteItems]
   );
-
   const favoriteIds = favoriteResolution.ids;
   const favoriteEntries = favoriteResolution.entries;
   const reviewFavorites = favoriteResolution.reviewItems;
   const reviewCount = reviewFavorites.length;
-
-  const days = useMemo(() => getDays(selectedEntries), [selectedEntries]);
-  const stages = useMemo(
-    () => getStages(selectedEntries, selectedDay),
-    [selectedEntries, selectedDay]
+  const tribeLikesByEntryId = useMemo(() => {
+    if (!tribe?.members?.length) {
+      return new Map();
+    }
+    const entriesByHash = new Map(selectedEntries.map((entry) => [entry.hash, entry]));
+    const likesByEntryId = new Map();
+    tribe.members.forEach((member) => {
+      const profileRecord = member.profile ?? {};
+      const avatarUrl =
+        resolveProfileAvatarUrl(profileRecord) ||
+        getPresetAvatarUrl(profileRecord?.avatar_preset ?? 1);
+      const firstName = String(profileRecord.first_name ?? '').trim() || profileRecord.username || 'Tribe';
+      const lastName = String(profileRecord.last_name ?? '').trim() || 'member';
+      const seenEntryIds = new Set();
+      (member.favorites ?? []).forEach((favorite) => {
+        let matchedEntry = null;
+        if (favorite.id && entriesById.has(favorite.id)) {
+          matchedEntry = entriesById.get(favorite.id);
+        } else if (favorite.hash && entriesByHash.has(favorite.hash)) {
+          matchedEntry = entriesByHash.get(favorite.hash);
+        }
+        if (!matchedEntry || seenEntryIds.has(matchedEntry.id)) {
+          return;
+        }
+        seenEntryIds.add(matchedEntry.id);
+        const currentLikes = likesByEntryId.get(matchedEntry.id) ?? [];
+        currentLikes.push({
+          userId: member.userId,
+          firstName,
+          lastName,
+          avatarUrl,
+          isCurrentUser: member.userId === authUser?.id,
+        });
+        likesByEntryId.set(matchedEntry.id, currentLikes);
+      });
+    });
+    return likesByEntryId;
+  }, [tribe, selectedEntries, entriesById, authUser]);
+  const tribeLikedEntryIds = useMemo(
+    () => new Set(Array.from(tribeLikesByEntryId.keys())),
+    [tribeLikesByEntryId]
   );
 
-  const profileAvatarSrc = authUser
-    ? resolveProfileAvatarUrl(profile) || getPresetAvatarUrl(1)
-    : '';
+  // Derive lists of days and stages for filters
+  const days = useMemo(() => getDays(selectedEntries), [selectedEntries]);
+  const stages = useMemo(() => getStages(selectedEntries, selectedDay), [selectedEntries, selectedDay]);
 
-      const profileDisplayName = authUser
-    ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
-      profile?.username ||
-      'Your profile'
-    : 'Login / Sign up';
+  // Filter entries based on query, day and stage
+  const visibleEntries = useMemo(() => {
+    const base = filterEntries(selectedEntries, { query, day: selectedDay, stage: selectedStage });
+    if (showTribeOnly) {
+      return base.filter((entry) => tribeLikedEntryIds.has(entry.id));
+    }
+    if (showFavoritesOnly) {
+      return base.filter((entry) => favoriteIds.includes(entry.id));
+    }
+    return base;
+  }, [
+    selectedEntries,
+    query,
+    selectedDay,
+    selectedStage,
+    showFavoritesOnly,
+    showTribeOnly,
+    favoriteIds,
+    tribeLikedEntryIds,
+  ]);
+  // Group visible entries by day and stage for the lineup view
+  const groupedVisibleEntries = useMemo(
+    () => groupEntriesByDayAndStage(visibleEntries),
+    [visibleEntries]
+  );
+  // Filter favourite entries when used in the original favourites view (not used in new design)
+  const filteredFavoriteEntries = useMemo(
+    () => filterEntries(favoriteEntries, { query, day: selectedDay, stage: selectedStage }),
+    [favoriteEntries, query, selectedDay, selectedStage]
+  );
+  // Filter review favourites for the reviews view
+  const filteredReviewFavorites = useMemo(
+    () => filterReviewFavorites(reviewFavorites, { query, day: selectedDay, stage: selectedStage }),
+    [reviewFavorites, query, selectedDay, selectedStage]
+  );
+  // Group favourites by day and stage when needed (unused in new design)
+  const groupedFavorites = useMemo(
+    () => groupFavoritesByDayAndStage(filteredFavoriteEntries),
+    [filteredFavoriteEntries]
+  );
+  // Save view preferences whenever day or stage changes
+  useEffect(() => {
+    saveViewPreferences({ selectedDay, selectedStage });
+  }, [selectedDay, selectedStage]);
+  useEffect(() => {
+    if (!openDrawer) {
+      return undefined;
+    }
 
-  const profileDisplayUsername = authUser
-    ? profile?.username
-      ? `@${profile.username}`
-      : authUser?.email ?? ''
-    : 'Sync your favorites';
+    const isInsideFilterLayer = (target) => {
+      return target instanceof Element && target.closest('[data-filter-layer="true"]');
+    };
 
+    const handlePointerDown = (event) => {
+      if (!isInsideFilterLayer(event.target)) {
+        setOpenDrawer(null);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setOpenDrawer(null);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openDrawer]);
+  // Ensure selected day exists when the lineup changes
   useEffect(() => {
     if (selectedDay !== 'All days' && !days.includes(selectedDay)) {
-      setSelectedDay(getDefaultDay(selectedEntries));
+      // When the current day is no longer available (because the lineup
+      // changed), fall back to "All days" instead of the first day.
+      setSelectedDay('All days');
     }
   }, [selectedDay, days, selectedEntries]);
-
+  // Ensure selected stage exists when the day changes
   useEffect(() => {
     if (selectedStage !== 'All stages' && !stages.includes(selectedStage)) {
       setSelectedStage('All stages');
     }
   }, [selectedStage, stages]);
-
-  const visibleEntries = useMemo(() => {
-    return filterEntries(selectedEntries, {
-      query,
-      day: selectedDay,
-      stage: selectedStage,
-    });
-  }, [selectedEntries, query, selectedDay, selectedStage]);
-
-  const groupedVisibleEntries = useMemo(() => {
-    return groupEntriesByDayAndStage(visibleEntries);
-  }, [visibleEntries]);
-
-  const filteredFavoriteEntries = useMemo(() => {
-    return filterEntries(favoriteEntries, {
-      query,
-      day: selectedDay,
-      stage: selectedStage,
-    });
-  }, [favoriteEntries, query, selectedDay, selectedStage]);
-
-  const filteredReviewFavorites = useMemo(() => {
-    return filterReviewFavorites(reviewFavorites, {
-      query,
-      day: selectedDay,
-      stage: selectedStage,
-    });
-  }, [reviewFavorites, query, selectedDay, selectedStage]);
-
-  const groupedFavorites = useMemo(() => {
-    return groupFavoritesByDayAndStage(filteredFavoriteEntries);
-  }, [filteredFavoriteEntries]);
-
-  const summary = useMemo(() => {
-    const sourceEntries =
-      view === 'favorites' ? filteredFavoriteEntries : visibleEntries;
-
-    return {
-      mode: `${selectedDay} • ${selectedStage}`,
-      stages: countVisibleStages(sourceEntries),
-      artists:
-        view === 'favorites'
-          ? filteredFavoriteEntries.length + filteredReviewFavorites.length
-          : sourceEntries.length,
-    };
-  }, [
-    view,
-    filteredFavoriteEntries,
-    filteredReviewFavorites,
-    visibleEntries,
-    selectedDay,
-    selectedStage,
-  ]);
-
-  useEffect(() => {
-    saveViewPreferences({
-      selectedDay,
-      selectedStage,
-    });
-  }, [selectedDay, selectedStage]);
-
+  // Auto expand search scope if the query is non‑empty
   useEffect(() => {
     const trimmedQuery = query.trim();
-
     if (!trimmedQuery) {
       setHasAutoExpandedSearchScope(false);
       return;
     }
-
     if (!hasAutoExpandedSearchScope) {
       setSelectedDay('All days');
       setSelectedStage('All stages');
       setHasAutoExpandedSearchScope(true);
     }
   }, [query, hasAutoExpandedSearchScope]);
-
+  // Hydrate account and tribe from Supabase
   useEffect(() => {
     if (!isSupabaseConfigured()) {
       return;
     }
-
     let isActive = true;
-
     const hydrateFromAccount = async (userOverride) => {
       setIsAccountReady(false);
-
       try {
         const currentUser = userOverride ?? (await getCurrentUser());
-
         if (!isActive) {
           return;
         }
-
         if (!currentUser) {
           setAuthUser(null);
           setProfile(null);
           setTribe(null);
           setFavoriteItems([]);
-          setIsProfileModalOpen(false);
           setIsAccountReady(true);
           return;
         }
-
         setAuthUser(currentUser);
-
         const [bundle, tribeBundle] = await Promise.all([
           loadAccountBundle(currentUser.id, currentUser),
           loadTribeBundle(currentUser.id),
         ]);
-
         if (!isActive) {
           return;
         }
-
         setProfile(bundle.profile);
         setFavoriteItems(bundle.favorites);
         setTribe(tribeBundle);
@@ -307,116 +338,140 @@ export default function App() {
         }
       }
     };
-
     hydrateFromAccount();
-
-    const subscription = supabase.auth.onAuthStateChange((_event, session) => {
+    const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
       hydrateFromAccount(session?.user ?? null);
     });
-
     return () => {
       isActive = false;
-      subscription.data.subscription.unsubscribe();
+      subscription?.data?.subscription?.unsubscribe();
     };
   }, []);
-
+  // Persist favourites when the user and account are ready
   useEffect(() => {
     if (!authUser || !isAccountReady || !isSupabaseConfigured()) {
       return;
     }
-
     syncFavoriteSnapshots(authUser.id, favoriteItems).catch((error) => {
       console.error(error);
     });
   }, [authUser, favoriteItems, isAccountReady]);
 
+  const isSearchView = view === 'search';
+
+  useEffect(() => {
+    if (isSearchView) {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchView]);
+  useEffect(() => {
+    if (view !== 'lineup') {
+      setOpenDrawer(null);
+    }
+  }, [view]);
+  useEffect(() => {
+    if (!tribe && showTribeOnly) {
+      setShowTribeOnly(false);
+    }
+  }, [tribe, showTribeOnly]);
+  // Execute pending action after authentication
   useEffect(() => {
     if (!authUser || !isAccountReady || !pendingAction) {
       return;
     }
-
-    if (pendingAction.type === 'open-favorites') {
-      setView('favorites');
+    if (pendingAction.type === 'open-reviews') {
+      setView('reviews');
       setQuery('');
       setSelectedDay('All days');
       setSelectedStage('All stages');
-      setHasAutoExpandedSearchScope(false);
+      setShowFavoritesOnly(false);
+      setShowTribeOnly(false);
     }
-
     if (pendingAction.type === 'open-tribe') {
       setView('tribe');
       setQuery('');
       setSelectedDay('All days');
       setSelectedStage('All stages');
-      setHasAutoExpandedSearchScope(false);
+      setShowFavoritesOnly(false);
+      setShowTribeOnly(false);
     }
-
     if (pendingAction.type === 'toggle-favorite' && isLatestLineupSelected) {
       const entry = entriesById.get(pendingAction.entryId);
-
       if (entry) {
         setFavoriteItems((prev) => {
           const isAlreadyFavorite = prev.some(
-            (item) =>
-              item.id === entry.id ||
-              (item.hash && entry.hash && item.hash === entry.hash)
+            (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
           );
-
           if (isAlreadyFavorite) {
             return removeFavoriteByEntryId(prev, entry.id);
           }
-
           return upsertFavoriteEntry(prev, entry);
         });
       }
     }
-
     if (pendingAction.type === 'remove-review-favorite' && isLatestLineupSelected) {
-      setFavoriteItems((prev) =>
-        removeFavoriteByKey(prev, pendingAction.favoriteKey)
-      );
+      setFavoriteItems((prev) => removeFavoriteByKey(prev, pendingAction.favoriteKey));
     }
-
     setPendingAction(null);
     setIsAuthModalOpen(false);
   }, [authUser, isAccountReady, pendingAction, entriesById, isLatestLineupSelected]);
 
+  // Trigger auth modal when user attempts an action requiring authentication
   const requestAuth = (action, defaultTab = 'login') => {
     setPendingAction(action);
     setAuthDefaultTab(defaultTab);
     setIsAuthModalOpen(true);
   };
 
-  const openFavoritesView = () => {
-    setView('favorites');
+  const openSearchMode = () => {
+    setOpenDrawer(null);
+    setView('search');
+    setQuery('');
+  };
+
+  const closeSearchMode = () => {
+    setView('lineup');
+    setOpenDrawer(null);
+    setQuery('');
+  };
+
+  // Navigation handlers for the bottom/tab nav
+  const handleLineupNav = () => {
+    setView('lineup');
     setQuery('');
     setSelectedDay('All days');
     setSelectedStage('All stages');
     setHasAutoExpandedSearchScope(false);
+    setShowFavoritesOnly(false);
+    setShowTribeOnly(false);
   };
-
-  const handleFavoritesTabClick = () => {
+  const handleReviewsNav = () => {
     if (!authUser) {
-      requestAuth({ type: 'open-favorites' });
+      requestAuth({ type: 'open-reviews' });
       return;
     }
-
-    openFavoritesView();
+    setView('reviews');
+    setQuery('');
+      setSelectedDay('All days');
+    setSelectedStage('All stages');
+    setHasAutoExpandedSearchScope(false);
+    setShowFavoritesOnly(false);
+    setShowTribeOnly(false);
   };
-
-  const handleTribeTabClick = () => {
+  const handleTribeNav = () => {
     if (!authUser) {
       requestAuth({ type: 'open-tribe' });
       return;
     }
-
     setView('tribe');
     setQuery('');
-    setSelectedDay('All days');
+      setSelectedDay('All days');
     setSelectedStage('All stages');
     setHasAutoExpandedSearchScope(false);
+    setShowFavoritesOnly(false);
+    setShowTribeOnly(false);
   };
-
+  // Profile click opens auth modal or profile settings page
   const handleProfileClick = () => {
     if (!authUser) {
       setPendingAction(null);
@@ -424,18 +479,45 @@ export default function App() {
       setIsAuthModalOpen(true);
       return;
     }
-
-    setIsProfileModalOpen(true);
+    setView('profileSettings');
   };
 
+  // Functions to manage favourites from within child components
+  const toggleFavorite = (entryId) => {
+    if (favoritesReadOnly) {
+      return;
+    }
+    if (!authUser) {
+      requestAuth({ type: 'toggle-favorite', entryId });
+      return;
+    }
+    const entry = entriesById.get(entryId);
+    if (!entry) {
+      return;
+    }
+    setFavoriteItems((prev) => {
+      const isAlreadyFavorite = prev.some(
+        (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
+      );
+      if (isAlreadyFavorite) {
+        return removeFavoriteByEntryId(prev, entry.id);
+      }
+      return upsertFavoriteEntry(prev, entry);
+    });
+  };
+  const removeReviewFavorite = (favoriteKey) => {
+    if (favoritesReadOnly || !authUser) {
+      return;
+    }
+    setFavoriteItems((prev) => removeFavoriteByKey(prev, favoriteKey));
+  };
+  // Tribe handlers wrap supabase actions
   const handleCreateTribe = async () => {
     if (!authUser) {
       requestAuth({ type: 'open-tribe' });
       return;
     }
-
     setIsTribeBusy(true);
-
     try {
       const nextTribe = await createCurrentUserTribe();
       setTribe(nextTribe);
@@ -443,15 +525,12 @@ export default function App() {
       setIsTribeBusy(false);
     }
   };
-
   const handleJoinTribe = async (code) => {
     if (!authUser) {
       requestAuth({ type: 'open-tribe' });
       return;
     }
-
     setIsTribeBusy(true);
-
     try {
       const nextTribe = await joinCurrentUserTribeByCode(code);
       setTribe(nextTribe);
@@ -459,14 +538,11 @@ export default function App() {
       setIsTribeBusy(false);
     }
   };
-
   const handleLeaveTribe = async () => {
     if (!authUser) {
       return;
     }
-
     setIsTribeBusy(true);
-
     try {
       await leaveCurrentUserTribe();
       setTribe(null);
@@ -474,294 +550,496 @@ export default function App() {
       setIsTribeBusy(false);
     }
   };
-
-  const toggleFavorite = (entryId) => {
-
-    if (favoritesReadOnly) {
-      return;
-    }
-
-    if (!authUser) {
-      requestAuth({ type: 'toggle-favorite', entryId });
-      return;
-    }
-
-    const entry = entriesById.get(entryId);
-
-    if (!entry) {
-      return;
-    }
-
-    setFavoriteItems((prev) => {
-      const isAlreadyFavorite = prev.some(
-        (item) =>
-          item.id === entry.id ||
-          (item.hash && entry.hash && item.hash === entry.hash)
-      );
-
-      if (isAlreadyFavorite) {
-        return removeFavoriteByEntryId(prev, entry.id);
-      }
-
-      return upsertFavoriteEntry(prev, entry);
-    });
-  };
-
-  const removeReviewFavorite = (favoriteKey) => {
-    if (favoritesReadOnly || !authUser) {
-      return;
-    }
-
-    setFavoriteItems((prev) => removeFavoriteByKey(prev, favoriteKey));
-  };
-
-  const resetLocalData = () => {
-    setSelectedDay(defaultDay);
+  // Reset filters and query
+  const resetFilters = () => {
+    setSelectedDay('All days');
     setSelectedStage('All stages');
     setQuery('');
+    setShowFavoritesOnly(false);
+    setShowTribeOnly(false);
     setHasAutoExpandedSearchScope(false);
   };
+  // Determine header title based on view and filters
+  const headerTitle = useMemo(() => {
+    if (view === 'lineup') {
+      const dayPart = selectedDay !== 'All days' ? selectedDay : '';
+      const stagePart = selectedStage !== 'All stages' ? selectedStage : '';
+      if (dayPart && stagePart) {
+        return `${dayPart} on ${stagePart}`;
+      }
+      if (dayPart) {
+        return dayPart;
+      }
+      if (stagePart) {
+        return stagePart;
+      }
+      return 'Line‑up';
+    }
+    if (view === 'reviews') {
+      return 'Needs review';
+    }
+    if (view === 'tribe') {
+      return 'Tribe';
+    }
+    if (view === 'profileSettings') {
+      return '';
+    }
+    return '';
+  }, [view, selectedDay, selectedStage]);
+  // Determine if filters/search should be shown for the active view
+  const hasActiveFilters =
+    selectedDay !== 'All days' ||
+    selectedStage !== 'All stages' ||
+    showFavoritesOnly ||
+    showTribeOnly;
+  const searchEntries = useMemo(
+    () => filterEntries(selectedEntries, { query, day: 'All days', stage: 'All stages' }),
+    [selectedEntries, query]
+  );
+  const groupedSearchEntries = useMemo(
+    () => groupEntriesByDayAndStage(searchEntries),
+    [searchEntries]
+  );
+  const showFilters = view === 'lineup';
+  const showSearch = true;
+  const selectedStageTheme =
+    selectedStage !== 'All stages' ? getStageTheme(selectedStage) : null;
+  const selectedStagePillStyle = selectedStageTheme
+    ? getStageBadgeStyles(selectedStageTheme, true)
+    : null;
 
   if (!hasLineup || !selectedLineup) {
     return <EmptyState text="No lineup detected" />;
   }
-
   return (
     <>
-      <div className="app-shell">
-        <header className="hero">
-          <div className="hero__inner">
-            <div className="hero__top">
+      {/* Render application header except on profile settings page; the header
+         contains the page title, the desktop navigation and the profile trigger.
+         On desktop the navigation appears in the centre. */}
+      {view !== 'profileSettings' && (
+        <>
+          <header className={isSearchView ? 'page-header page-header--search' : 'page-header'}>
+            {isSearchView ? (
+              <div className="header-search" data-filter-layer="true">
+                <div className="header-search__input-wrap">
+                  <Search size={16} className="search-input__icon" />
+                  <input
+                    ref={searchInputRef}
+                    className="search-input header-search__input"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search artist, duo, showcase, alias..."
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="header-search__close"
+                  onClick={closeSearchMode}
+                  aria-label="Close search"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ) : (
+            <div className="header-row">
               <button
                 type="button"
-                className="profile-summary"
+                className="brand-mark"
+                onClick={handleLineupNav}
+                aria-label="Open lineup"
+              >
+                <img src={logoMark} alt="" className="brand-mark__logo" />
+                <span className="brand-mark__text">DEFQON.1</span>
+              </button>
+              <nav className="header-nav">
+                <button
+                  type="button"
+                  className={view === 'lineup' ? 'active' : ''}
+                  onClick={handleLineupNav}
+                >
+                  Line‑up
+                </button>
+                <button
+                  type="button"
+                  className={view === 'reviews' ? 'active' : ''}
+                  onClick={handleReviewsNav}
+                >
+                  Reviews
+                  {reviewCount > 0 && (
+                    <span className="tab__badge tab__badge--corner">{reviewCount}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={view === 'tribe' ? 'active' : ''}
+                  onClick={handleTribeNav}
+                >
+                  Tribe
+                </button>
+                {showSearch && (
+                  <button
+                    type="button"
+                    className={isSearchView ? 'active header-nav__icon' : 'header-nav__icon'}
+                    onClick={openSearchMode}
+                    aria-label="Open search"
+                    title="Open search"
+                  >
+                    <Search size={22} />
+                  </button>
+                )}
+              </nav>
+              <button
+                type="button"
+                className={authUser ? 'profile-trigger' : 'profile-trigger profile-trigger--guest'}
                 onClick={handleProfileClick}
                 aria-label={authUser ? 'Open profile' : 'Login or sign up'}
                 title={authUser ? 'Open profile' : 'Login or sign up'}
               >
-                <span className="profile-summary__avatar">
-                  {authUser ? (
+                {authUser ? (
+                  <>
                     <img
-                      src={profileAvatarSrc}
+                      src={resolveProfileAvatarUrl(profile) || getPresetAvatarUrl(1)}
                       alt="User avatar"
                       className="profile-trigger__image"
                     />
-                  ) : (
-                    <UserRound size={18} />
-                  )}
-                </span>
-
-                <span className="profile-summary__content">
-                  <span className="profile-summary__name">{profileDisplayName}</span>
-                  <span className="profile-summary__username">
-                    {profileDisplayUsername}
-                  </span>
-                </span>
+                    <div className="profile-trigger__details">
+                      <span className="profile-trigger__name">
+                        {profile?.first_name} {profile?.last_name}
+                      </span>
+                      <span className="profile-trigger__username">@{profile?.username}</span>
+                    </div>
+                  </>
+                ) : (
+                  <UserRound size={20} />
+                )}
               </button>
             </div>
-
-            <div className="hero__content">
-              <h1>Defqon.1 2026 planner</h1>
-              <p className="hero__text">
-                Search, favorites and smart suggestions to quickly see where an artist performs elsewhere.
-              </p>
-            </div>
-
-            <div className="hero__summary">
-              <SummaryCard icon={CalendarDays} label="Context" value={summary.mode} />
-              <SummaryCard icon={Disc3} label="Stages" value={summary.stages} />
-              <SummaryCard icon={Music2} label="Artists" value={summary.artists} />
-            </div>
-          </div>
-        </header>
-
-        <main className="page">
-          <section className="toolbar">
-            <div className="toolbar__top">
-              <div className="tabs">
-                <button
-                  type="button"
-                  className={view === 'lineup' ? 'tab tab--active' : 'tab'}
-                  onClick={() => {
-                    setView('lineup');
-                    setHasAutoExpandedSearchScope(false);
-                  }}
-                >
-                  Line-up
-                </button>
-
-                <button
-                  type="button"
-                  className={view === 'favorites' ? 'tab tab--active' : 'tab'}
-                  onClick={handleFavoritesTabClick}
-                >
-                  <span className="tab__text">Favorites</span>
-                  {reviewCount > 0 && (
-                    <span className="tab__badge tab__badge--corner">
-                      {reviewCount}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  className={view === 'tribe' ? 'tab tab--active' : 'tab'}
-                  onClick={handleTribeTabClick}
-                >
-                  <span className="tab__text">Tribe</span>
-                </button>
-              </div>
-
-              <button type="button" className="ghost-button" onClick={resetLocalData}>
-                <RotateCcw size={14} />
-                <span>Reset</span>
-              </button>
-            </div>
-
-            {favoritesReadOnly && (
-              <div className="toolbar__meta">
-                <div className="archive-banner">
-                  <strong>Archive mode enabled.</strong>
-                  <span>
-                    You are browsing an older lineup. Favorites are disabled until you switch back to the latest lineup or you refresh the browser.
-                  </span>
-                </div>
-              </div>
             )}
-
-            <div className="search-row">
-              <div className="search-input-wrap">
-                <Search size={16} className="search-input__icon" />
-                <input
-                  className="search-input"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search: artist, duo, showcase, alias..."
-                />
+          </header>
+          {showFilters && (
+            <div className="filter-stack" data-filter-layer="true">
+              <div className={openDrawer ? 'filter-row filter-row--attached' : 'filter-row'}>
+                {hasActiveFilters && (
+                  <div className="filter-row__sticky">
+                    <button
+                      type="button"
+                      className="filter-reset-pill"
+                      onClick={resetFilters}
+                      title="Reset filters"
+                      aria-label="Reset filters"
+                    >
+                      <RotateCcw size={15} />
+                    </button>
+                  </div>
+                )}
+                <div className="filter-row__scroll-shell">
+                  <div className="filter-row__scroll">
+                    <button
+                      type="button"
+                      className={
+                        selectedDay === 'All days'
+                          ? 'filter-pill filter-chip'
+                          : 'filter-pill filter-chip filter-chip--light'
+                      }
+                      onClick={() =>
+                        setOpenDrawer((prev) => (prev === 'day' ? null : 'day'))
+                      }
+                      aria-expanded={openDrawer === 'day'}
+                      aria-haspopup="dialog"
+                    >
+                      <span className="filter-pill__label">
+                        {selectedDay === 'All days' ? 'All days' : selectedDay}
+                      </span>
+                      <ChevronDown size={14} className="filter-pill__icon" />
+                    </button>
+                    <button
+                      type="button"
+                      className="filter-pill filter-chip"
+                      style={selectedStagePillStyle ?? undefined}
+                      onClick={() =>
+                        setOpenDrawer((prev) => (prev === 'stage' ? null : 'stage'))
+                      }
+                      aria-expanded={openDrawer === 'stage'}
+                      aria-haspopup="dialog"
+                    >
+                      <span className="filter-pill__label">
+                        {selectedStage === 'All stages' ? 'All stages' : selectedStage}
+                      </span>
+                      <ChevronDown size={14} className="filter-pill__icon" />
+                    </button>
+                    {authUser && (
+                      <>
+                        <button
+                          type="button"
+                          className={
+                            showFavoritesOnly
+                              ? 'filter-pill filter-chip favorites-pill favorites-pill--active'
+                              : 'filter-pill filter-chip favorites-pill'
+                          }
+                          onClick={() => {
+                            setShowFavoritesOnly((prev) => {
+                              const nextValue = !prev;
+                              if (nextValue) {
+                                setSelectedDay('All days');
+                                setSelectedStage('All stages');
+                                setQuery('');
+                                setHasAutoExpandedSearchScope(false);
+                                setOpenDrawer(null);
+                                setShowTribeOnly(false);
+                              }
+                              return nextValue;
+                            });
+                          }}
+                        >
+                          <StarIcon size={14} />
+                          <span className="filter-pill__label">Favorites</span>
+                        </button>
+                        {tribe && (
+                          <button
+                            type="button"
+                            className={
+                              showTribeOnly
+                                ? 'filter-pill filter-chip favorites-pill favorites-pill--active'
+                                : 'filter-pill filter-chip favorites-pill'
+                            }
+                            onClick={() => {
+                              setShowTribeOnly((prev) => {
+                                const nextValue = !prev;
+                                if (nextValue) {
+                                  setSelectedDay('All days');
+                                  setSelectedStage('All stages');
+                                  setQuery('');
+                                  setHasAutoExpandedSearchScope(false);
+                                  setOpenDrawer(null);
+                                  setShowFavoritesOnly(false);
+                                }
+                                return nextValue;
+                              });
+                            }}
+                          >
+                            <UsersIcon size={14} />
+                            <span className="filter-pill__label">Tribe</span>
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="filters-block">
-              <div className="filters-group">
-                <div className="filters-group__label">Days</div>
-                <div className="filters-row">
-                  <StageBadge
-                    label="All days"
-                    active={selectedDay === 'All days'}
-                    onClick={() => setSelectedDay('All days')}
-                    theme={{
-                      accent: '#ffffff',
-                      accentSoft: 'rgba(255,255,255,0.08)',
-                      accentBorder: 'rgba(255,255,255,0.14)',
-                      accentText: '#ffffff',
-                      activeText: '#111111',
-                    }}
-                  />
-                  {days.map((day) => (
-                    <StageBadge
-                      key={day}
-                      label={day}
-                      active={selectedDay === day}
-                      onClick={() => setSelectedDay(day)}
-                      theme={{
-                        accent: '#ffffff',
-                        accentSoft: 'rgba(255,255,255,0.08)',
-                        accentBorder: 'rgba(255,255,255,0.14)',
-                        accentText: '#ffffff',
-                        activeText: '#111111',
+              {openDrawer === 'day' && (
+                <div
+                  className="filter-drawer filter-drawer--attached"
+                  role="dialog"
+                  aria-label="Choose a day"
+                  data-filter-layer="true"
+                >
+                  <div className="filter-drawer__inner">
+                    <button
+                      type="button"
+                      className={
+                        selectedDay === 'All days'
+                          ? 'filter-badge filter-chip filter-chip--light filter-badge--active'
+                          : 'filter-badge filter-chip'
+                      }
+                      onClick={() => {
+                        setSelectedDay('All days');
+                        setOpenDrawer(null);
                       }}
-                    />
-                  ))}
+                    >
+                      All days
+                    </button>
+                    {days.map((day) => (
+                      <button
+                        key={day}
+                        type="button"
+                        className={
+                          selectedDay === day
+                            ? 'filter-badge filter-chip filter-chip--light filter-badge--active'
+                            : 'filter-badge filter-chip'
+                        }
+                        onClick={() => {
+                          setSelectedDay(day);
+                          setOpenDrawer(null);
+                        }}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              <div className="filters-group">
-                <div className="filters-group__label">Stages</div>
-                <div className="filters-row">
-                  <StageBadge
-                    label="All stages"
-                    active={selectedStage === 'All stages'}
-                    onClick={() => setSelectedStage('All stages')}
-                    theme={{
-                      accent: '#ffffff',
-                      accentSoft: 'rgba(255,255,255,0.08)',
-                      accentBorder: 'rgba(255,255,255,0.14)',
-                      accentText: '#ffffff',
-                      activeText: '#111111',
-                    }}
-                  />
-                  {stages.map((stage) => (
-                    <StageBadge
-                      key={stage}
-                      label={stage}
-                      active={selectedStage === stage}
-                      onClick={() => setSelectedStage(stage)}
-                      theme={getStageTheme(stage)}
-                    />
-                  ))}
+              )}
+              {openDrawer === 'stage' && (
+                <div
+                  className="filter-drawer filter-drawer--attached"
+                  role="dialog"
+                  aria-label="Choose a stage"
+                  data-filter-layer="true"
+                >
+                  <div className="filter-drawer__inner">
+                    <button
+                      type="button"
+                      className={
+                        selectedStage === 'All stages'
+                          ? 'filter-badge filter-chip filter-chip--light filter-badge--active'
+                          : 'filter-badge filter-chip'
+                      }
+                      onClick={() => {
+                        setSelectedStage('All stages');
+                        setOpenDrawer(null);
+                      }}
+                    >
+                      All stages
+                    </button>
+                    {stages.map((stage) => {
+                      const theme = getStageTheme(stage);
+                      return (
+                        <StageBadge
+                          key={stage}
+                          label={stage}
+                          active={selectedStage === stage}
+                          onClick={() => {
+                            setSelectedStage(stage);
+                            setOpenDrawer(null);
+                          }}
+                          theme={theme}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          </section>
-
-          <div className={favoritesReadOnly ? 'favorites-readonly' : ''}>
-            {view === 'lineup' ? (
+          )}
+        </>
+      )}
+      {view !== 'profileSettings' && (
+        <main className={view === 'lineup' ? 'page page--lineup' : 'page'}>
+          {view === 'lineup' && (
+            <LineupView
+              groupedEntries={groupedVisibleEntries}
+              entries={selectedEntries}
+              favorites={favoriteIds}
+              toggleFavorite={toggleFavorite}
+              showTribeOnly={showTribeOnly}
+              tribeLikesByEntryId={tribeLikesByEntryId}
+            />
+          )}
+          {view === 'search' &&
+            (query.trim() ? (
               <LineupView
-                groupedEntries={groupedVisibleEntries}
-                favorites={favoriteIds}
-                toggleFavorite={toggleFavorite}
-              />
-            ) : view === 'favorites' ? (
-              <FavoritesView
-                groupedFavorites={groupedFavorites}
-                filteredFavoriteEntries={filteredFavoriteEntries}
-                filteredReviewFavorites={filteredReviewFavorites}
+                groupedEntries={groupedSearchEntries}
                 entries={selectedEntries}
                 favorites={favoriteIds}
                 toggleFavorite={toggleFavorite}
-                removeReviewFavorite={removeReviewFavorite}
+                tribeLikesByEntryId={tribeLikesByEntryId}
               />
             ) : (
-              <TribeView
-                tribe={tribe}
-                isBusy={isTribeBusy}
-                onCreateTribe={handleCreateTribe}
-                onJoinTribe={handleJoinTribe}
-                onLeaveTribe={handleLeaveTribe}
-              />
-            )}
-          </div>
+              <EmptyState text="Start typing to search the lineup" />
+            ))}
+          {view === 'reviews' && (
+            <ReviewsView
+              reviewFavorites={filteredReviewFavorites}
+              entries={selectedEntries}
+              favorites={favoriteIds}
+              toggleFavorite={toggleFavorite}
+              removeReviewFavorite={removeReviewFavorite}
+            />
+          )}
+          {view === 'tribe' && (
+            <TribeView
+              tribe={tribe}
+              isBusy={isTribeBusy}
+              onCreateTribe={handleCreateTribe}
+              onJoinTribe={handleJoinTribe}
+              onLeaveTribe={handleLeaveTribe}
+            />
+          )}
         </main>
-
-        <footer className="site-footer">
-          <div className="site-footer__inner">
-            <div className="site-footer__brand">
-              <strong>Made with 🩷 by Dylan Bergozza</strong>
-              <span className="muted">
-                Defqon.1 planner · beta · more footer content later
+      )}
+      {view === 'profileSettings' && (
+        <ProfileSettingsView
+          user={authUser}
+          profile={profile}
+          lineups={lineupSources}
+          selectedLineupKey={selectedLineupKey}
+          onSelectLineup={(lineupKey) => {
+            setSelectedLineupKey(lineupKey);
+            // Always reset to "All days" when changing the lineup
+            setSelectedDay('All days');
+            setSelectedStage('All stages');
+            setQuery('');
+            setShowFavoritesOnly(false);
+            setShowTribeOnly(false);
+            setHasAutoExpandedSearchScope(false);
+          }}
+          onBack={() => setView('lineup')}
+          onProfileUpdated={(nextProfile) => setProfile(nextProfile)}
+          onSignedOut={() => {
+            setAuthUser(null);
+            setProfile(null);
+            setTribe(null);
+            setFavoriteItems([]);
+            setShowTribeOnly(false);
+            setView('lineup');
+          }}
+        />
+      )}
+      {/* Bottom navigation visible on mobile only */}
+      {view !== 'profileSettings' && (
+        <nav className="bottom-nav">
+          <button
+            type="button"
+            className={view === 'lineup' ? 'active' : ''}
+            onClick={handleLineupNav}
+          >
+            <span className="bottom-nav__icon-slot">
+              <span className="bottom-nav__icon-pill">
+                <MusicIcon size={20} />
               </span>
-            </div>
-
-            <div className="site-footer__links">
-              <span>About</span>
-              <span>Roadmap</span>
-              <span>Support</span>
-              <span>Legal</span>
-            </div>
-
-            <button
-              type="button"
-              className="footer-settings-button"
-              onClick={() => setIsAdvancedSettingsOpen(true)}
-              title="Advanced settings"
-              aria-label="Advanced settings"
-            >
-              <Settings2 size={16} />
-            </button>
-          </div>
-        </footer>
-      </div>
-
+            </span>
+            <span>Line‑up</span>
+          </button>
+          <button
+            type="button"
+            className={view === 'reviews' ? 'active' : ''}
+            onClick={handleReviewsNav}
+          >
+            <span className="bottom-nav__icon-slot">
+              <span className="bottom-nav__icon-pill">
+                <StarIcon size={20} />
+              </span>
+              {reviewCount > 0 && <span className="bottom-nav__badge">{reviewCount}</span>}
+            </span>
+            <span>Reviews</span>
+          </button>
+          <button
+            type="button"
+            className={view === 'tribe' ? 'active' : ''}
+            onClick={handleTribeNav}
+          >
+            <span className="bottom-nav__icon-slot">
+              <span className="bottom-nav__icon-pill">
+                <UsersIcon size={20} />
+              </span>
+            </span>
+            <span>Tribe</span>
+          </button>
+          <button
+            type="button"
+            className={isSearchView ? 'active' : ''}
+            onClick={() => {
+              openSearchMode();
+            }}
+          >
+            <span className="bottom-nav__icon-slot">
+              <span className="bottom-nav__icon-pill">
+                <Search size={22} />
+              </span>
+            </span>
+            <span>Search</span>
+          </button>
+        </nav>
+      )}
       <AuthModal
         open={isAuthModalOpen}
         defaultTab={authDefaultTab}
@@ -772,38 +1050,6 @@ export default function App() {
         onSuccess={() => {
           setIsAuthModalOpen(false);
         }}
-      />
-
-      <ProfileModal
-        open={isProfileModalOpen}
-        user={authUser}
-        profile={profile}
-        onClose={() => setIsProfileModalOpen(false)}
-        onProfileUpdated={(nextProfile) => setProfile(nextProfile)}
-        onSignedOut={() => {
-          setAuthUser(null);
-          setProfile(null);
-          setTribe(null);
-          setFavoriteItems([]);
-          setView('lineup');
-          setIsProfileModalOpen(false);
-        }}
-      />
-
-      <AdvancedSettingsModal
-        open={isAdvancedSettingsOpen}
-        lineups={lineupSources}
-        selectedLineupKey={selectedLineupKey}
-        onSelectLineup={(lineupKey) => {
-          setSelectedLineupKey(lineupKey);
-          setSelectedDay(getDefaultDay(
-            lineupSources.find((lineup) => lineup.key === lineupKey)?.entries ?? []
-          ));
-          setSelectedStage('All stages');
-          setQuery('');
-          setHasAutoExpandedSearchScope(false);
-        }}
-        onClose={() => setIsAdvancedSettingsOpen(false)}
       />
     </>
   );
