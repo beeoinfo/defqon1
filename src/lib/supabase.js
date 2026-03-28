@@ -549,3 +549,116 @@ export async function updateProfileAccount({
 
   return refreshedProfile;
 }
+
+export function normalizeTribeCode(value) {
+  return String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 8);
+}
+
+export async function loadTribeBundle(userId) {
+  const client = ensureSupabase();
+
+  const { data: membership, error: membershipError } = await client
+    .from('tribe_members')
+    .select('tribe_id, role')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (membershipError) {
+    throw membershipError;
+  }
+
+  if (!membership) {
+    return null;
+  }
+
+  const { data: tribe, error: tribeError } = await client
+    .from('tribes')
+    .select('id, code, owner_user_id, created_at')
+    .eq('id', membership.tribe_id)
+    .maybeSingle();
+
+  if (tribeError) {
+    throw tribeError;
+  }
+
+  if (!tribe) {
+    return null;
+  }
+
+  const { count, error: countError } = await client
+    .from('tribe_members')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('tribe_id', tribe.id);
+
+  if (countError) {
+    throw countError;
+  }
+
+  return {
+    tribeId: tribe.id,
+    code: tribe.code,
+    ownerUserId: tribe.owner_user_id,
+    createdAt: tribe.created_at,
+    role: membership.role,
+    isOwner: membership.role === 'owner',
+    memberCount: count ?? 1,
+  };
+}
+
+export async function createCurrentUserTribe() {
+  const client = ensureSupabase();
+
+  const { error } = await client.rpc('create_current_user_tribe');
+
+  if (error) {
+    throw error;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error('Authentication required.');
+  }
+
+  return loadTribeBundle(user.id);
+}
+
+export async function joinCurrentUserTribeByCode(code) {
+  const client = ensureSupabase();
+  const normalizedCode = normalizeTribeCode(code);
+
+  if (!normalizedCode) {
+    throw new Error('Please enter a tribe code.');
+  }
+
+  const { error } = await client.rpc('join_current_user_tribe', {
+    code_input: normalizedCode,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error('Authentication required.');
+  }
+
+  return loadTribeBundle(user.id);
+}
+
+export async function leaveCurrentUserTribe() {
+  const client = ensureSupabase();
+
+  const { error } = await client.rpc('leave_current_user_tribe');
+
+  if (error) {
+    throw error;
+  }
+
+  return null;
+}

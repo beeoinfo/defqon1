@@ -26,9 +26,13 @@ import {
   validateLineupPayload,
 } from './lib/lineup';
 import {
+  createCurrentUserTribe,
   getCurrentUser,
   isSupabaseConfigured,
+  joinCurrentUserTribeByCode,
+  leaveCurrentUserTribe,
   loadAccountBundle,
+  loadTribeBundle,
   supabase,
   syncFavoriteSnapshots,
 } from './lib/supabase';
@@ -42,6 +46,7 @@ import ProfileModal from './components/ProfileModal';
 import AdvancedSettingsModal from './components/AdvancedSettingsModal';
 import LineupView from './views/LineupView';
 import FavoritesView from './views/FavoritesView';
+import TribeView from './views/TribeView';
 import './index.css';
 
 function extractLineupEntries(moduleValue) {
@@ -125,6 +130,8 @@ export default function App() {
 
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [tribe, setTribe] = useState(null);
+  const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(!isSupabaseConfigured());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState('login');
@@ -152,7 +159,7 @@ export default function App() {
     ? resolveProfileAvatarUrl(profile) || getPresetAvatarUrl(1)
     : '';
 
-  const profileDisplayName = authUser
+      const profileDisplayName = authUser
     ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
       profile?.username ||
       'Your profile'
@@ -271,6 +278,7 @@ export default function App() {
         if (!currentUser) {
           setAuthUser(null);
           setProfile(null);
+          setTribe(null);
           setFavoriteItems([]);
           setIsProfileModalOpen(false);
           setIsAccountReady(true);
@@ -279,7 +287,10 @@ export default function App() {
 
         setAuthUser(currentUser);
 
-        const bundle = await loadAccountBundle(currentUser.id, currentUser);
+        const [bundle, tribeBundle] = await Promise.all([
+          loadAccountBundle(currentUser.id, currentUser),
+          loadTribeBundle(currentUser.id),
+        ]);
 
         if (!isActive) {
           return;
@@ -287,6 +298,7 @@ export default function App() {
 
         setProfile(bundle.profile);
         setFavoriteItems(bundle.favorites);
+        setTribe(tribeBundle);
       } catch (error) {
         console.error(error);
       } finally {
@@ -325,6 +337,14 @@ export default function App() {
 
     if (pendingAction.type === 'open-favorites') {
       setView('favorites');
+      setQuery('');
+      setSelectedDay('All days');
+      setSelectedStage('All stages');
+      setHasAutoExpandedSearchScope(false);
+    }
+
+    if (pendingAction.type === 'open-tribe') {
+      setView('tribe');
       setQuery('');
       setSelectedDay('All days');
       setSelectedStage('All stages');
@@ -384,6 +404,19 @@ export default function App() {
     openFavoritesView();
   };
 
+  const handleTribeTabClick = () => {
+    if (!authUser) {
+      requestAuth({ type: 'open-tribe' });
+      return;
+    }
+
+    setView('tribe');
+    setQuery('');
+    setSelectedDay('All days');
+    setSelectedStage('All stages');
+    setHasAutoExpandedSearchScope(false);
+  };
+
   const handleProfileClick = () => {
     if (!authUser) {
       setPendingAction(null);
@@ -395,7 +428,55 @@ export default function App() {
     setIsProfileModalOpen(true);
   };
 
+  const handleCreateTribe = async () => {
+    if (!authUser) {
+      requestAuth({ type: 'open-tribe' });
+      return;
+    }
+
+    setIsTribeBusy(true);
+
+    try {
+      const nextTribe = await createCurrentUserTribe();
+      setTribe(nextTribe);
+    } finally {
+      setIsTribeBusy(false);
+    }
+  };
+
+  const handleJoinTribe = async (code) => {
+    if (!authUser) {
+      requestAuth({ type: 'open-tribe' });
+      return;
+    }
+
+    setIsTribeBusy(true);
+
+    try {
+      const nextTribe = await joinCurrentUserTribeByCode(code);
+      setTribe(nextTribe);
+    } finally {
+      setIsTribeBusy(false);
+    }
+  };
+
+  const handleLeaveTribe = async () => {
+    if (!authUser) {
+      return;
+    }
+
+    setIsTribeBusy(true);
+
+    try {
+      await leaveCurrentUserTribe();
+      setTribe(null);
+    } finally {
+      setIsTribeBusy(false);
+    }
+  };
+
   const toggleFavorite = (entryId) => {
+
     if (favoritesReadOnly) {
       return;
     }
@@ -521,6 +602,14 @@ export default function App() {
                     </span>
                   )}
                 </button>
+
+                <button
+                  type="button"
+                  className={view === 'tribe' ? 'tab tab--active' : 'tab'}
+                  onClick={handleTribeTabClick}
+                >
+                  <span className="tab__text">Tribe</span>
+                </button>
               </div>
 
               <button type="button" className="ghost-button" onClick={resetLocalData}>
@@ -622,7 +711,7 @@ export default function App() {
                 favorites={favoriteIds}
                 toggleFavorite={toggleFavorite}
               />
-            ) : (
+            ) : view === 'favorites' ? (
               <FavoritesView
                 groupedFavorites={groupedFavorites}
                 filteredFavoriteEntries={filteredFavoriteEntries}
@@ -631,6 +720,14 @@ export default function App() {
                 favorites={favoriteIds}
                 toggleFavorite={toggleFavorite}
                 removeReviewFavorite={removeReviewFavorite}
+              />
+            ) : (
+              <TribeView
+                tribe={tribe}
+                isBusy={isTribeBusy}
+                onCreateTribe={handleCreateTribe}
+                onJoinTribe={handleJoinTribe}
+                onLeaveTribe={handleLeaveTribe}
               />
             )}
           </div>
@@ -686,6 +783,7 @@ export default function App() {
         onSignedOut={() => {
           setAuthUser(null);
           setProfile(null);
+          setTribe(null);
           setFavoriteItems([]);
           setView('lineup');
           setIsProfileModalOpen(false);
