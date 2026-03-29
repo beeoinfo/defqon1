@@ -7,6 +7,10 @@ import { getEntryDisplayName, getEntryMetaLabel } from '../lib/lineup';
 const EMPTY_ITEMS = [];
 const INITIAL_STAGE_PANEL_COUNT = 6;
 const STAGE_PANEL_CHUNK_SIZE = 6;
+const STAGE_PRIORITY_ORDER = ['BLUE', 'BLACK', 'RED', 'U.V.', 'GREEN', 'YELLOW'];
+const STAGE_PRIORITY_INDEX = new Map(
+  STAGE_PRIORITY_ORDER.map((stageName, index) => [stageName, index])
+);
 
 function getSuggestionCardStyle(theme, isStageChanged) {
   if (!isStageChanged) {
@@ -20,6 +24,27 @@ function getSuggestionCardStyle(theme, isStageChanged) {
     borderColor: theme.accentBorder,
     background: `${theme.accent}5C`,
   };
+}
+
+function compareStages(leftStage, rightStage) {
+  const leftCanonical = getCanonicalStageName(leftStage);
+  const rightCanonical = getCanonicalStageName(rightStage);
+  const leftPriority = STAGE_PRIORITY_INDEX.get(leftCanonical);
+  const rightPriority = STAGE_PRIORITY_INDEX.get(rightCanonical);
+
+  if (leftPriority !== undefined || rightPriority !== undefined) {
+    if (leftPriority === undefined) {
+      return 1;
+    }
+    if (rightPriority === undefined) {
+      return -1;
+    }
+    if (leftPriority !== rightPriority) {
+      return leftPriority - rightPriority;
+    }
+  }
+
+  return String(leftCanonical).localeCompare(String(rightCanonical));
 }
 
 const LineupEntryCard = memo(
@@ -45,7 +70,7 @@ const LineupEntryCard = memo(
             <FavoriteStar active={isFavorite} onClick={() => toggleFavorite(entry.id)} />
           ) : null}
         </div>
-        {showTribeOnly && tribeLikesFromOthers.length > 0 && (
+        {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
           <div className="suggestions suggestions--tribe">
             <div className="suggestions__title">Your tribe like this</div>
             <div className="tribe-likes-list">
@@ -64,8 +89,8 @@ const LineupEntryCard = memo(
               ))}
             </div>
           </div>
-        )}
-        {!showTribeOnly && isFavorite && relatedSuggestions.length > 0 && (
+        ) : null}
+        {!showTribeOnly && isFavorite && relatedSuggestions.length > 0 ? (
           <div className="suggestions">
             <div className="suggestions__title">This artist also plays elsewhere</div>
             <div className="suggestion-list">
@@ -75,6 +100,7 @@ const LineupEntryCard = memo(
                 const isStageChanged =
                   getCanonicalStageName(suggestion.stageCanonical || suggestion.stage) !==
                   getCanonicalStageName(entry.stageCanonical || entry.stage);
+
                 return (
                   <div
                     key={suggestion.id}
@@ -96,7 +122,7 @@ const LineupEntryCard = memo(
               })}
             </div>
           </div>
-        )}
+        ) : null}
       </article>
     );
   },
@@ -111,20 +137,6 @@ const LineupEntryCard = memo(
     previousProps.toggleFavorite === nextProps.toggleFavorite
 );
 
-/**
- * Render the main lineup grouped by day and stage. Entries are shown in
- * cards with the artist name and a meta label describing stage, day
- * and time. Unlike the original implementation this refactored view
- * deliberately omits the artist tags row per the new design to keep
- * cards compact. Favourite items are indicated via the star button
- * passed in as a prop.
- *
- * Props:
- *   groupedEntries (object): Map of day → stage → array of entries.
- *   entries (array): Full entries list used to derive related suggestions.
- *   favoriteIdSet (Set): Set of favourite entry ids.
- *   toggleFavorite (function): Handler to toggle the favourite state.
- */
 function LineupView({
   groupedEntries,
   entries,
@@ -157,11 +169,13 @@ function LineupView({
         if (!token) {
           return;
         }
+
         const currentEntries = entriesByToken.get(token);
         if (currentEntries) {
           currentEntries.push(entry);
           return;
         }
+
         entriesByToken.set(token, [entry]);
       });
     });
@@ -192,21 +206,54 @@ function LineupView({
     }, new Map());
   }, [entries, showTribeOnly, hasVisibleFavorites]);
 
-  const hasEntries = Object.keys(groupedEntries).length > 0;
-  const totalStagePanelCount = useMemo(
+  const dayEntries = useMemo(
     () =>
-      Object.values(groupedEntries).reduce(
-        (count, dayStages) => count + Object.keys(dayStages).length,
-        0
-      ),
+      Object.entries(groupedEntries).map(([day, dayStages]) => ({
+        day,
+        stages: Object.entries(dayStages)
+          .map(([stage, stageEntries]) => ({
+            key: `${day}-${stage}`,
+            stage,
+            stageEntries,
+          }))
+          .sort((leftStage, rightStage) => compareStages(leftStage.stage, rightStage.stage)),
+      })),
     [groupedEntries]
   );
+
+  const hasEntries = dayEntries.length > 0;
+  const totalStagePanelCount = useMemo(
+    () => dayEntries.reduce((count, dayEntry) => count + dayEntry.stages.length, 0),
+    [dayEntries]
+  );
+  const initialRenderedStagePanelCount = useMemo(
+    () => Math.min(Math.max(INITIAL_STAGE_PANEL_COUNT, dayEntries.length), totalStagePanelCount),
+    [dayEntries.length, totalStagePanelCount]
+  );
   const [renderedStagePanelCount, setRenderedStagePanelCount] = useState(totalStagePanelCount);
+  const visibleStagePanelKeys = useMemo(() => {
+    const prioritizedStagePanels = [];
+
+    dayEntries.forEach((dayEntry) => {
+      if (dayEntry.stages[0]) {
+        prioritizedStagePanels.push(dayEntry.stages[0].key);
+      }
+    });
+
+    dayEntries.forEach((dayEntry) => {
+      dayEntry.stages.slice(1).forEach((stageEntry) => {
+        prioritizedStagePanels.push(stageEntry.key);
+      });
+    });
+
+    return new Set(prioritizedStagePanels.slice(0, renderedStagePanelCount));
+  }, [dayEntries, renderedStagePanelCount]);
+  const isSingleDayView = dayEntries.length === 1;
 
   useEffect(() => {
-    setRenderedStagePanelCount(Math.min(INITIAL_STAGE_PANEL_COUNT, totalStagePanelCount));
+    setRenderedStagePanelCount(initialRenderedStagePanelCount);
 
-    if (totalStagePanelCount <= INITIAL_STAGE_PANEL_COUNT) {
+    if (totalStagePanelCount <= initialRenderedStagePanelCount) {
       return undefined;
     }
 
@@ -239,15 +286,20 @@ function LineupView({
         window.clearTimeout(timeoutId);
       }
     };
-  }, [totalStagePanelCount]);
+  }, [initialRenderedStagePanelCount, totalStagePanelCount]);
 
   if (!hasEntries) {
     return <EmptyState text="No entries found." />;
   }
 
-  let stagePanelIndex = 0;
   return (
-    <section className="content-grid">
+    <section
+      className={
+        isSingleDayView
+          ? 'content-grid content-grid--lineup content-grid--lineup-single-day'
+          : 'content-grid content-grid--lineup'
+      }
+    >
       <h1 className="sr-only">Line-up</h1>
       {archiveNotice ? (
         <div className="archive-banner">
@@ -260,83 +312,101 @@ function LineupView({
           </div>
         </div>
       ) : null}
-      {Object.entries(groupedEntries).map(([day, dayStages]) => {
-        const stagePanels = Object.entries(dayStages).map(([stage, stageEntries]) => {
-          stagePanelIndex += 1;
-          if (stagePanelIndex > renderedStagePanelCount) {
-            return null;
-          }
-          const theme = getStageTheme(stage);
-          return (
-            <section
-              key={`${day}-${stage}`}
-              className="stage-panel"
-              style={{
-                borderColor: theme.accentBorder,
-                background: theme.accentSoft,
-              }}
-            >
-              <div className="stage-panel__header">
-                <div className="stage-title-wrap">
-                  <span
-                    className="stage-pill"
-                    style={{ background: theme.accent, color: theme.activeText }}
+      <div className="lineup-grid-shell">
+        <div
+          className="lineup-day-columns"
+          style={{ '--lineup-day-count': String(Math.max(dayEntries.length, 1)) }}
+        >
+          {dayEntries.map(({ day, stages }) => {
+            const stagePanels = stages.map(({ key, stage, stageEntries }) => {
+              if (!visibleStagePanelKeys.has(key)) {
+                return null;
+              }
+
+              const theme = getStageTheme(stage);
+
+              return (
+                <section
+                  key={key}
+                  className="stage-panel lineup-stage-slot"
+                  style={{
+                    borderColor: theme.accentBorder,
+                    background: theme.accentSoft,
+                  }}
+                >
+                  <div className="stage-panel__header">
+                    <div className="stage-title-wrap">
+                      <span
+                        className="stage-pill"
+                        style={{ background: theme.accent, color: theme.activeText }}
+                      >
+                        {stage}
+                      </span>
+                    </div>
+                    <span>
+                      {stageEntries.length} {stageEntries.length === 1 ? 'artist' : 'artists'}
+                    </span>
+                  </div>
+                  <div
+                    className={
+                      isSingleDayView
+                        ? 'card-list lineup-entry-list lineup-entry-list--single-day'
+                        : 'card-list lineup-entry-list'
+                    }
                   >
-                    {stage}
-                  </span>
+                    {stageEntries.map((entry) => {
+                      const isFavorite = favoriteIdSet.has(entry.id);
+                      const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
+                      const tribeLikesFromOthers = showTribeOnly
+                        ? tribeLikes.filter((member) => !member.isCurrentUser)
+                        : EMPTY_ITEMS;
+                      const relatedSuggestions =
+                        isFavorite && !showTribeOnly
+                          ? (alternativeEntriesById.get(entry.id) ?? EMPTY_ITEMS)
+                          : EMPTY_ITEMS;
+                      const suggestionFavoriteSignature = relatedSuggestions
+                        .slice(0, 3)
+                        .map(
+                          (suggestion) =>
+                            `${suggestion.id}:${favoriteIdSet.has(suggestion.id) ? 1 : 0}`
+                        )
+                        .join('|');
+
+                      return (
+                        <LineupEntryCard
+                          key={entry.id}
+                          entry={entry}
+                          isFavorite={isFavorite}
+                          favoriteIdSet={favoriteIdSet}
+                          toggleFavorite={toggleFavorite}
+                          canToggleFavorites={canToggleFavorites}
+                          showTribeOnly={showTribeOnly}
+                          tribeLikesFromOthers={tribeLikesFromOthers}
+                          relatedSuggestions={relatedSuggestions}
+                          suggestionFavoriteSignature={suggestionFavoriteSignature}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            });
+
+            if (!stagePanels.some(Boolean)) {
+              return null;
+            }
+
+            return (
+              <section key={day} className="lineup-day-column">
+                <div className="lineup-day-column__header">
+                  <h2>{day}</h2>
                 </div>
-                <span>
-                  {stageEntries.length}{' '}
-                  {stageEntries.length === 1 ? 'artist' : 'artists'}
-                </span>
-              </div>
-              <div className="card-list">
-                {stageEntries.map((entry) => {
-                  const isFavorite = favoriteIdSet.has(entry.id);
-                  const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
-                  const tribeLikesFromOthers = showTribeOnly
-                    ? tribeLikes.filter((member) => !member.isCurrentUser)
-                    : EMPTY_ITEMS;
-                  const relatedSuggestions = isFavorite && !showTribeOnly
-                    ? (alternativeEntriesById.get(entry.id) ?? EMPTY_ITEMS)
-                    : EMPTY_ITEMS;
-                  const suggestionFavoriteSignature = relatedSuggestions
-                    .slice(0, 3)
-                    .map((suggestion) => `${suggestion.id}:${favoriteIdSet.has(suggestion.id) ? 1 : 0}`)
-                    .join('|');
-                  return (
-                    <LineupEntryCard
-                      key={entry.id}
-                      entry={entry}
-                      isFavorite={isFavorite}
-                      favoriteIdSet={favoriteIdSet}
-                      toggleFavorite={toggleFavorite}
-                      canToggleFavorites={canToggleFavorites}
-                      showTribeOnly={showTribeOnly}
-                      tribeLikesFromOthers={tribeLikesFromOthers}
-                      relatedSuggestions={relatedSuggestions}
-                      suggestionFavoriteSignature={suggestionFavoriteSignature}
-                    />
-                  );
-                })}
-              </div>
-            </section>
-          );
-        });
-
-        if (!stagePanels.some(Boolean)) {
-          return null;
-        }
-
-        return (
-          <section key={day} className="day-section">
-            <div className="day-section__header">
-              <h2>{day}</h2>
-            </div>
-            <div className="day-stage-list">{stagePanels}</div>
-          </section>
-        );
-      })}
+                <div className="lineup-stage-list">{stagePanels}</div>
+              </section>
+            );
+          })}
+        </div>
+      </div>
     </section>
   );
 }

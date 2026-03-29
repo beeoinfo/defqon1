@@ -12,6 +12,7 @@ import {
   Star as StarIcon,
   Users as UsersIcon,
   Search,
+  ArrowUp,
   UserRound,
   ChevronDown,
   X,
@@ -304,6 +305,7 @@ export default function App() {
   const [showTribeOnly, setShowTribeOnly] = useState(false);
   // View state: lineup, reviews, tribe, profileSettings
   const [view, setView] = useState('lineup');
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Local UI state for filter drawers
   // Only one filter drawer can be open at a time: 'day', 'stage' or null
@@ -694,6 +696,18 @@ export default function App() {
       setOpenDrawer(null);
     }
   }, [view]);
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop((window.scrollY || window.pageYOffset || 0) > 360);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   useEffect(() => {
     if (!tribe && showTribeOnly) {
       setShowTribeOnly(false);
@@ -1401,6 +1415,17 @@ export default function App() {
             <span>Search</span>
           </button>
         </nav>
+      )}
+      {view !== 'profileSettings' && showBackToTop && (
+        <button
+          type="button"
+          className="icon-button back-to-top-button"
+          onClick={scrollToTopQuickly}
+          aria-label="Back to top"
+          title="Back to top"
+        >
+          <ArrowUp size={18} />
+        </button>
       )}
       <AuthModal
         open={isAuthModalOpen}
