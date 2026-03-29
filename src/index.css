@@ -2763,21 +2763,10 @@ body {
 
 /* Final coherence pass */
 html {
-  background: transparent;
+  background: #11161d;
 }
 
 body {
-  position: relative;
-  background: transparent;
-  background-attachment: fixed;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
   background:
     radial-gradient(circle at 14% 18%, rgba(11, 219, 239, 0.14), transparent 22%),
     radial-gradient(circle at 82% 16%, rgba(255, 0, 139, 0.12), transparent 20%),
@@ -2785,6 +2774,11 @@ body::before {
     radial-gradient(circle at 76% 74%, rgba(161, 0, 255, 0.12), transparent 24%),
     radial-gradient(circle at 52% 46%, rgba(241, 227, 0, 0.06), transparent 26%),
     linear-gradient(180deg, #161b22 0%, #11161d 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: none;
 }
 
 .page-header,
@@ -3839,14 +3833,6 @@ body::before {
 
 /* Mobile perf pass: reduce expensive blur/fixed-paint work on touch devices. */
 @media (max-width: 768px) {
-  body {
-    background-attachment: scroll;
-  }
-
-  body::before {
-    display: none;
-  }
-
   .page-header,
   .bottom-nav,
   .profile-settings__sticky-header,
