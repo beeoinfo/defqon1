@@ -32,7 +32,7 @@ body {
   background: radial-gradient(circle at 50% 30%, rgba(24, 24, 27, 0.8), var(--bg) 60%);
   color: rgba(255, 255, 255, 0.92);
   min-width: 320px;
-  min-height: 100%;
+  min-height: 100dvh;
 }
 
 * {
@@ -43,7 +43,6 @@ html,
 body,
 #root {
   margin: 0;
-  min-height: 100%;
 }
 
 button,
@@ -152,7 +151,7 @@ select {
   max-width: 1240px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: calc(var(--header-height) + 24px) 20px 48px;
   flex: 1;
 }
 
@@ -1224,50 +1223,6 @@ select {
 /* Legacy header navigation definitions removed.  Navigation styles are
  * now defined within the .header-row context to avoid duplication. */
 
-/* Search bar row. It slides up when the `.search-bar--hidden` class is applied via
- * JavaScript. The inner container constrains width and horizontal padding. */
-.search-bar {
-  overflow: hidden;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(9, 9, 11, 0.85);
-  border-bottom: 1px solid var(--border);
-}
-.search-bar--hidden {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
-}
-.search-bar__inner {
-  max-width: 1240px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 8px 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* The reset button sits next to the search input.  It adopts the same
- * rounded appearance and height as the search input.  Using padding
- * instead of fixed width/height allows it to grow with the font size.
- */
-.reset-button {
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
-  color: white;
-  border-radius: 999px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.reset-button:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
 /* Filter row and pills */
 /*
  * Filter row sits below the search row and remains sticky as the page
@@ -1513,164 +1468,6 @@ select {
   }
 }
 
-/* ==========================================================================
- * New header layout: search and filter rows are separated from the header.
- * The search row appears below the sticky header and disappears smoothly
- * when scrolling down. The filter row sticks to the top underneath the
- * header (and search row if visible). Drawers provide selection of days and
- * stages instead of inline dropdown menus.
- *==========================================================================*/
-
-/* Floating search row. When hidden it collapses via max-height and opacity. */
-/*
- * The search row floats beneath the header on the lineup view.  It holds
- * the search input and its reset button.  When the user scrolls down
- * the search row collapses via max-height and fades out, freeing
- * vertical space.  A backdrop blur effect provides separation from
- * the content below.
- */
-.search-row {
-  position: sticky;
-  top: 68px;
-  z-index: 96;
-  overflow: hidden;
-  max-width: 1240px;
-  width: calc(100% - 28px);
-  margin: 10px auto 0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(18, 20, 24, 0.68);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
-  transition: transform 0.25s ease, opacity 0.25s ease, max-height 0.25s ease;
-  max-height: 64px;
-}
-.search-row--hidden {
-  transform: translateY(-10px);
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-  margin-top: 0;
-}
-/* Inner container of the search row uses flex to lay out the search
- * field and its reset button.  The reset button is sized to match
- * the height of the search input and uses the same rounded corners
- * for visual consistency.  */
-.search-row__inner {
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Filter row is sticky so that filter pills remain visible as the user scrolls.
-   It appears immediately below the search row (or header if search row hidden). */
-.filter-sticky-shell {
-  position: sticky;
-  top: 142px;
-  z-index: 95;
-  max-width: 1240px;
-  width: calc(100% - 28px);
-  margin: 8px auto 0;
-  background: rgba(18, 20, 24, 0.68);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
-}
-.filter-sticky-shell--search-hidden {
-  top: 68px;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.filter-row::-webkit-scrollbar {
-  display: none;
-}
-
-/* Drawer for displaying all day or stage filter options. Appears below the filter row. */
-.filter-drawer {
-  width: 100%;
-  padding: 0 12px 12px;
-}
-.filter-drawer__inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  max-height: min(42vh, 280px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
-/* Entry card layout tweaks: centre the favourite star vertically and reduce spacing
-   between the entry title and its meta line. */
-.entry-card__top {
-  align-items: center;
-}
-.entry-card__top h3 {
-  margin: 0 0 2px;
-}
-.entry-card__top p {
-  margin: 0;
-  margin-top: 2px;
-}
-
-@media (max-width: 768px) {
-  .filter-chip {
-    min-height: 40px;
-    padding: 0 14px;
-    font-size: 0.9rem;
-  }
-
-  .search-row {
-    top: 62px;
-    width: calc(100% - 16px);
-    margin-top: 8px;
-    border-radius: 16px;
-  }
-
-  .search-row__inner {
-    padding: 8px;
-    gap: 8px;
-  }
-
-  .filter-sticky-shell {
-    top: 126px;
-    width: calc(100% - 16px);
-    margin-top: 6px;
-    border-radius: 16px;
-  }
-
-  .filter-sticky-shell--search-hidden {
-    top: 62px;
-  }
-
-  .filter-row {
-    padding: 8px;
-  }
-
-  .filter-drawer {
-    padding: 0 8px 8px;
-  }
-
-  .filter-drawer__inner {
-    padding: 10px;
-    max-height: min(38vh, 240px);
-  }
-}
-
 /* =======================================================================
  * Header Reset
  * Rebuilt as four independent layers: sticky header, floating search,
@@ -1686,8 +1483,11 @@ select {
 }
 
 .page-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 120;
   background: rgba(9, 9, 11, 0.82);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1784,9 +1584,9 @@ select {
 }
 
 .search-row--hidden {
-  transform: translateX(-50%) translateY(calc(-100% - 8px));
-  opacity: 0;
-  pointer-events: none;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .search-row__inner {
@@ -1937,7 +1737,11 @@ select {
  * Header Search Mode Overrides
  * =======================================================================*/
 .page--lineup {
-  padding-top: calc(var(--filters-height) + (var(--floating-gap) * 3));
+  padding-top: calc(var(--header-height) + var(--filters-height) + (var(--floating-gap) * 3));
+}
+
+.page--search {
+  padding-top: calc(var(--header-height) + 20px);
 }
 
 .page-header--search {
@@ -1970,11 +1774,28 @@ select {
 .header-search__input-wrap {
   position: relative;
   flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 
 .header-search__input {
-  min-height: 44px;
+  min-height: 42px;
   padding-right: 16px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .header-search__close,
@@ -1992,6 +1813,19 @@ select {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.header-search__close {
+  width: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .header-row .header-nav {
@@ -2061,7 +1895,11 @@ select {
 
 @media (max-width: 768px) {
   .page--lineup {
-    padding-top: calc(var(--filters-height) + (var(--floating-gap) * 3) + 4px);
+    padding-top: calc(var(--header-height) + var(--filters-height) + (var(--floating-gap) * 3) + 4px);
+  }
+
+  .page--search {
+    padding-top: calc(var(--header-height) + 14px);
   }
 
   .header-search {
@@ -2548,7 +2386,7 @@ select {
 }
 
 .page--lineup {
-  padding-top: calc(var(--filters-height) + (var(--floating-gap) * 3) + 12px);
+  padding-top: calc(var(--header-height) + var(--filters-height) + (var(--floating-gap) * 3) + 12px);
 }
 
 .filter-row .filter-pill:not(:first-of-type):not(.favorites-pill),
@@ -2582,7 +2420,7 @@ select {
   }
 
   .page--lineup {
-    padding-top: calc(var(--filters-height) + (var(--floating-gap) * 3) + 12px);
+    padding-top: calc(var(--header-height) + var(--filters-height) + (var(--floating-gap) * 3) + 12px);
   }
 }
 
@@ -2728,6 +2566,30 @@ body {
   border-color: rgba(255, 255, 255, 0.14);
 }
 
+.header-search__input.search-input {
+  background: transparent;
+  border: 0;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.header-search__input.search-input:focus,
+.header-search__input.search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.header-search .search-input__icon {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.header-search .header-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.56);
+}
+
 .tab,
 .ghost-button,
 .star-button,
@@ -2738,6 +2600,8 @@ body {
 .profile-avatar-refresh-badge,
 .header-row .header-nav button,
 .profile-trigger,
+.header-search__input-wrap,
+.header-search__close,
 .filter-reset-pill {
   background: var(--surface-soft);
   border-color: var(--border);
@@ -2751,7 +2615,9 @@ body {
 .profile-summary:hover,
 .footer-settings-button:hover,
 .header-row .header-nav button:hover,
-.profile-trigger:hover {
+.profile-trigger:hover,
+.header-search__input-wrap:hover,
+.header-search__close:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -2775,6 +2641,7 @@ body {
     radial-gradient(circle at 52% 46%, rgba(241, 227, 0, 0.06), transparent 26%),
     linear-gradient(180deg, #161b22 0%, #11161d 100%);
   background-attachment: fixed;
+  min-height: 100dvh;
 }
 
 body::before {

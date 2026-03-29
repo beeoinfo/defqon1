@@ -756,10 +756,8 @@ export default function App() {
 
   const closeSearchMode = useCallback(() => {
     setOpenDrawer(null);
-    startTransition(() => {
-      setView('lineup');
-      setQuery('');
-    });
+    setView('lineup');
+    setQuery('');
   }, []);
 
   // Navigation handlers for the bottom/tab nav
@@ -817,9 +815,7 @@ export default function App() {
     });
   }, [authUser]);
   const closeProfileSettings = useCallback(() => {
-    startTransition(() => {
-      setView('lineup');
-    });
+    setView('lineup');
   }, []);
 
   // Functions to manage favourites from within child components
@@ -957,7 +953,7 @@ export default function App() {
             {isSearchView ? (
               <div className="header-search" data-filter-layer="true">
                 <div className="header-search__input-wrap">
-                  <Search size={16} className="search-input__icon" />
+                  <Search size={18} className="search-input__icon" />
                   <input
                     ref={searchInputRef}
                     className="search-input header-search__input"
@@ -1254,7 +1250,15 @@ export default function App() {
         </>
       )}
       {view !== 'profileSettings' && (
-        <main className={view === 'lineup' ? 'page page--lineup' : 'page'}>
+        <main
+          className={
+            view === 'lineup'
+              ? 'page page--lineup'
+              : view === 'search'
+                ? 'page page--search'
+                : 'page'
+          }
+        >
           {view === 'lineup' && (
             <LineupView
               groupedEntries={groupedVisibleEntries}
@@ -1275,7 +1279,7 @@ export default function App() {
                 tribeLikesByEntryId={tribeLikesByEntryId}
               />
             ) : (
-              <EmptyState text="Start typing to search the lineup" />
+              <EmptyState text="Start typing to search an artist or an event in the lineup" />
             ))}
           {view === 'reviews' && (
             <ReviewsView
