@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { X } from 'lucide-react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
@@ -34,13 +34,11 @@ function getReviewSuggestionCardStyle(theme, isStageChanged) {
  * Props:
  *   reviewFavorites (array): List of review favourite objects with
  *     artistRaw, favoriteKey, artistTags, suggestions, etc.
- *   entries (array): The full list of lineup entries. Used to find
- *     alternative suggestions.
- *   favorites (array): Array of favourite entry ids for toggling suggestions.
+ *   favoriteIdSet (Set): Set of favourite entry ids for toggling suggestions.
  *   toggleFavorite (function): Handler to toggle suggested favourites.
  *   removeReviewFavorite (function): Handler to remove a review item by its key.
  */
-export default function ReviewsView({ reviewFavorites, entries, favorites, toggleFavorite, removeReviewFavorite }) {
+function ReviewsView({ reviewFavorites, favoriteIdSet, toggleFavorite, removeReviewFavorite }) {
   const hasReview = reviewFavorites && reviewFavorites.length > 0;
   if (!hasReview) {
     return <EmptyState text="No favourites require a review." />;
@@ -81,7 +79,7 @@ export default function ReviewsView({ reviewFavorites, entries, favorites, toggl
                     <h3>{favorite.artistRaw}</h3>
                     <div className="review-previous">
                       <span className="review-previous__label">Previously:</span>
-                      <p className="muted muted--danger review-previous__value">
+                      <p className="muted review-previous__value">
                         {getSavedFavoritePreviousLabel(favorite)}
                       </p>
                     </div>
@@ -105,7 +103,7 @@ export default function ReviewsView({ reviewFavorites, entries, favorites, toggl
                     </div>
                     <div className="suggestion-list">
                       {favorite.suggestions.map((suggestion) => {
-                        const isSuggestionFavorite = favorites.includes(suggestion.id);
+                        const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
                         const suggestionTheme = getStageTheme(
                           suggestion.stageCanonical || suggestion.stage
                         );
@@ -149,3 +147,5 @@ export default function ReviewsView({ reviewFavorites, entries, favorites, toggl
     </section>
   );
 }
+
+export default memo(ReviewsView);

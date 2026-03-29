@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
-import { findAlternativeEntries, getEntryDisplayName, getEntryMetaLabel } from '../lib/lineup';
+import { getEntryDisplayName, getEntryMetaLabel } from '../lib/lineup';
+
+const EMPTY_ITEMS = [];
 
 function getSuggestionCardStyle(theme, isStageChanged) {
   if (!isStageChanged) {
@@ -18,6 +20,89 @@ function getSuggestionCardStyle(theme, isStageChanged) {
   };
 }
 
+const LineupEntryCard = memo(
+  function LineupEntryCard({
+    entry,
+    isFavorite,
+    favoriteIdSet,
+    toggleFavorite,
+    showTribeOnly,
+    tribeLikesFromOthers,
+    relatedSuggestions,
+    suggestionFavoriteSignature,
+  }) {
+    return (
+      <article className={isFavorite ? 'entry-card entry-card--favorite' : 'entry-card'}>
+        <div className="entry-card__top">
+          <div>
+            <h3>{getEntryDisplayName(entry)}</h3>
+            <p className="muted">{entry.timeLabel}</p>
+          </div>
+          <FavoriteStar active={isFavorite} onClick={() => toggleFavorite(entry.id)} />
+        </div>
+        {showTribeOnly && tribeLikesFromOthers.length > 0 && (
+          <div className="suggestions suggestions--tribe">
+            <div className="suggestions__title">Your tribe like this</div>
+            <div className="tribe-likes-list">
+              {tribeLikesFromOthers.map((member) => (
+                <div key={member.userId} className="tribe-like-card">
+                  <img
+                    src={member.avatarUrl}
+                    alt={`${member.firstName} ${member.lastName}`}
+                    className="tribe-like-card__avatar"
+                  />
+                  <div className="tribe-like-card__name">
+                    <strong>{member.firstName}</strong>
+                    <span>{member.lastName}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!showTribeOnly && isFavorite && relatedSuggestions.length > 0 && (
+          <div className="suggestions">
+            <div className="suggestions__title">This artist also plays elsewhere</div>
+            <div className="suggestion-list">
+              {relatedSuggestions.slice(0, 3).map((suggestion) => {
+                const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
+                const suggestionTheme = getStageTheme(suggestion.stageCanonical || suggestion.stage);
+                const isStageChanged =
+                  getCanonicalStageName(suggestion.stageCanonical || suggestion.stage) !==
+                  getCanonicalStageName(entry.stageCanonical || entry.stage);
+                return (
+                  <div
+                    key={suggestion.id}
+                    className="suggestion-card"
+                    style={getSuggestionCardStyle(suggestionTheme, isStageChanged)}
+                  >
+                    <div>
+                      <strong>{getEntryDisplayName(suggestion)}</strong>
+                      <p className="muted">{getEntryMetaLabel(suggestion)}</p>
+                    </div>
+                    <FavoriteStar
+                      active={isSuggestionFavorite}
+                      onClick={() => toggleFavorite(suggestion.id)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </article>
+    );
+  },
+  (previousProps, nextProps) =>
+    previousProps.entry === nextProps.entry &&
+    previousProps.isFavorite === nextProps.isFavorite &&
+    previousProps.showTribeOnly === nextProps.showTribeOnly &&
+    previousProps.tribeLikesFromOthers === nextProps.tribeLikesFromOthers &&
+    previousProps.relatedSuggestions === nextProps.relatedSuggestions &&
+    previousProps.suggestionFavoriteSignature === nextProps.suggestionFavoriteSignature &&
+    previousProps.toggleFavorite === nextProps.toggleFavorite
+);
+
 /**
  * Render the main lineup grouped by day and stage. Entries are shown in
  * cards with the artist name and a meta label describing stage, day
@@ -29,17 +114,74 @@ function getSuggestionCardStyle(theme, isStageChanged) {
  * Props:
  *   groupedEntries (object): Map of day → stage → array of entries.
  *   entries (array): Full entries list used to derive related suggestions.
- *   favorites (array): Array of favourite entry ids.
+ *   favoriteIdSet (Set): Set of favourite entry ids.
  *   toggleFavorite (function): Handler to toggle the favourite state.
  */
-export default function LineupView({
+function LineupView({
   groupedEntries,
   entries,
-  favorites,
+  favoriteIdSet,
   toggleFavorite,
   showTribeOnly = false,
   tribeLikesByEntryId = new Map(),
 }) {
+  const hasVisibleFavorites = useMemo(
+    () =>
+      Object.values(groupedEntries).some((dayStages) =>
+        Object.values(dayStages).some((stageEntries) =>
+          stageEntries.some((entry) => favoriteIdSet.has(entry.id))
+        )
+      ),
+    [groupedEntries, favoriteIdSet]
+  );
+
+  const alternativeEntriesById = useMemo(() => {
+    if (showTribeOnly || !hasVisibleFavorites) {
+      return new Map();
+    }
+
+    const entriesByToken = new Map();
+
+    entries.forEach((entry) => {
+      entry.artistTokens.forEach((token) => {
+        if (!token) {
+          return;
+        }
+        const currentEntries = entriesByToken.get(token);
+        if (currentEntries) {
+          currentEntries.push(entry);
+          return;
+        }
+        entriesByToken.set(token, [entry]);
+      });
+    });
+
+    return entries.reduce((accumulator, entry) => {
+      const seenIds = new Set();
+      const alternatives = [];
+
+      entry.artistTokens.forEach((token) => {
+        const tokenMatches = entriesByToken.get(token) ?? [];
+        tokenMatches.forEach((candidate) => {
+          if (candidate.id === entry.id || seenIds.has(candidate.id)) {
+            return;
+          }
+          seenIds.add(candidate.id);
+          alternatives.push(candidate);
+        });
+      });
+
+      alternatives.sort(
+        (a, b) =>
+          (a.dayOrder ?? 999) - (b.dayOrder ?? 999) ||
+          a.stage.localeCompare(b.stage)
+      );
+
+      accumulator.set(entry.id, alternatives);
+      return accumulator;
+    }, new Map());
+  }, [entries, showTribeOnly, hasVisibleFavorites]);
+
   const hasEntries = Object.keys(groupedEntries).length > 0;
   if (!hasEntries) {
     return <EmptyState text="No entries found." />;
@@ -80,82 +222,30 @@ export default function LineupView({
                   </div>
                   <div className="card-list">
                     {stageEntries.map((entry) => {
-                      const isFavorite = favorites.includes(entry.id);
+                      const isFavorite = favoriteIdSet.has(entry.id);
                       const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
-                      const tribeLikesFromOthers = tribeLikes.filter((member) => !member.isCurrentUser);
+                      const tribeLikesFromOthers = showTribeOnly
+                        ? tribeLikes.filter((member) => !member.isCurrentUser)
+                        : EMPTY_ITEMS;
                       const relatedSuggestions = isFavorite && !showTribeOnly
-                        ? findAlternativeEntries(entry, entries)
-                            .filter((suggestion) => !favorites.includes(suggestion.id))
-                            .slice(0, 3)
-                        : [];
+                        ? (alternativeEntriesById.get(entry.id) ?? EMPTY_ITEMS)
+                        : EMPTY_ITEMS;
+                      const suggestionFavoriteSignature = relatedSuggestions
+                        .slice(0, 3)
+                        .map((suggestion) => `${suggestion.id}:${favoriteIdSet.has(suggestion.id) ? 1 : 0}`)
+                        .join('|');
                       return (
-                        <article
+                        <LineupEntryCard
                           key={entry.id}
-                          className={isFavorite ? 'entry-card entry-card--favorite' : 'entry-card'}
-                        >
-                          <div className="entry-card__top">
-                            <div>
-                              <h3>{getEntryDisplayName(entry)}</h3>
-                              <p className="muted">{entry.timeLabel}</p>
-                            </div>
-                            <FavoriteStar
-                              active={isFavorite}
-                              onClick={() => toggleFavorite(entry.id)}
-                            />
-                          </div>
-                          {showTribeOnly && tribeLikesFromOthers.length > 0 && (
-                            <div className="suggestions suggestions--tribe">
-                              <div className="suggestions__title">Your tribe like this</div>
-                              <div className="tribe-likes-list">
-                                {tribeLikesFromOthers.map((member) => (
-                                  <div key={member.userId} className="tribe-like-card">
-                                    <img
-                                      src={member.avatarUrl}
-                                      alt={`${member.firstName} ${member.lastName}`}
-                                      className="tribe-like-card__avatar"
-                                    />
-                                    <div className="tribe-like-card__name">
-                                      <strong>{member.firstName}</strong>
-                                      <span>{member.lastName}</span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {!showTribeOnly && isFavorite && relatedSuggestions.length > 0 && (
-                            <div className="suggestions">
-                              <div className="suggestions__title">You may also like</div>
-                              <div className="suggestion-list">
-                                {relatedSuggestions.map((suggestion) => {
-                                  const isSuggestionFavorite = favorites.includes(suggestion.id);
-                                  const suggestionTheme = getStageTheme(
-                                    suggestion.stageCanonical || suggestion.stage
-                                  );
-                                  const isStageChanged =
-                                    getCanonicalStageName(suggestion.stageCanonical || suggestion.stage) !==
-                                    getCanonicalStageName(entry.stageCanonical || entry.stage);
-                                  return (
-                                    <div
-                                      key={suggestion.id}
-                                      className="suggestion-card"
-                                      style={getSuggestionCardStyle(suggestionTheme, isStageChanged)}
-                                    >
-                                      <div>
-                                        <strong>{getEntryDisplayName(suggestion)}</strong>
-                                        <p className="muted">{getEntryMetaLabel(suggestion)}</p>
-                                      </div>
-                                      <FavoriteStar
-                                        active={isSuggestionFavorite}
-                                        onClick={() => toggleFavorite(suggestion.id)}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </article>
+                          entry={entry}
+                          isFavorite={isFavorite}
+                          favoriteIdSet={favoriteIdSet}
+                          toggleFavorite={toggleFavorite}
+                          showTribeOnly={showTribeOnly}
+                          tribeLikesFromOthers={tribeLikesFromOthers}
+                          relatedSuggestions={relatedSuggestions}
+                          suggestionFavoriteSignature={suggestionFavoriteSignature}
+                        />
                       );
                     })}
                   </div>
@@ -168,3 +258,5 @@ export default function LineupView({
     </section>
   );
 }
+
+export default memo(LineupView);

@@ -274,11 +274,16 @@ async function ensureProfileRow(user) {
 
 export async function loadAccountBundle(userId, authUser = null) {
   const client = ensureSupabase();
-  const profile = authUser ? await ensureProfileRow(authUser) : (await client.from('profiles').select('*').eq('id', userId).maybeSingle()).data ?? null;
-  const { data: favorites, error: favoritesError } = await client
+  const profilePromise = authUser
+    ? ensureProfileRow(authUser)
+    : client.from('profiles').select('*').eq('id', userId).maybeSingle();
+  const favoritesPromise = client
     .from('user_favorites')
     .select('favorite_key, snapshot')
     .eq('user_id', userId);
+  const [profileResult, favoritesResult] = await Promise.all([profilePromise, favoritesPromise]);
+  const profile = authUser ? profileResult : profileResult.data ?? null;
+  const { data: favorites, error: favoritesError } = favoritesResult;
   if (favoritesError) {
     throw favoritesError;
   }

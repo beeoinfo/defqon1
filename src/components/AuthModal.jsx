@@ -123,9 +123,6 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
         <div className="modal-panel__header">
           <div>
             <h2>{isSignup ? 'Create your account' : 'Welcome back'}</h2>
-            <p className="muted">
-              Save your favorites and sync them across devices.
-            </p>
           </div>
           <button
             type="button"

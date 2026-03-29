@@ -23,6 +23,7 @@
   --text-soft: rgba(255, 255, 255, 0.65);
   --accent: #ef4444;
   --yellow: #facc15;
+  --mobile-bottom-nav-offset: 92px;
 }
 
 /* Apply a subtle gradient background across the entire page. This helps the
@@ -519,7 +520,6 @@ select {
   font-size: 0.875rem;
   font-weight: 600;
   margin-top: 0.5rem;
-  color: #fecaca;
 }
 .review-previous__value {
   margin: 0;
@@ -563,6 +563,7 @@ select {
 }
 .muted--danger {
   color: #fca5a5;
+  margin-top: 0;
 }
 .chip--danger {
   background: rgba(239, 68, 68, 0.18);
@@ -967,7 +968,7 @@ select {
 }
 @media (max-width: 768px) {
   .page {
-    padding: 16px 14px 32px;
+    padding: 16px 14px calc(var(--mobile-bottom-nav-offset) + env(safe-area-inset-bottom));
   }
   .hero__inner {
     padding: 24px 14px;
@@ -1392,7 +1393,7 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 6px 0;
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background: rgba(9, 9, 11, 0.85);
@@ -2469,6 +2470,7 @@ select {
 
   .filter-drawer__inner {
     padding: 8px 8px 10px;
+    max-height: min(70vh, 500px);
   }
 
   .filter-chip,
@@ -2749,8 +2751,7 @@ body {
 .profile-summary:hover,
 .footer-settings-button:hover,
 .header-row .header-nav button:hover,
-.profile-trigger:hover,
-.bottom-nav button:hover {
+.profile-trigger:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -3662,7 +3663,7 @@ body::before {
   }
 
   .profile-settings__setting-row {
-    align-items: flex-start;
+    align-items: center;
   }
 }
 
@@ -3833,5 +3834,60 @@ body::before {
   .modal-panel--auth .field input {
     min-height: 48px;
     border-radius: 16px;
+  }
+}
+
+/* Mobile perf pass: reduce expensive blur/fixed-paint work on touch devices. */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  .page-header,
+  .bottom-nav,
+  .profile-settings__sticky-header,
+  .filter-row,
+  .filter-drawer__inner,
+  .modal-panel,
+  .modal-panel--auth {
+    box-shadow: none !important;
+  }
+
+  .page-header,
+  .brand-mark,
+  .header-row .header-nav,
+  .profile-trigger,
+  .header-search,
+  .filter-row,
+  .filter-drawer,
+  .filter-stack .filter-drawer__inner {
+    animation: none !important;
+  }
+
+  .brand-mark,
+  .header-row .header-nav,
+  .profile-trigger,
+  .header-search {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .filter-row__scroll,
+  .filter-row__sticky + .filter-row__scroll-shell .filter-row__scroll {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
+}
+
+@supports (content-visibility: auto) {
+  .stage-panel,
+  .favorites-view .entry-card,
+  .tribe-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 540px;
   }
 }

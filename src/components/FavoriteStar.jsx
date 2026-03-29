@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Star } from 'lucide-react';
 
 /**
@@ -11,7 +11,7 @@ import { Star } from 'lucide-react';
  *   onClick (function): Handler invoked when the star is clicked.
  *   title (string): Accessible label for assistive technologies.
  */
-export default function FavoriteStar({ active, onClick, title = 'Toggle favorite' }) {
+function FavoriteStar({ active, onClick, title = 'Toggle favorite' }) {
   return (
     <button
       type="button"
@@ -25,3 +25,5 @@ export default function FavoriteStar({ active, onClick, title = 'Toggle favorite
     </button>
   );
 }
+
+export default memo(FavoriteStar);
