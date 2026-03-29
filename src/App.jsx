@@ -441,8 +441,8 @@ export default function App() {
   ]);
   // Group visible entries by day and stage for the lineup view
   const groupedVisibleEntries = useMemo(
-    () => (isLineupView ? groupEntriesByDayAndStage(visibleEntries) : EMPTY_GROUPED_ENTRIES),
-    [isLineupView, visibleEntries]
+    () => groupEntriesByDayAndStage(visibleEntries),
+    [visibleEntries]
   );
   // Filter review favourites for the reviews view
   const filteredReviewFavorites = useMemo(
@@ -1249,58 +1249,58 @@ export default function App() {
           )}
         </>
       )}
-      {view !== 'profileSettings' && (
-        <main
-          className={
-            view === 'lineup'
+      <main
+        className={
+          view === 'profileSettings'
+            ? 'page page--lineup page--hidden'
+            : view === 'lineup'
               ? 'page page--lineup'
               : view === 'search'
                 ? 'page page--search'
                 : 'page'
-          }
-        >
-          {view === 'lineup' && (
+        }
+      >
+        <div className={view === 'lineup' ? 'view-panel' : 'view-panel view-panel--hidden'}>
+          <LineupView
+            groupedEntries={groupedVisibleEntries}
+            entries={browseableEntries}
+            favoriteIdSet={favoriteIdSet}
+            toggleFavorite={toggleFavorite}
+            showTribeOnly={showTribeOnly}
+            tribeLikesByEntryId={tribeLikesByEntryId}
+          />
+        </div>
+        {view === 'search' &&
+          (query.trim() ? (
             <LineupView
-              groupedEntries={groupedVisibleEntries}
+              groupedEntries={groupedSearchEntries}
               entries={browseableEntries}
               favoriteIdSet={favoriteIdSet}
               toggleFavorite={toggleFavorite}
-              showTribeOnly={showTribeOnly}
               tribeLikesByEntryId={tribeLikesByEntryId}
             />
-          )}
-          {view === 'search' &&
-            (query.trim() ? (
-              <LineupView
-                groupedEntries={groupedSearchEntries}
-                entries={browseableEntries}
-                favoriteIdSet={favoriteIdSet}
-                toggleFavorite={toggleFavorite}
-                tribeLikesByEntryId={tribeLikesByEntryId}
-              />
-            ) : (
-              <EmptyState text="Start typing to search an artist or an event in the lineup" />
-            ))}
-          {view === 'reviews' && (
-            <ReviewsView
-              reviewFavorites={filteredReviewFavorites}
-              favoriteIdSet={favoriteIdSet}
-              toggleFavorite={toggleFavorite}
-              removeReviewFavorite={removeReviewFavorite}
-            />
-          )}
-          {view === 'tribe' && (
-            <TribeView
-              tribe={tribe}
-              isBusy={isTribeBusy}
-              isHydrating={!isTribeReady}
-              onCreateTribe={handleCreateTribe}
-              onJoinTribe={handleJoinTribe}
-              onLeaveTribe={handleLeaveTribe}
-            />
-          )}
-        </main>
-      )}
+          ) : (
+            <EmptyState text="Start typing to search an artist or an event in the lineup" />
+          ))}
+        {view === 'reviews' && (
+          <ReviewsView
+            reviewFavorites={filteredReviewFavorites}
+            favoriteIdSet={favoriteIdSet}
+            toggleFavorite={toggleFavorite}
+            removeReviewFavorite={removeReviewFavorite}
+          />
+        )}
+        {view === 'tribe' && (
+          <TribeView
+            tribe={tribe}
+            isBusy={isTribeBusy}
+            isHydrating={!isTribeReady}
+            onCreateTribe={handleCreateTribe}
+            onJoinTribe={handleJoinTribe}
+            onLeaveTribe={handleLeaveTribe}
+          />
+        )}
+      </main>
       {view === 'profileSettings' && (
         <ProfileSettingsView
           user={authUser}
