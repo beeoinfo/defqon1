@@ -277,6 +277,8 @@ export default function App() {
   const selectedEntries = selectedLineup?.entries ?? [];
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
   const favoritesReadOnly = !isLatestLineupSelected;
+  const archiveLineupNotice =
+    'You are browsing an older line-up snapshot in read-only mode, so favourites cannot be added, removed, or updated here. To get back to the latest version, switch it in Settings or reload the page.';
   // Precompute entry map for quick lookup
   const entriesById = useMemo(
     () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
@@ -1266,8 +1268,10 @@ export default function App() {
             entries={browseableEntries}
             favoriteIdSet={favoriteIdSet}
             toggleFavorite={toggleFavorite}
+            canToggleFavorites={!favoritesReadOnly}
             showTribeOnly={showTribeOnly}
             tribeLikesByEntryId={tribeLikesByEntryId}
+            archiveNotice={favoritesReadOnly ? archiveLineupNotice : null}
           />
         </div>
         {view === 'search' &&
@@ -1277,6 +1281,7 @@ export default function App() {
               entries={browseableEntries}
               favoriteIdSet={favoriteIdSet}
               toggleFavorite={toggleFavorite}
+              canToggleFavorites={!favoritesReadOnly}
               tribeLikesByEntryId={tribeLikesByEntryId}
             />
           ) : (
@@ -1288,6 +1293,8 @@ export default function App() {
             favoriteIdSet={favoriteIdSet}
             toggleFavorite={toggleFavorite}
             removeReviewFavorite={removeReviewFavorite}
+            canManageFavorites={!favoritesReadOnly}
+            archiveNotice={favoritesReadOnly ? archiveLineupNotice : null}
           />
         )}
         {view === 'tribe' && (

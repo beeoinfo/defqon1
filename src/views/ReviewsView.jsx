@@ -38,28 +38,53 @@ function getReviewSuggestionCardStyle(theme, isStageChanged) {
  *   toggleFavorite (function): Handler to toggle suggested favourites.
  *   removeReviewFavorite (function): Handler to remove a review item by its key.
  */
-function ReviewsView({ reviewFavorites, favoriteIdSet, toggleFavorite, removeReviewFavorite }) {
+function ReviewsView({
+  reviewFavorites,
+  favoriteIdSet,
+  toggleFavorite,
+  removeReviewFavorite,
+  canManageFavorites = true,
+  archiveNotice = null,
+}) {
   const hasReview = reviewFavorites && reviewFavorites.length > 0;
+  const showSuggestions = !archiveNotice;
+
   if (!hasReview) {
     return <EmptyState text="No favourites require a review." />;
   }
+
   return (
     <section className="favorites-view">
       <h1 className="sr-only">Reviews</h1>
       <section className="day-section">
         <div className="day-section__header">
           <div className="review-header">
+            {archiveNotice ? (
+              <div className="archive-banner">
+                <div className="alert-banner__icon" aria-hidden="true">
+                  ⚠️
+                </div>
+                <div className="alert-banner__content">
+                  <strong>Archived line-up snapshot</strong>
+                  <span>{archiveNotice}</span>
+                </div>
+              </div>
+            ): null}
             <div className="review-header__top">
               <h2>Needs review</h2>
               <span className="review-count-badge">{reviewFavorites.length}</span>
             </div>
-            <div className="alert-banner alert-banner--danger">
-              <div className="alert-banner__icon">⚠️</div>
-              <div className="alert-banner__content">
-                <strong>Uh oh… a few saved favourites need a quick check.</strong>
-                <p>{REVIEW_SECTION_MESSAGE}</p>
+            {!archiveNotice ? (
+              <div className="alert-banner alert-banner--danger">
+                <div className="alert-banner__icon" aria-hidden="true">
+                  ⚠️
+                </div>
+                <div className="alert-banner__content">
+                  <strong>A few saved favourites need a quick check.</strong>
+                  <p>{REVIEW_SECTION_MESSAGE}</p>
+                </div>
               </div>
-            </div>
+            ): null}
           </div>
         </div>
         <div className="card-list">
@@ -84,61 +109,71 @@ function ReviewsView({ reviewFavorites, favoriteIdSet, toggleFavorite, removeRev
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    className="review-close-button"
-                    onClick={() => removeReviewFavorite(favorite.favoriteKey)}
-                    title="Close review"
-                    aria-label="Close review"
-                  >
-                    <X size={16} />
-                  </button>
+                  {canManageFavorites ? (
+                    <button
+                      type="button"
+                      className="review-close-button"
+                      onClick={() => removeReviewFavorite(favorite.favoriteKey)}
+                      title="Close review"
+                      aria-label="Close review"
+                    >
+                      <X size={16} />
+                    </button>
+                  ) : null}
                 </div>
-              {/* Show suggestion chips with danger styling */}
-                <div className="suggestions suggestions--review">
-                  {favorite.suggestions.length > 0 ? (
-                    <>
-                    <div className="suggestions__title suggestions__title--review">
-                      You may be looking for this instead
-                    </div>
-                    <div className="suggestion-list">
-                      {favorite.suggestions.map((suggestion) => {
-                        const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
-                        const suggestionTheme = getStageTheme(
-                          suggestion.stageCanonical || suggestion.stage
-                        );
-                        const isStageChanged =
-                          getCanonicalStageName(suggestion.stageCanonical || suggestion.stage) !==
-                          getCanonicalStageName(favorite.stageCanonical || favorite.stage);
-                        return (
-                          <div
-                            key={suggestion.id}
-                            className="suggestion-card suggestion-card--review"
-                            style={getReviewSuggestionCardStyle(
-                              suggestionTheme,
-                              isStageChanged
-                            )}
-                          >
-                            <div>
-                              <strong>{getEntryDisplayName(suggestion)}</strong>
-                              <p className="muted">{getEntryMetaLabel(suggestion)}</p>
-                            </div>
-                            <FavoriteStar
-                              active={isSuggestionFavorite}
-                              onClick={() => toggleFavorite(suggestion.id)}
-                              title="Toggle suggested favourite"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                ) : (
-                  <p className="muted muted--danger">
-                    No suggestions for now... It seems your artist disappeared 😢
-                  </p>
-                )}
-              </div>
+                {showSuggestions ? (
+                  <div className="suggestions suggestions--review">
+                    {favorite.suggestions.length > 0 ? (
+                      <>
+                        <div className="suggestions__title suggestions__title--review">
+                          You may be looking for this instead
+                        </div>
+                        <div className="suggestion-list">
+                          {favorite.suggestions.map((suggestion) => {
+                            const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
+                            const suggestionTheme = getStageTheme(
+                              suggestion.stageCanonical || suggestion.stage
+                            );
+                            const isStageChanged =
+                              getCanonicalStageName(
+                                suggestion.stageCanonical || suggestion.stage
+                              ) !==
+                              getCanonicalStageName(
+                                favorite.stageCanonical || favorite.stage
+                              );
+
+                            return (
+                              <div
+                                key={suggestion.id}
+                                className="suggestion-card suggestion-card--review"
+                                style={getReviewSuggestionCardStyle(
+                                  suggestionTheme,
+                                  isStageChanged
+                                )}
+                              >
+                                <div>
+                                  <strong>{getEntryDisplayName(suggestion)}</strong>
+                                  <p className="muted">{getEntryMetaLabel(suggestion)}</p>
+                                </div>
+                                {canManageFavorites ? (
+                                  <FavoriteStar
+                                    active={isSuggestionFavorite}
+                                    onClick={() => toggleFavorite(suggestion.id)}
+                                    title="Toggle suggested favourite"
+                                  />
+                                ) : null}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="muted muted--danger">
+                        No suggestions for now... It seems your artist disappeared :(
+                      </p>
+                    )}
+                  </div>
+                ) : null}
               </article>
             );
           })}

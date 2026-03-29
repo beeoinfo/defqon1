@@ -28,6 +28,7 @@ const LineupEntryCard = memo(
     isFavorite,
     favoriteIdSet,
     toggleFavorite,
+    canToggleFavorites,
     showTribeOnly,
     tribeLikesFromOthers,
     relatedSuggestions,
@@ -40,7 +41,9 @@ const LineupEntryCard = memo(
             <h3>{getEntryDisplayName(entry)}</h3>
             <p className="muted">{entry.timeLabel}</p>
           </div>
-          <FavoriteStar active={isFavorite} onClick={() => toggleFavorite(entry.id)} />
+          {canToggleFavorites ? (
+            <FavoriteStar active={isFavorite} onClick={() => toggleFavorite(entry.id)} />
+          ) : null}
         </div>
         {showTribeOnly && tribeLikesFromOthers.length > 0 && (
           <div className="suggestions suggestions--tribe">
@@ -82,10 +85,12 @@ const LineupEntryCard = memo(
                       <strong>{getEntryDisplayName(suggestion)}</strong>
                       <p className="muted">{getEntryMetaLabel(suggestion)}</p>
                     </div>
-                    <FavoriteStar
-                      active={isSuggestionFavorite}
-                      onClick={() => toggleFavorite(suggestion.id)}
-                    />
+                    {canToggleFavorites ? (
+                      <FavoriteStar
+                        active={isSuggestionFavorite}
+                        onClick={() => toggleFavorite(suggestion.id)}
+                      />
+                    ) : null}
                   </div>
                 );
               })}
@@ -98,6 +103,7 @@ const LineupEntryCard = memo(
   (previousProps, nextProps) =>
     previousProps.entry === nextProps.entry &&
     previousProps.isFavorite === nextProps.isFavorite &&
+    previousProps.canToggleFavorites === nextProps.canToggleFavorites &&
     previousProps.showTribeOnly === nextProps.showTribeOnly &&
     previousProps.tribeLikesFromOthers === nextProps.tribeLikesFromOthers &&
     previousProps.relatedSuggestions === nextProps.relatedSuggestions &&
@@ -124,8 +130,10 @@ function LineupView({
   entries,
   favoriteIdSet,
   toggleFavorite,
+  canToggleFavorites = true,
   showTribeOnly = false,
   tribeLikesByEntryId = new Map(),
+  archiveNotice = null,
 }) {
   const hasVisibleFavorites = useMemo(
     () =>
@@ -241,6 +249,17 @@ function LineupView({
   return (
     <section className="content-grid">
       <h1 className="sr-only">Line-up</h1>
+      {archiveNotice ? (
+        <div className="archive-banner">
+          <div className="alert-banner__icon" aria-hidden="true">
+            ⚠️
+          </div>
+          <div className="alert-banner__content">
+            <strong>Archived line-up snapshot</strong>
+            <span>{archiveNotice}</span>
+          </div>
+        </div>
+      ) : null}
       {Object.entries(groupedEntries).map(([day, dayStages]) => {
         const stagePanels = Object.entries(dayStages).map(([stage, stageEntries]) => {
           stagePanelIndex += 1;
@@ -292,6 +311,7 @@ function LineupView({
                       isFavorite={isFavorite}
                       favoriteIdSet={favoriteIdSet}
                       toggleFavorite={toggleFavorite}
+                      canToggleFavorites={canToggleFavorites}
                       showTribeOnly={showTribeOnly}
                       tribeLikesFromOthers={tribeLikesFromOthers}
                       relatedSuggestions={relatedSuggestions}
