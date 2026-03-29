@@ -464,7 +464,19 @@ select {
   grid-template-columns: 1fr;
 }
 .card-list.lineup-entry-list--single-day {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: block;
+  margin-bottom: -14px;
+  column-count: 4;
+  column-gap: 14px;
+}
+.card-list.lineup-entry-list--single-day > * {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 14px;
+  vertical-align: top;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
 }
 .entry-card {
   background: rgba(0, 0, 0, 0.22);
@@ -1008,7 +1020,7 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .card-list.lineup-entry-list--single-day {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-count: 3;
   }
 }
 @media (max-width: 1180px) {
@@ -1053,7 +1065,7 @@ select {
     grid-auto-columns: clamp(280px, calc((100vw - 64px) / 2), 420px);
   }
   .card-list.lineup-entry-list--single-day {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-count: 2;
   }
 }
 @media (max-width: 768px) {
@@ -1101,7 +1113,7 @@ select {
     justify-content: flex-start;
   }
   .card-list.lineup-entry-list--single-day {
-    grid-template-columns: 1fr;
+    column-count: 1;
   }
 }
 @media (max-width: 768px) {
