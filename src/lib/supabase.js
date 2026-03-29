@@ -8,10 +8,11 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabase =
   supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
-// Validation regexes for usernames, passwords and emails
+// Validation regexes for usernames and passwords
 const USERNAME_REGEX = /^[a-z0-9._-]{3,30}$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const HIDDEN_AUTH_EMAIL_DOMAIN = 'auth.beeoinfo.local';
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 
@@ -77,10 +78,6 @@ export function normalizeUsername(value) {
   return String(value ?? '').trim().toLowerCase();
 }
 
-export function normalizeEmail(value) {
-  return String(value ?? '').trim().toLowerCase();
-}
-
 export function validateUsername(value) {
   return USERNAME_REGEX.test(normalizeUsername(value));
 }
@@ -89,8 +86,20 @@ export function validatePassword(value) {
   return PASSWORD_REGEX.test(String(value ?? ''));
 }
 
+export function normalizeEmail(value) {
+  return String(value ?? '').trim().toLowerCase();
+}
+
 export function validateEmail(value) {
   return EMAIL_REGEX.test(normalizeEmail(value));
+}
+
+export function buildHiddenAuthEmail(username) {
+  const normalizedUsername = normalizeUsername(username);
+  if (!normalizedUsername) {
+    return '';
+  }
+  return `${normalizedUsername}@${HIDDEN_AUTH_EMAIL_DOMAIN}`;
 }
 
 export async function isUsernameAvailable(username) {
@@ -105,17 +114,14 @@ export async function isUsernameAvailable(username) {
   return Boolean(data);
 }
 
-export async function signUpWithEmail({ firstName, lastName, username, email, password }) {
+export async function signUpWithUsername({ firstName, lastName, username, password }) {
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
-  const normalizedEmail = normalizeEmail(email);
+  const hiddenAuthEmail = buildHiddenAuthEmail(normalizedUsername);
   if (!validateUsername(normalizedUsername)) {
     throw new Error(
       'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
     );
-  }
-  if (!validateEmail(normalizedEmail)) {
-    throw new Error('Please enter a valid email address.');
   }
   if (!validatePassword(password)) {
     throw new Error(
@@ -127,12 +133,13 @@ export async function signUpWithEmail({ firstName, lastName, username, email, pa
     throw new Error('This username is already taken.');
   }
   const { data, error } = await client.auth.signUp({
-    email: normalizedEmail,
+    email: hiddenAuthEmail,
     password,
     options: {
       data: {
         first_name: String(firstName ?? '').trim(),
         last_name: String(lastName ?? '').trim(),
+        auth_email: hiddenAuthEmail,
         username: normalizedUsername,
       },
     },
@@ -147,17 +154,53 @@ export async function signUpWithEmail({ firstName, lastName, username, email, pa
   };
 }
 
-export async function signInWithEmail({ email, password }) {
+export async function signInWithUsername({ username, password }) {
   const client = ensureSupabase();
-  const normalizedEmail = normalizeEmail(email);
-  if (!validateEmail(normalizedEmail)) {
-    throw new Error('Please enter a valid email address.');
+  const rawIdentifier = String(username ?? '').trim();
+  const normalizedUsername = normalizeUsername(rawIdentifier);
+  const normalizedEmail = normalizeEmail(rawIdentifier);
+
+  if (validateEmail(normalizedEmail)) {
+    const { data: signInData, error } = await client.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+    if (error) {
+      throw error;
+    }
+    return signInData.user;
   }
-  const { data, error } = await client.auth.signInWithPassword({ email: normalizedEmail, password });
+
+  if (!validateUsername(normalizedUsername)) {
+    throw new Error('Enter a valid username or email address.');
+  }
+  let authEmail = '';
+  const { data, error: lookupError } = await client.rpc('get_auth_email_for_username', {
+    username_input: normalizedUsername,
+  });
+  if (!lookupError) {
+    authEmail = String(data ?? '').trim().toLowerCase();
+  } else {
+    const message = String(lookupError.message ?? '').toLowerCase();
+    const isMissingFunction =
+      message.includes('get_auth_email_for_username') &&
+      (message.includes('schema cache') || message.includes('does not exist'));
+
+    if (!isMissingFunction) {
+      throw lookupError;
+    }
+  }
+  if (!authEmail) {
+    authEmail = buildHiddenAuthEmail(normalizedUsername);
+  }
+  const { data: signInData, error } = await client.auth.signInWithPassword({
+    email: authEmail,
+    password,
+  });
   if (error) {
     throw error;
   }
-  return data.user;
+  return signInData.user;
 }
 
 export async function signOutCurrentUser() {
@@ -189,11 +232,11 @@ function buildProfilePayloadFromUser(user) {
   const metadata = user?.user_metadata ?? {};
   return {
     id: user.id,
-    auth_email: user.email ?? '',
+    auth_email: String(metadata.auth_email ?? user.email ?? '').trim().toLowerCase(),
     first_name: String(metadata.first_name ?? '').trim(),
     last_name: String(metadata.last_name ?? '').trim(),
     username: normalizeUsername(
-      metadata.username ?? (user.email ? user.email.split('@')[0] : `user-${user.id.slice(0, 8)}`)
+      metadata.username ?? `user-${user.id.slice(0, 8)}`
     ),
     avatar_kind: 'preset',
     avatar_preset: getRandomPresetAvatarIndex(),

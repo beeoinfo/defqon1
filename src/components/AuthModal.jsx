@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import {
   isSupabaseConfigured,
-  signInWithEmail,
-  signUpWithEmail,
+  signInWithUsername,
+  signUpWithUsername,
   validateEmail,
   validatePassword,
   validateUsername,
@@ -18,7 +18,7 @@ import {
  * Props:
  *   open (boolean): Whether the modal is visible.
  *   defaultTab (string): Either 'login' or 'signup' to control the initial tab.
- *   onClose (function): Handler invoked when the modal backdrop or close button is clicked.
+ *   onClose (function): Handler invoked when the close button is clicked.
  *   onSuccess (function): Called with the user object after a successful login or signup.
  */
 export default function AuthModal({ open, defaultTab = 'login', onClose, onSuccess }) {
@@ -26,7 +26,6 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -37,6 +36,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
       setTab(defaultTab);
       setErrorMessage('');
       setSuccessMessage('');
+      setUsername('');
       setPassword('');
     }
   }, [open, defaultTab]);
@@ -57,20 +57,22 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
       return;
     }
 
-    if (!validateEmail(email)) {
-      setErrorMessage('Please enter a valid email address.');
-      return;
-    }
-
-    if (!password) {
-      setErrorMessage('Password is required.');
-      return;
-    }
+    const isValidLoginIdentifier = validateUsername(username) || validateEmail(username);
 
     if (isSignup && !validateUsername(username)) {
       setErrorMessage(
         'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
       );
+      return;
+    }
+
+    if (!isSignup && !isValidLoginIdentifier) {
+      setErrorMessage('Enter a valid username or email address.');
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage('Password is required.');
       return;
     }
 
@@ -90,25 +92,23 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
 
     try {
       if (isSignup) {
-        const result = await signUpWithEmail({
+        const result = await signUpWithUsername({
           firstName,
           lastName,
           username,
-          email,
           password,
         });
-        if (result.session && result.user) {
+        if (result.user) {
           onSuccess?.(result.user);
           return;
         }
-        setSuccessMessage(
-          'Account created. Check your email to confirm your address, then come back to log in.'
-        );
+        setSuccessMessage('Account created. You can now log in with your username and password.');
         setTab('login');
+        setUsername('');
         setPassword('');
         return;
       }
-      const user = await signInWithEmail({ email, password });
+      const user = await signInWithUsername({ username, password });
       onSuccess?.(user);
     } catch (error) {
       setErrorMessage(error.message || 'Something went wrong.');
@@ -118,7 +118,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div className="modal-panel modal-panel--auth" onClick={(event) => event.stopPropagation()}>
         <div className="modal-panel__header">
           <div>
@@ -179,23 +179,14 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
                   autoComplete="family-name"
                 />
               </label>
-              <label className="field">
-                <span>Username</span>
-                <input
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  autoComplete="username"
-                />
-              </label>
             </>
           )}
           <label className="field">
-            <span>Email</span>
+            <span>Username</span>
             <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              autoComplete="username"
             />
           </label>
           <label className="field">

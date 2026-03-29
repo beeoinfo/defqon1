@@ -47,6 +47,7 @@ export default function ReviewsView({ reviewFavorites, entries, favorites, toggl
   }
   return (
     <section className="favorites-view">
+      <h1 className="sr-only">Reviews</h1>
       <section className="day-section">
         <div className="day-section__header">
           <div className="review-header">

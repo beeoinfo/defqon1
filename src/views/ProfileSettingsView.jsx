@@ -76,10 +76,14 @@ function InfoPage({ pageKey, onClose }) {
 export default function ProfileSettingsView({
   user,
   profile,
+  hidePastEvents,
+  hideUndatedEvents,
   lineups,
   selectedLineupKey,
   onSelectLineup,
   onBack,
+  onHidePastEventsChange,
+  onHideUndatedEventsChange,
   onProfileUpdated,
   onSignedOut,
 }) {
@@ -93,14 +97,6 @@ export default function ProfileSettingsView({
   const [errorMessage, setErrorMessage] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [activeInfoPage, setActiveInfoPage] = useState(null);
-  const [hidePastEvents, setHidePastEvents] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('hidePastEvents') ?? 'false');
-    } catch {
-      return false;
-    }
-  });
-
   const initialFirstName = profile?.first_name ?? '';
   const initialLastName = profile?.last_name ?? '';
   const initialUsername = profile?.username ?? '';
@@ -117,10 +113,6 @@ export default function ProfileSettingsView({
     setErrorMessage('');
     setShowEditor(false);
   }, [profile]);
-
-  useEffect(() => {
-    localStorage.setItem('hidePastEvents', JSON.stringify(hidePastEvents));
-  }, [hidePastEvents]);
 
   const previewUrl = useMemo(() => {
     if (avatarFile) {
@@ -147,9 +139,7 @@ export default function ProfileSettingsView({
 
   if (activeInfoPage) {
     return (
-      <main className="page page--profile-settings">
-        <InfoPage pageKey={activeInfoPage} onClose={() => setActiveInfoPage(null)} />
-      </main>
+      <InfoPage pageKey={activeInfoPage} onClose={() => setActiveInfoPage(null)} />
     );
   }
 
@@ -423,10 +413,7 @@ export default function ProfileSettingsView({
                         <span className="profile-settings__lineup-badge">Latest</span>
                       )}
                     </div>
-                    <span className="profile-settings__lineup-meta">
-                      {lineup.entries.length} entries
-                    </span>
-                    {isSelected && <Check size={16} />}
+                    {isSelected && <Check size={16} className="profile-settings__lineup-check" />}
                   </button>
                 );
               })}
@@ -436,13 +423,26 @@ export default function ProfileSettingsView({
           <div className="profile-settings__setting-row">
             <div className="profile-settings__setting-copy">
               <h3>Hide past events</h3>
-              <p>Keep expired sets out of the browsing experience.</p>
             </div>
             <label className="settings-toggle__label">
               <input
                 type="checkbox"
                 checked={hidePastEvents}
-                onChange={(event) => setHidePastEvents(event.target.checked)}
+                onChange={(event) => onHidePastEventsChange?.(event.target.checked)}
+              />
+              <span className="settings-toggle__slider"></span>
+            </label>
+          </div>
+
+          <div className="profile-settings__setting-row">
+            <div className="profile-settings__setting-copy">
+              <h3>Hide events without date</h3>
+            </div>
+            <label className="settings-toggle__label">
+              <input
+                type="checkbox"
+                checked={hideUndatedEvents}
+                onChange={(event) => onHideUndatedEventsChange?.(event.target.checked)}
               />
               <span className="settings-toggle__slider"></span>
             </label>

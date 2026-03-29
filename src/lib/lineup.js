@@ -2,6 +2,8 @@ import { getCanonicalStageName } from './stageThemes';
 
 export const FAVORITES_STORAGE_KEY = 'defqon1-favorites';
 export const VIEW_STORAGE_KEY = 'defqon1-view';
+export const HIDE_PAST_EVENTS_STORAGE_KEY = 'hidePastEvents';
+export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
 
 export const REVIEW_SECTION_MESSAGE =
   'Some saved favorites seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
@@ -517,6 +519,38 @@ export function matchesSelectedStage(entryStage, selectedStage) {
   return getCanonicalStageName(entryStage) === selectedStage;
 }
 
+function parseEntryDateTime(value) {
+  if (!value) {
+    return null;
+  }
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+export function isPastScheduledItem(item, referenceTime = Date.now()) {
+  const endTimestamp = parseEntryDateTime(item?.endAt);
+  if (endTimestamp !== null) {
+    return endTimestamp < referenceTime;
+  }
+  const startTimestamp = parseEntryDateTime(item?.startAt);
+  if (startTimestamp !== null) {
+    return startTimestamp < referenceTime;
+  }
+  return false;
+}
+
+export function filterExpiredEntries(entries, referenceTime = Date.now()) {
+  return entries.filter((entry) => !isPastScheduledItem(entry, referenceTime));
+}
+
+export function hasScheduledDate(item) {
+  return parseEntryDateTime(item?.startAt) !== null || parseEntryDateTime(item?.endAt) !== null;
+}
+
+export function filterUndatedEntries(entries) {
+  return entries.filter((entry) => hasScheduledDate(entry));
+}
+
 export function filterEntries(entries, { query, day, stage }) {
   let result = entries;
 
@@ -570,6 +604,14 @@ export function filterReviewFavorites(reviewFavorites, { query, day, stage }) {
   }
 
   return result;
+}
+
+export function filterExpiredReviewFavorites(reviewFavorites, referenceTime = Date.now()) {
+  return reviewFavorites.filter((favorite) => !isPastScheduledItem(favorite, referenceTime));
+}
+
+export function filterUndatedReviewFavorites(reviewFavorites) {
+  return reviewFavorites.filter((favorite) => hasScheduledDate(favorite));
 }
 
 function selectedStageToCanonical(selectedStage, fallbackStage) {
@@ -731,6 +773,62 @@ export function loadViewPreferences() {
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
+  }
+}
+
+export function loadHidePastEventsPreference() {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(HIDE_PAST_EVENTS_STORAGE_KEY) ?? 'true');
+  } catch {
+    return true;
+  }
+}
+
+export function saveHidePastEventsPreference(value) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (Boolean(value)) {
+      window.localStorage.removeItem(HIDE_PAST_EVENTS_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(HIDE_PAST_EVENTS_STORAGE_KEY, JSON.stringify(false));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function loadHideUndatedEventsPreference() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(HIDE_UNDATED_EVENTS_STORAGE_KEY) ?? 'false');
+  } catch {
+    return false;
+  }
+}
+
+export function saveHideUndatedEventsPreference(value) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (!Boolean(value)) {
+      window.localStorage.removeItem(HIDE_UNDATED_EVENTS_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(HIDE_UNDATED_EVENTS_STORAGE_KEY, JSON.stringify(true));
+  } catch {
+    // Ignore storage errors
   }
 }
 

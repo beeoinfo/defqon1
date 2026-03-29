@@ -12,11 +12,19 @@ import { normalizeTribeCode } from '../lib/supabase';
  * Props:
  *   tribe (object|null): The current tribe bundle or null if none.
  *   isBusy (boolean): Whether an async tribe operation is in flight.
+ *   isHydrating (boolean): Whether the initial tribe bundle is still loading.
  *   onCreateTribe (function): Handler to create a new tribe.
  *   onJoinTribe (function): Handler to join a tribe by code.
  *   onLeaveTribe (function): Handler to leave the current tribe.
  */
-export default function TribeView({ tribe, isBusy, onCreateTribe, onJoinTribe, onLeaveTribe }) {
+export default function TribeView({
+  tribe,
+  isBusy,
+  isHydrating = false,
+  onCreateTribe,
+  onJoinTribe,
+  onLeaveTribe,
+}) {
   const [joinCode, setJoinCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [leaveArmed, setLeaveArmed] = useState(false);
@@ -71,9 +79,21 @@ export default function TribeView({ tribe, isBusy, onCreateTribe, onJoinTribe, o
     }
   };
 
+  if (!tribe && isHydrating) {
+    return (
+      <section className="tribe-view">
+        <h1 className="sr-only">Tribe</h1>
+        <div className="tribe-coming-soon">
+          <EmptyState text="Loading tribe..." />
+        </div>
+      </section>
+    );
+  }
+
   if (!tribe) {
     return (
       <section className="tribe-view">
+        <h1 className="sr-only">Tribe</h1>
         <div className="tribe-grid">
           <article className="tribe-card">
             <div className="tribe-card__header">
@@ -125,6 +145,7 @@ export default function TribeView({ tribe, isBusy, onCreateTribe, onJoinTribe, o
   }
   return (
     <section className="tribe-view">
+      <h1 className="sr-only">Tribe</h1>
       <article className="tribe-card tribe-card--active">
         <div className="tribe-card__header">
           <Users size={18} />

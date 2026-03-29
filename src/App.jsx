@@ -11,16 +11,24 @@ import {
 } from 'lucide-react';
 import {
   countVisibleStages,
+  filterExpiredEntries,
+  filterExpiredReviewFavorites,
+  filterUndatedEntries,
+  filterUndatedReviewFavorites,
   filterEntries,
   filterReviewFavorites,
   getDays,
   getStages,
   groupEntriesByDayAndStage,
   groupFavoritesByDayAndStage,
+  loadHidePastEventsPreference,
+  loadHideUndatedEventsPreference,
   loadViewPreferences,
   removeFavoriteByEntryId,
   removeFavoriteByKey,
   resolveFavoriteItems,
+  saveHidePastEventsPreference,
+  saveHideUndatedEventsPreference,
   saveViewPreferences,
   upsertFavoriteEntry,
   validateLineupPayload,
@@ -48,6 +56,116 @@ import ReviewsView from './views/ReviewsView';
 import TribeView from './views/TribeView';
 import ProfileSettingsView from './views/ProfileSettingsView';
 import './index.css';
+
+const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
+const LAST_AUTHENTICATED_USER_ID_KEY = 'last-authenticated-user-id:v1';
+
+function getAccountCacheKey(userId) {
+  return `${ACCOUNT_CACHE_KEY_PREFIX}${userId}`;
+}
+
+function readCachedAccount(userId) {
+  if (!userId) {
+    return null;
+  }
+  try {
+    const rawValue = localStorage.getItem(getAccountCacheKey(userId));
+    if (!rawValue) {
+      return null;
+    }
+    const parsed = JSON.parse(rawValue);
+    return {
+      profile: parsed?.profile ?? null,
+      favorites: Array.isArray(parsed?.favorites) ? parsed.favorites : [],
+      tribe: parsed?.tribe ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedAccount(userId, account) {
+  if (!userId) {
+    return;
+  }
+  try {
+    localStorage.setItem(
+      getAccountCacheKey(userId),
+      JSON.stringify({
+        profile: account?.profile ?? null,
+        favorites: Array.isArray(account?.favorites) ? account.favorites : [],
+        tribe: account?.tribe ?? null,
+      })
+    );
+  } catch {
+    // Ignore storage quota / availability issues.
+  }
+}
+
+function clearCachedAccount(userId) {
+  if (!userId) {
+    return;
+  }
+  try {
+    localStorage.removeItem(getAccountCacheKey(userId));
+  } catch {
+    // Ignore storage availability issues.
+  }
+}
+
+function serializeFavoriteItems(items) {
+  return JSON.stringify(items ?? []);
+}
+
+function scrollToTopQuickly() {
+  const startY = window.scrollY || window.pageYOffset || 0;
+  if (startY <= 0) {
+    return;
+  }
+  const duration = 220;
+  const startTime = performance.now();
+
+  const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+
+  const tick = (currentTime) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = easeOutCubic(progress);
+    window.scrollTo(0, Math.round(startY * (1 - easedProgress)));
+
+    if (progress < 1) {
+      window.requestAnimationFrame(tick);
+    }
+  };
+
+  window.requestAnimationFrame(tick);
+}
+
+function readLastAuthenticatedUserId() {
+  try {
+    return localStorage.getItem(LAST_AUTHENTICATED_USER_ID_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeLastAuthenticatedUserId(userId) {
+  try {
+    if (!userId) {
+      localStorage.removeItem(LAST_AUTHENTICATED_USER_ID_KEY);
+      return;
+    }
+    localStorage.setItem(LAST_AUTHENTICATED_USER_ID_KEY, userId);
+  } catch {
+    // Ignore storage availability issues.
+  }
+}
+
+function getBootAccountState() {
+  const userId = readLastAuthenticatedUserId();
+  const account = readCachedAccount(userId);
+  return { userId, account };
+}
 
 // Load all lineup JSON modules at build time. Each module may export
 // either an array of entries or an object with an `entries` array.
@@ -95,6 +213,12 @@ for (const lineupSource of lineupSources) {
 const hasLineup = lineupSources.length > 0;
 
 export default function App() {
+  const bootStateRef = useRef(null);
+  if (!bootStateRef.current) {
+    bootStateRef.current = getBootAccountState();
+  }
+  const bootUserId = bootStateRef.current.userId;
+  const bootAccount = bootStateRef.current.account;
   // Which lineup JSON is selected
   const [selectedLineupKey, setSelectedLineupKey] = useState(latestKey);
   const selectedLineup =
@@ -118,8 +242,11 @@ export default function App() {
     () => loadViewPreferences()?.selectedStage || 'All stages'
   );
   const [query, setQuery] = useState('');
+  const [hidePastEvents, setHidePastEvents] = useState(() => loadHidePastEventsPreference());
+  const [hideUndatedEvents, setHideUndatedEvents] = useState(() => loadHideUndatedEventsPreference());
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   // Manage favourite items and filter
-  const [favoriteItems, setFavoriteItems] = useState([]);
+  const [favoriteItems, setFavoriteItems] = useState(() => bootAccount?.favorites ?? []);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showTribeOnly, setShowTribeOnly] = useState(false);
   // View state: lineup, reviews, tribe, profileSettings
@@ -129,10 +256,15 @@ export default function App() {
   // Only one filter drawer can be open at a time: 'day', 'stage' or null
   const [openDrawer, setOpenDrawer] = useState(null);
   const searchInputRef = useRef(null);
+  const activeHydrationIdRef = useRef(0);
+  const lastAuthenticatedUserIdRef = useRef(bootUserId);
+  const hasRemoteAccountBundleRef = useRef(false);
+  const lastSyncedFavoritesRef = useRef(serializeFavoriteItems(bootAccount?.favorites ?? []));
   // Supabase auth and account
-  const [authUser, setAuthUser] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [tribe, setTribe] = useState(null);
+  const [authUser, setAuthUser] = useState(() => (bootUserId ? { id: bootUserId } : null));
+  const [profile, setProfile] = useState(() => bootAccount?.profile ?? null);
+  const [tribe, setTribe] = useState(() => bootAccount?.tribe ?? null);
+  const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [isAccountReady, setIsAccountReady] = useState(!isSupabaseConfigured());
   // Auth modal
@@ -151,7 +283,26 @@ export default function App() {
   const favoriteIds = favoriteResolution.ids;
   const favoriteEntries = favoriteResolution.entries;
   const reviewFavorites = favoriteResolution.reviewItems;
-  const reviewCount = reviewFavorites.length;
+  const baseVisibleReviewFavorites = useMemo(
+    () => (hideUndatedEvents ? filterUndatedReviewFavorites(reviewFavorites) : reviewFavorites),
+    [hideUndatedEvents, reviewFavorites]
+  );
+  const visibleReviewFavorites = useMemo(
+    () =>
+      hidePastEvents
+        ? filterExpiredReviewFavorites(baseVisibleReviewFavorites, currentTime)
+        : baseVisibleReviewFavorites,
+    [baseVisibleReviewFavorites, hidePastEvents, currentTime]
+  );
+  const reviewCount = visibleReviewFavorites.length;
+  const baseBrowseableEntries = useMemo(
+    () => (hideUndatedEvents ? filterUndatedEntries(selectedEntries) : selectedEntries),
+    [hideUndatedEvents, selectedEntries]
+  );
+  const browseableEntries = useMemo(
+    () => (hidePastEvents ? filterExpiredEntries(baseBrowseableEntries, currentTime) : baseBrowseableEntries),
+    [baseBrowseableEntries, hidePastEvents, currentTime]
+  );
   const tribeLikesByEntryId = useMemo(() => {
     if (!tribe?.members?.length) {
       return new Map();
@@ -196,12 +347,19 @@ export default function App() {
   );
 
   // Derive lists of days and stages for filters
-  const days = useMemo(() => getDays(selectedEntries), [selectedEntries]);
-  const stages = useMemo(() => getStages(selectedEntries, selectedDay), [selectedEntries, selectedDay]);
+  const days = useMemo(() => getDays(browseableEntries), [browseableEntries]);
+  const stages = useMemo(
+    () => getStages(browseableEntries, selectedDay),
+    [browseableEntries, selectedDay]
+  );
 
   // Filter entries based on query, day and stage
   const visibleEntries = useMemo(() => {
-    const base = filterEntries(selectedEntries, { query, day: selectedDay, stage: selectedStage });
+    const base = filterEntries(browseableEntries, {
+      query,
+      day: selectedDay,
+      stage: selectedStage,
+    });
     if (showTribeOnly) {
       return base.filter((entry) => tribeLikedEntryIds.has(entry.id));
     }
@@ -210,7 +368,7 @@ export default function App() {
     }
     return base;
   }, [
-    selectedEntries,
+    browseableEntries,
     query,
     selectedDay,
     selectedStage,
@@ -226,13 +384,24 @@ export default function App() {
   );
   // Filter favourite entries when used in the original favourites view (not used in new design)
   const filteredFavoriteEntries = useMemo(
-    () => filterEntries(favoriteEntries, { query, day: selectedDay, stage: selectedStage }),
-    [favoriteEntries, query, selectedDay, selectedStage]
+    () =>
+      filterEntries(
+        hidePastEvents
+          ? filterExpiredEntries(
+              hideUndatedEvents ? filterUndatedEntries(favoriteEntries) : favoriteEntries,
+              currentTime
+            )
+          : hideUndatedEvents
+            ? filterUndatedEntries(favoriteEntries)
+            : favoriteEntries,
+        { query, day: selectedDay, stage: selectedStage }
+      ),
+    [favoriteEntries, hidePastEvents, hideUndatedEvents, currentTime, query, selectedDay, selectedStage]
   );
   // Filter review favourites for the reviews view
   const filteredReviewFavorites = useMemo(
-    () => filterReviewFavorites(reviewFavorites, { query, day: selectedDay, stage: selectedStage }),
-    [reviewFavorites, query, selectedDay, selectedStage]
+    () => filterReviewFavorites(visibleReviewFavorites, { query, day: selectedDay, stage: selectedStage }),
+    [visibleReviewFavorites, query, selectedDay, selectedStage]
   );
   // Group favourites by day and stage when needed (unused in new design)
   const groupedFavorites = useMemo(
@@ -243,6 +412,26 @@ export default function App() {
   useEffect(() => {
     saveViewPreferences({ selectedDay, selectedStage });
   }, [selectedDay, selectedStage]);
+  useEffect(() => {
+    if (view !== 'lineup') {
+      return;
+    }
+    scrollToTopQuickly();
+  }, [view, selectedDay, selectedStage, showFavoritesOnly, showTribeOnly]);
+  useEffect(() => {
+    saveHidePastEventsPreference(hidePastEvents);
+  }, [hidePastEvents]);
+  useEffect(() => {
+    saveHideUndatedEventsPreference(hideUndatedEvents);
+  }, [hideUndatedEvents]);
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000);
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
   useEffect(() => {
     if (!openDrawer) {
       return undefined;
@@ -305,35 +494,72 @@ export default function App() {
     }
     let isActive = true;
     const hydrateFromAccount = async (userOverride) => {
+      const hydrationId = activeHydrationIdRef.current + 1;
+      activeHydrationIdRef.current = hydrationId;
       setIsAccountReady(false);
+      hasRemoteAccountBundleRef.current = false;
       try {
         const currentUser = userOverride ?? (await getCurrentUser());
-        if (!isActive) {
+        if (!isActive || hydrationId !== activeHydrationIdRef.current) {
           return;
         }
         if (!currentUser) {
+          clearCachedAccount(lastAuthenticatedUserIdRef.current);
+          writeLastAuthenticatedUserId(null);
+          lastAuthenticatedUserIdRef.current = null;
           setAuthUser(null);
           setProfile(null);
           setTribe(null);
+          setIsTribeReady(true);
           setFavoriteItems([]);
+          lastSyncedFavoritesRef.current = serializeFavoriteItems([]);
           setIsAccountReady(true);
           return;
         }
+        lastAuthenticatedUserIdRef.current = currentUser.id;
+        writeLastAuthenticatedUserId(currentUser.id);
         setAuthUser(currentUser);
-        const [bundle, tribeBundle] = await Promise.all([
-          loadAccountBundle(currentUser.id, currentUser),
-          loadTribeBundle(currentUser.id),
-        ]);
-        if (!isActive) {
+        const cachedAccount = readCachedAccount(currentUser.id);
+        if (cachedAccount) {
+          setProfile(cachedAccount.profile ?? null);
+          setFavoriteItems(cachedAccount.favorites ?? []);
+          setTribe(cachedAccount.tribe ?? null);
+          setIsTribeReady(Boolean(cachedAccount.tribe));
+        } else {
+          setProfile(null);
+          setFavoriteItems([]);
+          setTribe(null);
+          setIsTribeReady(false);
+        }
+
+        loadTribeBundle(currentUser.id)
+          .then((tribeBundle) => {
+            if (!isActive || hydrationId !== activeHydrationIdRef.current) {
+              return;
+            }
+            setTribe(tribeBundle);
+            setIsTribeReady(true);
+          })
+          .catch((error) => {
+            console.error(error);
+            if (!isActive || hydrationId !== activeHydrationIdRef.current) {
+              return;
+            }
+            setIsTribeReady(true);
+          });
+
+        const bundle = await loadAccountBundle(currentUser.id, currentUser);
+        if (!isActive || hydrationId !== activeHydrationIdRef.current) {
           return;
         }
         setProfile(bundle.profile);
         setFavoriteItems(bundle.favorites);
-        setTribe(tribeBundle);
+        lastSyncedFavoritesRef.current = serializeFavoriteItems(bundle.favorites);
+        hasRemoteAccountBundleRef.current = true;
       } catch (error) {
         console.error(error);
       } finally {
-        if (isActive) {
+        if (isActive && hydrationId === activeHydrationIdRef.current) {
           setIsAccountReady(true);
         }
       }
@@ -349,13 +575,25 @@ export default function App() {
   }, []);
   // Persist favourites when the user and account are ready
   useEffect(() => {
-    if (!authUser || !isAccountReady || !isSupabaseConfigured()) {
+    if (!authUser || !isAccountReady || !isSupabaseConfigured() || !hasRemoteAccountBundleRef.current) {
       return;
     }
+    const nextSerializedFavorites = serializeFavoriteItems(favoriteItems);
+    if (nextSerializedFavorites === lastSyncedFavoritesRef.current) {
+      return;
+    }
+    lastSyncedFavoritesRef.current = nextSerializedFavorites;
     syncFavoriteSnapshots(authUser.id, favoriteItems).catch((error) => {
       console.error(error);
     });
   }, [authUser, favoriteItems, isAccountReady]);
+
+  useEffect(() => {
+    if (!authUser || !profile) {
+      return;
+    }
+    writeCachedAccount(authUser.id, { profile, favorites: favoriteItems, tribe });
+  }, [authUser, profile, favoriteItems, tribe]);
 
   const isSearchView = view === 'search';
 
@@ -593,8 +831,8 @@ export default function App() {
     showFavoritesOnly ||
     showTribeOnly;
   const searchEntries = useMemo(
-    () => filterEntries(selectedEntries, { query, day: 'All days', stage: 'All stages' }),
-    [selectedEntries, query]
+    () => filterEntries(browseableEntries, { query, day: 'All days', stage: 'All stages' }),
+    [browseableEntries, query]
   );
   const groupedSearchEntries = useMemo(
     () => groupEntriesByDayAndStage(searchEntries),
@@ -697,17 +935,23 @@ export default function App() {
               >
                 {authUser ? (
                   <>
-                    <img
-                      src={resolveProfileAvatarUrl(profile) || getPresetAvatarUrl(1)}
-                      alt="User avatar"
-                      className="profile-trigger__image"
-                    />
-                    <div className="profile-trigger__details">
-                      <span className="profile-trigger__name">
-                        {profile?.first_name} {profile?.last_name}
-                      </span>
-                      <span className="profile-trigger__username">@{profile?.username}</span>
-                    </div>
+                    {profile ? (
+                      <>
+                        <img
+                          src={resolveProfileAvatarUrl(profile)}
+                          alt="User avatar"
+                          className="profile-trigger__image"
+                        />
+                        <div className="profile-trigger__details">
+                          <span className="profile-trigger__name">
+                            {profile.first_name} {profile.last_name}
+                          </span>
+                          <span className="profile-trigger__username">@{profile.username}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <UserRound size={20} />
+                    )}
                   </>
                 ) : (
                   <UserRound size={20} />
@@ -917,7 +1161,7 @@ export default function App() {
           {view === 'lineup' && (
             <LineupView
               groupedEntries={groupedVisibleEntries}
-              entries={selectedEntries}
+              entries={browseableEntries}
               favorites={favoriteIds}
               toggleFavorite={toggleFavorite}
               showTribeOnly={showTribeOnly}
@@ -928,7 +1172,7 @@ export default function App() {
             (query.trim() ? (
               <LineupView
                 groupedEntries={groupedSearchEntries}
-                entries={selectedEntries}
+                entries={browseableEntries}
                 favorites={favoriteIds}
                 toggleFavorite={toggleFavorite}
                 tribeLikesByEntryId={tribeLikesByEntryId}
@@ -939,7 +1183,7 @@ export default function App() {
           {view === 'reviews' && (
             <ReviewsView
               reviewFavorites={filteredReviewFavorites}
-              entries={selectedEntries}
+              entries={browseableEntries}
               favorites={favoriteIds}
               toggleFavorite={toggleFavorite}
               removeReviewFavorite={removeReviewFavorite}
@@ -949,6 +1193,7 @@ export default function App() {
             <TribeView
               tribe={tribe}
               isBusy={isTribeBusy}
+              isHydrating={!isTribeReady}
               onCreateTribe={handleCreateTribe}
               onJoinTribe={handleJoinTribe}
               onLeaveTribe={handleLeaveTribe}
@@ -960,6 +1205,8 @@ export default function App() {
         <ProfileSettingsView
           user={authUser}
           profile={profile}
+          hidePastEvents={hidePastEvents}
+          hideUndatedEvents={hideUndatedEvents}
           lineups={lineupSources}
           selectedLineupKey={selectedLineupKey}
           onSelectLineup={(lineupKey) => {
@@ -973,11 +1220,19 @@ export default function App() {
             setHasAutoExpandedSearchScope(false);
           }}
           onBack={() => setView('lineup')}
+          onHidePastEventsChange={setHidePastEvents}
+          onHideUndatedEventsChange={setHideUndatedEvents}
           onProfileUpdated={(nextProfile) => setProfile(nextProfile)}
           onSignedOut={() => {
+            clearCachedAccount(authUser?.id ?? lastAuthenticatedUserIdRef.current);
+            writeLastAuthenticatedUserId(null);
+            lastAuthenticatedUserIdRef.current = null;
+            hasRemoteAccountBundleRef.current = false;
+            lastSyncedFavoritesRef.current = serializeFavoriteItems([]);
             setAuthUser(null);
             setProfile(null);
             setTribe(null);
+            setIsTribeReady(true);
             setFavoriteItems([]);
             setShowTribeOnly(false);
             setView('lineup');

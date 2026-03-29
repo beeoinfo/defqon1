@@ -46,6 +46,7 @@ export default function LineupView({
   }
   return (
     <section className="content-grid">
+      <h1 className="sr-only">Line-up</h1>
       {Object.entries(groupedEntries).map(([day, dayStages]) => (
         <section key={day} className="day-section">
           <div className="day-section__header">
