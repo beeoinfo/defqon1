@@ -379,6 +379,9 @@ select {
 .lineup-grid-shell {
   min-width: 0;
   overflow: visible;
+  container-type: inline-size;
+  --lineup-shell-inline-padding: 0px;
+  --lineup-fit-safety: 2px;
 }
 .lineup-day-columns {
   --lineup-day-gap: 20px;
@@ -1040,10 +1043,21 @@ select {
   }
   .lineup-day-columns {
     width: max-content;
-    min-width: max-content;
+    min-width: 100%;
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: clamp(280px, calc((100vw - 84px) / 3), 380px);
+    grid-auto-columns: clamp(
+      280px,
+      calc(
+        (
+          100cqw
+          - (var(--lineup-shell-inline-padding) * 2)
+          - (var(--lineup-day-gap) * 2)
+          - (var(--lineup-fit-safety) * 3)
+        ) / 3
+      ),
+      380px
+    );
   }
   .content-grid--lineup-single-day .lineup-grid-shell {
     overflow: visible;
@@ -1062,7 +1076,18 @@ select {
     grid-template-columns: 1fr 1fr 1fr;
   }
   .lineup-day-columns {
-    grid-auto-columns: clamp(280px, calc((100vw - 64px) / 2), 420px);
+    grid-auto-columns: clamp(
+      280px,
+      calc(
+        (
+          100cqw
+          - (var(--lineup-shell-inline-padding) * 2)
+          - var(--lineup-day-gap)
+          - (var(--lineup-fit-safety) * 2)
+        ) / 2
+      ),
+      420px
+    );
   }
   .card-list.lineup-entry-list--single-day {
     column-count: 2;
@@ -1118,7 +1143,9 @@ select {
 }
 @media (max-width: 768px) {
   .lineup-day-columns {
-    grid-auto-columns: calc(100vw - 40px);
+    grid-auto-columns: calc(
+      100cqw - (var(--lineup-shell-inline-padding) * 2) - var(--lineup-fit-safety)
+    );
   }
 }
 .tribe-view {
