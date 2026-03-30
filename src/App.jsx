@@ -1327,6 +1327,7 @@ export default function App() {
               toggleFavorite={toggleFavorite}
               canToggleFavorites={!favoritesReadOnly}
               tribeLikesByEntryId={tribeLikesByEntryId}
+              stackDays
             />
           ) : (
             <EmptyState text="Start typing to search an artist or an event in the lineup" />

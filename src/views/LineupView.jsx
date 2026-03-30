@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
@@ -146,7 +146,13 @@ function LineupView({
   showTribeOnly = false,
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
+  stackDays = false,
 }) {
+  const gridShellRef = useRef(null);
+  const dayRailTrackRef = useRef(null);
+  const dayRailRef = useRef(null);
+  const dayColumnRefs = useRef(new Map());
+  const dayPillRefs = useRef(new Map());
   const hasVisibleFavorites = useMemo(
     () =>
       Object.values(groupedEntries).some((dayStages) =>
@@ -248,7 +254,20 @@ function LineupView({
 
     return new Set(prioritizedStagePanels.slice(0, renderedStagePanelCount));
   }, [dayEntries, renderedStagePanelCount]);
+  const visibleDayEntries = useMemo(
+    () =>
+      dayEntries
+        .map((dayEntry) => ({
+          ...dayEntry,
+          visibleStages: dayEntry.stages.filter((stageEntry) =>
+            visibleStagePanelKeys.has(stageEntry.key)
+          ),
+        }))
+        .filter((dayEntry) => dayEntry.visibleStages.length > 0),
+    [dayEntries, visibleStagePanelKeys]
+  );
   const isSingleDayView = dayEntries.length === 1;
+  const useDenseEntryGrid = isSingleDayView || stackDays;
 
   useEffect(() => {
     setRenderedStagePanelCount(initialRenderedStagePanelCount);
@@ -288,6 +307,145 @@ function LineupView({
     };
   }, [initialRenderedStagePanelCount, totalStagePanelCount]);
 
+  useEffect(() => {
+    const gridShell = gridShellRef.current;
+    const dayRailTrack = dayRailTrackRef.current;
+
+    if (!gridShell || !dayRailTrack || stackDays) {
+      return undefined;
+    }
+
+    const syncDayRail = () => {
+      dayRailTrack.style.transform = `translate3d(${-gridShell.scrollLeft}px, 0, 0)`;
+    };
+
+    syncDayRail();
+    gridShell.addEventListener('scroll', syncDayRail, { passive: true });
+    window.addEventListener('resize', syncDayRail, { passive: true });
+
+    return () => {
+      gridShell.removeEventListener('scroll', syncDayRail);
+      window.removeEventListener('resize', syncDayRail);
+    };
+  }, [stackDays, visibleDayEntries.length]);
+
+  useEffect(() => {
+    const dayRail = dayRailRef.current;
+
+    if (!dayRail || stackDays) {
+      return undefined;
+    }
+
+    let frameId = null;
+
+    const syncDayPillVisibility = () => {
+      frameId = null;
+      const railBottom = dayRail.getBoundingClientRect().bottom;
+
+      visibleDayEntries.forEach(({ day }) => {
+        const dayColumn = dayColumnRefs.current.get(day);
+        const dayPill = dayPillRefs.current.get(day);
+
+        if (!dayColumn || !dayPill) {
+          return;
+        }
+
+        const shouldHide = dayColumn.getBoundingClientRect().bottom <= railBottom + 2;
+        dayPill.classList.toggle('lineup-day-rail__pill--hidden', shouldHide);
+      });
+    };
+
+    const scheduleSyncDayPillVisibility = () => {
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(syncDayPillVisibility);
+    };
+
+    scheduleSyncDayPillVisibility();
+    window.addEventListener('scroll', scheduleSyncDayPillVisibility, { passive: true });
+    window.addEventListener('resize', scheduleSyncDayPillVisibility, { passive: true });
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      window.removeEventListener('scroll', scheduleSyncDayPillVisibility);
+      window.removeEventListener('resize', scheduleSyncDayPillVisibility);
+    };
+  }, [stackDays, visibleDayEntries]);
+
+  const renderStagePanels = (visibleStages) =>
+    visibleStages.map(({ key, stage, stageEntries }) => {
+      const theme = getStageTheme(stage);
+
+      return (
+        <section
+          key={key}
+          className="stage-panel lineup-stage-slot"
+          style={{
+            borderColor: theme.accentBorder,
+            background: theme.accentSoft,
+          }}
+        >
+          <div className="stage-panel__header">
+            <div className="stage-title-wrap">
+              <span
+                className="stage-pill"
+                style={{ background: theme.accent, color: theme.activeText }}
+              >
+                {stage}
+              </span>
+            </div>
+            <span>
+              {stageEntries.length} {stageEntries.length === 1 ? 'artist' : 'artists'}
+            </span>
+          </div>
+          <div
+            className={
+              useDenseEntryGrid
+                ? 'card-list lineup-entry-list lineup-entry-list--single-day'
+                : 'card-list lineup-entry-list'
+            }
+          >
+            {stageEntries.map((entry) => {
+              const isFavorite = favoriteIdSet.has(entry.id);
+              const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
+              const tribeLikesFromOthers = showTribeOnly
+                ? tribeLikes.filter((member) => !member.isCurrentUser)
+                : EMPTY_ITEMS;
+              const relatedSuggestions =
+                isFavorite && !showTribeOnly
+                  ? (alternativeEntriesById.get(entry.id) ?? EMPTY_ITEMS)
+                  : EMPTY_ITEMS;
+              const suggestionFavoriteSignature = relatedSuggestions
+                .slice(0, 3)
+                .map(
+                  (suggestion) => `${suggestion.id}:${favoriteIdSet.has(suggestion.id) ? 1 : 0}`
+                )
+                .join('|');
+
+              return (
+                <LineupEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  isFavorite={isFavorite}
+                  favoriteIdSet={favoriteIdSet}
+                  toggleFavorite={toggleFavorite}
+                  canToggleFavorites={canToggleFavorites}
+                  showTribeOnly={showTribeOnly}
+                  tribeLikesFromOthers={tribeLikesFromOthers}
+                  relatedSuggestions={relatedSuggestions}
+                  suggestionFavoriteSignature={suggestionFavoriteSignature}
+                />
+              );
+            })}
+          </div>
+        </section>
+      );
+    });
+
   if (!hasEntries) {
     return <EmptyState text="No entries found." />;
   }
@@ -312,101 +470,66 @@ function LineupView({
           </div>
         </div>
       ) : null}
-      <div className="lineup-grid-shell">
-        <div
-          className="lineup-day-columns"
-          style={{ '--lineup-day-count': String(Math.max(dayEntries.length, 1)) }}
-        >
-          {dayEntries.map(({ day, stages }) => {
-            const stagePanels = stages.map(({ key, stage, stageEntries }) => {
-              if (!visibleStagePanelKeys.has(key)) {
-                return null;
-              }
-
-              const theme = getStageTheme(stage);
-
-              return (
-                <section
-                  key={key}
-                  className="stage-panel lineup-stage-slot"
-                  style={{
-                    borderColor: theme.accentBorder,
-                    background: theme.accentSoft,
-                  }}
-                >
-                  <div className="stage-panel__header">
-                    <div className="stage-title-wrap">
-                      <span
-                        className="stage-pill"
-                        style={{ background: theme.accent, color: theme.activeText }}
-                      >
-                        {stage}
-                      </span>
-                    </div>
-                    <span>
-                      {stageEntries.length} {stageEntries.length === 1 ? 'artist' : 'artists'}
-                    </span>
-                  </div>
-                  <div
-                    className={
-                      isSingleDayView
-                        ? 'card-list lineup-entry-list lineup-entry-list--single-day'
-                        : 'card-list lineup-entry-list'
-                    }
+      {stackDays ? (
+        visibleDayEntries.map(({ day, visibleStages }) => (
+          <section key={day} className="day-section day-section--stacked-lineup">
+            <div className="day-section__header day-section__header--stacked-lineup">
+              <h2 className="day-section__pill-heading">
+                <span className="lineup-day-rail__pill">{day}</span>
+              </h2>
+            </div>
+            <div className="day-stage-list">{renderStagePanels(visibleStages)}</div>
+          </section>
+        ))
+      ) : (
+      <div
+        className="lineup-grid-frame"
+        style={{ '--lineup-day-count': String(Math.max(visibleDayEntries.length, 1)) }}
+      >
+        <div ref={dayRailRef} className="lineup-day-rail" aria-hidden="true">
+          <div className="lineup-day-rail__viewport">
+            <div ref={dayRailTrackRef} className="lineup-day-rail__track">
+              {visibleDayEntries.map(({ day }) => (
+                <div key={day} className="lineup-day-rail__cell">
+                  <span
+                    ref={(node) => {
+                      if (node) {
+                        dayPillRefs.current.set(day, node);
+                        return;
+                      }
+                      dayPillRefs.current.delete(day);
+                    }}
+                    className="lineup-day-rail__pill"
                   >
-                    {stageEntries.map((entry) => {
-                      const isFavorite = favoriteIdSet.has(entry.id);
-                      const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
-                      const tribeLikesFromOthers = showTribeOnly
-                        ? tribeLikes.filter((member) => !member.isCurrentUser)
-                        : EMPTY_ITEMS;
-                      const relatedSuggestions =
-                        isFavorite && !showTribeOnly
-                          ? (alternativeEntriesById.get(entry.id) ?? EMPTY_ITEMS)
-                          : EMPTY_ITEMS;
-                      const suggestionFavoriteSignature = relatedSuggestions
-                        .slice(0, 3)
-                        .map(
-                          (suggestion) =>
-                            `${suggestion.id}:${favoriteIdSet.has(suggestion.id) ? 1 : 0}`
-                        )
-                        .join('|');
-
-                      return (
-                        <LineupEntryCard
-                          key={entry.id}
-                          entry={entry}
-                          isFavorite={isFavorite}
-                          favoriteIdSet={favoriteIdSet}
-                          toggleFavorite={toggleFavorite}
-                          canToggleFavorites={canToggleFavorites}
-                          showTribeOnly={showTribeOnly}
-                          tribeLikesFromOthers={tribeLikesFromOthers}
-                          relatedSuggestions={relatedSuggestions}
-                          suggestionFavoriteSignature={suggestionFavoriteSignature}
-                        />
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            });
-
-            if (!stagePanels.some(Boolean)) {
-              return null;
-            }
-
-            return (
-              <section key={day} className="lineup-day-column">
-                <div className="lineup-day-column__header">
-                  <h2>{day}</h2>
+                    {day}
+                  </span>
                 </div>
-                <div className="lineup-stage-list">{stagePanels}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div ref={gridShellRef} className="lineup-grid-shell">
+          <div className="lineup-day-columns">
+            {visibleDayEntries.map(({ day, visibleStages }) => (
+              <section
+                key={day}
+                ref={(node) => {
+                  if (node) {
+                    dayColumnRefs.current.set(day, node);
+                    return;
+                  }
+                  dayColumnRefs.current.delete(day);
+                }}
+                className="lineup-day-column"
+              >
+                <h2 className="sr-only">{day}</h2>
+                <div className="lineup-stage-list">{renderStagePanels(visibleStages)}</div>
               </section>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
+      )}
     </section>
   );
 }
