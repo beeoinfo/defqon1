@@ -306,6 +306,7 @@ export default function App() {
   // View state: lineup, reviews, tribe, profileSettings
   const [view, setView] = useState('lineup');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isFilterStackVisible, setIsFilterStackVisible] = useState(true);
 
   // Local UI state for filter drawers
   // Only one filter drawer can be open at a time: 'day', 'stage' or null
@@ -317,6 +318,7 @@ export default function App() {
   const lastSyncedFavoritesRef = useRef(serializeFavoriteItems(bootAccount?.favorites ?? []));
   const lastHydratedAuthKeyRef = useRef(bootUserId ? `user:${bootUserId}` : 'guest');
   const hydrateAccountRef = useRef(null);
+  const lastScrollYRef = useRef(0);
   // Supabase auth and account
   const [authUser, setAuthUser] = useState(() => (bootUserId ? { id: bootUserId } : null));
   const [profile, setProfile] = useState(() => bootAccount?.profile ?? null);
@@ -698,16 +700,41 @@ export default function App() {
   }, [view]);
   useEffect(() => {
     const handleScroll = () => {
-      setShowBackToTop((window.scrollY || window.pageYOffset || 0) > 360);
+      const currentY = window.scrollY || window.pageYOffset || 0;
+
+      setShowBackToTop(currentY > 360);
+
+      if (!isLineupView || openDrawer) {
+        setIsFilterStackVisible(true);
+        lastScrollYRef.current = currentY;
+        return;
+      }
+
+      if (currentY <= 96) {
+        setIsFilterStackVisible(true);
+        lastScrollYRef.current = currentY;
+        return;
+      }
+
+      const delta = currentY - lastScrollYRef.current;
+
+      if (delta > 6 && currentY > 140) {
+        setIsFilterStackVisible(false);
+      } else if (delta < -6) {
+        setIsFilterStackVisible(true);
+      }
+
+      lastScrollYRef.current = currentY;
     };
 
+    lastScrollYRef.current = window.scrollY || window.pageYOffset || 0;
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isLineupView, openDrawer]);
   useEffect(() => {
     if (!tribe && showTribeOnly) {
       setShowTribeOnly(false);
@@ -1070,7 +1097,10 @@ export default function App() {
             )}
           </header>
           {showFilters && (
-            <div className="filter-stack" data-filter-layer="true">
+            <div
+              className={isFilterStackVisible ? 'filter-stack' : 'filter-stack filter-stack--hidden'}
+              data-filter-layer="true"
+            >
               <div className={openDrawer ? 'filter-row filter-row--attached' : 'filter-row'}>
                 {hasActiveFilters && (
                   <div className="filter-row__sticky">
