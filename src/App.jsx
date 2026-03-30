@@ -1447,13 +1447,18 @@ export default function App() {
           </button>
         </nav>
       )}
-      {view !== 'profileSettings' && showBackToTop && (
+      {view !== 'profileSettings' && (
         <button
           type="button"
-          className="icon-button back-to-top-button"
+          className={
+            showBackToTop
+              ? 'icon-button back-to-top-button back-to-top-button--visible'
+              : 'icon-button back-to-top-button'
+          }
           onClick={scrollToTopQuickly}
           aria-label="Back to top"
           title="Back to top"
+          tabIndex={showBackToTop ? 0 : -1}
         >
           <ArrowUp size={18} />
         </button>

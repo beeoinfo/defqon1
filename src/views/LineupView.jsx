@@ -1,4 +1,5 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
@@ -152,7 +153,7 @@ function LineupView({
   const dayRailTrackRef = useRef(null);
   const dayRailRef = useRef(null);
   const dayColumnRefs = useRef(new Map());
-  const dayPillRefs = useRef(new Map());
+  const dayCellRefs = useRef(new Map());
   const hasVisibleFavorites = useMemo(
     () =>
       Object.values(groupedEntries).some((dayStages) =>
@@ -315,19 +316,63 @@ function LineupView({
       return undefined;
     }
 
+    let frameId = null;
+
     const syncDayRail = () => {
+      frameId = null;
       dayRailTrack.style.transform = `translate3d(${-gridShell.scrollLeft}px, 0, 0)`;
+
+      let activeDay = visibleDayEntries[0]?.day ?? null;
+      let smallestOffset = Number.POSITIVE_INFINITY;
+
+      visibleDayEntries.forEach(({ day }) => {
+        const dayColumn = dayColumnRefs.current.get(day);
+
+        if (!dayColumn) {
+          return;
+        }
+
+        const offset = Math.abs(dayColumn.offsetLeft - gridShell.scrollLeft);
+
+        if (offset < smallestOffset) {
+          smallestOffset = offset;
+          activeDay = day;
+        }
+      });
+
+      visibleDayEntries.forEach(({ day }) => {
+        const dayCell = dayCellRefs.current.get(day);
+        const dayColumn = dayColumnRefs.current.get(day);
+
+        if (!dayCell) {
+          return;
+        }
+
+        dayCell.classList.toggle('lineup-day-rail__cell--active', day === activeDay);
+        dayColumn?.classList.toggle('lineup-day-column--active', day === activeDay);
+      });
     };
 
-    syncDayRail();
-    gridShell.addEventListener('scroll', syncDayRail, { passive: true });
-    window.addEventListener('resize', syncDayRail, { passive: true });
+    const scheduleSyncDayRail = () => {
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(syncDayRail);
+    };
+
+    scheduleSyncDayRail();
+    gridShell.addEventListener('scroll', scheduleSyncDayRail, { passive: true });
+    window.addEventListener('resize', scheduleSyncDayRail, { passive: true });
 
     return () => {
-      gridShell.removeEventListener('scroll', syncDayRail);
-      window.removeEventListener('resize', syncDayRail);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+      gridShell.removeEventListener('scroll', scheduleSyncDayRail);
+      window.removeEventListener('resize', scheduleSyncDayRail);
     };
-  }, [stackDays, visibleDayEntries.length]);
+  }, [stackDays, visibleDayEntries]);
 
   useEffect(() => {
     const dayRail = dayRailRef.current;
@@ -344,14 +389,15 @@ function LineupView({
 
       visibleDayEntries.forEach(({ day }) => {
         const dayColumn = dayColumnRefs.current.get(day);
-        const dayPill = dayPillRefs.current.get(day);
+        const dayCell = dayCellRefs.current.get(day);
 
-        if (!dayColumn || !dayPill) {
+        if (!dayColumn || !dayCell) {
           return;
         }
 
         const shouldHide = dayColumn.getBoundingClientRect().bottom <= railBottom + 2;
-        dayPill.classList.toggle('lineup-day-rail__pill--hidden', shouldHide);
+        dayCell.classList.toggle('lineup-day-rail__cell--hidden', shouldHide);
+        dayColumn.classList.toggle('lineup-day-column--title-hidden', shouldHide);
       });
     };
 
@@ -375,6 +421,24 @@ function LineupView({
       window.removeEventListener('resize', scheduleSyncDayPillVisibility);
     };
   }, [stackDays, visibleDayEntries]);
+
+  const scrollToDayIndex = useCallback(
+    (targetIndex) => {
+      const gridShell = gridShellRef.current;
+      const targetDay = visibleDayEntries[targetIndex]?.day;
+      const targetDayColumn = targetDay ? dayColumnRefs.current.get(targetDay) : null;
+
+      if (!gridShell || !targetDayColumn) {
+        return;
+      }
+
+      gridShell.scrollTo({
+        left: targetDayColumn.offsetLeft,
+        behavior: 'smooth',
+      });
+    },
+    [visibleDayEntries]
+  );
 
   const renderStagePanels = (visibleStages) =>
     visibleStages.map(({ key, stage, stageEntries }) => {
@@ -486,23 +550,50 @@ function LineupView({
         className="lineup-grid-frame"
         style={{ '--lineup-day-count': String(Math.max(visibleDayEntries.length, 1)) }}
       >
-        <div ref={dayRailRef} className="lineup-day-rail" aria-hidden="true">
+        <div ref={dayRailRef} className="lineup-day-rail">
           <div className="lineup-day-rail__viewport">
-            <div ref={dayRailTrackRef} className="lineup-day-rail__track">
-              {visibleDayEntries.map(({ day }) => (
-                <div key={day} className="lineup-day-rail__cell">
-                  <span
-                    ref={(node) => {
-                      if (node) {
-                        dayPillRefs.current.set(day, node);
-                        return;
-                      }
-                      dayPillRefs.current.delete(day);
-                    }}
-                    className="lineup-day-rail__pill"
-                  >
-                    {day}
-                  </span>
+            <div ref={dayRailTrackRef} className="lineup-day-rail__track" aria-hidden="true">
+              {visibleDayEntries.map(({ day }, index) => (
+                <div
+                  key={day}
+                  ref={(node) => {
+                    if (node) {
+                      dayCellRefs.current.set(day, node);
+                      return;
+                    }
+                    dayCellRefs.current.delete(day);
+                  }}
+                  className="lineup-day-rail__cell"
+                >
+                  <span className="lineup-day-rail__pill">{day}</span>
+                  <div className="lineup-day-rail__nav-inline">
+                    {index > 0 ? (
+                      <button
+                        type="button"
+                        className="lineup-day-rail__nav-button lineup-day-rail__nav-button--prev"
+                        onClick={() => scrollToDayIndex(index - 1)}
+                        aria-label={`Scroll to previous day before ${day}`}
+                      >
+                        <ChevronLeft size={16} />
+                        <span className="lineup-day-rail__nav-label">
+                          {visibleDayEntries[index - 1]?.day}
+                        </span>
+                      </button>
+                    ) : null}
+                    {index < visibleDayEntries.length - 1 ? (
+                      <button
+                        type="button"
+                        className="lineup-day-rail__nav-button lineup-day-rail__nav-button--next"
+                        onClick={() => scrollToDayIndex(index + 1)}
+                        aria-label={`Scroll to next day after ${day}`}
+                      >
+                        <span className="lineup-day-rail__nav-label">
+                          {visibleDayEntries[index + 1]?.day}
+                        </span>
+                        <ChevronRight size={16} />
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>
@@ -510,7 +601,7 @@ function LineupView({
         </div>
         <div ref={gridShellRef} className="lineup-grid-shell">
           <div className="lineup-day-columns">
-            {visibleDayEntries.map(({ day, visibleStages }) => (
+            {visibleDayEntries.map(({ day, visibleStages }, index) => (
               <section
                 key={day}
                 ref={(node) => {
@@ -524,6 +615,40 @@ function LineupView({
               >
                 <h2 className="sr-only">{day}</h2>
                 <div className="lineup-stage-list">{renderStagePanels(visibleStages)}</div>
+                {visibleDayEntries.length > 1 ? (
+                  <div className="lineup-mobile-nav" aria-label={`Day navigation for ${day}`}>
+                    <div className="lineup-mobile-nav__slot lineup-mobile-nav__slot--prev">
+                      {index > 0 ? (
+                        <button
+                          type="button"
+                          className="lineup-mobile-nav__button"
+                          onClick={() => scrollToDayIndex(index - 1)}
+                          aria-label={`Scroll to ${visibleDayEntries[index - 1]?.day}`}
+                        >
+                          <ChevronLeft size={18} />
+                          <span className="lineup-mobile-nav__label">
+                            {visibleDayEntries[index - 1]?.day}
+                          </span>
+                        </button>
+                      ) : null}
+                    </div>
+                    <div className="lineup-mobile-nav__slot lineup-mobile-nav__slot--next">
+                      {index < visibleDayEntries.length - 1 ? (
+                        <button
+                          type="button"
+                          className="lineup-mobile-nav__button"
+                          onClick={() => scrollToDayIndex(index + 1)}
+                          aria-label={`Scroll to ${visibleDayEntries[index + 1]?.day}`}
+                        >
+                          <span className="lineup-mobile-nav__label">
+                            {visibleDayEntries[index + 1]?.day}
+                          </span>
+                          <ChevronRight size={18} />
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
               </section>
             ))}
           </div>

@@ -240,7 +240,7 @@ export default function ProfileSettingsView({
   };
 
   return (
-    <>
+    <div className="profile-settings-page">
       <header className="profile-settings__sticky-header">
         <div className="profile-settings__sticky-shell">
           <div className="profile-settings__sticky-inner">
@@ -453,7 +453,11 @@ export default function ProfileSettingsView({
           </button>
         </section>
 
-        <footer className="profile-settings__footer">
+          </div>
+        </section>
+      </main>
+      <footer className="profile-settings__footer-shell">
+        <div className="profile-settings__footer">
           <p>
             Made with 🩷 by <strong>Dylan Bergozza</strong>
           </p>
@@ -471,10 +475,8 @@ export default function ProfileSettingsView({
               Legal
             </button>
           </div>
-            </footer>
-          </div>
-        </section>
-      </main>
-    </>
+        </div>
+      </footer>
+    </div>
   );
 }
