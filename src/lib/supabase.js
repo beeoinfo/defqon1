@@ -468,7 +468,7 @@ export async function loadTribeBundle(userId) {
   }
   const { data: tribe, error: tribeError } = await client
     .from('tribes')
-    .select('id, code, owner_user_id, created_at')
+    .select()
     .eq('id', membership.tribe_id)
     .maybeSingle();
   if (tribeError) {
@@ -528,6 +528,7 @@ export async function loadTribeBundle(userId) {
   }, new Map());
   return {
     tribeId: tribe.id,
+    name: tribe.name ?? null,
     code: tribe.code,
     ownerUserId: tribe.owner_user_id,
     createdAt: tribe.created_at,
@@ -543,7 +544,32 @@ export async function loadTribeBundle(userId) {
   };
 }
 
-export async function createCurrentUserTribe() {
+export async function updateCurrentUserTribeName({ tribeId, name }) {
+  const client = ensureSupabase();
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Authentication required.');
+  }
+  const nextName = String(name ?? '').trim().slice(0, 48);
+  if (!nextName) {
+    throw new Error('Please enter a tribe name.');
+  }
+  const { data, error } = await client
+    .from('tribes')
+    .update({ name: nextName })
+    .eq('id', tribeId)
+    .select()
+    .maybeSingle();
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    throw new Error('Could not rename the tribe.');
+  }
+  return loadTribeBundle(user.id);
+}
+
+export async function createCurrentUserTribe(name) {
   const client = ensureSupabase();
   const { error } = await client.rpc('create_current_user_tribe');
   if (error) {
@@ -553,7 +579,16 @@ export async function createCurrentUserTribe() {
   if (!user) {
     throw new Error('Authentication required.');
   }
-  return loadTribeBundle(user.id);
+  const tribe = await loadTribeBundle(user.id);
+  const nextName = String(name ?? '').trim();
+  if (!tribe || !nextName) {
+    return tribe;
+  }
+  try {
+    return await updateCurrentUserTribeName({ tribeId: tribe.tribeId, name: nextName });
+  } catch {
+    return tribe;
+  }
 }
 
 export async function joinCurrentUserTribeByCode(code) {

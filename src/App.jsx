@@ -51,6 +51,8 @@ import {
   loadTribeBundle,
   supabase,
   syncFavoriteSnapshots,
+  updateCurrentUserTribeName,
+  normalizeTribeCode,
 } from './lib/supabase';
 import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
 import { getStageTheme } from './lib/stageThemes';
@@ -67,6 +69,7 @@ import './index.css';
 
 const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
 const LAST_AUTHENTICATED_USER_ID_KEY = 'last-authenticated-user-id:v1';
+const PENDING_TRIBE_INVITE_KEY = 'pending-tribe-invite:v1';
 
 function getAccountCacheKey(userId) {
   return `${ACCOUNT_CACHE_KEY_PREFIX}${userId}`;
@@ -79,6 +82,7 @@ function sanitizeCachedTribe(tribe) {
 
   return {
     tribeId: tribe.tribeId ?? null,
+    name: tribe.name ?? null,
     code: tribe.code ?? null,
     ownerUserId: tribe.ownerUserId ?? null,
     createdAt: tribe.createdAt ?? null,
@@ -87,6 +91,28 @@ function sanitizeCachedTribe(tribe) {
     memberCount: tribe.memberCount ?? 0,
     members: [],
   };
+}
+
+function readPendingTribeInviteCode() {
+  try {
+    return normalizeTribeCode(sessionStorage.getItem(PENDING_TRIBE_INVITE_KEY));
+  } catch {
+    return '';
+  }
+}
+
+function writePendingTribeInviteCode(code) {
+  try {
+    const normalizedCode = normalizeTribeCode(code);
+    if (!normalizedCode) {
+      sessionStorage.removeItem(PENDING_TRIBE_INVITE_KEY);
+      return '';
+    }
+    sessionStorage.setItem(PENDING_TRIBE_INVITE_KEY, normalizedCode);
+    return normalizedCode;
+  } catch {
+    return '';
+  }
 }
 
 function buildCachedAccountPayload(account) {
@@ -325,6 +351,10 @@ export default function App() {
   const [tribe, setTribe] = useState(() => bootAccount?.tribe ?? null);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
+  const [pendingTribeInviteCode, setPendingTribeInviteCode] = useState(() =>
+    readPendingTribeInviteCode()
+  );
+  const [tribeInviteAlert, setTribeInviteAlert] = useState('');
   const [isAccountReady, setIsAccountReady] = useState(!isSupabaseConfigured());
   // Auth modal
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -332,6 +362,7 @@ export default function App() {
   // State to track pending actions waiting for authentication
   const [pendingAction, setPendingAction] = useState(null);
   // Whether search has auto expanded the filter scope
+  const attemptedInviteJoinKeyRef = useRef('');
   const [hasAutoExpandedSearchScope, setHasAutoExpandedSearchScope] = useState(false);
   const activeProfile = profile ?? buildOptimisticProfile(authUser);
   const deferredFavoriteItems = useDeferredValue(favoriteItems);
@@ -380,6 +411,7 @@ export default function App() {
       const avatarUrl =
         resolveProfileAvatarUrl(profileRecord) ||
         getPresetAvatarUrl(profileRecord?.avatar_preset ?? 1);
+      const username = String(profileRecord.username ?? '').trim();
       const firstName = String(profileRecord.first_name ?? '').trim() || profileRecord.username || 'Tribe';
       const lastName = String(profileRecord.last_name ?? '').trim() || 'member';
       const seenEntryIds = new Set();
@@ -399,6 +431,7 @@ export default function App() {
           userId: member.userId,
           firstName,
           lastName,
+          username,
           avatarUrl,
           isCurrentUser: member.userId === authUser?.id,
         });
@@ -552,6 +585,20 @@ export default function App() {
       setHasAutoExpandedSearchScope(true);
     }
   }, [query, hasAutoExpandedSearchScope]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = normalizeTribeCode(params.get('tribe'));
+    if (!inviteCode) {
+      return;
+    }
+    const nextCode = writePendingTribeInviteCode(inviteCode);
+    setPendingTribeInviteCode(nextCode);
+    params.delete('tribe');
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`;
+    window.history.replaceState({}, '', nextUrl);
+  }, []);
   // Hydrate account and tribe from Supabase
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -740,6 +787,48 @@ export default function App() {
       setShowTribeOnly(false);
     }
   }, [tribe, showTribeOnly]);
+
+  useEffect(() => {
+    if (!authUser || !isAccountReady || !pendingTribeInviteCode || tribe || isTribeBusy) {
+      return;
+    }
+    const attemptKey = `${authUser.id}:${pendingTribeInviteCode}`;
+    if (attemptedInviteJoinKeyRef.current === attemptKey) {
+      return;
+    }
+    attemptedInviteJoinKeyRef.current = attemptKey;
+    setIsTribeBusy(true);
+    joinCurrentUserTribeByCode(pendingTribeInviteCode)
+      .then((nextTribe) => {
+        setTribe(nextTribe);
+        setView('tribe');
+        writePendingTribeInviteCode('');
+        setPendingTribeInviteCode('');
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        setIsTribeBusy(false);
+      });
+  }, [authUser, isAccountReady, pendingTribeInviteCode, tribe, isTribeBusy]);
+  const clearPendingTribeInvite = useCallback(() => {
+    writePendingTribeInviteCode('');
+    setPendingTribeInviteCode('');
+    attemptedInviteJoinKeyRef.current = '';
+  }, []);
+  useEffect(() => {
+    if (!pendingTribeInviteCode || !tribe) {
+      return;
+    }
+    if (normalizeTribeCode(tribe.code) === normalizeTribeCode(pendingTribeInviteCode)) {
+      clearPendingTribeInvite();
+      return;
+    }
+    clearPendingTribeInvite();
+    setTribeInviteAlert('Leave your current tribe before joining another one.');
+    setView('tribe');
+  }, [clearPendingTribeInvite, pendingTribeInviteCode, tribe]);
   // Execute pending action after authentication
   useEffect(() => {
     if (!authUser || !isAccountReady || !pendingAction) {
@@ -891,14 +980,15 @@ export default function App() {
     setFavoriteItems((prev) => removeFavoriteByKey(prev, favoriteKey));
   }, [favoritesReadOnly, authUser]);
   // Tribe handlers wrap supabase actions
-  const handleCreateTribe = useCallback(async () => {
+  const handleCreateTribe = useCallback(async (name) => {
     if (!authUser) {
       requestAuth({ type: 'open-tribe' });
       return;
     }
     setIsTribeBusy(true);
     try {
-      const nextTribe = await createCurrentUserTribe();
+      const nextTribe = await createCurrentUserTribe(name);
+      setTribeInviteAlert('');
       setTribe(nextTribe);
     } finally {
       setIsTribeBusy(false);
@@ -912,7 +1002,10 @@ export default function App() {
     setIsTribeBusy(true);
     try {
       const nextTribe = await joinCurrentUserTribeByCode(code);
+      setTribeInviteAlert('');
       setTribe(nextTribe);
+      writePendingTribeInviteCode('');
+      setPendingTribeInviteCode('');
     } finally {
       setIsTribeBusy(false);
     }
@@ -924,11 +1017,24 @@ export default function App() {
     setIsTribeBusy(true);
     try {
       await leaveCurrentUserTribe();
+      setTribeInviteAlert('');
       setTribe(null);
     } finally {
       setIsTribeBusy(false);
     }
   }, [authUser]);
+  const handleRenameTribe = useCallback(async (name) => {
+    if (!authUser || !tribe?.tribeId) {
+      return;
+    }
+    setIsTribeBusy(true);
+    try {
+      const nextTribe = await updateCurrentUserTribeName({ tribeId: tribe.tribeId, name });
+      setTribe(nextTribe);
+    } finally {
+      setIsTribeBusy(false);
+    }
+  }, [authUser, tribe]);
   // Reset filters and query
   const resetFilters = useCallback(() => {
     setOpenDrawer(null);
@@ -1152,31 +1258,6 @@ export default function App() {
                     </button>
                     {authUser && (
                       <>
-                        <button
-                          type="button"
-                          className={
-                            showFavoritesOnly
-                              ? 'filter-pill filter-chip favorites-pill favorites-pill--active'
-                              : 'filter-pill filter-chip favorites-pill'
-                          }
-                          onClick={() => {
-                            setShowFavoritesOnly((prev) => {
-                              const nextValue = !prev;
-                              if (nextValue) {
-                                setSelectedDay('All days');
-                                setSelectedStage('All stages');
-                                setQuery('');
-                                setHasAutoExpandedSearchScope(false);
-                                setOpenDrawer(null);
-                                setShowTribeOnly(false);
-                              }
-                              return nextValue;
-                            });
-                          }}
-                        >
-                          <StarIcon size={14} />
-                          <span className="filter-pill__label">Favorites</span>
-                        </button>
                         {tribe && (
                           <button
                             type="button"
@@ -1201,9 +1282,34 @@ export default function App() {
                             }}
                           >
                             <UsersIcon size={14} />
-                            <span className="filter-pill__label">Tribe</span>
+                            <span className="filter-pill__label">My tribe</span>
                           </button>
                         )}
+                        <button
+                          type="button"
+                          className={
+                            showFavoritesOnly
+                              ? 'filter-pill filter-chip favorites-pill favorites-pill--active'
+                              : 'filter-pill filter-chip favorites-pill'
+                          }
+                          onClick={() => {
+                            setShowFavoritesOnly((prev) => {
+                              const nextValue = !prev;
+                              if (nextValue) {
+                                setSelectedDay('All days');
+                                setSelectedStage('All stages');
+                                setQuery('');
+                                setHasAutoExpandedSearchScope(false);
+                                setOpenDrawer(null);
+                                setShowTribeOnly(false);
+                              }
+                              return nextValue;
+                            });
+                          }}
+                        >
+                          <StarIcon size={14} />
+                          <span className="filter-pill__label">My favorites</span>
+                        </button>
                       </>
                     )}
                   </div>
@@ -1344,12 +1450,16 @@ export default function App() {
         )}
         {view === 'tribe' && (
           <TribeView
+            user={authUser}
             tribe={tribe}
             isBusy={isTribeBusy}
             isHydrating={!isTribeReady}
+            pendingInviteCode={pendingTribeInviteCode}
+            inviteConflictMessage={tribeInviteAlert}
             onCreateTribe={handleCreateTribe}
             onJoinTribe={handleJoinTribe}
             onLeaveTribe={handleLeaveTribe}
+            onRenameTribe={handleRenameTribe}
           />
         )}
       </main>

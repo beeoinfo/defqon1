@@ -1,13 +1,14 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Users, X } from 'lucide-react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
-import { getEntryDisplayName, getEntryMetaLabel } from '../lib/lineup';
+import { getEntryDayLabel, getEntryDisplayName, getEntryMetaLabel } from '../lib/lineup';
 
 const EMPTY_ITEMS = [];
 const INITIAL_STAGE_PANEL_COUNT = 6;
 const STAGE_PANEL_CHUNK_SIZE = 6;
+const MAX_VISIBLE_TRIBE_AVATARS = 10;
 const STAGE_PRIORITY_ORDER = ['BLUE', 'BLACK', 'RED', 'U.V.', 'GREEN', 'YELLOW'];
 const STAGE_PRIORITY_INDEX = new Map(
   STAGE_PRIORITY_ORDER.map((stageName, index) => [stageName, index])
@@ -48,6 +49,73 @@ function compareStages(leftStage, rightStage) {
   return String(leftCanonical).localeCompare(String(rightCanonical));
 }
 
+function buildMockAvatarDataUrl(label, hue) {
+  const safeLabel = String(label).slice(0, 2).toUpperCase();
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="hsl(${hue} 82% 62%)" />
+          <stop offset="100%" stop-color="hsl(${(hue + 28) % 360} 78% 54%)" />
+        </linearGradient>
+      </defs>
+      <rect width="80" height="80" rx="40" fill="url(#g)" />
+      <text x="40" y="46" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="white">${safeLabel}</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function buildMockTribeLikes(baseMember, count = 30) {
+  const mockMembers = [
+    ['Alex', 'Martin'],
+    ['Camille', 'Roy'],
+    ['Nina', 'Perez'],
+    ['Leo', 'Garnier'],
+    ['Maya', 'Dupont'],
+    ['Noah', 'Petit'],
+    ['Jules', 'Henry'],
+    ['Emma', 'Lopez'],
+    ['Lina', 'Moreau'],
+    ['Tom', 'Bernard'],
+    ['Iris', 'Mercier'],
+    ['Sacha', 'Roux'],
+    ['Yanis', 'Fischer'],
+    ['Zoé', 'Marchand'],
+    ['Mila', 'Chevalier'],
+    ['Louis', 'Boyer'],
+    ['Rose', 'Guerin'],
+    ['Hugo', 'Lambert'],
+    ['Chloé', 'Faure'],
+    ['Nathan', 'Barbier'],
+    ['Eva', 'Caron'],
+    ['Paul', 'Muller'],
+    ['Inès', 'Lemoine'],
+    ['Lucas', 'Schmitt'],
+    ['Anna', 'Perrin'],
+    ['Mael', 'Robin'],
+    ['Sarah', 'Colin'],
+    ['Enzo', 'Picard'],
+    ['Léa', 'Aubry'],
+    ['Theo', 'Masson'],
+  ];
+
+  return mockMembers.slice(0, count).map(([firstName, lastName], index) => {
+    const initials = `${firstName[0]}${lastName[0]}`;
+    const hue = (index * 29 + 182) % 360;
+
+    return {
+      userId: `${baseMember.userId}-mock-${index}`,
+      firstName,
+      lastName,
+      username: `${firstName}.${lastName}`.toLowerCase(),
+      avatarUrl: buildMockAvatarDataUrl(initials, hue),
+      isCurrentUser: false,
+    };
+  });
+}
+
 const LineupEntryCard = memo(
   function LineupEntryCard({
     entry,
@@ -57,9 +125,18 @@ const LineupEntryCard = memo(
     canToggleFavorites,
     showTribeOnly,
     tribeLikesFromOthers,
+    onOpenTribeLikes,
     relatedSuggestions,
     suggestionFavoriteSignature,
   }) {
+    const displayTribeLikes = tribeLikesFromOthers;
+    const tribeLikesCount = displayTribeLikes.length;
+    const hasHiddenTribeLikes = tribeLikesCount > MAX_VISIBLE_TRIBE_AVATARS;
+    const visibleTribeLikes = displayTribeLikes.slice(
+      0,
+      hasHiddenTribeLikes ? MAX_VISIBLE_TRIBE_AVATARS - 1 : MAX_VISIBLE_TRIBE_AVATARS
+    );
+
     return (
       <article className={isFavorite ? 'entry-card entry-card--favorite' : 'entry-card'}>
         <div className="entry-card__top">
@@ -73,22 +150,38 @@ const LineupEntryCard = memo(
         </div>
         {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
           <div className="suggestions suggestions--tribe">
-            <div className="suggestions__title">Your tribe like this</div>
-            <div className="tribe-likes-list">
-              {tribeLikesFromOthers.map((member) => (
-                <div key={member.userId} className="tribe-like-card">
-                  <img
-                    src={member.avatarUrl}
-                    alt={`${member.firstName} ${member.lastName}`}
-                    className="tribe-like-card__avatar"
-                  />
-                  <div className="tribe-like-card__name">
-                    <strong>{member.firstName}</strong>
-                    <span>{member.lastName}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <button
+              type="button"
+              className="tribe-summary-trigger"
+              onClick={() => onOpenTribeLikes(entry, displayTribeLikes)}
+              aria-label={`Open tribe details for ${tribeLikesCount} member${tribeLikesCount === 1 ? '' : 's'}`}
+            >
+              <div className="tribe-summary-trigger__avatars" aria-hidden="true">
+                {visibleTribeLikes.map((member, index) => (
+                  <span
+                    key={member.userId}
+                    className="tribe-summary-trigger__avatar-shell"
+                    style={{ zIndex: visibleTribeLikes.length - index }}
+                  >
+                    <img
+                      src={member.avatarUrl}
+                      alt=""
+                      className="tribe-summary-trigger__avatar"
+                    />
+                  </span>
+                ))}
+                {hasHiddenTribeLikes ? (
+                  <span
+                    className="tribe-summary-trigger__avatar-shell tribe-summary-trigger__avatar-shell--more"
+                    style={{ zIndex: visibleTribeLikes.length + 1 }}
+                  >
+                    <span className="tribe-summary-trigger__more">
+                      <Plus size={15} strokeWidth={1.6} aria-hidden="true" />
+                    </span>
+                  </span>
+                ) : null}
+              </div>
+            </button>
           </div>
         ) : null}
         {!showTribeOnly && isFavorite && relatedSuggestions.length > 0 ? (
@@ -133,6 +226,7 @@ const LineupEntryCard = memo(
     previousProps.canToggleFavorites === nextProps.canToggleFavorites &&
     previousProps.showTribeOnly === nextProps.showTribeOnly &&
     previousProps.tribeLikesFromOthers === nextProps.tribeLikesFromOthers &&
+    previousProps.onOpenTribeLikes === nextProps.onOpenTribeLikes &&
     previousProps.relatedSuggestions === nextProps.relatedSuggestions &&
     previousProps.suggestionFavoriteSignature === nextProps.suggestionFavoriteSignature &&
     previousProps.toggleFavorite === nextProps.toggleFavorite
@@ -154,6 +248,14 @@ function LineupView({
   const dayRailRef = useRef(null);
   const dayColumnRefs = useRef(new Map());
   const dayCellRefs = useRef(new Map());
+  const tribeLikesDrawerShellRef = useRef(null);
+  const tribeLikesDrawerPanelRef = useRef(null);
+  const tribeLikesDrawerSpacerRef = useRef(null);
+  const tribeLikesDrawerSettleTimerRef = useRef(null);
+  const tribeLikesDrawerIgnoreScrollRef = useRef(false);
+  const tribeLikesDrawerOpeningRef = useRef(false);
+  const [tribeLikesDrawer, setTribeLikesDrawer] = useState(null);
+  const [tribeLikesDrawerClosing, setTribeLikesDrawerClosing] = useState(false);
   const hasVisibleFavorites = useMemo(
     () =>
       Object.values(groupedEntries).some((dayStages) =>
@@ -269,6 +371,127 @@ function LineupView({
   );
   const isSingleDayView = dayEntries.length === 1;
   const useDenseEntryGrid = isSingleDayView || stackDays;
+  const isTouchDrawerDevice = useCallback(
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: none) and (pointer: coarse)').matches,
+    []
+  );
+  const showTouchDrawerChrome = isTouchDrawerDevice();
+
+  const finalizeCloseTribeLikesDrawer = useCallback(() => {
+    if (tribeLikesDrawerSettleTimerRef.current !== null) {
+      window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
+      tribeLikesDrawerSettleTimerRef.current = null;
+    }
+    tribeLikesDrawerIgnoreScrollRef.current = false;
+    tribeLikesDrawerOpeningRef.current = false;
+    setTribeLikesDrawer(null);
+    setTribeLikesDrawerClosing(false);
+  }, []);
+
+  const openTribeLikesDrawer = useCallback((entry, likes) => {
+    if (tribeLikesDrawer || tribeLikesDrawerOpeningRef.current) {
+      return;
+    }
+
+    if (tribeLikesDrawerSettleTimerRef.current !== null) {
+      window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
+      tribeLikesDrawerSettleTimerRef.current = null;
+    }
+    tribeLikesDrawerOpeningRef.current = true;
+    tribeLikesDrawerIgnoreScrollRef.current = false;
+    setTribeLikesDrawerClosing(false);
+    setTribeLikesDrawer({ entry, likes });
+  }, [tribeLikesDrawer]);
+
+  const closeTribeLikesDrawer = useCallback(() => {
+    if (!tribeLikesDrawer || tribeLikesDrawerClosing || tribeLikesDrawerOpeningRef.current) {
+      return;
+    }
+
+    if (!isTouchDrawerDevice()) {
+      setTribeLikesDrawerClosing(true);
+      tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
+        finalizeCloseTribeLikesDrawer();
+      }, 220);
+      return;
+    }
+
+    const shell = tribeLikesDrawerShellRef.current;
+    const spacer = tribeLikesDrawerSpacerRef.current;
+    const openScrollTop = Math.max(
+      0,
+      spacer?.offsetHeight ?? tribeLikesDrawerPanelRef.current?.offsetHeight ?? 0
+    );
+
+    if (!shell || openScrollTop <= 0) {
+      finalizeCloseTribeLikesDrawer();
+      return;
+    }
+
+    setTribeLikesDrawerClosing(true);
+    tribeLikesDrawerIgnoreScrollRef.current = true;
+    shell.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+
+    tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
+      finalizeCloseTribeLikesDrawer();
+    }, 280);
+  }, [
+    finalizeCloseTribeLikesDrawer,
+    isTouchDrawerDevice,
+    tribeLikesDrawer,
+    tribeLikesDrawerClosing,
+  ]);
+
+  const handleTribeLikesDrawerShellScroll = useCallback(
+    (event) => {
+      if (!isTouchDrawerDevice() || tribeLikesDrawerClosing || tribeLikesDrawerIgnoreScrollRef.current) {
+        return;
+      }
+
+      const shell = event.currentTarget;
+      const panel = tribeLikesDrawerPanelRef.current;
+      const spacer = tribeLikesDrawerSpacerRef.current;
+
+      if (!panel) {
+        return;
+      }
+
+      const openScrollTop = Math.max(
+        0,
+        spacer?.offsetHeight ?? panel.offsetHeight
+      );
+
+      if (tribeLikesDrawerSettleTimerRef.current !== null) {
+        window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
+      }
+
+      tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
+        const currentScrollTop = shell.scrollTop;
+
+        if (currentScrollTop <= openScrollTop * 0.4) {
+          closeTribeLikesDrawer();
+          return;
+        }
+
+        tribeLikesDrawerIgnoreScrollRef.current = true;
+        shell.scrollTo({
+          top: openScrollTop,
+          behavior: 'smooth',
+        });
+
+        tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
+          tribeLikesDrawerIgnoreScrollRef.current = false;
+          tribeLikesDrawerSettleTimerRef.current = null;
+        }, 220);
+      }, 80);
+    },
+    [closeTribeLikesDrawer, isTouchDrawerDevice, tribeLikesDrawerClosing]
+  );
 
   useEffect(() => {
     setRenderedStagePanelCount(initialRenderedStagePanelCount);
@@ -422,6 +645,109 @@ function LineupView({
     };
   }, [stackDays, visibleDayEntries]);
 
+  useEffect(() => {
+    if (!tribeLikesDrawer) {
+      return undefined;
+    }
+
+    const htmlOverflow = document.documentElement.style.overflow;
+    const bodyOverflow = document.body.style.overflow;
+    const bodyOverscrollBehavior = document.body.style.overscrollBehavior;
+
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+
+    if (isTouchDrawerDevice()) {
+      const shell = tribeLikesDrawerShellRef.current;
+      const panel = tribeLikesDrawerPanelRef.current;
+      const spacer = tribeLikesDrawerSpacerRef.current;
+
+      if (shell && panel && spacer) {
+        requestAnimationFrame(() => {
+          const openScrollTop = Math.max(0, panel.offsetHeight);
+          spacer.style.height = `${openScrollTop}px`;
+          tribeLikesDrawerIgnoreScrollRef.current = true;
+          shell.scrollTop = 0;
+
+          requestAnimationFrame(() => {
+            shell.scrollTo({
+              top: openScrollTop,
+              behavior: 'smooth',
+            });
+
+            if (tribeLikesDrawerSettleTimerRef.current !== null) {
+              window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
+            }
+
+            tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
+              tribeLikesDrawerOpeningRef.current = false;
+              tribeLikesDrawerIgnoreScrollRef.current = false;
+              tribeLikesDrawerSettleTimerRef.current = null;
+            }, 260);
+          });
+        });
+      }
+    }
+
+    return () => {
+      if (tribeLikesDrawerSettleTimerRef.current !== null) {
+        window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
+        tribeLikesDrawerSettleTimerRef.current = null;
+      }
+
+      tribeLikesDrawerOpeningRef.current = false;
+      tribeLikesDrawerIgnoreScrollRef.current = false;
+      document.documentElement.style.overflow = htmlOverflow;
+      document.body.style.overflow = bodyOverflow;
+      document.body.style.overscrollBehavior = bodyOverscrollBehavior;
+    };
+  }, [isTouchDrawerDevice, tribeLikesDrawer]);
+
+  useEffect(() => {
+    if (!tribeLikesDrawer) {
+      return undefined;
+    }
+
+    const shell = tribeLikesDrawerShellRef.current;
+
+    if (!shell) {
+      return undefined;
+    }
+
+    const handleWheel = (event) => {
+      const list = event.target.closest('.tribe-likes-drawer__list');
+
+      if (!list) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      const canScroll = list.scrollHeight > list.clientHeight;
+
+      if (!canScroll) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      const atTop = list.scrollTop <= 0;
+      const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
+
+      if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    shell.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      shell.removeEventListener('wheel', handleWheel);
+    };
+  }, [tribeLikesDrawer]);
+
   const scrollToDayIndex = useCallback(
     (targetIndex) => {
       const gridShell = gridShellRef.current;
@@ -500,6 +826,9 @@ function LineupView({
                   canToggleFavorites={canToggleFavorites}
                   showTribeOnly={showTribeOnly}
                   tribeLikesFromOthers={tribeLikesFromOthers}
+                  onOpenTribeLikes={(nextEntry, likes) =>
+                    openTribeLikesDrawer(nextEntry, likes)
+                  }
                   relatedSuggestions={relatedSuggestions}
                   suggestionFavoriteSignature={suggestionFavoriteSignature}
                 />
@@ -655,6 +984,93 @@ function LineupView({
         </div>
       </div>
       )}
+      {tribeLikesDrawer ? (
+        <div
+          className={
+            tribeLikesDrawerClosing
+              ? 'tribe-likes-drawer-backdrop tribe-likes-drawer-backdrop--closing'
+              : 'tribe-likes-drawer-backdrop'
+          }
+          onClick={closeTribeLikesDrawer}
+        >
+          <div
+            ref={tribeLikesDrawerShellRef}
+            className="tribe-likes-drawer-shell"
+            onScroll={handleTribeLikesDrawerShellScroll}
+          >
+            <div
+              ref={tribeLikesDrawerSpacerRef}
+              className="tribe-likes-drawer-shell__snap-spacer"
+              aria-hidden="true"
+            />
+            <div className="tribe-likes-drawer-shell__viewport">
+              <div
+                ref={tribeLikesDrawerPanelRef}
+                className={
+                  tribeLikesDrawerClosing
+                    ? 'modal-panel tribe-likes-drawer tribe-likes-drawer--closing'
+                    : 'modal-panel tribe-likes-drawer'
+                }
+                onClick={(event) => event.stopPropagation()}
+              >
+                {showTouchDrawerChrome ? (
+                  <div className="tribe-likes-drawer__handle" aria-hidden="true" />
+                ) : null}
+                <div className="modal-panel__header tribe-likes-drawer__header">
+                  <div className="tribe-likes-drawer__header-content">
+                    <h2>{getEntryDisplayName(tribeLikesDrawer.entry)}</h2>
+                    <p className="muted">
+                      {[getEntryDayLabel(tribeLikesDrawer.entry), tribeLikesDrawer.entry.stage]
+                        .filter(Boolean)
+                        .join(' \u2022 ')}
+                    </p>
+                    <p className="muted">{tribeLikesDrawer.entry.timeLabel}</p>
+                  </div>
+                  {!showTouchDrawerChrome ? (
+                    <button
+                      type="button"
+                      className="tribe-likes-drawer__close"
+                      onClick={closeTribeLikesDrawer}
+                      aria-label="Close tribe drawer"
+                    >
+                      <X size={16} />
+                    </button>
+                  ) : null}
+                </div>
+                <p className="muted tribe-likes-drawer__summary">
+                  {tribeLikesDrawer.likes.length} member
+                  {tribeLikesDrawer.likes.length === 1 ? '' : 's'} of your tribe
+                  {tribeLikesDrawer.likes.length === 1 ? ' is' : ' are'} already hyped.
+                </p>
+                <div className="tribe-likes-drawer__list-shell">
+                  <div className="tribe-likes-drawer__list">
+                    {tribeLikesDrawer.likes.map((member) => {
+                      const fullName = [member.firstName, member.lastName]
+                        .filter(Boolean)
+                        .join(' ')
+                        .trim();
+                      const usernameLabel = String(member.username ?? '').trim();
+                      return (
+                        <div key={member.userId} className="tribe-like-card tribe-like-card--drawer">
+                          <img
+                            src={member.avatarUrl}
+                            alt={fullName || 'Tribe member'}
+                            className="tribe-like-card__avatar"
+                          />
+                          <div className="tribe-like-card__name">
+                            <strong>{fullName || 'Tribe member'}</strong>
+                            <span>{usernameLabel ? `@${usernameLabel}` : 'Profile unavailable'}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
