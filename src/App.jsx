@@ -858,7 +858,7 @@ export default function App() {
             (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
           );
           if (isAlreadyFavorite) {
-            return removeFavoriteByEntryId(prev, entry.id);
+            return removeFavoriteByEntryId(prev, entry.id, entry.hash);
           }
           return upsertFavoriteEntry(prev, entry);
         });
@@ -968,7 +968,7 @@ export default function App() {
         (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
       );
       if (isAlreadyFavorite) {
-        return removeFavoriteByEntryId(prev, entry.id);
+        return removeFavoriteByEntryId(prev, entry.id, entry.hash);
       }
       return upsertFavoriteEntry(prev, entry);
     });

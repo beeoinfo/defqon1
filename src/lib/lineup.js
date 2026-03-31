@@ -755,8 +755,18 @@ export function upsertFavoriteEntry(favoriteItems, entry) {
   return [...filteredItems, nextSnapshot];
 }
 
-export function removeFavoriteByEntryId(favoriteItems, entryId) {
-  return favoriteItems.filter((item) => item.id !== entryId);
+export function removeFavoriteByEntryId(favoriteItems, entryId, entryHash = null) {
+  return favoriteItems.filter((item) => {
+    if (item.id && item.id === entryId) {
+      return false;
+    }
+
+    if (entryHash && item.hash && item.hash === entryHash) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
 export function removeFavoriteByKey(favoriteItems, favoriteKey) {
