@@ -248,12 +248,7 @@ function LineupView({
   const dayRailRef = useRef(null);
   const dayColumnRefs = useRef(new Map());
   const dayCellRefs = useRef(new Map());
-  const tribeLikesDrawerShellRef = useRef(null);
-  const tribeLikesDrawerPanelRef = useRef(null);
-  const tribeLikesDrawerSpacerRef = useRef(null);
-  const tribeLikesDrawerSettleTimerRef = useRef(null);
-  const tribeLikesDrawerIgnoreScrollRef = useRef(false);
-  const tribeLikesDrawerOpeningRef = useRef(false);
+  const tribeLikesDrawerCloseTimerRef = useRef(null);
   const [tribeLikesDrawer, setTribeLikesDrawer] = useState(null);
   const [tribeLikesDrawerClosing, setTribeLikesDrawerClosing] = useState(false);
   const hasVisibleFavorites = useMemo(
@@ -379,119 +374,40 @@ function LineupView({
   );
   const showTouchDrawerChrome = isTouchDrawerDevice();
 
-  const finalizeCloseTribeLikesDrawer = useCallback(() => {
-    if (tribeLikesDrawerSettleTimerRef.current !== null) {
-      window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
-      tribeLikesDrawerSettleTimerRef.current = null;
-    }
-    tribeLikesDrawerIgnoreScrollRef.current = false;
-    tribeLikesDrawerOpeningRef.current = false;
-    setTribeLikesDrawer(null);
-    setTribeLikesDrawerClosing(false);
-  }, []);
-
   const openTribeLikesDrawer = useCallback((entry, likes) => {
-    if (tribeLikesDrawer || tribeLikesDrawerOpeningRef.current) {
+    if (tribeLikesDrawer || tribeLikesDrawerClosing) {
       return;
     }
-
-    if (tribeLikesDrawerSettleTimerRef.current !== null) {
-      window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
-      tribeLikesDrawerSettleTimerRef.current = null;
+    if (tribeLikesDrawerCloseTimerRef.current !== null) {
+      window.clearTimeout(tribeLikesDrawerCloseTimerRef.current);
+      tribeLikesDrawerCloseTimerRef.current = null;
     }
-    tribeLikesDrawerOpeningRef.current = true;
-    tribeLikesDrawerIgnoreScrollRef.current = false;
     setTribeLikesDrawerClosing(false);
     setTribeLikesDrawer({ entry, likes });
-  }, [tribeLikesDrawer]);
+  }, [tribeLikesDrawer, tribeLikesDrawerClosing]);
 
   const closeTribeLikesDrawer = useCallback(() => {
-    if (!tribeLikesDrawer || tribeLikesDrawerClosing || tribeLikesDrawerOpeningRef.current) {
+    if (!tribeLikesDrawer || tribeLikesDrawerClosing) {
       return;
     }
-
-    if (!isTouchDrawerDevice()) {
-      setTribeLikesDrawerClosing(true);
-      tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
-        finalizeCloseTribeLikesDrawer();
-      }, 220);
-      return;
-    }
-
-    const shell = tribeLikesDrawerShellRef.current;
-    const spacer = tribeLikesDrawerSpacerRef.current;
-    const openScrollTop = Math.max(
-      0,
-      spacer?.offsetHeight ?? tribeLikesDrawerPanelRef.current?.offsetHeight ?? 0
-    );
-
-    if (!shell || openScrollTop <= 0) {
-      finalizeCloseTribeLikesDrawer();
-      return;
-    }
-
     setTribeLikesDrawerClosing(true);
-    tribeLikesDrawerIgnoreScrollRef.current = true;
-    shell.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    if (tribeLikesDrawerCloseTimerRef.current !== null) {
+      window.clearTimeout(tribeLikesDrawerCloseTimerRef.current);
+    }
+    tribeLikesDrawerCloseTimerRef.current = window.setTimeout(() => {
+      setTribeLikesDrawer(null);
+      setTribeLikesDrawerClosing(false);
+      tribeLikesDrawerCloseTimerRef.current = null;
+    }, 180);
+  }, [tribeLikesDrawer, tribeLikesDrawerClosing]);
 
-    tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
-      finalizeCloseTribeLikesDrawer();
-    }, 280);
-  }, [
-    finalizeCloseTribeLikesDrawer,
-    isTouchDrawerDevice,
-    tribeLikesDrawer,
-    tribeLikesDrawerClosing,
-  ]);
-
-  const handleTribeLikesDrawerShellScroll = useCallback(
-    (event) => {
-      if (!isTouchDrawerDevice() || tribeLikesDrawerClosing || tribeLikesDrawerIgnoreScrollRef.current) {
-        return;
+  useEffect(() => {
+    return () => {
+      if (tribeLikesDrawerCloseTimerRef.current !== null) {
+        window.clearTimeout(tribeLikesDrawerCloseTimerRef.current);
       }
-
-      const shell = event.currentTarget;
-      const panel = tribeLikesDrawerPanelRef.current;
-      const spacer = tribeLikesDrawerSpacerRef.current;
-
-      if (!panel) {
-        return;
-      }
-
-      const openScrollTop = Math.max(
-        0,
-        spacer?.offsetHeight ?? panel.offsetHeight
-      );
-
-      if (tribeLikesDrawerSettleTimerRef.current !== null) {
-        window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
-      }
-
-      tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
-        const currentScrollTop = shell.scrollTop;
-
-        if (currentScrollTop <= openScrollTop * 0.4) {
-          closeTribeLikesDrawer();
-          return;
-        }
-
-        tribeLikesDrawerIgnoreScrollRef.current = true;
-        shell.scrollTo({
-          top: openScrollTop,
-          behavior: 'smooth',
-        });
-
-        tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
-          tribeLikesDrawerIgnoreScrollRef.current = false;
-          tribeLikesDrawerSettleTimerRef.current = null;
-        }, 220);
-      }, 80);
-    },
-    [closeTribeLikesDrawer, isTouchDrawerDevice, tribeLikesDrawerClosing]
-  );
+    };
+  }, []);
 
   useEffect(() => {
     setRenderedStagePanelCount(initialRenderedStagePanelCount);
@@ -658,93 +574,10 @@ function LineupView({
     document.body.style.overflow = 'hidden';
     document.body.style.overscrollBehavior = 'none';
 
-    if (isTouchDrawerDevice()) {
-      const shell = tribeLikesDrawerShellRef.current;
-      const panel = tribeLikesDrawerPanelRef.current;
-      const spacer = tribeLikesDrawerSpacerRef.current;
-
-      if (shell && panel && spacer) {
-        requestAnimationFrame(() => {
-          const openScrollTop = Math.max(0, panel.offsetHeight);
-          spacer.style.height = `${openScrollTop}px`;
-          tribeLikesDrawerIgnoreScrollRef.current = true;
-          shell.scrollTop = 0;
-
-          requestAnimationFrame(() => {
-            shell.scrollTo({
-              top: openScrollTop,
-              behavior: 'smooth',
-            });
-
-            if (tribeLikesDrawerSettleTimerRef.current !== null) {
-              window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
-            }
-
-            tribeLikesDrawerSettleTimerRef.current = window.setTimeout(() => {
-              tribeLikesDrawerOpeningRef.current = false;
-              tribeLikesDrawerIgnoreScrollRef.current = false;
-              tribeLikesDrawerSettleTimerRef.current = null;
-            }, 260);
-          });
-        });
-      }
-    }
-
     return () => {
-      if (tribeLikesDrawerSettleTimerRef.current !== null) {
-        window.clearTimeout(tribeLikesDrawerSettleTimerRef.current);
-        tribeLikesDrawerSettleTimerRef.current = null;
-      }
-
-      tribeLikesDrawerOpeningRef.current = false;
-      tribeLikesDrawerIgnoreScrollRef.current = false;
       document.documentElement.style.overflow = htmlOverflow;
       document.body.style.overflow = bodyOverflow;
       document.body.style.overscrollBehavior = bodyOverscrollBehavior;
-    };
-  }, [isTouchDrawerDevice, tribeLikesDrawer]);
-
-  useEffect(() => {
-    if (!tribeLikesDrawer) {
-      return undefined;
-    }
-
-    const shell = tribeLikesDrawerShellRef.current;
-
-    if (!shell) {
-      return undefined;
-    }
-
-    const handleWheel = (event) => {
-      const list = event.target.closest('.tribe-likes-drawer__list');
-
-      if (!list) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      const canScroll = list.scrollHeight > list.clientHeight;
-
-      if (!canScroll) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-
-      const atTop = list.scrollTop <= 0;
-      const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
-
-      if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-
-    shell.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      shell.removeEventListener('wheel', handleWheel);
     };
   }, [tribeLikesDrawer]);
 
@@ -986,26 +819,12 @@ function LineupView({
       )}
       {tribeLikesDrawer ? (
         <div
-          className={
-            tribeLikesDrawerClosing
-              ? 'tribe-likes-drawer-backdrop tribe-likes-drawer-backdrop--closing'
-              : 'tribe-likes-drawer-backdrop'
-          }
+          className="tribe-likes-drawer-backdrop"
           onClick={closeTribeLikesDrawer}
         >
-          <div
-            ref={tribeLikesDrawerShellRef}
-            className="tribe-likes-drawer-shell"
-            onScroll={handleTribeLikesDrawerShellScroll}
-          >
-            <div
-              ref={tribeLikesDrawerSpacerRef}
-              className="tribe-likes-drawer-shell__snap-spacer"
-              aria-hidden="true"
-            />
+          <div className="tribe-likes-drawer-shell">
             <div className="tribe-likes-drawer-shell__viewport">
               <div
-                ref={tribeLikesDrawerPanelRef}
                 className={
                   tribeLikesDrawerClosing
                     ? 'modal-panel tribe-likes-drawer tribe-likes-drawer--closing'

@@ -3700,10 +3700,6 @@ body::before {
   pointer-events: none;
 }
 
-.tribe-likes-drawer-shell__snap-spacer {
-  display: none;
-}
-
 .tribe-likes-drawer-shell__viewport {
   width: 100%;
   display: flex;
@@ -3734,12 +3730,11 @@ body::before {
   position: relative;
   isolation: isolate;
   pointer-events: auto;
-  transform: translateY(0);
-  animation: tribeLikesDrawerSlideIn 0.22s ease;
+  animation: tribe-likes-drawer-slide-in 0.18s ease-out;
 }
 
 .tribe-likes-drawer--closing {
-  animation: tribeLikesDrawerSlideOut 0.22s ease forwards;
+  animation: tribe-likes-drawer-slide-out 0.18s ease-in forwards;
 }
 
 .tribe-likes-drawer__handle {
@@ -3851,32 +3846,9 @@ body::before {
   background: rgba(9, 11, 15, 0.18);
   z-index: 1000;
   pointer-events: auto;
-  animation: tribeLikesBackdropFadeIn 0.18s ease;
 }
 
-.tribe-likes-drawer-backdrop--closing {
-  animation: tribeLikesBackdropFadeOut 0.18s ease forwards;
-}
-
-@keyframes tribeLikesBackdropFadeIn {
-  from {
-    background: rgba(9, 11, 15, 0);
-  }
-  to {
-    background: rgba(9, 11, 15, 0.18);
-  }
-}
-
-@keyframes tribeLikesBackdropFadeOut {
-  from {
-    background: rgba(9, 11, 15, 0.18);
-  }
-  to {
-    background: rgba(9, 11, 15, 0);
-  }
-}
-
-@keyframes tribeLikesDrawerSlideIn {
+@keyframes tribe-likes-drawer-slide-in {
   from {
     transform: translateY(100%);
   }
@@ -3885,7 +3857,7 @@ body::before {
   }
 }
 
-@keyframes tribeLikesDrawerSlideOut {
+@keyframes tribe-likes-drawer-slide-out {
   from {
     transform: translateY(0);
   }
@@ -3902,24 +3874,9 @@ body::before {
     width: 100%;
     height: 100dvh;
     transform: none;
-    display: block;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    pointer-events: auto;
-  }
-
-  .tribe-likes-drawer-shell::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-    display: none;
-  }
-
-  .tribe-likes-drawer-shell__snap-spacer {
-    display: block;
-    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
     pointer-events: none;
   }
 
@@ -3932,11 +3889,6 @@ body::before {
     box-sizing: border-box;
     padding-inline: 16px;
     pointer-events: none;
-  }
-
-  .tribe-likes-drawer,
-  .tribe-likes-drawer--closing {
-    animation: none;
   }
 
   .tribe-likes-drawer__handle {
