@@ -1,3 +1,4 @@
+import { processLock } from '@supabase/auth-js';
 import { createClient } from '@supabase/supabase-js';
 import { getRandomPresetAvatarIndex } from './presetAvatars';
 
@@ -6,7 +7,15 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase =
-  supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          // Use an in-process auth lock to avoid noisy browser LockManager
+          // recoveries under React StrictMode during local development.
+          lock: processLock,
+        },
+      })
+    : null;
 
 // Validation regexes for usernames and passwords
 const USERNAME_REGEX = /^[a-z0-9._-]{3,30}$/;

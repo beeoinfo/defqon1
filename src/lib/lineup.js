@@ -4,6 +4,7 @@ export const FAVORITES_STORAGE_KEY = 'defqon1-favorites';
 export const VIEW_STORAGE_KEY = 'defqon1-view';
 export const HIDE_PAST_EVENTS_STORAGE_KEY = 'hidePastEvents';
 export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
+export const BETA_FEATURES_STORAGE_KEY = 'defqon1-beta-features';
 
 export const REVIEW_SECTION_MESSAGE =
   'Some saved favorites seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
@@ -837,6 +838,34 @@ export function saveHideUndatedEventsPreference(value) {
       return;
     }
     window.localStorage.setItem(HIDE_UNDATED_EVENTS_STORAGE_KEY, JSON.stringify(true));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function loadBetaFeaturesPreference() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(BETA_FEATURES_STORAGE_KEY) ?? 'false');
+  } catch {
+    return false;
+  }
+}
+
+export function saveBetaFeaturesPreference(value) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (!Boolean(value)) {
+      window.localStorage.removeItem(BETA_FEATURES_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(BETA_FEATURES_STORAGE_KEY, JSON.stringify(true));
   } catch {
     // Ignore storage errors
   }

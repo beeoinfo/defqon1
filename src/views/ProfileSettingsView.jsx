@@ -76,12 +76,14 @@ function InfoPage({ pageKey, onClose }) {
 export default function ProfileSettingsView({
   user,
   profile,
+  betaFeaturesEnabled,
   hidePastEvents,
   hideUndatedEvents,
   lineups,
   selectedLineupKey,
   onSelectLineup,
   onBack,
+  onBetaFeaturesEnabledChange,
   onHidePastEventsChange,
   onHideUndatedEventsChange,
   onProfileUpdated,
@@ -443,6 +445,20 @@ export default function ProfileSettingsView({
                 type="checkbox"
                 checked={hideUndatedEvents}
                 onChange={(event) => onHideUndatedEventsChange?.(event.target.checked)}
+              />
+              <span className="settings-toggle__slider"></span>
+            </label>
+          </div>
+
+          <div className="profile-settings__setting-row">
+            <div className="profile-settings__setting-copy">
+              <h3>Enable beta features</h3>
+            </div>
+            <label className="settings-toggle__label">
+              <input
+                type="checkbox"
+                checked={betaFeaturesEnabled}
+                onChange={(event) => onBetaFeaturesEnabledChange?.(event.target.checked)}
               />
               <span className="settings-toggle__slider"></span>
             </label>

@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {
   Music2 as MusicIcon,
+  Map as MapIcon,
   Star as StarIcon,
   Users as UsersIcon,
   Search,
@@ -26,6 +27,7 @@ import {
   filterUndatedReviewFavorites,
   filterEntries,
   filterReviewFavorites,
+  loadBetaFeaturesPreference,
   getDays,
   getStages,
   groupEntriesByDayAndStage,
@@ -35,6 +37,7 @@ import {
   removeFavoriteByEntryId,
   removeFavoriteByKey,
   resolveFavoriteItems,
+  saveBetaFeaturesPreference,
   saveHidePastEventsPreference,
   saveHideUndatedEventsPreference,
   saveViewPreferences,
@@ -62,9 +65,11 @@ import FavoriteStar from './components/FavoriteStar';
 import EmptyState from './components/EmptyState';
 import AuthModal from './components/AuthModal';
 import LineupView from './views/LineupView';
+import MapsView from './views/MapsView';
 import ReviewsView from './views/ReviewsView';
 import TribeView from './views/TribeView';
 import ProfileSettingsView from './views/ProfileSettingsView';
+import { mapLayers as festivalMapLayers } from './data/mapLayers';
 import './index.css';
 
 const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
@@ -322,6 +327,7 @@ export default function App() {
     () => loadViewPreferences()?.selectedStage || 'All stages'
   );
   const [query, setQuery] = useState('');
+  const [betaFeaturesEnabled, setBetaFeaturesEnabled] = useState(() => loadBetaFeaturesPreference());
   const [hidePastEvents, setHidePastEvents] = useState(() => loadHidePastEventsPreference());
   const [hideUndatedEvents, setHideUndatedEvents] = useState(() => loadHideUndatedEventsPreference());
   const [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -339,6 +345,7 @@ export default function App() {
   const [openDrawer, setOpenDrawer] = useState(null);
   const searchInputRef = useRef(null);
   const activeHydrationIdRef = useRef(0);
+  const authHydrationTimeoutRef = useRef(0);
   const lastAuthenticatedUserIdRef = useRef(bootUserId);
   const hasRemoteAccountBundleRef = useRef(false);
   const lastSyncedFavoritesRef = useRef(serializeFavoriteItems(bootAccount?.favorites ?? []));
@@ -367,6 +374,7 @@ export default function App() {
   const activeProfile = profile ?? buildOptimisticProfile(authUser);
   const deferredFavoriteItems = useDeferredValue(favoriteItems);
   const isLineupView = view === 'lineup';
+  const isMapsView = view === 'maps';
   const isReviewsView = view === 'reviews';
   const isSearchView = view === 'search';
 
@@ -513,15 +521,23 @@ export default function App() {
   useEffect(() => {
     if (view !== 'lineup') {
       return;
-    }
+      }
     scrollToTopQuickly();
   }, [view, selectedDay, selectedStage, showFavoritesOnly, showTribeOnly]);
+  useEffect(() => {
+    saveBetaFeaturesPreference(betaFeaturesEnabled);
+  }, [betaFeaturesEnabled]);
   useEffect(() => {
     saveHidePastEventsPreference(hidePastEvents);
   }, [hidePastEvents]);
   useEffect(() => {
     saveHideUndatedEventsPreference(hideUndatedEvents);
   }, [hideUndatedEvents]);
+  useEffect(() => {
+    if (!betaFeaturesEnabled && view === 'maps') {
+      setView('lineup');
+    }
+  }, [betaFeaturesEnabled, view]);
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setCurrentTime(Date.now());
@@ -605,13 +621,20 @@ export default function App() {
       return;
     }
     let isActive = true;
-    const hydrateFromAccount = async (userOverride) => {
+    const clearScheduledAuthHydration = () => {
+      if (authHydrationTimeoutRef.current) {
+        window.clearTimeout(authHydrationTimeoutRef.current);
+        authHydrationTimeoutRef.current = 0;
+      }
+    };
+    const hydrateFromAccount = async (userOverride, options = {}) => {
+      const { hasUserOverride = false } = options;
       const hydrationId = activeHydrationIdRef.current + 1;
       activeHydrationIdRef.current = hydrationId;
       setIsAccountReady(false);
       hasRemoteAccountBundleRef.current = false;
       try {
-        const currentUser = userOverride ?? (await getCurrentUser());
+        const currentUser = hasUserOverride ? userOverride : await getCurrentUser();
         if (!isActive || hydrationId !== activeHydrationIdRef.current) {
           return;
         }
@@ -679,32 +702,27 @@ export default function App() {
       }
     };
     hydrateAccountRef.current = hydrateFromAccount;
-    getCurrentUser()
-      .then((user) => {
+    const scheduleAuthHydration = (userOverride) => {
+      clearScheduledAuthHydration();
+      authHydrationTimeoutRef.current = window.setTimeout(() => {
+        authHydrationTimeoutRef.current = 0;
         if (!isActive) {
           return;
         }
-        hydrateFromAccount(user);
-      })
-      .catch((error) => {
-        console.error(error);
-        if (isActive) {
-          setIsAccountReady(true);
-        }
-      });
+        hydrateFromAccount(userOverride ?? null, { hasUserOverride: true });
+      }, 0);
+    };
     const subscription = supabase?.auth.onAuthStateChange((event, session) => {
-      if (event === 'INITIAL_SESSION') {
-        return;
-      }
       const nextAuthKey = session?.user?.id ? `user:${session.user.id}` : 'guest';
-      if (nextAuthKey === lastHydratedAuthKeyRef.current) {
+      if (event !== 'INITIAL_SESSION' && nextAuthKey === lastHydratedAuthKeyRef.current) {
         return;
       }
-      hydrateFromAccount(session?.user ?? null);
+      scheduleAuthHydration(session?.user ?? null);
     });
     return () => {
       isActive = false;
       hydrateAccountRef.current = null;
+      clearScheduledAuthHydration();
       subscription?.data?.subscription?.unsubscribe();
     };
   }, []);
@@ -904,6 +922,20 @@ export default function App() {
       setShowTribeOnly(false);
     });
   }, []);
+  const handleMapsNav = useCallback(() => {
+    if (!betaFeaturesEnabled) {
+      return;
+    }
+    startTransition(() => {
+      setView('maps');
+      setQuery('');
+      setSelectedDay('All days');
+      setSelectedStage('All stages');
+      setHasAutoExpandedSearchScope(false);
+      setShowFavoritesOnly(false);
+      setShowTribeOnly(false);
+    });
+  }, [betaFeaturesEnabled]);
   const handleReviewsNav = useCallback(() => {
     if (!authUser) {
       requestAuth({ type: 'open-reviews' });
@@ -1066,6 +1098,9 @@ export default function App() {
     if (view === 'reviews') {
       return 'Needs review';
     }
+    if (view === 'maps') {
+      return 'Maps';
+    }
     if (view === 'tribe') {
       return 'Tribe';
     }
@@ -1098,7 +1133,15 @@ export default function App() {
          On desktop the navigation appears in the centre. */}
       {view !== 'profileSettings' && (
         <>
-          <header className={isSearchView ? 'page-header page-header--search' : 'page-header'}>
+          <header
+            className={
+              isSearchView
+                ? 'page-header page-header--search'
+                : view === 'maps'
+                  ? 'page-header page-header--maps'
+                  : 'page-header'
+            }
+          >
             {isSearchView ? (
               <div className="header-search" data-filter-layer="true">
                 <div className="header-search__input-wrap">
@@ -1139,6 +1182,15 @@ export default function App() {
                 >
                   Line‑up
                 </button>
+                {betaFeaturesEnabled && (
+                  <button
+                    type="button"
+                    className={view === 'maps' ? 'active' : ''}
+                    onClick={handleMapsNav}
+                  >
+                    Maps
+                  </button>
+                )}
                 <button
                   type="button"
                   className={view === 'reviews' ? 'active' : ''}
@@ -1407,6 +1459,8 @@ export default function App() {
             ? 'page page--lineup page--hidden'
             : view === 'lineup'
               ? 'page page--lineup'
+              : betaFeaturesEnabled && isMapsView
+                ? 'page page--maps'
               : view === 'search'
                 ? 'page page--search'
                 : 'page'
@@ -1424,6 +1478,7 @@ export default function App() {
             archiveNotice={favoritesReadOnly ? archiveLineupNotice : null}
           />
         </div>
+        {betaFeaturesEnabled && view === 'maps' && <MapsView mapLayers={festivalMapLayers} />}
         {view === 'search' &&
           (query.trim() ? (
             <LineupView
@@ -1467,6 +1522,7 @@ export default function App() {
         <ProfileSettingsView
           user={authUser}
           profile={activeProfile}
+          betaFeaturesEnabled={betaFeaturesEnabled}
           hidePastEvents={hidePastEvents}
           hideUndatedEvents={hideUndatedEvents}
           lineups={lineupSources}
@@ -1482,6 +1538,7 @@ export default function App() {
             setHasAutoExpandedSearchScope(false);
           }}
           onBack={closeProfileSettings}
+          onBetaFeaturesEnabledChange={setBetaFeaturesEnabled}
           onHidePastEventsChange={setHidePastEvents}
           onHideUndatedEventsChange={setHideUndatedEvents}
           onProfileUpdated={(nextProfile) => setProfile(nextProfile)}
@@ -1516,6 +1573,20 @@ export default function App() {
             </span>
             <span>Line‑up</span>
           </button>
+          {betaFeaturesEnabled && (
+            <button
+              type="button"
+              className={view === 'maps' ? 'active' : ''}
+              onClick={handleMapsNav}
+            >
+              <span className="bottom-nav__icon-slot">
+                <span className="bottom-nav__icon-pill">
+                  <MapIcon size={20} />
+                </span>
+              </span>
+              <span>Maps</span>
+            </button>
+          )}
           <button
             type="button"
             className={view === 'reviews' ? 'active' : ''}
