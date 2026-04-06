@@ -1,0 +1,10 @@
+.dq-layout-navbar {
+  width: 100%;
+  padding-block: var(--dq-ui-space-sm);
+}
+
+@media (max-width: 768px) {
+  .dq-layout-navbar {
+    padding-block: var(--dq-ui-space-xs);
+  }
+}

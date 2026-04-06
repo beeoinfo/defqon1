@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { LogOut, Pencil, Plus, QrCode, Share2, Users, X } from 'lucide-react';
+import { Pencil, Plus, QrCode, Share2, Users, X } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 import { resolveProfileAvatarUrl } from '../lib/presetAvatars';
 import { normalizeTribeCode } from '../lib/supabase';
@@ -205,6 +205,7 @@ export default function TribeView({
                 onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
                 placeholder="Weekend crew"
                 maxLength={48}
+                autoComplete="off"
               />
             </label>
             <button
@@ -231,6 +232,7 @@ export default function TribeView({
                 onChange={(event) => setJoinCode(normalizeTribeCode(event.target.value))}
                 placeholder="Enter code"
                 maxLength={8}
+                autoComplete="off"
               />
               <button
                 type="submit"
@@ -281,6 +283,7 @@ export default function TribeView({
                   onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
                   placeholder="Tribe name"
                   maxLength={48}
+                  autoComplete="off"
                 />
                 <div className="tribe-name-actions">
                   <button
@@ -341,7 +344,6 @@ export default function TribeView({
               }}
               disabled={isBusy}
             >
-              <LogOut size={16} />
               <span>Leave tribe</span>
             </button>
           </div>

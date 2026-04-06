@@ -1,0 +1,38 @@
+.dq-layout-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dq-ui-space-lg);
+}
+
+.dq-layout-box--content-root {
+  flex-direction: var(--dq-layout-box-direction, column);
+  gap: var(--dq-layout-box-gap, var(--dq-ui-space-lg));
+  justify-content: var(--dq-layout-box-justify, flex-start);
+  align-items: var(--dq-layout-box-align, stretch);
+  flex-wrap: var(--dq-layout-box-wrap, nowrap);
+}
+
+.dq-layout-box__content {
+  display: flex;
+  flex-direction: var(--dq-layout-box-direction, column);
+  gap: var(--dq-layout-box-gap, var(--dq-ui-space-lg));
+  justify-content: var(--dq-layout-box-justify, flex-start);
+  align-items: var(--dq-layout-box-align, stretch);
+  flex-wrap: var(--dq-layout-box-wrap, nowrap);
+}
+
+.dq-layout-box--surface {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--dq-ui-radius-xl);
+  background: var(--dq-ui-surface);
+}
+
+.dq-layout-box--surface-blur {
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--dq-ui-radius-xl);
+  background: var(--dq-ui-surface);
+  backdrop-filter: var(--dq-ui-background-blur-filter);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
+}

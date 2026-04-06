@@ -1,0 +1,10 @@
+.dq-layout-grid {
+  display: grid;
+  gap: var(--dq-layout-grid-gap, 16px);
+  grid-template-columns: var(--dq-layout-grid-columns, 1fr);
+  justify-content: var(--dq-layout-grid-justify, stretch);
+  align-content: var(--dq-layout-grid-align-content, stretch);
+  justify-items: var(--dq-layout-grid-justify-items, stretch);
+  align-items: var(--dq-layout-grid-align-items, stretch);
+  grid-auto-flow: var(--dq-layout-grid-auto-flow, row);
+}

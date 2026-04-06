@@ -1,0 +1,51 @@
+.dq-ui-theme {
+  --dq-ui-bg: #09090b;
+  --dq-ui-surface: rgba(255, 255, 255, 0.04);
+  --dq-ui-panel: rgba(255, 255, 255, 0.05);
+  --dq-ui-panel-strong: rgba(255, 255, 255, 0.08);
+  --dq-ui-border: rgba(255, 255, 255, 0.1);
+  --dq-ui-text: rgba(255, 255, 255, 0.92);
+  --dq-ui-text-soft: rgba(255, 255, 255, 0.65);
+  --dq-ui-accent: #ef4444;
+  --dq-ui-accent-soft: #fecaca;
+  --dq-ui-yellow: #facc15;
+  --dq-ui-favorite-surface: rgba(133, 77, 14, 0.3);
+  --dq-ui-favorite-border: rgba(250, 204, 21, 0.26);
+  --dq-ui-success: #bbf7d0;
+  --dq-ui-success-surface: rgba(21, 128, 61, 0.22);
+  --dq-ui-success-border: rgba(34, 197, 94, 0.28);
+  --dq-ui-danger-surface: rgba(127, 29, 29, 0.3);
+  --dq-ui-danger-border: rgba(239, 68, 68, 0.26);
+  --dq-ui-backdrop: rgba(9, 9, 11, 0.42);
+  --dq-ui-radius-md: 14px;
+  --dq-ui-radius-lg: 20px;
+  --dq-ui-radius-xl: 24px;
+  --dq-ui-radius-rounded: 999px;
+  --dq-ui-space-xs: 6px;
+  --dq-ui-space-sm: 8px;
+  --dq-ui-space-md: 10px;
+  --dq-ui-space-lg: 14px;
+  --dq-ui-space-xl: 18px;
+  --dq-ui-space-xxl: 22px;
+  --dq-ui-space-xxxl: 24px;
+  --dq-ui-layout-max-width: 1200px;
+  --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
+  --dq-ui-layout-block-padding-top: 24px;
+  --dq-ui-layout-block-padding-bottom: 40px;
+  --dq-ui-background-blur-filter: blur(24px) saturate(140%);
+  --dq-ui-background-blur-surface: linear-gradient(180deg, #1c222aad, #161b228f);
+  color: var(--dq-ui-text);
+  font-family: 'Roboto', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.dq-ui-theme,
+.dq-ui-theme *,
+.dq-ui-theme *::before,
+.dq-ui-theme *::after {
+  box-sizing: border-box;
+}
+
+.dq-ui-theme button,
+.dq-ui-theme input {
+  font: inherit;
+}

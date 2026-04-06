@@ -17,6 +17,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --bg: #09090b;
+  --dq-ui-surface: rgba(255, 255, 255, 0.04);
   --panel: rgba(255, 255, 255, 0.05);
   --panel-strong: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.1);
@@ -24,12 +25,25 @@
   --accent: #ef4444;
   --yellow: #facc15;
   --mobile-bottom-nav-offset: 92px;
+  --app-background:
+    radial-gradient(circle at 14% 18%, rgba(11, 219, 239, 0.12), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(255, 0, 139, 0.1), transparent 24%),
+    radial-gradient(circle at 22% 78%, rgba(0, 255, 0, 0.08), transparent 24%),
+    radial-gradient(circle at 76% 74%, rgba(161, 0, 255, 0.1), transparent 28%),
+    radial-gradient(circle at 52% 46%, rgba(241, 227, 0, 0.05), transparent 30%),
+    linear-gradient(180deg, #12161c, #0f1318);
+  --background-blur-filter: blur(24px) saturate(140%);
+  --background-blur-surface: linear-gradient(180deg, #1c222aad, #161b228f);
+  --dq-ui-layout-max-width: 1200px;
+  --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
+  --dq-ui-layout-block-padding-top: 24px;
+  --dq-ui-layout-block-padding-bottom: 40px;
 }
 
 /* Apply a subtle gradient background across the entire page. This helps the
  * glass‑like backdrop filters stand out while staying within the dark theme. */
 body {
-  background: radial-gradient(circle at 50% 30%, rgba(24, 24, 27, 0.8), var(--bg) 60%);
+  background: var(--app-background);
   color: rgba(255, 255, 255, 0.92);
   min-width: 320px;
   min-height: 100dvh;
@@ -3292,14 +3306,14 @@ body::before {
 .header-search,
 .filter-row,
 .filter-drawer__inner {
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: var(--background-blur-filter);
+  -webkit-backdrop-filter: var(--background-blur-filter);
 }
 
 .page-header,
 .bottom-nav,
 .back-to-top-button {
-  background: linear-gradient(180deg, rgba(18, 22, 29, 0.78), rgba(18, 22, 29, 0.64));
+  background: var(--background-blur-surface);
 }
 
 .back-to-top-button {

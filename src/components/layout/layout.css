@@ -1,0 +1,41 @@
+.dq-layout-container {
+  width: 100%;
+  max-width: var(--dq-ui-layout-max-width);
+  margin: 0 auto;
+  padding-inline: var(--dq-ui-layout-inline-padding);
+}
+
+.dq-layout-main {
+  --dq-layout-header-control-size: 48px;
+  --dq-layout-header-offset:
+    calc(
+      var(--dq-layout-header-control-size) +
+      (var(--dq-ui-space-lg) * 2) +
+      1px
+    );
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.dq-layout-main-shell {
+  padding-top:
+    calc(
+      var(--dq-layout-header-offset) +
+      var(--dq-ui-layout-block-padding-top)
+    );
+  padding-bottom: var(--dq-ui-layout-block-padding-bottom);
+}
+
+@media (max-width: 768px) {
+  .dq-layout-main {
+    --dq-layout-header-offset:
+      calc(
+        var(--dq-layout-header-control-size) +
+        (var(--dq-ui-space-sm) * 2) +
+        1px
+      );
+  }
+}

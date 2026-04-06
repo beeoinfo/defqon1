@@ -1,0 +1,7 @@
+.dq-layout-element {
+  min-height: 42px;
+  padding: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: var(--dq-ui-radius-lg);
+  color: rgba(255, 255, 255, 0.72);
+}

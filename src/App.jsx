@@ -69,6 +69,7 @@ import MapsView from './views/MapsView';
 import ReviewsView from './views/ReviewsView';
 import TribeView from './views/TribeView';
 import ProfileSettingsView from './views/ProfileSettingsView';
+import StorybookView from './views/StorybookView/index';
 import { mapLayers as festivalMapLayers } from './data/mapLayers';
 import './index.css';
 
@@ -294,6 +295,16 @@ for (const lineupSource of lineupSources) {
 const hasLineup = lineupSources.length > 0;
 const EMPTY_GROUPED_ENTRIES = {};
 const EMPTY_REVIEW_FAVORITES = [];
+
+function getStorybookMode() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
+    return null;
+  }
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const mode = searchParams.get('storybook');
+  return mode === 'view' || mode === 'page' ? mode : null;
+}
 
 export default function App() {
   const bootStateRef = useRef(null);
@@ -1122,9 +1133,13 @@ export default function App() {
   const selectedStagePillStyle = selectedStageTheme
     ? getStageBadgeStyles(selectedStageTheme, true)
     : null;
+  const storybookMode = useMemo(() => getStorybookMode(), []);
 
   if (!hasLineup || !selectedLineup) {
     return <EmptyState text="No lineup detected" />;
+  }
+  if (storybookMode) {
+    return <StorybookView mode={storybookMode} />;
   }
   return (
     <>

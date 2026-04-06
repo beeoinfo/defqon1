@@ -1,0 +1,14 @@
+.dq-ui-storybook__title-column {
+  flex: 1 1 320px;
+}
+
+.dq-ui-storybook__button-section {
+  flex: 1 1 420px;
+}
+
+@media (max-width: 960px) {
+  .dq-ui-storybook__title-column,
+  .dq-ui-storybook__button-section {
+    flex-basis: 100%;
+  }
+}
