@@ -1,0 +1,78 @@
+.dq-ui-choice-button {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.dq-ui-choice-button__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dq-ui-choice-button__input:focus + .dq-ui-choice-button__control,
+.dq-ui-choice-button__input:focus-visible + .dq-ui-choice-button__control {
+  outline: none;
+  background: var(--dq-ui-button-bg);
+  border-color: var(--dq-ui-button-border-color);
+  color: var(--dq-ui-button-text-color);
+}
+
+.dq-ui-choice-button__input:focus + .dq-ui-choice-button__control .dq-ui-button__subtitle,
+.dq-ui-choice-button__input:focus-visible + .dq-ui-choice-button__control .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-subtitle-color);
+}
+
+.dq-ui-choice-button__input:checked + .dq-ui-choice-button__control {
+  background: var(--dq-ui-button-selected-bg);
+  border-color: var(--dq-ui-button-selected-border-color);
+  color: var(--dq-ui-button-selected-text-color);
+}
+
+.dq-ui-choice-button__input:checked + .dq-ui-choice-button__control .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-selected-subtitle-color);
+}
+
+.dq-ui-choice-button:hover .dq-ui-choice-button__control {
+  background: var(--dq-ui-button-hover-bg);
+  border-color: var(--dq-ui-button-hover-border-color);
+  color: var(--dq-ui-button-hover-text-color);
+}
+
+.dq-ui-choice-button:hover .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-hover-subtitle-color);
+}
+
+.dq-ui-choice-button:hover .dq-ui-choice-button__input:checked + .dq-ui-choice-button__control {
+  background: var(--dq-ui-button-selected-hover-bg);
+  border-color: var(--dq-ui-button-selected-hover-border-color);
+  color: var(--dq-ui-button-selected-hover-text-color);
+}
+
+.dq-ui-choice-button:hover .dq-ui-choice-button__input:checked + .dq-ui-choice-button__control .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-selected-hover-subtitle-color);
+}
+
+.dq-ui-choice-button:active .dq-ui-choice-button__control {
+  background: var(--dq-ui-button-active-bg);
+  border-color: var(--dq-ui-button-active-border-color);
+  color: var(--dq-ui-button-active-text-color);
+}
+
+.dq-ui-choice-button:active .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-active-subtitle-color);
+}
+
+.dq-ui-choice-button:active .dq-ui-choice-button__input:checked + .dq-ui-choice-button__control {
+  background: var(--dq-ui-button-selected-active-bg);
+  border-color: var(--dq-ui-button-selected-active-border-color);
+  color: var(--dq-ui-button-selected-active-text-color);
+}
+
+.dq-ui-choice-button:active .dq-ui-choice-button__input:checked + .dq-ui-choice-button__control .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-selected-active-subtitle-color);
+}
+
+.dq-ui-choice-button__input:disabled + .dq-ui-choice-button__control {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -6,6 +6,17 @@
   flex: 1 1 420px;
 }
 
+.dq-ui-storybook__badge-anchor {
+  position: relative;
+  width: max-content;
+}
+
+.dq-ui-storybook__badge-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}
+
 @media (max-width: 960px) {
   .dq-ui-storybook__title-column,
   .dq-ui-storybook__button-section {

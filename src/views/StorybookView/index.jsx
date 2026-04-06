@@ -1,9 +1,13 @@
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Users } from 'lucide-react';
 import './StorybookView.css';
 import Box from '../../components/layout/Box/index';
 import Element from '../../components/layout/Element/index';
 import Page from '../../components/layout/Page/index';
+import Badge from '../../components/primitives/Badge/index';
 import Button from '../../components/primitives/Button/index';
+import ChoiceButton from '../../components/primitives/ChoiceButton/index';
+import Tabs from '../../components/primitives/Tabs/index';
+import ToggleButton from '../../components/primitives/ToggleButton/index';
 import Title from '../../components/primitives/Title/index';
 import UiThemeScope from '../../theme/UiThemeScope';
 import View from '../../components/layout/View/index';
@@ -113,6 +117,21 @@ function StorybookBody() {
           <Box
             className="dq-ui-storybook__button-section"
             background="surface"
+            title="Color"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Button color="#0BDBEF">Blue</Button>
+              <Button color="#FF008B">Magenta</Button>
+              <Button color="#00FF00">Green</Button>
+              <Button color="#F1E300">Yellow</Button>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
             title="With Icon"
             titleComponent="h3"
             titleVariant="h4"
@@ -161,6 +180,250 @@ function StorybookBody() {
               </Button>
             </Box>
           </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Toggle Buttons"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Toggle"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Box gap="var(--dq-ui-space-sm)">
+                <Title component="span" variant="h6">
+                  Ghost
+                </Title>
+                <Box
+                  className="dq-ui-storybook__buttons"
+                  direction="row"
+                  wrap="wrap"
+                  gap="var(--dq-ui-space-lg)"
+                >
+                  <ToggleButton>Subscribed</ToggleButton>
+                  <ToggleButton icon={Sparkles}>Notify me</ToggleButton>
+                </Box>
+              </Box>
+
+              <Box gap="var(--dq-ui-space-sm)">
+                <Title component="span" variant="h6">
+                  Favorite
+                </Title>
+                <Box
+                  className="dq-ui-storybook__buttons"
+                  direction="row"
+                  wrap="wrap"
+                  gap="var(--dq-ui-space-lg)"
+                >
+                  <ToggleButton variant="favorite">Favorite</ToggleButton>
+                  <ToggleButton variant="favorite" icon={Users}>
+                    My Tribe
+                  </ToggleButton>
+                  <ToggleButton
+                    variant="favorite"
+                    icon={Sparkles}
+                    ariaLabel="Favorite sparkles"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Choice"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Box gap="var(--dq-ui-space-sm)">
+                <Title component="span" variant="h6">
+                  Checkbox
+                </Title>
+                <Box
+                  className="dq-ui-storybook__buttons"
+                  direction="row"
+                  wrap="wrap"
+                  gap="var(--dq-ui-space-lg)"
+                >
+                  <ChoiceButton defaultChecked>Camping</ChoiceButton>
+                  <ChoiceButton>Parking</ChoiceButton>
+                  <ChoiceButton variant="favorite" defaultChecked icon={Sparkles}>
+                    Saved
+                  </ChoiceButton>
+                  <ChoiceButton variant="favorite" icon={Users}>
+                    My Tribe
+                  </ChoiceButton>
+                </Box>
+              </Box>
+
+              <Box gap="var(--dq-ui-space-sm)">
+                <Title component="span" variant="h6">
+                  Radio
+                </Title>
+                <Box
+                  className="dq-ui-storybook__buttons"
+                  direction="row"
+                  wrap="wrap"
+                  gap="var(--dq-ui-space-lg)"
+                >
+                  <ChoiceButton type="radio" name="storybook-filter" defaultChecked>
+                    All
+                  </ChoiceButton>
+                  <ChoiceButton type="radio" name="storybook-filter">
+                    Tribe
+                  </ChoiceButton>
+                  <ChoiceButton type="radio" name="storybook-filter">
+                    Favorites
+                  </ChoiceButton>
+                </Box>
+              </Box>
+
+              <Box gap="var(--dq-ui-space-sm)">
+                <Title component="span" variant="h6">
+                  Radio Color
+                </Title>
+                <Box
+                  className="dq-ui-storybook__buttons"
+                  direction="row"
+                  wrap="wrap"
+                  gap="var(--dq-ui-space-lg)"
+                >
+                  <ChoiceButton type="radio" name="storybook-color-filter" color="#0BDBEF" radius="rounded" defaultChecked>
+                    Blue
+                  </ChoiceButton>
+                  <ChoiceButton type="radio" name="storybook-color-filter" color="#FF008B" radius="rounded">
+                    Magenta
+                  </ChoiceButton>
+                  <ChoiceButton type="radio" name="storybook-color-filter" color="#00FF00" radius="rounded">
+                    Green
+                  </ChoiceButton>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Tabs"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+          >
+            <Tabs
+              ariaLabel="Storybook tabs"
+              items={[
+                {
+                  value: 'lineup',
+                  label: 'Line-up',
+                  content: (
+                    <Box background="surface">
+                      <Element>Line-up panel</Element>
+                    </Box>
+                  ),
+                },
+                {
+                  value: 'tribe',
+                  label: 'Tribe',
+                  content: (
+                    <Box background="surface">
+                      <Element>Tribe panel</Element>
+                    </Box>
+                  ),
+                },
+                {
+                  value: 'favorites',
+                  label: 'Favorites',
+                  content: (
+                    <Box background="surface">
+                      <Element>Favorites panel</Element>
+                    </Box>
+                  ),
+                },
+              ]}
+            />
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Badges"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Count"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Button badge={3}>Inbox</Button>
+              <Button badge={12}>Alerts</Button>
+            </Box>
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge variant="title">1</Badge>
+              <Badge variant="title">12</Badge>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Pills"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge>DEFAULT</Badge>
+              <Badge color="#22c55e">Live</Badge>
+              <Badge variant="plain">
+                PLAIN
+              </Badge>
+              <Badge variant="plain" color="#ca2323">
+                Hotfix
+              </Badge>
+            </Box>
+          </Box>
+
         </Box>
       </Box>
     </Box>

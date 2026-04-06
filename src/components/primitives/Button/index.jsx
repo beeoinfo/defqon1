@@ -1,4 +1,7 @@
+import { cloneElement, forwardRef, isValidElement } from 'react';
 import './Button.css';
+import Badge from '../Badge/index';
+import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
 
 const BUTTON_ICON_SIZES = {
   withLabel: {
@@ -54,6 +57,7 @@ export function getButtonClassName({
   isRichLarge = false,
   hasImage = false,
   isIconOnly = false,
+  hasBadge = false,
   className = '',
 }) {
   return [
@@ -65,10 +69,29 @@ export function getButtonClassName({
     isRichLarge ? 'dq-ui-button--rich' : '',
     hasImage ? 'dq-ui-button--has-image' : '',
     isIconOnly ? 'dq-ui-button--icon-only' : '',
+    hasBadge ? 'dq-ui-button--has-badge' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
+}
+
+function renderButtonBadge(badge) {
+  if (badge === null || badge === undefined || badge === false) {
+    return null;
+  }
+
+  if (isValidElement(badge)) {
+    return cloneElement(badge, {
+      className: [badge.props.className, 'dq-ui-button__badge'].filter(Boolean).join(' '),
+    });
+  }
+
+  return (
+    <Badge className="dq-ui-button__badge" variant="count">
+      {badge}
+    </Badge>
+  );
 }
 
 export function ButtonContent({
@@ -115,7 +138,7 @@ export function ButtonContent({
   );
 }
 
-export default function Button({
+const Button = forwardRef(function Button({
   children,
   icon: Icon = null,
   iconPosition = 'start',
@@ -128,11 +151,14 @@ export default function Button({
   radius = 'md',
   type = 'button',
   disabled = false,
+  color,
+  badge,
   className = '',
   ariaLabel,
   title,
+  style,
   ...props
-}) {
+}, ref) {
   const visualState = resolveButtonVisualState({
     children,
     icon: Icon,
@@ -146,7 +172,12 @@ export default function Button({
 
   return (
     <button
+      ref={ref}
       {...props}
+      style={{
+        ...(variant === 'ghost' && color ? buildGhostButtonColorVars(color) : {}),
+        ...style,
+      }}
       type={type}
       disabled={disabled}
       aria-label={visualState.isIconOnly ? ariaLabel : undefined}
@@ -159,6 +190,7 @@ export default function Button({
         isRichLarge: visualState.isRichLarge,
         hasImage: visualState.hasImage,
         isIconOnly: visualState.isIconOnly,
+        hasBadge: Boolean(badge),
         className,
       })}
     >
@@ -173,6 +205,9 @@ export default function Button({
         hasLabel={visualState.hasLabel}
         iconSize={visualState.iconSize}
       />
+      {renderButtonBadge(badge)}
     </button>
   );
-}
+});
+
+export default Button;

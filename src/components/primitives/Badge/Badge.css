@@ -1,0 +1,44 @@
+.dq-ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-transform: uppercase;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--dq-ui-badge-text, #ffffff);
+}
+
+.dq-ui-badge--plain {
+  min-height: 32px;
+  padding-inline: 12px;
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-badge-bg, #ffffff);
+  color: var(--dq-ui-badge-text, #111111);
+}
+
+.dq-ui-badge--ghost,
+.dq-ui-badge--surface {
+  min-height: 32px;
+  padding-inline: 12px;
+  border: 1px solid var(--dq-ui-badge-border, var(--dq-ui-border));
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-badge-bg, var(--dq-ui-surface));
+}
+
+.dq-ui-badge--title {
+  min-width: 32px;
+  height: 32px;
+  padding-inline: 10px;
+  border: 1px solid var(--dq-ui-badge-border, var(--dq-ui-danger-border));
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-badge-bg, var(--dq-ui-danger-surface));
+}
+
+.dq-ui-badge--count {
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 6px;
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-badge-bg, var(--dq-ui-accent));
+}

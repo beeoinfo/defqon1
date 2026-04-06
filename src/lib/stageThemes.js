@@ -1,28 +1,4 @@
-function buildTheme(accent) {
-  return {
-    accent,
-    accentSoft: `${accent}33`,
-    accentBorder: `${accent}66`,
-    accentText: "#FFFFFF", // Inactive stage badges
-    activeText: "#111111", // Active stage badges + stage card pills
-  };
-}
-
-export const stageThemes = {
-  RED: buildTheme("#FF0000"),
-  BLUE: buildTheme("#0BDBEF"),
-  BLACK: buildTheme("#878787"),
-  "U.V.": buildTheme("#D492FF"),
-  MAGENTA: buildTheme("#FF008B"),
-  GREEN: buildTheme("#00FF00"),
-  YELLOW: buildTheme("#F1E300"),
-  GOLD: buildTheme("#BB9551"),
-  PINK: buildTheme("#EF81A0"),
-  PURPLE: buildTheme("#A100FF"),
-  INDIGO: buildTheme("#3842DA"),
-  ORANGE: buildTheme("#FF6500"),
-  SILVER: buildTheme("#DADADA"),
-};
+import { buildColorTheme } from './colorStyles';
 
 const neutralTheme = {
   accent: "#FFFFFF",
@@ -31,6 +7,22 @@ const neutralTheme = {
   accentText: "#FFFFFF",
   activeText: "#111111",
 };
+
+export function buildStageTheme(color) {
+  if (!color) {
+    return neutralTheme;
+  }
+
+  const theme = buildColorTheme(color);
+
+  return {
+    accent: color,
+    accentSoft: theme.accentSoft,
+    accentBorder: theme.accentBorder,
+    accentText: theme.accentText,
+    activeText: theme.activeText,
+  };
+}
 
 export function getCanonicalStageName(stage) {
   if (!stage || typeof stage !== "string") {
@@ -65,5 +57,5 @@ export function getCanonicalStageName(stage) {
 
 export function getStageTheme(stage) {
   const canonicalStage = getCanonicalStageName(stage);
-  return stageThemes[canonicalStage] || neutralTheme;
+  return buildStageTheme(canonicalStage && canonicalStage.startsWith('#') ? canonicalStage : null);
 }

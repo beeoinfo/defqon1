@@ -1,0 +1,67 @@
+.dq-ui-toggle-button:focus:not(:disabled),
+.dq-ui-toggle-button:focus-visible {
+  outline: none;
+  background: var(--dq-ui-button-bg);
+  border-color: var(--dq-ui-button-border-color);
+  color: var(--dq-ui-button-text-color);
+}
+
+.dq-ui-toggle-button:focus:not(:disabled) .dq-ui-button__subtitle,
+.dq-ui-toggle-button:focus-visible .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-subtitle-color);
+}
+
+.dq-ui-toggle-button.dq-ui-button--selected:focus:not(:disabled),
+.dq-ui-toggle-button.dq-ui-button--selected:focus-visible {
+  background: var(--dq-ui-button-selected-bg);
+  border-color: var(--dq-ui-button-selected-border-color);
+  color: var(--dq-ui-button-selected-text-color);
+}
+
+.dq-ui-toggle-button.dq-ui-button--selected:focus:not(:disabled) .dq-ui-button__subtitle,
+.dq-ui-toggle-button.dq-ui-button--selected:focus-visible .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-selected-subtitle-color);
+}
+
+.dq-ui-toggle-button:focus:hover:not(:disabled),
+.dq-ui-toggle-button:focus-visible:hover:not(:disabled) {
+  background: var(--dq-ui-button-hover-bg);
+  border-color: var(--dq-ui-button-hover-border-color);
+  color: var(--dq-ui-button-hover-text-color);
+}
+
+.dq-ui-toggle-button.dq-ui-button--selected:focus:hover:not(:disabled),
+.dq-ui-toggle-button.dq-ui-button--selected:focus-visible:hover:not(:disabled) {
+  background: var(--dq-ui-button-selected-hover-bg);
+  border-color: var(--dq-ui-button-selected-hover-border-color);
+  color: var(--dq-ui-button-selected-hover-text-color);
+}
+
+.dq-ui-toggle-button:focus:hover:not(:disabled) .dq-ui-button__subtitle,
+.dq-ui-toggle-button:focus-visible:hover:not(:disabled) .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-hover-subtitle-color);
+}
+
+.dq-ui-toggle-button.dq-ui-button--selected:focus:hover:not(:disabled) .dq-ui-button__subtitle,
+.dq-ui-toggle-button.dq-ui-button--selected:focus-visible:hover:not(:disabled) .dq-ui-button__subtitle {
+  color: var(--dq-ui-button-selected-hover-subtitle-color);
+}
+
+.dq-ui-toggle-button--favorite {
+  --dq-ui-button-active-bg: rgba(217, 119, 6, 0.26);
+  --dq-ui-button-active-border-color: rgba(251, 191, 36, 0.5);
+  --dq-ui-button-active-text-color: #fde68a;
+  --dq-ui-button-active-subtitle-color: rgba(253, 230, 138, 0.8);
+  --dq-ui-button-selected-bg: rgba(217, 119, 6, 0.2);
+  --dq-ui-button-selected-border-color: rgba(251, 191, 36, 0.42);
+  --dq-ui-button-selected-text-color: #fcd34d;
+  --dq-ui-button-selected-subtitle-color: rgba(252, 211, 77, 0.78);
+  --dq-ui-button-selected-hover-bg: rgba(217, 119, 6, 0.24);
+  --dq-ui-button-selected-hover-border-color: rgba(251, 191, 36, 0.48);
+  --dq-ui-button-selected-hover-text-color: #fde68a;
+  --dq-ui-button-selected-hover-subtitle-color: rgba(253, 230, 138, 0.8);
+  --dq-ui-button-selected-active-bg: rgba(217, 119, 6, 0.28);
+  --dq-ui-button-selected-active-border-color: rgba(251, 191, 36, 0.54);
+  --dq-ui-button-selected-active-text-color: #fef3c7;
+  --dq-ui-button-selected-active-subtitle-color: rgba(254, 243, 199, 0.84);
+}
