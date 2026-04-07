@@ -8,17 +8,17 @@ import {
   useState,
 } from 'react';
 import {
-  Music2 as MusicIcon,
-  Map as MapIcon,
-  Star as StarIcon,
-  Users as UsersIcon,
-  Search,
-  ArrowUp,
-  UserRound,
-  ChevronDown,
-  X,
-  RotateCcw,
-} from 'lucide-react';
+  MusicNoteIcon as MusicIcon,
+  MapTrifoldIcon as MapIcon,
+  StarIcon,
+  UsersIcon,
+  MagnifyingGlassIcon as Search,
+  ArrowUpIcon as ArrowUp,
+  UserCircleIcon as UserRound,
+  CaretDownIcon as ChevronDown,
+  XIcon as X,
+  ArrowCounterClockwiseIcon as RotateCcw,
+} from '@phosphor-icons/react';
 import {
   countVisibleStages,
   filterExpiredEntries,

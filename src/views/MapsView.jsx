@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { LoaderCircle, TriangleAlert } from 'lucide-react';
+import { CircleNotchIcon, WarningIcon } from '@phosphor-icons/react';
 import EmptyState from '../components/EmptyState';
 
 const ENV_MAPBOX_ACCESS_TOKEN = String(import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').trim();
@@ -516,14 +516,14 @@ export default function MapsView({ mapLayers = [] }) {
 
       {viewerState === 'loading' && (
         <div className="maps-view__status" role="status" aria-live="polite">
-          <LoaderCircle size={18} className="maps-view__spinner" />
+          <CircleNotchIcon size={18} className="maps-view__spinner" />
           <span>Loading {activeLayer?.label} map...</span>
         </div>
       )}
 
       {(viewerState === 'error' || viewerState === 'unsupported') && (
         <div className="maps-view__status maps-view__status--error" role="status" aria-live="polite">
-          <TriangleAlert size={18} />
+          <WarningIcon size={18} />
           <div>
             <strong>Map unavailable</strong>
             <p>{errorMessage || 'The selected Mapbox style could not be loaded.'}</p>

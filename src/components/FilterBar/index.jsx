@@ -1,4 +1,4 @@
-import { RotateCcw } from 'lucide-react';
+import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import Box from '../layout/Box/index';
 import Button from '../primitives/Button/index';
@@ -261,6 +261,42 @@ export default function FilterBar({
   }, [drawers, openDrawer]);
 
   useEffect(() => {
+    const element = filterBarRef.current;
+    const layoutMain = element?.closest?.('.dq-layout-main-shell');
+
+    if (!element || !layoutMain || !floating || resolvedPlacement !== 'top') {
+      layoutMain?.style.removeProperty('--dq-layout-filter-bar-measured-offset');
+      return undefined;
+    }
+
+    function syncFilterBarOffset() {
+      layoutMain.style.setProperty(
+        '--dq-layout-filter-bar-measured-offset',
+        `calc(${element.getBoundingClientRect().height}px + var(--dq-ui-space-lg))`
+      );
+    }
+
+    syncFilterBarOffset();
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', syncFilterBarOffset);
+
+      return () => {
+        window.removeEventListener('resize', syncFilterBarOffset);
+        layoutMain.style.removeProperty('--dq-layout-filter-bar-measured-offset');
+      };
+    }
+
+    const resizeObserver = new ResizeObserver(syncFilterBarOffset);
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+      layoutMain.style.removeProperty('--dq-layout-filter-bar-measured-offset');
+    };
+  }, [floating, resolvedPlacement]);
+
+  useEffect(() => {
     if (!floating || !hideOnScroll) {
       isScrollHiddenRef.current = false;
       setIsScrollHidden(false);
@@ -373,7 +409,7 @@ export default function FilterBar({
               ariaLabel={resetButtonOptions.ariaLabel ?? 'Reset filters'}
               title={resetButtonOptions.title ?? 'Reset filters'}
               radius="rounded"
-              icon={resetButtonOptions.icon ?? RotateCcw}
+              icon={resetButtonOptions.icon ?? ArrowCounterClockwiseIcon}
               onClick={resetFilters}
             />
           </Box>
@@ -405,6 +441,7 @@ export default function FilterBar({
                   radius="rounded"
                   color={choice.color}
                   icon={choice.icon}
+                  fillOnPress={choice.fillOnPress}
                   variant={choice.variant ?? 'ghost'}
                 >
                   {choice.label}
@@ -472,6 +509,7 @@ export default function FilterBar({
                   radius="rounded"
                   color={option.color}
                   icon={option.icon}
+                  fillOnPress={option.fillOnPress}
                   variant={option.variant ?? 'ghost'}
                 >
                   {option.label}

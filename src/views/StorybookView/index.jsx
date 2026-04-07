@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Users } from 'lucide-react';
+import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import './StorybookView.css';
 import Box from '../../components/layout/Box/index';
 import Element from '../../components/layout/Element/index';
@@ -14,6 +14,36 @@ import ToggleButton from '../../components/primitives/ToggleButton/index';
 import Title from '../../components/primitives/Title/index';
 import UiThemeScope from '../../theme/UiThemeScope';
 import View from '../../components/layout/View/index';
+
+const STORYBOOK_NAV_ITEMS = [
+  {
+    id: 'lineup',
+    label: 'Line-up',
+    icon: MusicNoteIcon,
+    active: true,
+  },
+  {
+    id: 'maps',
+    label: 'Maps',
+    icon: MapTrifoldIcon,
+  },
+  {
+    id: 'reviews',
+    label: 'Reviews',
+    icon: StarIcon,
+  },
+  {
+    id: 'tribe',
+    label: 'Tribe',
+    icon: UsersIcon,
+  },
+  {
+    id: 'search',
+    label: 'Search',
+    icon: MagnifyingGlassIcon,
+    mobileOnly: true,
+  },
+];
 
 const STORYBOOK_BOX_EXAMPLES = [
   {
@@ -49,7 +79,7 @@ const STORYBOOK_BOX_EXAMPLES = [
   },
   {
     color: '#00FF00',
-    titleIcon: Sparkles,
+    titleIcon: SparkleIcon,
     titleVariant: 'h4',
     titleCount: 3,
     titleCountLabel: 'performers',
@@ -58,7 +88,7 @@ const STORYBOOK_BOX_EXAMPLES = [
   {
     color: '#3842DA',
     title: 'Warm Spotlight',
-    titleIcon: Sparkles,
+    titleIcon: SparkleIcon,
     titleComponent: 'h3',
     titleVariant: 'h4',
     titleCount: 5,
@@ -68,7 +98,7 @@ const STORYBOOK_BOX_EXAMPLES = [
     color: '#A100FF',
     title: 'Ignored Icon',
     titleBadge: 'PURPLE',
-    titleIcon: Sparkles,
+    titleIcon: SparkleIcon,
     titleVariant: 'h4',
     titleCount: 6,
     titleCountLabel: 'artists',
@@ -238,8 +268,8 @@ function StorybookBody() {
             titleVariant="h4"
           >
             <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Button icon={Sparkles}>Icon Start</Button>
-              <Button icon={Sparkles} iconPosition="end">
+              <Button icon={SparkleIcon}>Icon Start</Button>
+              <Button icon={SparkleIcon} iconPosition="end">
                 Icon End
               </Button>
             </Box>
@@ -253,9 +283,9 @@ function StorybookBody() {
             titleVariant="h4"
           >
             <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Button icon={Sparkles} ariaLabel="Sparkles small" size="sm" />
-              <Button icon={Sparkles} ariaLabel="Sparkles medium" />
-              <Button icon={Sparkles} ariaLabel="Sparkles large" size="lg" />
+              <Button icon={SparkleIcon} ariaLabel="Sparkles small" size="sm" />
+              <Button icon={SparkleIcon} ariaLabel="Sparkles medium" />
+              <Button icon={SparkleIcon} ariaLabel="Sparkles large" size="lg" />
             </Box>
           </Box>
 
@@ -338,7 +368,8 @@ function StorybookBody() {
               label: 'My Tribe',
               type: 'checkbox',
               variant: 'favorite',
-              icon: Users,
+              icon: UsersIcon,
+              fillOnPress: true,
             },
             {
               id: 'all',
@@ -374,7 +405,7 @@ function StorybookBody() {
               options: [
                 { value: 'live', label: 'Live', color: '#22c55e' },
                 { value: 'special', label: 'Special', color: '#F1E300' },
-                { value: 'favorite', label: 'Favorite', variant: 'favorite', icon: Sparkles },
+                { value: 'favorite', label: 'Favorite', variant: 'favorite', icon: StarIcon, fillOnPress: true },
               ],
             },
           ]}
@@ -414,7 +445,7 @@ function StorybookBody() {
                   gap="var(--dq-ui-space-lg)"
                 >
                   <ToggleButton>Subscribed</ToggleButton>
-                  <ToggleButton icon={Sparkles}>Notify me</ToggleButton>
+                  <ToggleButton icon={SparkleIcon}>Notify me</ToggleButton>
                 </Box>
               </Box>
 
@@ -428,14 +459,15 @@ function StorybookBody() {
                   wrap="wrap"
                   gap="var(--dq-ui-space-lg)"
                 >
-                  <ToggleButton variant="favorite">Favorite</ToggleButton>
-                  <ToggleButton variant="favorite" icon={Users}>
+                  <ToggleButton variant="favorite" icon={StarIcon} fillOnPress>Favorite</ToggleButton>
+                  <ToggleButton variant="favorite" icon={UsersIcon} fillOnPress>
                     My Tribe
                   </ToggleButton>
                   <ToggleButton
                     variant="favorite"
-                    icon={Sparkles}
-                    ariaLabel="Favorite sparkles"
+                    icon={StarIcon}
+                    fillOnPress
+                    ariaLabel="Favorite"
                   />
                 </Box>
               </Box>
@@ -465,7 +497,7 @@ function StorybookBody() {
                   <ChoiceButton color="#00FF00" radius="rounded">
                     Green
                   </ChoiceButton>
-                  <ChoiceButton variant="favorite" icon={Users}>
+                  <ChoiceButton variant="favorite" icon={UsersIcon} fillOnPress>
                     My Tribe
                   </ChoiceButton>
                 </Box>
@@ -710,9 +742,7 @@ export default function StorybookView({ mode = 'view' }) {
         </Page>
       ) : (
         <View
-          navbar={
-            <Element>Navbar</Element>
-          }
+          navbar={STORYBOOK_NAV_ITEMS}
         >
           <StorybookBody />
         </View>

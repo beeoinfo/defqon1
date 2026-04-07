@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
@@ -117,7 +117,7 @@ function ReviewsView({
                       title="Close review"
                       aria-label="Close review"
                     >
-                      <X size={16} />
+                      <XIcon size={16} />
                     </button>
                   ) : null}
                 </div>

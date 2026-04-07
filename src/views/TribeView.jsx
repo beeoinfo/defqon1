@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pencil, Plus, QrCode, Share2, Users, X } from 'lucide-react';
+import { PencilSimpleIcon, PlusIcon, QrCodeIcon, ShareNetworkIcon, UsersIcon, XIcon } from '@phosphor-icons/react';
 import EmptyState from '../components/EmptyState';
 import { resolveProfileAvatarUrl } from '../lib/presetAvatars';
 import { normalizeTribeCode } from '../lib/supabase';
@@ -192,7 +192,7 @@ export default function TribeView({
         <div className="tribe-grid tribe-grid--setup">
           <article className="tribe-card tribe-card--setup">
             <div className="tribe-card__header">
-              <Plus size={18} />
+              <PlusIcon size={18} />
               <h2>Create your tribe</h2>
             </div>
             <p className="muted">
@@ -219,7 +219,7 @@ export default function TribeView({
           </article>
           <article className="tribe-card tribe-card--setup">
             <div className="tribe-card__header">
-              <Users size={18} />
+              <UsersIcon size={18} />
               <h2>Join with a code</h2>
             </div>
             <p className="muted">
@@ -270,7 +270,7 @@ export default function TribeView({
       <div className="tribe-grid tribe-grid--active">
         <article className="tribe-card tribe-card--hero tribe-card--active">
           <div className="tribe-card__header">
-            <Users size={18} />
+            <UsersIcon size={18} />
             <h2>Your tribe</h2>
           </div>
 
@@ -316,7 +316,7 @@ export default function TribeView({
                   onClick={() => setIsEditingName(true)}
                   aria-label="Rename tribe"
                 >
-                  <Pencil size={16} />
+                  <PencilSimpleIcon size={16} />
                 </button>
               </>
             )}
@@ -328,11 +328,11 @@ export default function TribeView({
               className="button-secondary"
               onClick={() => setShowQr(true)}
             >
-              <QrCode size={16} />
+              <QrCodeIcon size={16} />
               <span>Show QR code</span>
             </button>
             <button type="button" className="button-secondary" onClick={handleShare}>
-              <Share2 size={16} />
+              <ShareNetworkIcon size={16} />
               <span>Share invite</span>
             </button>
             <button
@@ -353,7 +353,7 @@ export default function TribeView({
 
         <article className="tribe-card tribe-card--members">
           <div className="tribe-card__header">
-            <Users size={18} />
+            <UsersIcon size={18} />
             <h2>{tribe.memberCount} member{tribe.memberCount === 1 ? '' : 's'}</h2>
           </div>
           <div className="tribe-member-list">
@@ -403,7 +403,7 @@ export default function TribeView({
                 onClick={() => setIsLeaveModalOpen(false)}
                 aria-label="Close leave tribe confirmation"
               >
-                <X size={18} />
+                <XIcon size={18} />
               </button>
             </div>
             <div className="tribe-leave-modal__body">
@@ -457,7 +457,7 @@ export default function TribeView({
                 onClick={() => setShowQr(false)}
                 aria-label="Close QR code"
               >
-                <X size={18} />
+                <XIcon size={18} />
               </button>
             </div>
             <div className="tribe-qr-frame tribe-qr-frame--modal">

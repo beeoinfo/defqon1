@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
 import { useEffect, useId, useRef, useState } from 'react';
 import Box from '../../layout/Box/index';
 import ToggleButton from '../ToggleButton/index';
@@ -11,10 +11,11 @@ function getAnchorName(id) {
 }
 
 export function DropdownChevron({ size }) {
+  const adjustedSize = Math.max(size - 4, 12); // Réduit de 4px, minimum 12px
   return (
     <span className="dq-ui-dropdown__chevron">
-      <ChevronDown className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--closed" size={size} />
-      <ChevronUp className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--open" size={size} />
+      <CaretDownIcon className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--closed" size={adjustedSize} weight="bold" />
+      <CaretUpIcon className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--open" size={adjustedSize} weight="bold" />
     </span>
   );
 }

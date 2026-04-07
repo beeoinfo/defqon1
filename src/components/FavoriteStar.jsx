@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Star } from 'lucide-react';
+import { StarIcon } from '@phosphor-icons/react';
 
 /**
  * Render a star icon that toggles the favourite state of an entry. When
@@ -21,7 +21,7 @@ function FavoriteStar({ active, onClick, title = 'Toggle favorite' }) {
       title={title}
     >
       {/* Size 16 matches the original design */}
-      <Star size={16} />
+      <StarIcon size={16} />
     </button>
   );
 }

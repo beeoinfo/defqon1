@@ -194,6 +194,25 @@ If one of these settings changes, update this section in the same work cycle.
 - When using such an exception, explicitly mention it and justify why the existing structure could not be kept clean otherwise.
 - The expected standard is to avoid these escape hatches in 99.99% of cases.
 
+## Third-Party Libraries & Deprecations
+
+### Phosphor Icons (@phosphor-icons/react)
+
+The project uses Phosphor Icons for all icon components. As of Phosphor v2, all icon exports have been migrated to a `-Icon` suffix format.
+
+**Deprecated API (❌ Do NOT use):**
+- `Icon`, `Plus`, `Star`, `Users`, `X`, `Check`, `Warning`, `CaretDown`, `CaretUp`, `CaretLeft`, `CaretRight`, `MusicNote`, `MapTrifold`, `MagnifyingGlass`, `Sparkle`, `ArrowUp`, `UserCircle`, `QrCode`, `ShareNetwork`, `PencilSimple`, `ArrowCounterClockwise`, `CircleNotch`, etc.
+
+**Current API (✅ Use these):**
+- `IconIcon`, `PlusIcon`, `StarIcon`, `UsersIcon`, `XIcon`, `CheckIcon`, `WarningIcon`, `CaretDownIcon`, `CaretUpIcon`, `CaretLeftIcon`, `CaretRightIcon`, `MusicNoteIcon`, `MapTrifoldIcon`, `MagnifyingGlassIcon`, `SparkleIcon`, `ArrowUpIcon`, `UserCircleIcon`, `QrCodeIcon`, `ShareNetworkIcon`, `PencilSimpleIcon`, `ArrowCounterClockwiseIcon`, `CircleNotchIcon`, etc.
+
+**Pattern:** All Phosphor icon imports must use the `-Icon` suffix. Always verify in the TypeScript definitions when adding new icons.
+
+**Icon Styling with Phosphor:**
+- Use `weight="fill"` prop for filled variants: `<StarIcon weight="fill" />`
+- Do NOT use `fill="currentColor"` (Lucide-style); Phosphor uses `weight` prop instead.
+- All weight variants are available: `"thin"`, `"light"`, `"regular"`, `"bold"`, `"fill"`, `"duotone"`.
+
 ## Best Coding Practices
 
 To be documented and maintained later.

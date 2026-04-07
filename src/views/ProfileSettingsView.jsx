@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, RefreshCcw, X } from 'lucide-react';
+import { CheckIcon, ArrowCounterClockwiseIcon, XIcon } from '@phosphor-icons/react';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '../lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '../lib/supabase';
 
@@ -53,7 +53,7 @@ function InfoPage({ pageKey, onClose }) {
             onClick={onClose}
             aria-label="Close page"
           >
-            <X size={18} />
+            <XIcon size={18} />
           </button>
         </div>
         </div>
@@ -255,7 +255,7 @@ export default function ProfileSettingsView({
               onClick={onBack}
               aria-label="Close settings"
             >
-              <X size={18} />
+              <XIcon size={18} />
             </button>
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function ProfileSettingsView({
                   title="Pick another default avatar"
                   aria-label="Pick another default avatar"
                 >
-                  <RefreshCcw size={15} />
+                  <ArrowCounterClockwiseIcon size={15} />
                 </button>
               </div>
 
@@ -415,7 +415,7 @@ export default function ProfileSettingsView({
                         <span className="profile-settings__lineup-badge">Latest</span>
                       )}
                     </div>
-                    {isSelected && <Check size={16} className="profile-settings__lineup-check" />}
+                    {isSelected && <CheckIcon size={16} className="profile-settings__lineup-check" />}
                   </button>
                 );
               })}

@@ -5,14 +5,14 @@ import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
 
 const BUTTON_ICON_SIZES = {
   withLabel: {
-    sm: 14,
-    md: 18,
-    lg: 18,
+    sm: 18,
+    md: 22,
+    lg: 22,
   },
   iconOnly: {
-    sm: 16,
-    md: 18,
-    lg: 20,
+    sm: 20,
+    md: 22,
+    lg: 24,
   },
 };
 
@@ -97,6 +97,7 @@ function renderButtonBadge(badge) {
 export function ButtonContent({
   children,
   Icon = null,
+  iconWeight,
   iconPosition = 'start',
   imageSrc = '',
   imageAlt = '',
@@ -114,7 +115,7 @@ export function ButtonContent({
       ) : null}
       {Icon && iconPosition === 'start' ? (
         <span className="dq-ui-button__icon" aria-hidden="true">
-          <Icon size={iconSize} />
+          <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
         </span>
       ) : null}
       {hasLabel ? (
@@ -131,7 +132,7 @@ export function ButtonContent({
       ) : null}
       {Icon && iconPosition === 'end' ? (
         <span className="dq-ui-button__icon" aria-hidden="true">
-          <Icon size={iconSize} />
+          <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
         </span>
       ) : null}
     </>
@@ -141,6 +142,7 @@ export function ButtonContent({
 const Button = forwardRef(function Button({
   children,
   icon: Icon = null,
+  iconWeight,
   iconPosition = 'start',
   imageSrc = '',
   imageAlt = '',
@@ -197,6 +199,7 @@ const Button = forwardRef(function Button({
       <ButtonContent
         children={children}
         Icon={visualState.Icon}
+        iconWeight={iconWeight}
         iconPosition={iconPosition}
         imageSrc={imageSrc}
         imageAlt={imageAlt}

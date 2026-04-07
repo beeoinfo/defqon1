@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { XIcon } from '@phosphor-icons/react';
 import {
   isSupabaseConfigured,
   signInWithUsername,
@@ -130,7 +130,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
             onClick={onClose}
             aria-label="Close modal"
           >
-            <X size={18} />
+            <XIcon size={18} />
           </button>
         </div>
         <div className="modal-tabs modal-tabs--auth">

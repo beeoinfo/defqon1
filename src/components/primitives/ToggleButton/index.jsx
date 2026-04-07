@@ -1,29 +1,15 @@
 import { useState } from 'react';
-import { Star } from 'lucide-react';
 import Button from '../Button/index';
 import './ToggleButton.css';
 
-function getFilledIcon(Icon) {
-  return function FilledIcon(props) {
-    return <Icon {...props} fill="currentColor" />;
-  };
-}
-
-export function resolveToggleIcons({ variant, icon, selectedIcon, pressed }) {
-  if (variant !== 'favorite') {
-    return {
-      icon: icon ?? null,
-      selectedIcon: selectedIcon ?? null,
-      currentIcon: pressed ? selectedIcon ?? icon ?? null : icon ?? null,
-    };
+export function resolveIconProps({ icon, pressed, fillOnPress = false }) {
+  if (!icon) {
+    return { Icon: null, iconWeight: undefined };
   }
 
-  const resolvedIcon = icon ?? Star;
-
   return {
-    icon: resolvedIcon,
-    selectedIcon: selectedIcon ?? getFilledIcon(resolvedIcon),
-    currentIcon: pressed ? selectedIcon ?? getFilledIcon(resolvedIcon) : resolvedIcon,
+    Icon: icon,
+    iconWeight: fillOnPress && pressed ? 'fill' : undefined,
   };
 }
 
@@ -34,19 +20,14 @@ export default function ToggleButton({
   onClick,
   variant = 'ghost',
   icon = null,
-  selectedIcon = null,
+  fillOnPress = false,
   className = '',
   ...props
 }) {
   const [internalPressed, setInternalPressed] = useState(defaultPressed);
   const isControlled = pressed !== undefined;
   const isPressed = isControlled ? pressed : internalPressed;
-  const resolvedIcons = resolveToggleIcons({
-    variant,
-    icon,
-    selectedIcon,
-    pressed: isPressed,
-  });
+  const iconProps = resolveIconProps({ icon, pressed: isPressed, fillOnPress });
 
   function handleClick(event) {
     const nextPressed = !isPressed;
@@ -62,11 +43,12 @@ export default function ToggleButton({
   return (
     <Button
       {...props}
-      icon={resolvedIcons.currentIcon ?? resolvedIcons.icon}
+      icon={iconProps.Icon}
+      iconWeight={iconProps.iconWeight}
       selected={isPressed}
       aria-pressed={isPressed}
       variant={variant === 'favorite' ? 'ghost' : variant}
-      className={['dq-ui-toggle-button', `dq-ui-toggle-button--${variant}`, className]
+      className={['dq-ui-toggle-button', `dq-ui-toggle-button--${variant}`, fillOnPress ? 'dq-ui-toggle-button--fill-on-press' : '', className]
         .filter(Boolean)
         .join(' ')}
       onClick={handleClick}

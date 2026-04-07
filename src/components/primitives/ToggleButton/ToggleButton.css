@@ -47,6 +47,10 @@
   color: var(--dq-ui-button-selected-hover-subtitle-color);
 }
 
+.dq-ui-toggle-button--fill-on-press .dq-ui-button__icon {
+  position: relative;
+}
+
 .dq-ui-toggle-button--favorite {
   --dq-ui-button-active-bg: rgba(217, 119, 6, 0.26);
   --dq-ui-button-active-border-color: rgba(251, 191, 36, 0.5);

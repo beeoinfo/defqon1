@@ -6,7 +6,7 @@ import {
   getButtonClassName,
   resolveButtonVisualState,
 } from '../Button/index';
-import { resolveToggleIcons } from '../ToggleButton/index';
+import { resolveIconProps } from '../ToggleButton/index';
 import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
 
 export default function ChoiceButton({
@@ -19,7 +19,7 @@ export default function ChoiceButton({
   name,
   value,
   icon = null,
-  selectedIcon = null,
+  fillOnPress = false,
   iconPosition = 'start',
   imageSrc = '',
   imageAlt = '',
@@ -37,15 +37,10 @@ export default function ChoiceButton({
   const [internalChecked, setInternalChecked] = useState(Boolean(defaultChecked));
   const isControlled = checked !== undefined;
   const isChecked = isControlled ? checked : internalChecked;
-  const resolvedIcons = resolveToggleIcons({
-    variant,
-    icon,
-    selectedIcon,
-    pressed: isChecked,
-  });
+  const iconProps = resolveIconProps({ icon, pressed: isChecked, fillOnPress });
   const visualState = resolveButtonVisualState({
     children,
-    icon: resolvedIcons.currentIcon ?? resolvedIcons.icon,
+    icon: iconProps.Icon,
     imageSrc,
     subtitle,
     size,
@@ -55,7 +50,7 @@ export default function ChoiceButton({
   });
 
   function handleChange(event) {
-    if (!isControlled) {
+    if (!isControlled && type !== 'radio') {
       setInternalChecked(event.target.checked);
     }
 
@@ -78,8 +73,8 @@ export default function ChoiceButton({
         {...props}
         className="dq-ui-choice-button__input"
         type={type}
-        checked={checked}
-        defaultChecked={defaultChecked}
+        {...(isControlled ? { checked: isChecked } : {})}
+        {...(type !== 'radio' && !isControlled ? { defaultChecked: isChecked } : {})}
         onChange={handleChange}
         name={name}
         value={value}
@@ -92,12 +87,13 @@ export default function ChoiceButton({
             variant: variant === 'favorite' ? 'ghost' : variant,
             size,
             resolvedRadius: visualState.resolvedRadius,
-            selected: isChecked,
+            selected: type !== 'radio' && isChecked,
             isRichLarge: visualState.isRichLarge,
             hasImage: visualState.hasImage,
             isIconOnly: visualState.isIconOnly,
           }),
           variant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
+          fillOnPress ? 'dq-ui-toggle-button--fill-on-press' : '',
           'dq-ui-choice-button__control',
         ]
           .filter(Boolean)
@@ -113,6 +109,7 @@ export default function ChoiceButton({
           children={children}
           Icon={visualState.Icon}
           iconPosition={iconPosition}
+          iconWeight={iconProps.iconWeight}
           imageSrc={imageSrc}
           imageAlt={imageAlt}
           resolvedSubtitle={visualState.resolvedSubtitle}

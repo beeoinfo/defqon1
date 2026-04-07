@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Users, X } from 'lucide-react';
+import { CaretLeftIcon, CaretRightIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 import FavoriteStar from '../components/FavoriteStar';
 import EmptyState from '../components/EmptyState';
 import { getCanonicalStageName, getStageTheme } from '../lib/stageThemes';
@@ -176,7 +176,7 @@ const LineupEntryCard = memo(
                     style={{ zIndex: visibleTribeLikes.length + 1 }}
                   >
                     <span className="tribe-summary-trigger__more">
-                      <Plus size={15} strokeWidth={1.6} aria-hidden="true" />
+                      <PlusIcon size={15} aria-hidden="true" />
                     </span>
                   </span>
                 ) : null}
@@ -736,7 +736,7 @@ function LineupView({
                         onClick={() => scrollToDayIndex(index - 1)}
                         aria-label={`Scroll to previous day before ${day}`}
                       >
-                        <ChevronLeft size={16} />
+                        <CaretLeftIcon size={12} weight="bold" />
                         <span className="lineup-day-rail__nav-label">
                           {visibleDayEntries[index - 1]?.day}
                         </span>
@@ -752,7 +752,7 @@ function LineupView({
                         <span className="lineup-day-rail__nav-label">
                           {visibleDayEntries[index + 1]?.day}
                         </span>
-                        <ChevronRight size={16} />
+                        <CaretRightIcon size={12} weight="bold" />
                       </button>
                     ) : null}
                   </div>
@@ -787,7 +787,7 @@ function LineupView({
                           onClick={() => scrollToDayIndex(index - 1)}
                           aria-label={`Scroll to ${visibleDayEntries[index - 1]?.day}`}
                         >
-                          <ChevronLeft size={18} />
+                          <CaretLeftIcon size={14} weight="bold" />
                           <span className="lineup-mobile-nav__label">
                             {visibleDayEntries[index - 1]?.day}
                           </span>
@@ -805,7 +805,7 @@ function LineupView({
                           <span className="lineup-mobile-nav__label">
                             {visibleDayEntries[index + 1]?.day}
                           </span>
-                          <ChevronRight size={18} />
+                          <CaretRightIcon size={14} weight="bold" />
                         </button>
                       ) : null}
                     </div>
@@ -852,7 +852,7 @@ function LineupView({
                       onClick={closeTribeLikesDrawer}
                       aria-label="Close tribe drawer"
                     >
-                      <X size={16} />
+                      <XIcon size={16} />
                     </button>
                   ) : null}
                 </div>
