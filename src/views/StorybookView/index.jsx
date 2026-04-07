@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Sparkles, Users } from 'lucide-react';
 import './StorybookView.css';
 import Box from '../../components/layout/Box/index';
 import Element from '../../components/layout/Element/index';
+import FilterBar from '../../components/FilterBar/index';
 import Page from '../../components/layout/Page/index';
 import Badge from '../../components/primitives/Badge/index';
 import Button from '../../components/primitives/Button/index';
@@ -109,6 +111,9 @@ function StorybookBoxExamples({ layout = 'flex' }) {
 }
 
 function StorybookBody() {
+  const [isFilterBarBottom, setIsFilterBarBottom] = useState(false);
+  const [doesFilterBarHideOnScroll, setDoesFilterBarHideOnScroll] = useState(false);
+
   return (
     <Box gap="var(--dq-ui-space-xxxl)">
       <Box
@@ -301,6 +306,79 @@ function StorybookBody() {
         titleCountLabel="performers"
       >
         <StorybookBoxExamples layout="columns" />
+      </Box>
+
+      <Box
+        component="section"
+        title="Filter Bar"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <FilterBar
+          placement={isFilterBarBottom ? 'bottom' : 'top'}
+          hideOnScroll={doesFilterBarHideOnScroll}
+          choices={[
+            {
+              id: 'bottom-filter-bar',
+              label: 'Bottom filter bar',
+              type: 'checkbox',
+              checked: isFilterBarBottom,
+              onCheckedChange: setIsFilterBarBottom,
+            },
+            {
+              id: 'hide-filter-bar-on-scroll',
+              label: 'Hide on scroll',
+              type: 'checkbox',
+              checked: doesFilterBarHideOnScroll,
+              onCheckedChange: setDoesFilterBarHideOnScroll,
+            },
+            {
+              id: 'tribe',
+              label: 'My Tribe',
+              type: 'checkbox',
+              variant: 'favorite',
+              icon: Users,
+            },
+            {
+              id: 'all',
+              label: 'All',
+              type: 'radio',
+              name: 'storybook-filter-scope',
+              value: 'all',
+            },
+            {
+              id: 'favorites',
+              label: 'Favorites',
+              type: 'radio',
+              name: 'storybook-filter-scope',
+              value: 'favorites',
+            },
+          ]}
+          drawers={[
+            {
+              id: 'stage',
+              label: 'Stages',
+              type: 'radio',
+              options: [
+                { value: 'all', label: 'All', reset: true, defaultChecked: true },
+                { value: 'blue', label: 'Blue', color: '#0BDBEF' },
+                { value: 'magenta', label: 'Magenta', color: '#FF008B' },
+                { value: 'green', label: 'Green', color: '#00FF00' },
+              ],
+            },
+            {
+              id: 'tags',
+              label: 'Tags',
+              type: 'checkbox',
+              options: [
+                { value: 'live', label: 'Live', color: '#22c55e' },
+                { value: 'special', label: 'Special', color: '#F1E300' },
+                { value: 'favorite', label: 'Favorite', variant: 'favorite', icon: Sparkles },
+              ],
+            },
+          ]}
+        />
       </Box>
 
       <Box

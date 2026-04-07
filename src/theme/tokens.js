@@ -45,6 +45,7 @@ export const dqUiTokens = {
     inlinePadding: 'clamp(16px, 3vw, 32px)',
     blockPaddingTop: '24px',
     blockPaddingBottom: '40px',
+    mobileBottomNavControlSize: '42px',
   },
 };
 
@@ -84,6 +85,13 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
       --dq-ui-layout-inline-padding: ${tokens.layout.inlinePadding};
       --dq-ui-layout-block-padding-top: ${tokens.layout.blockPaddingTop};
       --dq-ui-layout-block-padding-bottom: ${tokens.layout.blockPaddingBottom};
+      --dq-ui-layout-mobile-bottom-nav-control-size: ${tokens.layout.mobileBottomNavControlSize};
+      --dq-ui-layout-mobile-bottom-nav-offset: calc(
+        var(--dq-ui-layout-mobile-bottom-nav-control-size) +
+        (var(--dq-ui-space-xs) * 2) +
+        1px +
+        env(safe-area-inset-bottom, 0px)
+      );
       color: var(--dq-ui-text);
       font-family: 'Roboto', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }

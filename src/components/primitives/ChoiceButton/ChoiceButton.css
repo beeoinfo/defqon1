@@ -1,10 +1,15 @@
 .dq-ui-choice-button {
+  position: relative;
   display: inline-flex;
   cursor: pointer;
 }
 
 .dq-ui-choice-button__input {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   opacity: 0;
   pointer-events: none;
 }

@@ -92,7 +92,7 @@ export default function ChoiceButton({
             variant: variant === 'favorite' ? 'ghost' : variant,
             size,
             resolvedRadius: visualState.resolvedRadius,
-            selected: false,
+            selected: isChecked,
             isRichLarge: visualState.isRichLarge,
             hasImage: visualState.hasImage,
             isIconOnly: visualState.isIconOnly,

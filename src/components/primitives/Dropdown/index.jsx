@@ -10,7 +10,7 @@ function getAnchorName(id) {
   return `--dq-ui-dropdown-${id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 }
 
-function DropdownChevron({ size }) {
+export function DropdownChevron({ size }) {
   return (
     <span className="dq-ui-dropdown__chevron">
       <ChevronDown className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--closed" size={size} />
@@ -122,12 +122,13 @@ export function DropdownDrawer({
       >
         {items.map((item) => {
           const isActive = item.value === activeValue;
+          const isSelected = isActive || Boolean(item.selected);
           const nextValue = isActive && allowClose ? null : item.value;
 
           return (
             <ToggleButton
               key={item.value}
-              pressed={isActive}
+              pressed={isSelected}
               onPressedChange={() => setNextValue(nextValue)}
               size={item.size ?? size}
               radius={item.radius ?? radius}
@@ -188,52 +189,27 @@ export default function Dropdown({
   const resolvedPlacement = placement === 'top' ? 'top' : 'bottom';
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [effectivePlacement, setEffectivePlacement] = useState(resolvedPlacement);
 
   useEffect(() => {
     const popover = document.getElementById(popoverId);
-    const trigger = triggerRef.current;
 
-    if (!popover || !trigger) {
+    if (!popover) {
       return undefined;
     }
 
-    let frame = 0;
+    function syncOpenState() {
+      const nextOpen = popover.matches(':popover-open');
 
-    const syncEffectivePlacement = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const nextOpen = popover.matches(':popover-open');
+      setIsOpen((currentOpen) => (currentOpen === nextOpen ? currentOpen : nextOpen));
+    }
 
-        setIsOpen(nextOpen);
-
-        if (!nextOpen) {
-          setEffectivePlacement(resolvedPlacement);
-          return;
-        }
-
-        const popoverRect = popover.getBoundingClientRect();
-        const triggerRect = trigger.getBoundingClientRect();
-        const popoverCenter = popoverRect.top + popoverRect.height / 2;
-        const triggerCenter = triggerRect.top + triggerRect.height / 2;
-
-        setEffectivePlacement(popoverCenter < triggerCenter ? 'top' : 'bottom');
-      });
-    };
-
-    popover.addEventListener('toggle', syncEffectivePlacement);
-    window.addEventListener('resize', syncEffectivePlacement);
-    window.addEventListener('scroll', syncEffectivePlacement, true);
-
-    syncEffectivePlacement();
+    popover.addEventListener('toggle', syncOpenState);
+    syncOpenState();
 
     return () => {
-      cancelAnimationFrame(frame);
-      popover.removeEventListener('toggle', syncEffectivePlacement);
-      window.removeEventListener('resize', syncEffectivePlacement);
-      window.removeEventListener('scroll', syncEffectivePlacement, true);
+      popover.removeEventListener('toggle', syncOpenState);
     };
-  }, [popoverId, resolvedPlacement]);
+  }, [popoverId]);
 
   return (
     <Box
@@ -257,7 +233,7 @@ export default function Dropdown({
         }}
         className={['dq-ui-dropdown__trigger', buttonClassName].filter(Boolean).join(' ')}
         data-placement={resolvedPlacement}
-        data-effective-placement={effectivePlacement}
+        data-effective-placement={resolvedPlacement}
         pressed={isOpen}
         size={size}
         radius={radius}
@@ -267,8 +243,8 @@ export default function Dropdown({
         iconPosition="end"
         aria-haspopup="dialog"
         aria-controls={popoverId}
-        popovertarget={popoverId}
-        popovertargetaction="toggle"
+        popoverTarget={popoverId}
+        popoverTargetAction="toggle"
       >
         {label}
       </ToggleButton>

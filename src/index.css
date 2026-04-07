@@ -38,6 +38,13 @@
   --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
   --dq-ui-layout-block-padding-top: 24px;
   --dq-ui-layout-block-padding-bottom: 40px;
+  --dq-ui-layout-mobile-bottom-nav-control-size: 42px;
+  --dq-ui-layout-mobile-bottom-nav-offset: calc(
+    var(--dq-ui-layout-mobile-bottom-nav-control-size) +
+    (var(--dq-ui-space-xs) * 2) +
+    1px +
+    env(safe-area-inset-bottom, 0px)
+  );
 }
 
 /* Apply a subtle gradient background across the entire page. This helps the

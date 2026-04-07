@@ -32,6 +32,13 @@
   --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
   --dq-ui-layout-block-padding-top: 24px;
   --dq-ui-layout-block-padding-bottom: 40px;
+  --dq-ui-layout-mobile-bottom-nav-control-size: 42px;
+  --dq-ui-layout-mobile-bottom-nav-offset: calc(
+    var(--dq-ui-layout-mobile-bottom-nav-control-size) +
+    (var(--dq-ui-space-xs) * 2) +
+    1px +
+    env(safe-area-inset-bottom, 0px)
+  );
   --dq-ui-background-blur-filter: blur(24px) saturate(140%);
   --dq-ui-background-blur-surface: linear-gradient(180deg, #1c222aad, #161b228f);
   color: var(--dq-ui-text);

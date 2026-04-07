@@ -1,5 +1,9 @@
 @media (max-width: 767.98px) {
   .dq-layout-view__main {
-    padding-bottom: 88px;
+    padding-bottom:
+      calc(
+        var(--dq-ui-layout-mobile-bottom-nav-offset) +
+        var(--dq-ui-layout-block-padding-bottom)
+      );
   }
 }
