@@ -57,7 +57,7 @@
   padding-block: var(--dq-ui-space-xs);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .dq-layout-header__row {
     padding-block: var(--dq-ui-space-sm);
   }

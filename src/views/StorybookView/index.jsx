@@ -6,11 +6,107 @@ import Page from '../../components/layout/Page/index';
 import Badge from '../../components/primitives/Badge/index';
 import Button from '../../components/primitives/Button/index';
 import ChoiceButton from '../../components/primitives/ChoiceButton/index';
+import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown/index';
 import Tabs from '../../components/primitives/Tabs/index';
 import ToggleButton from '../../components/primitives/ToggleButton/index';
 import Title from '../../components/primitives/Title/index';
 import UiThemeScope from '../../theme/UiThemeScope';
 import View from '../../components/layout/View/index';
+
+const STORYBOOK_BOX_EXAMPLES = [
+  {
+    color: '#0BDBEF',
+    title: 'Line-up Preview',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    titleCount: 4,
+    titleCountLabel: 'items',
+    elements: ['Box content', 'Second element'],
+  },
+  {
+    color: '#FF008B',
+    titleCount: 2,
+    titleCountLabel: 'performers',
+    content: 'Box without title',
+  },
+  {
+    color: '#D492FF',
+    titleBadge: 'U.V.',
+    titleCount: 6,
+    titleCountLabel: 'artists',
+    elements: ['Box content', 'Second element', 'Third element'],
+  },
+  {
+    color: '#B95511',
+    title: 'Featured Stage',
+    titleBadge: 'GOLD',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    titleCount: 6,
+    titleCountLabel: 'artists',
+  },
+  {
+    color: '#00FF00',
+    titleIcon: Sparkles,
+    titleVariant: 'h4',
+    titleCount: 3,
+    titleCountLabel: 'performers',
+    elements: ['Box content', 'Extra content'],
+  },
+  {
+    color: '#3842DA',
+    title: 'Warm Spotlight',
+    titleIcon: Sparkles,
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    titleCount: 5,
+    titleCountLabel: 'items',
+  },
+  {
+    color: '#A100FF',
+    title: 'Ignored Icon',
+    titleBadge: 'PURPLE',
+    titleIcon: Sparkles,
+    titleVariant: 'h4',
+    titleCount: 6,
+    titleCountLabel: 'artists',
+    elements: ['Box content', 'Second element'],
+  },
+];
+
+function StorybookBoxExamples({ layout = 'flex' }) {
+  const content = STORYBOOK_BOX_EXAMPLES.map(({
+    content: exampleContent = 'Box content',
+    elements,
+    ...boxProps
+  }, index) => (
+    <Box
+      key={`${boxProps.title ?? 'untitled'}-${boxProps.titleCount}-${index}`}
+      background="surface"
+      {...boxProps}
+    >
+      {elements ? (
+        elements.map((element) => <Element key={element}>{element}</Element>)
+      ) : (
+        <Element>{exampleContent}</Element>
+      )}
+    </Box>
+  ));
+
+  if (layout === 'columns') {
+    return (
+      <Box layout="columns" maxColumns={4} gap="var(--dq-ui-space-xxxl)">
+        {content}
+      </Box>
+    );
+  }
+
+  return (
+    <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-xxxl)" maxColumns={4}>
+      {content}
+    </Box>
+  );
+}
 
 function StorybookBody() {
   return (
@@ -185,6 +281,30 @@ function StorybookBody() {
 
       <Box
         component="section"
+        title="Boxes"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+        titleCount={12}
+        titleCountLabel="performers"
+      >
+        <StorybookBoxExamples />
+      </Box>
+
+      <Box
+        component="section"
+        title="Boxes Columns"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+        titleCount={12}
+        titleCountLabel="performers"
+      >
+        <StorybookBoxExamples layout="columns" />
+      </Box>
+
+      <Box
+        component="section"
         title="Toggle Buttons"
         titleComponent="h2"
         titleVariant="h2"
@@ -264,8 +384,8 @@ function StorybookBody() {
                 >
                   <ChoiceButton defaultChecked>Camping</ChoiceButton>
                   <ChoiceButton>Parking</ChoiceButton>
-                  <ChoiceButton variant="favorite" defaultChecked icon={Sparkles}>
-                    Saved
+                  <ChoiceButton color="#00FF00" radius="rounded">
+                    Green
                   </ChoiceButton>
                   <ChoiceButton variant="favorite" icon={Users}>
                     My Tribe
@@ -286,37 +406,108 @@ function StorybookBody() {
                   <ChoiceButton type="radio" name="storybook-filter" defaultChecked>
                     All
                   </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-filter">
-                    Tribe
-                  </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-filter">
-                    Favorites
-                  </ChoiceButton>
-                </Box>
-              </Box>
-
-              <Box gap="var(--dq-ui-space-sm)">
-                <Title component="span" variant="h6">
-                  Radio Color
-                </Title>
-                <Box
-                  className="dq-ui-storybook__buttons"
-                  direction="row"
-                  wrap="wrap"
-                  gap="var(--dq-ui-space-lg)"
-                >
-                  <ChoiceButton type="radio" name="storybook-color-filter" color="#0BDBEF" radius="rounded" defaultChecked>
+                  <ChoiceButton type="radio" name="storybook-filter" color="#0BDBEF" radius="rounded" defaultChecked>
                     Blue
                   </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-color-filter" color="#FF008B" radius="rounded">
+                  <ChoiceButton type="radio" name="storybook-filter" color="#FF008B" radius="rounded">
                     Magenta
-                  </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-color-filter" color="#00FF00" radius="rounded">
-                    Green
                   </ChoiceButton>
                 </Box>
               </Box>
             </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Dropdowns"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Default"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Dropdown label="Stages">
+                <Element>Line-up</Element>
+                <Element>Favorites</Element>
+                <Element>My tribe</Element>
+              </Dropdown>
+              <Dropdown label="Blue" color="#0BDBEF" radius="rounded">
+                <Element>Blue stage</Element>
+                <Element>6 artists</Element>
+              </Dropdown>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Placements"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Dropdown label="Bottom">
+                <Element>bottom</Element>
+              </Dropdown>
+              <Dropdown label="Top" placement="top">
+                <Element>top</Element>
+              </Dropdown>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Drawer"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <DropdownDrawer
+              items={[
+                {
+                  value: 'lineup',
+                  label: 'Line-up',
+                  content: (
+                    <Box background="surface">
+                      <Element>Line-up panel</Element>
+                    </Box>
+                  ),
+                },
+                {
+                  value: 'tribe',
+                  label: 'Tribe',
+                  content: (
+                    <Box background="surface">
+                      <Element>Tribe panel</Element>
+                    </Box>
+                  ),
+                },
+                {
+                  value: 'favorites',
+                  label: 'Favorites',
+                  content: (
+                    <Box background="surface">
+                      <Element>Favorites panel</Element>
+                    </Box>
+                  ),
+                },
+              ]}
+            />
           </Box>
         </Box>
       </Box>

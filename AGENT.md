@@ -151,11 +151,23 @@ If one of these settings changes, update this section in the same work cycle.
 - If no suitable component exists, stop and ask for validation before creating a new component.
 - Do not create intermediate wrappers, helper components, or structural abstractions unless they are explicitly requested or clearly necessary.
 - In layout and primitive code, do not write raw `<div>` wrappers.
-- Use existing `Box` or `Grid` components instead.
+- Use the existing `Box` component instead.
 - Prefer `Box` and flexbox layouts by default.
-- Do not use `Grid` unless the user explicitly asks for a real grid layout.
-- Do not choose `Grid` as a convenience wrapper for rows, columns, button groups, or simple responsive alignment.
+- The standalone `Grid` layout component is intentionally not part of the current design system.
+- For row, column, wrap, alignment, and gap layout needs, use `Box` flex props.
+- For masonry-like column stacking, use `Box layout="columns"` and `maxColumns`.
+- Do not recreate a `Grid` component unless the user explicitly asks to reintroduce one for a real grid layout.
 - If a semantic wrapper such as `section`, `aside`, `header`, `main`, or `footer` is needed, prefer using `Box` with the appropriate `component` prop instead of introducing a raw wrapper.
+
+### Layout Breakpoints
+
+- Use the project layout breakpoint scale consistently.
+- The current layout breakpoints are Bootstrap-like: desktop `>= 1200px`, large `>= 992px`, medium `>= 768px`, then mobile below `768px`.
+- When writing `max-width` media queries for these thresholds, use the non-overlapping values `1199.98px`, `991.98px`, and `767.98px`.
+- CSS custom properties must not be used as breakpoint tokens inside `@media` queries because they are not reliable for that use in standard CSS.
+- Until a build-time token system such as custom media, PostCSS, or SCSS is explicitly introduced, breakpoint values are centralized by this documented convention and repeated exactly where needed.
+- `Box` column layouts must never exceed 4 columns.
+- `Box` column layouts should reduce from 4 to 3 to 2 to 1 columns across those breakpoints.
 
 ### Tokens and Shared Styling
 

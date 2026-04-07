@@ -3,7 +3,7 @@
   padding-block: var(--dq-ui-space-sm);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .dq-layout-navbar {
     padding-block: var(--dq-ui-space-xs);
   }
