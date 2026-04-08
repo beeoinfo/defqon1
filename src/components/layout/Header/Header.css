@@ -7,7 +7,7 @@
 }
 
 .dq-layout-header__surface {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--dq-ui-border-subtle);
   background: var(--dq-ui-background-blur-surface);
   backdrop-filter: var(--dq-ui-background-blur-filter);
   -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
@@ -47,7 +47,7 @@
 
 .dq-layout-header__mobile-nav-shell {
   padding: 0 0 calc(env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--dq-ui-border-subtle);
   background: var(--dq-ui-background-blur-surface);
   backdrop-filter: var(--dq-ui-background-blur-filter);
   -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);

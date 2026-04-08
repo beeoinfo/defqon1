@@ -1,9 +1,9 @@
-import './Box.css';
-import Badge from '../../primitives/Badge/index';
-import Title from '../../primitives/Title/index';
 import { buildColorTheme } from '../../../lib/colorStyles';
+import Badge from '../../primitives/Badge';
+import Title from '../../primitives/Title';
+import './Box.css';
 
-export default function Box({
+const Box = ({
   component = 'div',
   background = 'none',
   color,
@@ -28,7 +28,7 @@ export default function Box({
   style,
   slot,
   ...props
-}) {
+}) => {
   const parsedMaxColumns = Number(maxColumns);
   const hasExplicitMaxColumns = Number.isFinite(parsedMaxColumns) && parsedMaxColumns > 0;
   const resolvedLayout = layout === 'columns' ? 'columns' : 'flex';
@@ -198,4 +198,6 @@ export default function Box({
       </Box>
     </Component>
   );
-}
+};
+
+export default Box;

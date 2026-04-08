@@ -1,11 +1,11 @@
 import './Element.css';
 
-export default function Element({
+const Element = ({
   component = 'div',
   className = '',
   children,
   ...props
-}) {
+}) => {
   const Component = component;
 
   return (
@@ -16,4 +16,6 @@ export default function Element({
       {children}
     </Component>
   );
-}
+};
+
+export default Element;

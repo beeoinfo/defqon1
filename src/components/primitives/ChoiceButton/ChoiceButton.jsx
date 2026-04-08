@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import '../ToggleButton/ToggleButton.css';
-import './ChoiceButton.css';
+import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
 import {
   ButtonContent,
   getButtonClassName,
   resolveButtonVisualState,
-} from '../Button/index';
-import { resolveIconProps } from '../ToggleButton/index';
-import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
+} from '../Button';
+import { resolveIconProps } from '../ToggleButton';
+import '../ToggleButton/ToggleButton.css';
+import './ChoiceButton.css';
 
-export default function ChoiceButton({
+const ChoiceButton = ({
   children,
   type = 'checkbox',
   checked,
@@ -33,8 +33,8 @@ export default function ChoiceButton({
   ariaLabel,
   title,
   ...props
-}) {
-  const [internalChecked, setInternalChecked] = useState(Boolean(defaultChecked));
+}) => {
+  const [internalChecked, setInternalChecked] = useState(() => Boolean(defaultChecked));
   const isControlled = checked !== undefined;
   const isChecked = isControlled ? checked : internalChecked;
   const iconProps = resolveIconProps({ icon, pressed: isChecked, fillOnPress });
@@ -49,14 +49,14 @@ export default function ChoiceButton({
     ariaLabel,
   });
 
-  function handleChange(event) {
+  const handleChange = (event) => {
     if (!isControlled && type !== 'radio') {
       setInternalChecked(event.target.checked);
     }
 
     onCheckedChange?.(event.target.checked, event);
     onChange?.(event);
-  }
+  };
 
   return (
     <label
@@ -120,4 +120,6 @@ export default function ChoiceButton({
       </span>
     </label>
   );
-}
+};
+
+export default ChoiceButton;

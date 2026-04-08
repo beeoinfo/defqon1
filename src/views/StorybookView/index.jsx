@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import './StorybookView.css';
-import Box from '../../components/layout/Box/index';
-import Element from '../../components/layout/Element/index';
-import FilterBar from '../../components/FilterBar/index';
-import Page from '../../components/layout/Page/index';
-import Badge from '../../components/primitives/Badge/index';
-import Button from '../../components/primitives/Button/index';
-import ChoiceButton from '../../components/primitives/ChoiceButton/index';
-import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown/index';
-import Tabs from '../../components/primitives/Tabs/index';
-import ToggleButton from '../../components/primitives/ToggleButton/index';
-import Title from '../../components/primitives/Title/index';
+import FilterBar from '../../components/FilterBar';
+import Box from '../../components/layout/Box';
+import Element from '../../components/layout/Element';
+import Page from '../../components/layout/Page';
+import View from '../../components/layout/View';
+import Badge from '../../components/primitives/Badge';
+import Button from '../../components/primitives/Button';
+import ChoiceButton from '../../components/primitives/ChoiceButton';
+import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
+import Tabs from '../../components/primitives/Tabs';
+import Title from '../../components/primitives/Title';
+import ToggleButton from '../../components/primitives/ToggleButton';
 import UiThemeScope from '../../theme/UiThemeScope';
-import View from '../../components/layout/View/index';
 
 const STORYBOOK_NAV_ITEMS = [
   {

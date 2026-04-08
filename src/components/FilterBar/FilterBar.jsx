@@ -1,10 +1,10 @@
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
-import Box from '../layout/Box/index';
-import Button from '../primitives/Button/index';
-import ChoiceButton from '../primitives/ChoiceButton/index';
-import ToggleButton from '../primitives/ToggleButton/index';
-import { DropdownChevron } from '../primitives/Dropdown/index';
+import Box from '../layout/Box';
+import Button from '../primitives/Button';
+import ChoiceButton from '../primitives/ChoiceButton';
+import { DropdownChevron } from '../primitives/Dropdown';
+import ToggleButton from '../primitives/ToggleButton';
 import './FilterBar.css';
 
 const FILTER_BAR_DRAWER_ANIMATION_MS = 160;
@@ -12,7 +12,7 @@ const FILTER_BAR_RESET_ANIMATION_MS = 160;
 const FILTER_BAR_SCROLL_HIDE_DELAY_MS = 140;
 const FILTER_BAR_SCROLL_THRESHOLD = 240;
 
-function getInitialValue({ choices = [], drawers = [] }) {
+const getInitialValue = ({ choices = [], drawers = [] }) => {
   const initialValue = {};
 
   choices.forEach((choice) => {
@@ -47,13 +47,13 @@ function getInitialValue({ choices = [], drawers = [] }) {
   });
 
   return initialValue;
-}
+};
 
-function hasFilterValue(value) {
-  return Object.values(value).some((entry) => (Array.isArray(entry) ? entry.length > 0 : Boolean(entry)));
-}
+const hasFilterValue = (value) => (
+  Object.values(value).some((entry) => (Array.isArray(entry) ? entry.length > 0 : Boolean(entry)))
+);
 
-function isChoiceChecked(choice, currentValue) {
+const isChoiceChecked = (choice, currentValue) => {
   if (choice.checked !== undefined) {
     return choice.checked;
   }
@@ -61,9 +61,9 @@ function isChoiceChecked(choice, currentValue) {
   return choice.type === 'radio'
     ? currentValue[choice.name ?? choice.id] === (choice.value ?? choice.id)
     : Boolean(currentValue[choice.id]);
-}
+};
 
-function getDrawerSelection(drawer, drawerValue) {
+const getDrawerSelection = (drawer, drawerValue) => {
   if (drawer.type === 'checkbox') {
     const values = Array.isArray(drawerValue) ? drawerValue : [];
     const selectedOptions = drawer.options?.filter((option) => values.includes(option.value)) ?? [];
@@ -82,9 +82,9 @@ function getDrawerSelection(drawer, drawerValue) {
     label: selectedOption?.label ?? drawer.label,
     color: selectedOption?.color ?? drawer.color,
   };
-}
+};
 
-export default function FilterBar({
+const FilterBar = ({
   choices = [],
   drawers = [],
   value,
@@ -97,18 +97,17 @@ export default function FilterBar({
   hideOnScroll = false,
   className = '',
   ariaLabel = 'Filters',
-}) {
+}) => {
   const filterBarRef = useRef(null);
+  const filterBarRowRef = useRef(null);
   const [internalValue, setInternalValue] = useState(
-    defaultValue ?? getInitialValue({ choices, drawers })
+    () => defaultValue ?? getInitialValue({ choices, drawers })
   );
   const [openDrawer, setOpenDrawer] = useState(null);
   const [renderedDrawerId, setRenderedDrawerId] = useState(null);
   const [drawerState, setDrawerState] = useState('closed');
-  const [rendersResetButton, setRendersResetButton] = useState(false);
   const [resetButtonState, setResetButtonState] = useState('closed');
   const [isScrollHidden, setIsScrollHidden] = useState(false);
-  const isScrollHiddenRef = useRef(false);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : internalValue;
   const hasSelection = hasFilterValue(currentValue);
@@ -116,24 +115,25 @@ export default function FilterBar({
   const resolvedPlacement = placement === 'bottom' ? 'bottom' : 'top';
   const resetButtonOptions = typeof resetButton === 'object' ? resetButton : {};
   const showsResetButton = resetButton !== false && hasSelection;
+  const shouldRenderResetButton = resetButtonState !== 'closed';
 
-  function updateValue(nextValue) {
+  const updateValue = (nextValue) => {
     if (!isControlled) {
       setInternalValue(nextValue);
     }
 
     onChange?.(nextValue);
-  }
+  };
 
-  function resetFilters() {
+  const resetFilters = () => {
     const nextValue = getInitialValue({ choices, drawers });
 
     updateValue(nextValue);
     setOpenDrawer(null);
     onReset?.(nextValue);
-  }
+  };
 
-  function updateChoice(choice, checked) {
+  const updateChoice = (choice, checked) => {
     choice.onCheckedChange?.(checked);
 
     if (choice.checked !== undefined) {
@@ -151,9 +151,9 @@ export default function FilterBar({
     }
 
     updateValue(nextValue);
-  }
+  };
 
-  function updateDrawerOption(drawer, option, checked) {
+  const updateDrawerOption = (drawer, option, checked) => {
     const nextValue = { ...currentValue };
 
     if (drawer.type === 'checkbox') {
@@ -167,11 +167,14 @@ export default function FilterBar({
     }
 
     updateValue(nextValue);
-  }
+  };
 
   useEffect(() => {
     if (showsResetButton) {
-      setRendersResetButton(true);
+      if (resetButtonState === 'open' || resetButtonState === 'opening') {
+        return undefined;
+      }
+
       setResetButtonState('opening');
 
       const timeout = setTimeout(() => {
@@ -181,20 +184,18 @@ export default function FilterBar({
       return () => clearTimeout(timeout);
     }
 
-    if (!rendersResetButton) {
-      setResetButtonState('closed');
+    if (resetButtonState === 'closed' || resetButtonState === 'closing') {
       return undefined;
     }
 
     setResetButtonState('closing');
 
     const timeout = setTimeout(() => {
-      setRendersResetButton(false);
       setResetButtonState('closed');
     }, FILTER_BAR_RESET_ANIMATION_MS);
 
     return () => clearTimeout(timeout);
-  }, [rendersResetButton, showsResetButton]);
+  }, [resetButtonState, showsResetButton]);
 
   useEffect(() => {
     if (openDrawer === renderedDrawerId) {
@@ -226,8 +227,7 @@ export default function FilterBar({
       return undefined;
     }
 
-    function handlePointerDown(event) {
-      const activeDrawer = drawers.find((drawer) => drawer.id === openDrawer);
+    const handlePointerDown = (event) => {
       const drawerContent = filterBarRef.current?.querySelector('.dq-filter-bar__drawer');
       const clickedDrawerTrigger = event.target.closest?.('.dq-filter-bar__drawer-trigger');
 
@@ -240,16 +240,16 @@ export default function FilterBar({
         return;
       }
 
-      if (activeDrawer && drawerContent && !drawerContent.contains(event.target)) {
+      if (drawerContent && !drawerContent.contains(event.target)) {
         setOpenDrawer(null);
       }
-    }
+    };
 
-    function handleKeyDown(event) {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setOpenDrawer(null);
       }
-    }
+    };
 
     document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
@@ -258,23 +258,23 @@ export default function FilterBar({
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [drawers, openDrawer]);
+  }, [openDrawer]);
 
   useEffect(() => {
-    const element = filterBarRef.current;
-    const layoutMain = element?.closest?.('.dq-layout-main-shell');
+    const element = filterBarRowRef.current;
+    const layoutMain = filterBarRef.current?.closest?.('.dq-layout-main-shell');
 
     if (!element || !layoutMain || !floating || resolvedPlacement !== 'top') {
       layoutMain?.style.removeProperty('--dq-layout-filter-bar-measured-offset');
       return undefined;
     }
 
-    function syncFilterBarOffset() {
+    const syncFilterBarOffset = () => {
       layoutMain.style.setProperty(
         '--dq-layout-filter-bar-measured-offset',
         `calc(${element.getBoundingClientRect().height}px + var(--dq-ui-space-lg))`
       );
-    }
+    };
 
     syncFilterBarOffset();
 
@@ -298,8 +298,7 @@ export default function FilterBar({
 
   useEffect(() => {
     if (!floating || !hideOnScroll) {
-      isScrollHiddenRef.current = false;
-      setIsScrollHidden(false);
+      setIsScrollHidden((currentHidden) => (currentHidden ? false : currentHidden));
       return undefined;
     }
 
@@ -309,16 +308,7 @@ export default function FilterBar({
     let pendingScrollY = previousScrollY;
     let accumulatedScroll = 0;
 
-    function setNextScrollHidden(nextHidden) {
-      if (isScrollHiddenRef.current === nextHidden) {
-        return;
-      }
-
-      isScrollHiddenRef.current = nextHidden;
-      setIsScrollHidden(nextHidden);
-    }
-
-    function syncScrollDirection() {
+    const syncScrollDirection = () => {
       frame = 0;
 
       const nextScrollY = pendingScrollY;
@@ -344,18 +334,18 @@ export default function FilterBar({
 
       if (nextHidden) {
         hideTimeout = window.setTimeout(() => {
-          setNextScrollHidden(true);
+          setIsScrollHidden((currentHidden) => (currentHidden ? currentHidden : true));
           setOpenDrawer(null);
         }, FILTER_BAR_SCROLL_HIDE_DELAY_MS);
       } else {
-        setNextScrollHidden(false);
+        setIsScrollHidden((currentHidden) => (currentHidden ? false : currentHidden));
       }
 
       accumulatedScroll = 0;
       previousScrollY = nextScrollY;
-    }
+    };
 
-    function handleScroll() {
+    const handleScroll = () => {
       pendingScrollY = window.scrollY;
 
       if (frame) {
@@ -363,7 +353,7 @@ export default function FilterBar({
       }
 
       frame = window.requestAnimationFrame(syncScrollDirection);
-    }
+    };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -389,12 +379,13 @@ export default function FilterBar({
       aria-label={ariaLabel}
     >
       <Box
+        ref={filterBarRowRef}
         className="dq-filter-bar__row"
         direction="row"
         align="center"
         gap="0"
       >
-        {rendersResetButton ? (
+        {shouldRenderResetButton ? (
           <Box
             className={[
               'dq-filter-bar__sticky',
@@ -419,7 +410,7 @@ export default function FilterBar({
           <Box
             className={[
               'dq-filter-bar__scroll',
-              showsResetButton ? 'dq-filter-bar__scroll--with-reset' : '',
+              shouldRenderResetButton ? 'dq-filter-bar__scroll--with-reset' : '',
             ].filter(Boolean).join(' ')}
             slot="content"
             direction="row"
@@ -521,4 +512,6 @@ export default function FilterBar({
       ) : null}
     </Box>
   );
-}
+};
+
+export default FilterBar;

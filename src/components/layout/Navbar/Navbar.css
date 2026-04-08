@@ -27,9 +27,6 @@
 
 @media (max-width: 767.98px) {
   .dq-layout-navbar {
-    --dq-layout-navbar-primary-rgb: 188, 155, 94;
-    --dq-layout-navbar-primary-text: #f6ecd4;
-    --dq-layout-navbar-primary-icon: #ccb072;
     padding-block: var(--dq-ui-space-xs);
   }
 
@@ -105,16 +102,16 @@
   .dq-layout-navbar__item.dq-ui-button--selected:focus-visible,
   .dq-layout-navbar__item.dq-ui-toggle-button.dq-ui-button--selected:focus:not(:disabled),
   .dq-layout-navbar__item.dq-ui-toggle-button.dq-ui-button--selected:focus-visible {
-    color: var(--dq-layout-navbar-primary-text);
+    color: var(--dq-ui-primary-soft);
   }
 
   .dq-layout-navbar__item.dq-ui-button--selected {
-    color: var(--dq-layout-navbar-primary-text);
+    color: var(--dq-ui-primary-soft);
     font-weight: 500;
   }
 
   .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon {
-    color: var(--dq-layout-navbar-primary-icon);
+    color: var(--dq-ui-primary-muted);
   }
 
   .dq-layout-navbar__item .dq-ui-button__icon {
@@ -157,23 +154,23 @@
   .dq-layout-navbar__item:active:not(:disabled) .dq-ui-button__icon::before {
     width: 100%;
     opacity: 1;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--dq-ui-panel-strong);
   }
 
   .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon::before {
     width: 100%;
     opacity: 1;
-    background: rgba(var(--dq-layout-navbar-primary-rgb), 0.18);
+    background: var(--dq-ui-primary-surface);
   }
 
   .dq-layout-navbar__item.dq-ui-button--selected:hover:not(:disabled) .dq-ui-button__icon::before,
   .dq-layout-navbar__item.dq-ui-button--selected:active:not(:disabled) .dq-ui-button__icon::before {
-    background: rgba(var(--dq-layout-navbar-primary-rgb), 0.22);
+    background: var(--dq-ui-primary-surface-strong);
   }
 
   .dq-layout-navbar__item.dq-ui-button--selected:focus:not(:disabled) .dq-ui-button__icon::before,
   .dq-layout-navbar__item.dq-ui-button--selected:focus-visible .dq-ui-button__icon::before {
-    background: rgba(var(--dq-layout-navbar-primary-rgb), 0.18);
+    background: var(--dq-ui-primary-surface);
   }
 
   .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon::before {

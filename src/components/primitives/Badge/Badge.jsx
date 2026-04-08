@@ -1,7 +1,7 @@
-import './Badge.css';
 import { buildColorTheme, getContrastTextColor } from '../../../lib/colorStyles';
+import './Badge.css';
 
-export default function Badge({
+const Badge = ({
   component = 'span',
   variant = 'ghost',
   color,
@@ -12,19 +12,19 @@ export default function Badge({
   children,
   style,
   ...props
-}) {
+}) => {
   const Component = component;
   const resolvedVariant = variant === 'surface' ? 'ghost' : variant;
   const generatedTheme = color ? buildColorTheme(color) : null;
   const resolvedBackgroundColor =
     backgroundColor ??
     (resolvedVariant === 'plain'
-      ? generatedTheme?.accent ?? '#ffffff'
+      ? generatedTheme?.accent ?? 'var(--dq-ui-color-white)'
       : resolvedVariant === 'count'
         ? generatedTheme?.accent
         : resolvedVariant === 'title'
           ? 'var(--dq-ui-danger-surface)'
-        : generatedTheme?.accentSoft);
+          : generatedTheme?.accentSoft);
   const resolvedBorderColor =
     borderColor ??
     ((resolvedVariant === 'ghost' || resolvedVariant === 'title')
@@ -37,7 +37,7 @@ export default function Badge({
     (resolvedVariant === 'plain'
       ? getContrastTextColor(resolvedBackgroundColor)
       : resolvedVariant === 'count'
-        ? '#ffffff'
+        ? 'var(--dq-ui-color-white)'
       : resolvedVariant === 'title'
         ? 'var(--dq-ui-accent-soft)'
       : generatedTheme?.accentText);
@@ -56,4 +56,6 @@ export default function Badge({
       {children}
     </Component>
   );
-}
+};
+
+export default Badge;

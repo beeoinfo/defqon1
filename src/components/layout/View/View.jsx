@@ -1,15 +1,16 @@
-import './View.css';
+import Header from '../Header';
+import Box from '../Box';
 import '../layout.css';
-import Header from '../Header/index';
+import './View.css';
 
-export default function View({
+const View = ({
   component = 'div',
   header = null,
   navbar = null,
   className = '',
   children,
   ...props
-}) {
+}) => {
   const Component = component;
 
   return (
@@ -18,9 +19,11 @@ export default function View({
       className={['dq-layout-view', className].filter(Boolean).join(' ')}
     >
       <Header navbar={navbar}>{header}</Header>
-      <main className="dq-layout-main dq-layout-view__main dq-layout-container dq-layout-main-shell">
+      <Box component="main" className="dq-layout-main dq-layout-view__main dq-layout-container dq-layout-main-shell">
         {children}
-      </main>
+      </Box>
     </Component>
   );
-}
+};
+
+export default View;

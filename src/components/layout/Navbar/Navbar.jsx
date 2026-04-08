@@ -1,54 +1,44 @@
-import './Navbar.css';
 import { useEffect, useRef, useState } from 'react';
-import Box from '../Box/index';
-import ToggleButton from '../../primitives/ToggleButton/index';
+import ToggleButton from '../../primitives/ToggleButton';
+import Box from '../Box';
+import './Navbar.css';
 
-function getItemKey(item) {
-  return item.id ?? item.label;
-}
+const getItemKey = (item) => item.id ?? item.label;
 
-function getActiveItemKey(items) {
+const getActiveItemKey = (items) => {
   const activeItem = items.find((item) => item.active);
 
   return activeItem ? getItemKey(activeItem) : null;
-}
+};
 
-export default function Navbar({
+const Navbar = ({
   component = 'nav',
   items = [],
   className = '',
   children,
   ariaLabel = 'Main navigation',
   ...props
-}) {
+}) => {
   const Component = component;
   const hasItems = items.length > 0;
   const controlledActiveKey = getActiveItemKey(items);
-  const [activeKey, setActiveKey] = useState(controlledActiveKey);
+  const [internalActiveKey, setInternalActiveKey] = useState(null);
   const [bouncingItemKey, setBouncingItemKey] = useState(null);
-  const resolvedActiveKey = activeKey ?? controlledActiveKey;
+  const resolvedActiveKey = controlledActiveKey ?? internalActiveKey;
   const bounceFrameRef = useRef(null);
   const bounceTimeoutRef = useRef(null);
 
-  useEffect(() => {
-    if (controlledActiveKey) {
-      setActiveKey(controlledActiveKey);
+  useEffect(() => () => {
+    if (bounceFrameRef.current) {
+      window.cancelAnimationFrame(bounceFrameRef.current);
     }
-  }, [controlledActiveKey]);
 
-  useEffect(() => {
-    return () => {
-      if (bounceFrameRef.current) {
-        window.cancelAnimationFrame(bounceFrameRef.current);
-      }
-
-      if (bounceTimeoutRef.current) {
-        window.clearTimeout(bounceTimeoutRef.current);
-      }
-    };
+    if (bounceTimeoutRef.current) {
+      window.clearTimeout(bounceTimeoutRef.current);
+    }
   }, []);
 
-  function triggerBounce(itemKey) {
+  const triggerBounce = (itemKey) => {
     if (bounceFrameRef.current) {
       window.cancelAnimationFrame(bounceFrameRef.current);
     }
@@ -64,7 +54,7 @@ export default function Navbar({
         setBouncingItemKey((currentItemKey) => (currentItemKey === itemKey ? null : currentItemKey));
       }, 420);
     });
-  }
+  };
 
   return (
     <Component
@@ -110,7 +100,7 @@ export default function Navbar({
                   onPressedChange={() => {
                     const shouldAnimate = itemKey !== resolvedActiveKey;
 
-                    setActiveKey(itemKey);
+                    setInternalActiveKey(itemKey);
 
                     if (shouldAnimate) {
                       triggerBounce(itemKey);
@@ -129,4 +119,6 @@ export default function Navbar({
       )}
     </Component>
   );
-}
+};
+
+export default Navbar;

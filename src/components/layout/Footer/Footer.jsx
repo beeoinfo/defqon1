@@ -1,8 +1,8 @@
+import Box from '../Box';
 import '../layout.css';
 import './Footer.css';
-import Box from '../Box/index';
 
-export default function Footer({ component = 'footer', className = '', children, ...props }) {
+const Footer = ({ component = 'footer', className = '', children, ...props }) => {
   const Component = component;
 
   return (
@@ -13,4 +13,6 @@ export default function Footer({ component = 'footer', className = '', children,
       <Box className="dq-layout-container dq-layout-footer__shell">{children}</Box>
     </Component>
   );
-}
+};
+
+export default Footer;

@@ -6,15 +6,15 @@
   text-transform: uppercase;
   font-size: 0.88rem;
   font-weight: 500;
-  color: var(--dq-ui-badge-text, #ffffff);
+  color: var(--dq-ui-badge-text, var(--dq-ui-color-white));
 }
 
 .dq-ui-badge--plain {
   min-height: 32px;
   padding-inline: 12px;
   border-radius: var(--dq-ui-radius-rounded);
-  background: var(--dq-ui-badge-bg, #ffffff);
-  color: var(--dq-ui-badge-text, #111111);
+  background: var(--dq-ui-badge-bg, var(--dq-ui-color-white));
+  color: var(--dq-ui-badge-text, var(--dq-ui-color-black));
 }
 
 .dq-ui-badge--ghost,

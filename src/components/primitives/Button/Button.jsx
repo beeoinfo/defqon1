@@ -1,7 +1,7 @@
 import { cloneElement, forwardRef, isValidElement } from 'react';
-import './Button.css';
-import Badge from '../Badge/index';
 import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
+import Badge from '../Badge';
+import './Button.css';
 
 const BUTTON_ICON_SIZES = {
   withLabel: {
@@ -16,7 +16,7 @@ const BUTTON_ICON_SIZES = {
   },
 };
 
-export function resolveButtonVisualState({
+export const resolveButtonVisualState = ({
   children,
   icon: Icon = null,
   imageSrc = '',
@@ -25,7 +25,7 @@ export function resolveButtonVisualState({
   radius = 'md',
   title,
   ariaLabel,
-}) {
+}) => {
   const hasLabel = children !== null && children !== undefined && children !== false;
   const resolvedSubtitle = size === 'lg' ? String(subtitle ?? '').trim() : '';
   const hasImage = size === 'lg' && Boolean(imageSrc);
@@ -47,9 +47,9 @@ export function resolveButtonVisualState({
     iconSize,
     resolvedTitle,
   };
-}
+};
 
-export function getButtonClassName({
+export const getButtonClassName = ({
   variant = 'ghost',
   size = 'md',
   resolvedRadius = 'md',
@@ -59,8 +59,8 @@ export function getButtonClassName({
   isIconOnly = false,
   hasBadge = false,
   className = '',
-}) {
-  return [
+}) => (
+  [
     'dq-ui-button',
     `dq-ui-button--${variant}`,
     `dq-ui-button--${size}`,
@@ -73,10 +73,10 @@ export function getButtonClassName({
     className,
   ]
     .filter(Boolean)
-    .join(' ');
-}
+    .join(' ')
+);
 
-function renderButtonBadge(badge) {
+const renderButtonBadge = (badge) => {
   if (badge === null || badge === undefined || badge === false) {
     return null;
   }
@@ -92,9 +92,9 @@ function renderButtonBadge(badge) {
       {badge}
     </Badge>
   );
-}
+};
 
-export function ButtonContent({
+export const ButtonContent = ({
   children,
   Icon = null,
   iconWeight,
@@ -105,41 +105,39 @@ export function ButtonContent({
   hasImage = false,
   hasLabel = false,
   iconSize = BUTTON_ICON_SIZES.withLabel.md,
-}) {
-  return (
-    <>
-      {hasImage ? (
-        <span className="dq-ui-button__media" aria-hidden="true">
-          <img src={imageSrc} alt={imageAlt} />
+}) => (
+  <>
+    {hasImage ? (
+      <span className="dq-ui-button__media" aria-hidden="true">
+        <img src={imageSrc} alt={imageAlt} />
+      </span>
+    ) : null}
+    {Icon && iconPosition === 'start' ? (
+      <span className="dq-ui-button__icon" aria-hidden="true">
+        <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
+      </span>
+    ) : null}
+    {hasLabel ? (
+      resolvedSubtitle ? (
+        <span className="dq-ui-button__content dq-ui-button__content--stacked">
+          <span className="dq-ui-button__label">{children}</span>
+          <span className="dq-ui-button__subtitle">{resolvedSubtitle}</span>
         </span>
-      ) : null}
-      {Icon && iconPosition === 'start' ? (
-        <span className="dq-ui-button__icon" aria-hidden="true">
-          <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
+      ) : (
+        <span className="dq-ui-button__content">
+          <span className="dq-ui-button__label">{children}</span>
         </span>
-      ) : null}
-      {hasLabel ? (
-        resolvedSubtitle ? (
-          <span className="dq-ui-button__content dq-ui-button__content--stacked">
-            <span className="dq-ui-button__label">{children}</span>
-            <span className="dq-ui-button__subtitle">{resolvedSubtitle}</span>
-          </span>
-        ) : (
-          <span className="dq-ui-button__content">
-            <span className="dq-ui-button__label">{children}</span>
-          </span>
-        )
-      ) : null}
-      {Icon && iconPosition === 'end' ? (
-        <span className="dq-ui-button__icon" aria-hidden="true">
-          <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
-        </span>
-      ) : null}
-    </>
-  );
-}
+      )
+    ) : null}
+    {Icon && iconPosition === 'end' ? (
+      <span className="dq-ui-button__icon" aria-hidden="true">
+        <Icon size={iconSize} {...(iconWeight ? { weight: iconWeight } : {})} />
+      </span>
+    ) : null}
+  </>
+);
 
-const Button = forwardRef(function Button({
+const Button = forwardRef(({
   children,
   icon: Icon = null,
   iconWeight,
@@ -160,7 +158,7 @@ const Button = forwardRef(function Button({
   title,
   style,
   ...props
-}, ref) {
+}, ref) => {
   const visualState = resolveButtonVisualState({
     children,
     icon: Icon,
@@ -212,5 +210,7 @@ const Button = forwardRef(function Button({
     </button>
   );
 });
+
+Button.displayName = 'Button';
 
 export default Button;

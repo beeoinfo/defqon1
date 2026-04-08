@@ -1,9 +1,9 @@
 import { useId, useRef, useState } from 'react';
-import Box from '../../layout/Box/index';
-import Button from '../Button/index';
+import Box from '../../layout/Box';
+import Button from '../Button';
 import './Tabs.css';
 
-function getEnabledIndex(items, startIndex, step) {
+const getEnabledIndex = (items, startIndex, step) => {
   const total = items.length;
 
   for (let offset = 0; offset < total; offset += 1) {
@@ -15,9 +15,9 @@ function getEnabledIndex(items, startIndex, step) {
   }
 
   return startIndex;
-}
+};
 
-export default function Tabs({
+const Tabs = ({
   items = [],
   value,
   defaultValue,
@@ -26,26 +26,26 @@ export default function Tabs({
   size = 'md',
   radius = 'md',
   className = '',
-}) {
+}) => {
   const baseId = useId();
   const firstEnabledItem = items.find((item) => !item.disabled);
   const fallbackValue = firstEnabledItem?.value;
-  const [internalValue, setInternalValue] = useState(defaultValue ?? fallbackValue);
+  const [internalValue, setInternalValue] = useState(() => defaultValue ?? fallbackValue);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : internalValue;
   const currentIndex = items.findIndex((item) => item.value === currentValue);
   const selectedIndex = currentIndex >= 0 ? currentIndex : items.findIndex((item) => item.value === fallbackValue);
   const buttonRefs = useRef([]);
 
-  function selectTab(nextValue) {
+  const selectTab = (nextValue) => {
     if (!isControlled) {
       setInternalValue(nextValue);
     }
 
     onValueChange?.(nextValue);
-  }
+  };
 
-  function handleKeyDown(index, event) {
+  const handleKeyDown = (index, event) => {
     let nextIndex = index;
 
     if (event.key === 'ArrowRight') {
@@ -70,7 +70,7 @@ export default function Tabs({
 
     selectTab(nextItem.value);
     buttonRefs.current[nextIndex]?.focus();
-  }
+  };
 
   return (
     <Box className={['dq-ui-tabs', className].filter(Boolean).join(' ')} gap="var(--dq-ui-space-lg)">
@@ -135,4 +135,6 @@ export default function Tabs({
       })}
     </Box>
   );
-}
+};
+
+export default Tabs;

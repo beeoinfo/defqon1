@@ -1,16 +1,17 @@
-import './Page.css';
+import Footer from '../Footer';
+import Header from '../Header';
+import Box from '../Box';
 import '../layout.css';
-import Footer from '../Footer/index';
-import Header from '../Header/index';
+import './Page.css';
 
-export default function Page({
+const Page = ({
   component = 'div',
   header = null,
   footer = null,
   className = '',
   children,
   ...props
-}) {
+}) => {
   const Component = component;
 
   return (
@@ -19,8 +20,12 @@ export default function Page({
       className={['dq-layout-page', className].filter(Boolean).join(' ')}
     >
       <Header>{header}</Header>
-      <main className="dq-layout-main dq-layout-container dq-layout-main-shell">{children}</main>
+      <Box component="main" className="dq-layout-main dq-layout-container dq-layout-main-shell">
+        {children}
+      </Box>
       <Footer>{footer}</Footer>
     </Component>
   );
-}
+};
+
+export default Page;

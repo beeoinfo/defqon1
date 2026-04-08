@@ -5,13 +5,13 @@
   --dq-ui-button-media-size: 36px;
   --dq-ui-button-bg: var(--dq-ui-surface);
   --dq-ui-button-border-color: var(--dq-ui-border);
-  --dq-ui-button-text-color: #ffffff;
-  --dq-ui-button-hover-bg: rgba(255, 255, 255, 0.1);
-  --dq-ui-button-hover-border-color: rgba(255, 255, 255, 0.16);
+  --dq-ui-button-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-hover-bg: var(--dq-ui-panel-strong);
+  --dq-ui-button-hover-border-color: var(--dq-ui-border);
   --dq-ui-button-hover-text-color: var(--dq-ui-button-text-color);
-  --dq-ui-button-focus-bg: #ffffff;
+  --dq-ui-button-focus-bg: var(--dq-ui-color-white);
   --dq-ui-button-focus-border-color: var(--dq-ui-button-border-color);
-  --dq-ui-button-focus-text-color: #111111;
+  --dq-ui-button-focus-text-color: var(--dq-ui-color-black);
   --dq-ui-button-active-bg: var(--dq-ui-button-focus-bg);
   --dq-ui-button-active-border-color: var(--dq-ui-button-focus-border-color);
   --dq-ui-button-active-text-color: var(--dq-ui-button-focus-text-color);
@@ -27,9 +27,9 @@
   --dq-ui-button-selected-active-bg: var(--dq-ui-button-selected-bg);
   --dq-ui-button-selected-active-border-color: var(--dq-ui-button-selected-border-color);
   --dq-ui-button-selected-active-text-color: var(--dq-ui-button-selected-text-color);
-  --dq-ui-button-subtitle-color: rgba(255, 255, 255, 0.62);
+  --dq-ui-button-subtitle-color: var(--dq-ui-text-soft);
   --dq-ui-button-hover-subtitle-color: var(--dq-ui-button-subtitle-color);
-  --dq-ui-button-focus-subtitle-color: rgba(17, 17, 17, 0.7);
+  --dq-ui-button-focus-subtitle-color: var(--dq-ui-color-black-soft);
   --dq-ui-button-active-subtitle-color: var(--dq-ui-button-focus-subtitle-color);
   --dq-ui-button-selected-subtitle-color: var(--dq-ui-button-focus-subtitle-color);
   --dq-ui-button-selected-hover-subtitle-color: var(--dq-ui-button-selected-subtitle-color);
@@ -113,23 +113,23 @@
   --dq-ui-button-bg: var(--dq-ui-danger-surface);
   --dq-ui-button-border-color: var(--dq-ui-danger-border);
   --dq-ui-button-text-color: var(--dq-ui-accent-soft);
-  --dq-ui-button-hover-bg: rgba(127, 29, 29, 0.4);
-  --dq-ui-button-hover-border-color: rgba(239, 68, 68, 0.38);
-  --dq-ui-button-hover-text-color: #ffffff;
-  --dq-ui-button-focus-bg: rgba(127, 29, 29, 0.52);
-  --dq-ui-button-focus-border-color: rgba(239, 68, 68, 0.38);
-  --dq-ui-button-focus-text-color: #ffffff;
-  --dq-ui-button-active-bg: rgba(127, 29, 29, 0.52);
-  --dq-ui-button-active-border-color: rgba(239, 68, 68, 0.38);
-  --dq-ui-button-active-text-color: #ffffff;
-  --dq-ui-button-selected-bg: rgba(127, 29, 29, 0.52);
-  --dq-ui-button-selected-border-color: rgba(239, 68, 68, 0.38);
-  --dq-ui-button-selected-text-color: #ffffff;
-  --dq-ui-button-subtitle-color: rgba(254, 202, 202, 0.82);
-  --dq-ui-button-hover-subtitle-color: rgba(255, 255, 255, 0.74);
-  --dq-ui-button-focus-subtitle-color: rgba(255, 255, 255, 0.74);
-  --dq-ui-button-active-subtitle-color: rgba(255, 255, 255, 0.74);
-  --dq-ui-button-selected-subtitle-color: rgba(255, 255, 255, 0.74);
+  --dq-ui-button-hover-bg: var(--dq-ui-danger-surface-hover);
+  --dq-ui-button-hover-border-color: var(--dq-ui-danger-border-strong);
+  --dq-ui-button-hover-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-focus-bg: var(--dq-ui-danger-surface-strong);
+  --dq-ui-button-focus-border-color: var(--dq-ui-danger-border-strong);
+  --dq-ui-button-focus-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-active-bg: var(--dq-ui-danger-surface-strong);
+  --dq-ui-button-active-border-color: var(--dq-ui-danger-border-strong);
+  --dq-ui-button-active-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-selected-bg: var(--dq-ui-danger-surface-strong);
+  --dq-ui-button-selected-border-color: var(--dq-ui-danger-border-strong);
+  --dq-ui-button-selected-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-subtitle-color: var(--dq-ui-danger-text-soft);
+  --dq-ui-button-hover-subtitle-color: var(--dq-ui-color-white-soft-strong);
+  --dq-ui-button-focus-subtitle-color: var(--dq-ui-color-white-soft-strong);
+  --dq-ui-button-active-subtitle-color: var(--dq-ui-color-white-soft-strong);
+  --dq-ui-button-selected-subtitle-color: var(--dq-ui-color-white-soft-strong);
 }
 
 .dq-ui-button--sm {
@@ -190,7 +190,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--dq-ui-panel-strong);
 }
 
 .dq-ui-button__media img {

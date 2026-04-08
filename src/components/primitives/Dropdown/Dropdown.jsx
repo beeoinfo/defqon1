@@ -1,26 +1,25 @@
 import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react';
 import { useEffect, useId, useRef, useState } from 'react';
-import Box from '../../layout/Box/index';
-import ToggleButton from '../ToggleButton/index';
+import Box from '../../layout/Box';
+import ToggleButton from '../ToggleButton';
 import './Dropdown.css';
 
 const DRAWER_ANIMATION_MS = 160;
 
-function getAnchorName(id) {
-  return `--dq-ui-dropdown-${id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
-}
+const getAnchorName = (id) => `--dq-ui-dropdown-${id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
-export function DropdownChevron({ size }) {
-  const adjustedSize = Math.max(size - 4, 12); // Réduit de 4px, minimum 12px
+export const DropdownChevron = ({ size }) => {
+  const adjustedSize = Math.max(size - 4, 12);
+
   return (
     <span className="dq-ui-dropdown__chevron">
       <CaretDownIcon className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--closed" size={adjustedSize} weight="bold" />
       <CaretUpIcon className="dq-ui-dropdown__chevron-icon dq-ui-dropdown__chevron-icon--open" size={adjustedSize} weight="bold" />
     </span>
   );
-}
+};
 
-export function DropdownDrawer({
+export const DropdownDrawer = ({
   items = [],
   value,
   defaultValue = null,
@@ -35,23 +34,23 @@ export function DropdownDrawer({
   triggerClassName = '',
   contentClassName = '',
   ...props
-}) {
+}) => {
   const drawerId = useId();
   const drawerRef = useRef(null);
-  const [internalValue, setInternalValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState(() => defaultValue);
   const isControlled = value !== undefined;
   const activeValue = isControlled ? value : internalValue;
   const [renderedValue, setRenderedValue] = useState(activeValue);
   const [panelState, setPanelState] = useState(activeValue === null ? 'closed' : 'open');
   const renderedItem = items.find((item) => item.value === renderedValue);
 
-  function setNextValue(nextValue) {
+  const setNextValue = (nextValue) => {
     if (!isControlled) {
       setInternalValue(nextValue);
     }
 
     onValueChange?.(nextValue);
-  }
+  };
 
   useEffect(() => {
     if (activeValue === renderedValue) {
@@ -83,17 +82,17 @@ export function DropdownDrawer({
       return undefined;
     }
 
-    function handlePointerDown(event) {
+    const handlePointerDown = (event) => {
       if (!drawerRef.current?.contains(event.target)) {
         setNextValue(null);
       }
-    }
+    };
 
-    function handleKeyDown(event) {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setNextValue(null);
       }
-    }
+    };
 
     document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
@@ -102,12 +101,13 @@ export function DropdownDrawer({
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeValue, isControlled, onValueChange]);
+  }, [activeValue]);
 
   return (
-    <section
+    <Box
       {...props}
       ref={drawerRef}
+      component="section"
       className={['dq-ui-dropdown-drawer', className].filter(Boolean).join(' ')}
       aria-label={label}
     >
@@ -150,8 +150,9 @@ export function DropdownDrawer({
       </Box>
 
       {renderedItem ? (
-        <section
+        <Box
           key={renderedItem.value}
+          component="section"
           id={drawerId}
           role="region"
           aria-label={renderedItem.label}
@@ -164,13 +165,13 @@ export function DropdownDrawer({
           <Box className="dq-ui-dropdown-drawer__panel">
             {renderedItem.content}
           </Box>
-        </section>
+        </Box>
       ) : null}
-    </section>
+    </Box>
   );
-}
+};
 
-export default function Dropdown({
+const Dropdown = ({
   label = 'Dropdown',
   children,
   size = 'md',
@@ -183,34 +184,12 @@ export default function Dropdown({
   buttonClassName = '',
   buttonProps = {},
   ...props
-}) {
+}) => {
   const generatedId = useId();
   const popoverId = `dq-ui-dropdown-${generatedId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const anchorName = getAnchorName(generatedId);
   const resolvedPlacement = placement === 'top' ? 'top' : 'bottom';
-  const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const popover = document.getElementById(popoverId);
-
-    if (!popover) {
-      return undefined;
-    }
-
-    function syncOpenState() {
-      const nextOpen = popover.matches(':popover-open');
-
-      setIsOpen((currentOpen) => (currentOpen === nextOpen ? currentOpen : nextOpen));
-    }
-
-    popover.addEventListener('toggle', syncOpenState);
-    syncOpenState();
-
-    return () => {
-      popover.removeEventListener('toggle', syncOpenState);
-    };
-  }, [popoverId]);
 
   return (
     <Box
@@ -219,15 +198,6 @@ export default function Dropdown({
     >
       <ToggleButton
         {...buttonProps}
-        ref={(node) => {
-          triggerRef.current = node;
-
-          if (typeof buttonProps.ref === 'function') {
-            buttonProps.ref(node);
-          } else if (buttonProps.ref) {
-            buttonProps.ref.current = node;
-          }
-        }}
         style={{
           '--dq-ui-dropdown-anchor-name': anchorName,
           ...buttonProps.style,
@@ -253,6 +223,11 @@ export default function Dropdown({
       <Box
         id={popoverId}
         popover="auto"
+        onToggle={(event) => {
+          const nextOpen = event.currentTarget.matches(':popover-open');
+
+          setIsOpen((currentOpen) => (currentOpen === nextOpen ? currentOpen : nextOpen));
+        }}
         background="surface-blur"
         style={{ '--dq-ui-dropdown-anchor-name': anchorName }}
         className={[
@@ -265,4 +240,6 @@ export default function Dropdown({
       </Box>
     </Box>
   );
-}
+};
+
+export default Dropdown;

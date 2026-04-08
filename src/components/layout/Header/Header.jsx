@@ -1,61 +1,15 @@
-import '../layout.css';
-import './Header.css';
 import { useEffect, useRef } from 'react';
 import logoMark from '../../../assets/logo.svg';
 import tribeAvatarSample from '../../../assets/avatars/1.png';
-import Box from '../Box/index';
-import Button from '../../primitives/Button/index';
-import Title from '../../primitives/Title/index';
-import Navbar from '../Navbar/index';
+import useMeasuredLayoutMetric from '../../../hooks/useMeasuredLayoutMetric';
+import Button from '../../primitives/Button';
+import Title from '../../primitives/Title';
+import Box from '../Box';
+import Navbar from '../Navbar';
+import '../layout.css';
+import './Header.css';
 
-function getLayoutMetricScope(element) {
-  return element?.closest?.('.dq-ui-theme') ?? document.documentElement;
-}
-
-function useMeasuredLayoutMetric(ref, propertyName) {
-  useEffect(() => {
-    const element = ref.current;
-
-    if (!element) {
-      return undefined;
-    }
-
-    const scope = getLayoutMetricScope(element);
-
-    function syncMetric() {
-      scope.style.setProperty(propertyName, `${element.getBoundingClientRect().height}px`);
-    }
-
-    syncMetric();
-
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', syncMetric);
-
-      return () => {
-        window.removeEventListener('resize', syncMetric);
-        scope.style.removeProperty(propertyName);
-      };
-    }
-
-    const resizeObserver = new ResizeObserver(syncMetric);
-    resizeObserver.observe(element);
-
-    return () => {
-      resizeObserver.disconnect();
-      scope.style.removeProperty(propertyName);
-    };
-  }, [propertyName, ref]);
-}
-
-function renderNavbar(navbar, className = '') {
-  return Array.isArray(navbar) ? (
-    <Navbar items={navbar} className={className} />
-  ) : (
-    <Navbar className={className}>{navbar}</Navbar>
-  );
-}
-
-export default function Header({
+const Header = ({
   component = 'header',
   brandTitle = 'DEFQON',
   brandLogoSrc = logoMark,
@@ -66,7 +20,7 @@ export default function Header({
   className = '',
   children,
   ...props
-}) {
+}) => {
   const Component = component;
   const surfaceRef = useRef(null);
   const mobileNavRef = useRef(null);
@@ -79,13 +33,21 @@ export default function Header({
       return undefined;
     }
 
-    const scope = getLayoutMetricScope(surfaceRef.current);
+    const scope = surfaceRef.current?.closest?.('.dq-ui-theme') ?? document.documentElement;
     scope.style.setProperty('--dq-ui-layout-mobile-bottom-nav-offset', '0px');
 
     return () => {
       scope.style.removeProperty('--dq-ui-layout-mobile-bottom-nav-offset');
     };
   }, [navbar]);
+
+  const renderNavbar = (navbarContent, navbarClassName = '') => (
+    Array.isArray(navbarContent) ? (
+      <Navbar items={navbarContent} className={navbarClassName} />
+    ) : (
+      <Navbar className={navbarClassName}>{navbarContent}</Navbar>
+    )
+  );
 
   return (
     <Component
@@ -142,4 +104,6 @@ export default function Header({
       ) : null}
     </Component>
   );
-}
+};
+
+export default Header;

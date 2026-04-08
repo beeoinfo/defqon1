@@ -1,12 +1,12 @@
 import './Title.css';
 
-export default function Title({
+const Title = ({
   component = 'h2',
   variant,
   className = '',
   children,
   ...props
-}) {
+}) => {
   const Component = component;
   const resolvedVariant = variant ?? (/^h[1-6]$/.test(component) ? component : 'h2');
 
@@ -20,4 +20,6 @@ export default function Title({
       {children}
     </Component>
   );
-}
+};
+
+export default Title;

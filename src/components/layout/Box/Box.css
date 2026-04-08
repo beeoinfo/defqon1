@@ -47,14 +47,14 @@
 
 .dq-layout-box--surface {
   padding: 20px;
-  border: 1px solid var(--dq-layout-box-border, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--dq-layout-box-border, var(--dq-ui-border-subtle));
   border-radius: var(--dq-ui-radius-xl);
   background: var(--dq-layout-box-bg, var(--dq-ui-surface));
 }
 
 .dq-layout-box--surface-blur {
   padding: 20px;
-  border: 1px solid var(--dq-layout-box-border, rgba(255, 255, 255, 0.08));
+  border: 1px solid var(--dq-layout-box-border, var(--dq-ui-border-subtle));
   border-radius: var(--dq-ui-radius-xl);
   background: var(--dq-layout-box-bg, var(--dq-ui-background-blur-surface));
   backdrop-filter: var(--dq-ui-background-blur-filter);
