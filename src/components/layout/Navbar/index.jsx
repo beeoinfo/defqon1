@@ -1,5 +1,5 @@
 import './Navbar.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Box from '../Box/index';
 import ToggleButton from '../../primitives/ToggleButton/index';
 
@@ -25,13 +25,46 @@ export default function Navbar({
   const hasItems = items.length > 0;
   const controlledActiveKey = getActiveItemKey(items);
   const [activeKey, setActiveKey] = useState(controlledActiveKey);
+  const [bouncingItemKey, setBouncingItemKey] = useState(null);
   const resolvedActiveKey = activeKey ?? controlledActiveKey;
+  const bounceFrameRef = useRef(null);
+  const bounceTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (controlledActiveKey) {
       setActiveKey(controlledActiveKey);
     }
   }, [controlledActiveKey]);
+
+  useEffect(() => {
+    return () => {
+      if (bounceFrameRef.current) {
+        window.cancelAnimationFrame(bounceFrameRef.current);
+      }
+
+      if (bounceTimeoutRef.current) {
+        window.clearTimeout(bounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function triggerBounce(itemKey) {
+    if (bounceFrameRef.current) {
+      window.cancelAnimationFrame(bounceFrameRef.current);
+    }
+
+    if (bounceTimeoutRef.current) {
+      window.clearTimeout(bounceTimeoutRef.current);
+    }
+
+    setBouncingItemKey(null);
+    bounceFrameRef.current = window.requestAnimationFrame(() => {
+      setBouncingItemKey(itemKey);
+      bounceTimeoutRef.current = window.setTimeout(() => {
+        setBouncingItemKey((currentItemKey) => (currentItemKey === itemKey ? null : currentItemKey));
+      }, 420);
+    });
+  }
 
   return (
     <Component
@@ -60,6 +93,7 @@ export default function Navbar({
                 component="li"
                 className={[
                   'dq-layout-navbar__item-shell',
+                  itemKey === bouncingItemKey ? 'dq-layout-navbar__item-shell--bouncing' : '',
                   item.mobileOnly ? 'dq-layout-navbar__item-shell--mobile-only' : '',
                   item.desktopOnly ? 'dq-layout-navbar__item-shell--desktop-only' : '',
                 ].filter(Boolean).join(' ')}
@@ -73,7 +107,15 @@ export default function Navbar({
                   aria-current={isActive ? 'page' : undefined}
                   ariaLabel={item.ariaLabel}
                   title={item.title}
-                  onPressedChange={() => setActiveKey(itemKey)}
+                  onPressedChange={() => {
+                    const shouldAnimate = itemKey !== resolvedActiveKey;
+
+                    setActiveKey(itemKey);
+
+                    if (shouldAnimate) {
+                      triggerBounce(itemKey);
+                    }
+                  }}
                   onClick={item.onClick}
                 >
                   {item.label}
