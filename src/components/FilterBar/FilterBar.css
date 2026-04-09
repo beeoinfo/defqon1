@@ -82,7 +82,11 @@
 }
 
 .dq-filter-bar__sticky--closing {
+  width: var(--dq-filter-bar-reset-slot-size);
+  flex-basis: var(--dq-filter-bar-reset-slot-size);
+  padding-inline-start: 12px;
   pointer-events: none;
+  animation: dq-filter-bar-reset-slot-out 0.16s ease both;
 }
 
 .dq-filter-bar__sticky .dq-ui-button {
@@ -105,7 +109,9 @@
 }
 
 .dq-filter-bar__sticky--closing .dq-ui-button {
-  transition-delay: 0s;
+  opacity: 1;
+  transform: scale(1);
+  animation: dq-filter-bar-reset-button-out 0.14s ease both;
 }
 
 .dq-filter-bar__scroll-shell {
@@ -277,5 +283,31 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes dq-filter-bar-reset-slot-out {
+  from {
+    width: var(--dq-filter-bar-reset-slot-size);
+    flex-basis: var(--dq-filter-bar-reset-slot-size);
+    padding-inline-start: 12px;
+  }
+
+  to {
+    width: 0;
+    flex-basis: 0;
+    padding-inline-start: 0;
+  }
+}
+
+@keyframes dq-filter-bar-reset-button-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.84);
   }
 }

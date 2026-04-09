@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Box from '../../components/layout/Box';
 import Element from '../../components/layout/Element';
+import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
 import Page from '../../components/layout/Page';
 import View from '../../components/layout/View';
@@ -117,6 +118,85 @@ const STORYBOOK_MODAL_SCROLL_ITEMS = [
   'Backup stage route',
 ];
 
+const STORYBOOK_FILTER_BAR_CHOICES = [
+  {
+    id: 'live',
+    label: 'Live',
+    color: '#22c55e',
+  },
+  {
+    id: 'special',
+    label: 'Special',
+    color: '#bc9b5e',
+  },
+  {
+    id: 'favorite',
+    label: 'Favorite',
+    icon: StarIcon,
+    variant: 'favorite',
+    fillOnPress: true,
+  },
+];
+
+const STORYBOOK_FILTER_BAR_DRAWERS = [
+  {
+    id: 'stages',
+    label: 'Stages',
+    options: [
+      {
+        value: 'all',
+        label: 'All stages',
+        reset: true,
+        defaultChecked: true,
+      },
+      {
+        value: 'red',
+        label: 'Red',
+      },
+      {
+        value: 'blue',
+        label: 'Blue',
+        color: '#0BDBEF',
+      },
+      {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+    ],
+  },
+  {
+    id: 'tags',
+    label: 'Tags',
+    type: 'checkbox',
+    options: [
+      {
+        value: 'rawstyle',
+        label: 'Rawstyle',
+      },
+      {
+        value: 'uptempo',
+        label: 'Uptempo',
+      },
+      {
+        value: 'hardcore',
+        label: 'Hardcore',
+      },
+    ],
+  },
+];
+
+const STORYBOOK_FILTER_BAR_PLACEMENTS = [
+  {
+    value: 'top',
+    label: 'Top',
+  },
+  {
+    value: 'bottom',
+    label: 'Bottom',
+  },
+];
+
 function StorybookBoxExamples({ layout = 'flex' }) {
   const content = STORYBOOK_BOX_EXAMPLES.map(({
     content: exampleContent = 'Box content',
@@ -153,9 +233,18 @@ function StorybookBoxExamples({ layout = 'flex' }) {
 
 function StorybookBody() {
   const [openModalDemo, setOpenModalDemo] = useState(null);
+  const [filterBarPlacement, setFilterBarPlacement] = useState('top');
+  const [filterBarHideOnScroll, setFilterBarHideOnScroll] = useState(true);
 
   return (
     <Box gap="var(--dq-ui-space-xxxl)">
+      <FilterBar
+        choices={STORYBOOK_FILTER_BAR_CHOICES}
+        drawers={STORYBOOK_FILTER_BAR_DRAWERS}
+        placement={filterBarPlacement}
+        hideOnScroll={filterBarHideOnScroll}
+      />
+
       <Box
         component="section"
         title="Titles"
@@ -554,6 +643,41 @@ function StorybookBody() {
                 },
               ]}
             />
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Filter Bar"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          <Element>Live floating demo of the real `FilterBar`. Switch placement here and scroll the page to verify `hideOnScroll` and the reset-button animation.</Element>
+          <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+            {STORYBOOK_FILTER_BAR_PLACEMENTS.map((placementOption) => (
+              <ChoiceButton
+                key={placementOption.value}
+                type="radio"
+                name="storybook-filterbar-placement"
+                checked={filterBarPlacement === placementOption.value}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    setFilterBarPlacement(placementOption.value);
+                  }
+                }}
+              >
+                {placementOption.label}
+              </ChoiceButton>
+            ))}
+            <ChoiceButton
+              checked={filterBarHideOnScroll}
+              onCheckedChange={setFilterBarHideOnScroll}
+            >
+              Hide on scroll
+            </ChoiceButton>
           </Box>
         </Box>
       </Box>
