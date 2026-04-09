@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
-import './StorybookView.css';
-import FilterBar from '../../components/FilterBar';
 import Box from '../../components/layout/Box';
 import Element from '../../components/layout/Element';
+import Modal from '../../components/layout/Modal';
 import Page from '../../components/layout/Page';
 import View from '../../components/layout/View';
 import Badge from '../../components/primitives/Badge';
@@ -14,6 +13,7 @@ import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
 import UiThemeScope from '../../theme/UiThemeScope';
+import './StorybookView.css';
 
 const STORYBOOK_NAV_ITEMS = [
   {
@@ -106,6 +106,17 @@ const STORYBOOK_BOX_EXAMPLES = [
   },
 ];
 
+const STORYBOOK_MODAL_SCROLL_ITEMS = [
+  'Friday warm-up picks',
+  'Saturday blue stage clashes',
+  'Sunday closing moments',
+  'Legends set overlap',
+  'Afterparty shortlist',
+  'Must-see tribe picks',
+  'Sunrise set reminders',
+  'Backup stage route',
+];
+
 function StorybookBoxExamples({ layout = 'flex' }) {
   const content = STORYBOOK_BOX_EXAMPLES.map(({
     content: exampleContent = 'Box content',
@@ -141,8 +152,7 @@ function StorybookBoxExamples({ layout = 'flex' }) {
 }
 
 function StorybookBody() {
-  const [isFilterBarBottom, setIsFilterBarBottom] = useState(false);
-  const [doesFilterBarHideOnScroll, setDoesFilterBarHideOnScroll] = useState(false);
+  const [openModalDemo, setOpenModalDemo] = useState(null);
 
   return (
     <Box gap="var(--dq-ui-space-xxxl)">
@@ -336,80 +346,6 @@ function StorybookBody() {
         titleCountLabel="performers"
       >
         <StorybookBoxExamples layout="columns" />
-      </Box>
-
-      <Box
-        component="section"
-        title="Filter Bar"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <FilterBar
-          placement={isFilterBarBottom ? 'bottom' : 'top'}
-          hideOnScroll={doesFilterBarHideOnScroll}
-          choices={[
-            {
-              id: 'bottom-filter-bar',
-              label: 'Bottom filter bar',
-              type: 'checkbox',
-              checked: isFilterBarBottom,
-              onCheckedChange: setIsFilterBarBottom,
-            },
-            {
-              id: 'hide-filter-bar-on-scroll',
-              label: 'Hide on scroll',
-              type: 'checkbox',
-              checked: doesFilterBarHideOnScroll,
-              onCheckedChange: setDoesFilterBarHideOnScroll,
-            },
-            {
-              id: 'tribe',
-              label: 'My Tribe',
-              type: 'checkbox',
-              variant: 'favorite',
-              icon: UsersIcon,
-              fillOnPress: true,
-            },
-            {
-              id: 'all',
-              label: 'All',
-              type: 'radio',
-              name: 'storybook-filter-scope',
-              value: 'all',
-            },
-            {
-              id: 'favorites',
-              label: 'Favorites',
-              type: 'radio',
-              name: 'storybook-filter-scope',
-              value: 'favorites',
-            },
-          ]}
-          drawers={[
-            {
-              id: 'stage',
-              label: 'Stages',
-              type: 'radio',
-              options: [
-                { value: 'all', label: 'All', reset: true, defaultChecked: true },
-                { value: 'blue', label: 'Blue', color: '#0BDBEF' },
-                { value: 'magenta', label: 'Magenta', color: '#FF008B' },
-                { value: 'green', label: 'Green', color: '#00FF00' },
-              ],
-            },
-            {
-              id: 'tags',
-              label: 'Tags',
-              type: 'checkbox',
-              options: [
-                { value: 'live', label: 'Live', color: '#22c55e' },
-                { value: 'special', label: 'Special', color: '#F1E300' },
-                { value: 'favorite', label: 'Favorite', variant: 'favorite', icon: StarIcon, fillOnPress: true },
-              ],
-            },
-          ]}
-        />
       </Box>
 
       <Box
@@ -673,6 +609,152 @@ function StorybookBody() {
             />
           </Box>
         </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Modal"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Default"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Element>Header, close button, content area and bottom controls.</Element>
+              <Box
+                component="div"
+                slot="content"
+                direction="row"
+                wrap="wrap"
+                gap="var(--dq-ui-space-lg)"
+              >
+                <Button onClick={() => setOpenModalDemo('default')}>
+                  Open default modal
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Content Only"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Element>Optional title removed, close button kept, no bottom controls.</Element>
+              <Box
+                component="div"
+                slot="content"
+                direction="row"
+                wrap="wrap"
+                gap="var(--dq-ui-space-lg)"
+              >
+                <Button onClick={() => setOpenModalDemo('minimal')}>
+                  Open minimal modal
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Scroll Locked"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Element>Scrollable body with separators only when overflow exists, and no close on outside click.</Element>
+              <Box
+                component="div"
+                slot="content"
+                direction="row"
+                wrap="wrap"
+                gap="var(--dq-ui-space-lg)"
+              >
+                <Button onClick={() => setOpenModalDemo('wide')}>
+                  Open locked modal
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        <Modal
+          open={openModalDemo === 'default'}
+          onClose={() => setOpenModalDemo(null)}
+          title="Festival settings"
+          subtitle="Reusable modal shell with optional header and bottom controls."
+          controls={
+            <>
+              <Button onClick={() => setOpenModalDemo(null)}>
+                Cancel
+              </Button>
+              <Button selected onClick={() => setOpenModalDemo(null)}>
+                Save changes
+              </Button>
+            </>
+          }
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            <Element>Body content lives in the central slot and inherits the shared `surface-blur` shell.</Element>
+            <Element>Use this shape for forms, confirmation flows and richer settings content.</Element>
+          </Box>
+        </Modal>
+
+        <Modal
+          open={openModalDemo === 'minimal'}
+          onClose={() => setOpenModalDemo(null)}
+          ariaLabel="Minimal modal example"
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            <Element>This one shows the shell without title or controls.</Element>
+            <Element>The close icon still gives a clean dismiss path when the header copy is optional.</Element>
+          </Box>
+        </Modal>
+
+        <Modal
+          open={openModalDemo === 'wide'}
+          onClose={() => setOpenModalDemo(null)}
+          title="Line-up comparison"
+          subtitle="Outside click is disabled here, so use the close button or footer actions."
+          closeOnOutsideClick={false}
+          maxWidth="720px"
+          controls={
+            <>
+              <Button onClick={() => setOpenModalDemo(null)}>
+                Close
+              </Button>
+              <Button selected onClick={() => setOpenModalDemo(null)}>
+                Compare artists
+              </Button>
+            </>
+          }
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            {STORYBOOK_MODAL_SCROLL_ITEMS.map((item) => (
+              <Box key={item} background="surface">
+                <Element>{item}</Element>
+                <Element>Shared modal shell, scrollable body, and footer actions.</Element>
+              </Box>
+            ))}
+          </Box>
+        </Modal>
       </Box>
 
       <Box

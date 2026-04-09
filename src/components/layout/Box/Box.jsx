@@ -106,6 +106,13 @@ const Box = ({
   const hasTitleSlot = Boolean(title) || Boolean(TitleIcon) || hasTitleBadge;
   const hasHeader = hasTitleSlot || hasTitleMeta;
   const showsTitleIcon = Boolean(TitleIcon) && !hasTitleBadge;
+  const hasTitleLeading = hasTitleBadge || showsTitleIcon;
+  const titleClassName = [
+    'dq-layout-box__title',
+    hasTitleLeading ? 'dq-layout-box__title--with-leading' : 'dq-layout-box__title--compact',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   if (!hasHeader) {
     return (
@@ -142,14 +149,13 @@ const Box = ({
       <Box
         component="header"
         slot="content"
-        direction="row"
-        gap="var(--dq-ui-space-lg)"
-        justify={hasTitleSlot ? 'space-between' : 'flex-end'}
-        align="flex-start"
-        wrap="wrap"
+        direction="column"
+        gap="0"
+        justify="flex-start"
+        align="stretch"
         className="dq-layout-box__header"
       >
-        {hasTitleSlot ? (
+        {hasTitleLeading ? (
           <Box
             component="span"
             slot="content"
@@ -157,23 +163,38 @@ const Box = ({
             gap="var(--dq-ui-space-sm)"
             align="center"
             wrap="wrap"
+            className="dq-layout-box__title-main"
           >
-            {hasTitleBadge ? (
-              <Badge variant="plain" color={color} className="dq-layout-box__title-badge">
-                {titleBadge}
-              </Badge>
-            ) : null}
-            {showsTitleIcon ? (
-              <Title component="span" variant={titleVariant} className="dq-layout-box__title-icon">
-                <TitleIcon aria-hidden="true" focusable="false" />
-              </Title>
-            ) : null}
+            <Box
+              component="span"
+              slot="content"
+              direction="row"
+              gap="var(--dq-ui-space-sm)"
+              align="center"
+              className="dq-layout-box__title-leading"
+            >
+              {hasTitleBadge ? (
+                <Badge variant="plain" color={color} className="dq-layout-box__title-badge">
+                  {titleBadge}
+                </Badge>
+              ) : null}
+              {showsTitleIcon ? (
+                <Title component="span" variant={titleVariant} className="dq-layout-box__title-icon">
+                  <TitleIcon aria-hidden="true" focusable="false" />
+                </Title>
+              ) : null}
+            </Box>
             {title ? (
-              <Title component={titleComponent} variant={titleVariant} className="dq-layout-box__title">
+              <Title component={titleComponent} variant={titleVariant} className={titleClassName}>
                 {title}
               </Title>
             ) : null}
           </Box>
+        ) : null}
+        {!hasTitleLeading && title ? (
+          <Title component={titleComponent} variant={titleVariant} className={titleClassName}>
+            {title}
+          </Title>
         ) : null}
         {hasTitleMeta ? (
           <span className="dq-layout-box__title-meta">

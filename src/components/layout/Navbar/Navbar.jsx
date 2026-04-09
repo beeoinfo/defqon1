@@ -21,12 +21,18 @@ const Navbar = ({
 }) => {
   const Component = component;
   const hasItems = items.length > 0;
-  const controlledActiveKey = getActiveItemKey(items);
-  const [internalActiveKey, setInternalActiveKey] = useState(null);
+  const incomingActiveKey = getActiveItemKey(items);
+  const [internalActiveKey, setInternalActiveKey] = useState(() => incomingActiveKey);
   const [bouncingItemKey, setBouncingItemKey] = useState(null);
-  const resolvedActiveKey = controlledActiveKey ?? internalActiveKey;
+  const resolvedActiveKey = internalActiveKey;
   const bounceFrameRef = useRef(null);
   const bounceTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    setInternalActiveKey((currentActiveKey) => (
+      currentActiveKey === incomingActiveKey ? currentActiveKey : incomingActiveKey
+    ));
+  }, [incomingActiveKey]);
 
   useEffect(() => () => {
     if (bounceFrameRef.current) {

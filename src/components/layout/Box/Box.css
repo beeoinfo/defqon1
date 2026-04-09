@@ -63,12 +63,55 @@
 
 .dq-layout-box__header {
   width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--dq-ui-space-lg);
+  row-gap: var(--dq-ui-space-sm);
+  min-width: 0;
+}
+
+.dq-layout-box__title-main {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dq-layout-box__title-leading {
+  flex: 0 0 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.dq-layout-box__title {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dq-layout-box__title--with-leading {
+  flex: 1 1 9rem;
+  min-width: 0;
+}
+
+.dq-layout-box__title--compact {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
 }
 
 .dq-layout-box__title-meta {
   display: inline-flex;
   align-items: center;
   gap: var(--dq-ui-space-xs);
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
   color: var(--dq-layout-box-title-meta-color, var(--dq-ui-text-soft));
   font-size: 0.88rem;
   font-weight: 500;
@@ -81,6 +124,7 @@
 
 .dq-layout-box__title-icon {
   display: inline-flex;
+  line-height: 0;
 }
 
 .dq-layout-box__title-icon svg {
