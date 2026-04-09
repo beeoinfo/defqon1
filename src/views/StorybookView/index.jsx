@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
+import BackToTopNow from '../../components/BackToTopNow';
 import Box from '../../components/layout/Box';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
@@ -501,6 +502,18 @@ const StorybookBody = () => {
             A fresh data bundle is waiting with the latest line-up corrections and tribe updates.
           </Alert>
         </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Back To Top"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Element>
+          Scroll the page: the floating back-to-top control appears after a real scroll threshold and stays pinned to the viewport with a single blur icon-button style.
+        </Element>
       </Box>
 
       <Box
@@ -1019,6 +1032,7 @@ const StorybookView = ({ mode = 'view' }) => {
           <StorybookBody />
         </View>
       )}
+      <BackToTopNow />
     </UiThemeScope>
   );
 };
