@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import Alert from '../../components/Alert';
 import Box from '../../components/layout/Box';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
@@ -197,7 +198,35 @@ const STORYBOOK_FILTER_BAR_PLACEMENTS = [
   },
 ];
 
-function StorybookBoxExamples({ layout = 'flex' }) {
+const STORYBOOK_ALERT_EXAMPLES = [
+  {
+    variant: 'warning',
+    title: 'Schedule conflict',
+    message: 'Two saved sets now overlap on Blue and Gold. Pick a priority before doors open.',
+  },
+  {
+    variant: 'info',
+    title: 'Map sync available',
+    message: 'The latest venue map is ready. Refresh your offline snapshot before you lose signal.',
+  },
+  {
+    variant: 'success',
+    title: 'Profile updated',
+    message: 'Your tribe card, avatar and handle are now live across the app.',
+  },
+  {
+    variant: 'error',
+    title: 'Could not save favorites',
+    message: 'The sync failed on the last attempt. Keep this tab open and retry once the connection settles.',
+  },
+  {
+    variant: 'neutral',
+    title: 'No results for these filters',
+    message: 'Try clearing one tag, switching stage, or broadening the current time window.',
+  },
+];
+
+const StorybookBoxExamples = ({ layout = 'flex' }) => {
   const content = STORYBOOK_BOX_EXAMPLES.map(({
     content: exampleContent = 'Box content',
     elements,
@@ -229,9 +258,9 @@ function StorybookBoxExamples({ layout = 'flex' }) {
       {content}
     </Box>
   );
-}
+};
 
-function StorybookBody() {
+const StorybookBody = () => {
   const [openModalDemo, setOpenModalDemo] = useState(null);
   const [filterBarPlacement, setFilterBarPlacement] = useState('top');
   const [filterBarHideOnScroll, setFilterBarHideOnScroll] = useState(true);
@@ -435,6 +464,43 @@ function StorybookBody() {
         titleCountLabel="performers"
       >
         <StorybookBoxExamples layout="columns" />
+      </Box>
+
+      <Box
+        component="section"
+        title="Alerts"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          {STORYBOOK_ALERT_EXAMPLES.map((example) => (
+            <Alert
+              key={example.variant}
+              variant={example.variant}
+              title={example.title}
+            >
+              {example.message}
+            </Alert>
+          ))}
+
+          <Alert
+            variant="info"
+            title="App update available"
+            actions={(
+              <>
+                <Button size="sm">
+                  Later
+                </Button>
+                <Button size="sm">
+                  Reload now
+                </Button>
+              </>
+            )}
+          >
+            A fresh data bundle is waiting with the latest line-up corrections and tribe updates.
+          </Alert>
+        </Box>
       </Box>
 
       <Box
@@ -935,9 +1001,9 @@ function StorybookBody() {
       </Box>
     </Box>
   );
-}
+};
 
-export default function StorybookView({ mode = 'view' }) {
+const StorybookView = ({ mode = 'view' }) => {
   const isPage = mode === 'page';
 
   return (
@@ -955,4 +1021,6 @@ export default function StorybookView({ mode = 'view' }) {
       )}
     </UiThemeScope>
   );
-}
+};
+
+export default StorybookView;

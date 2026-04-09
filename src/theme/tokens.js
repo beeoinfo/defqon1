@@ -31,6 +31,12 @@ export const dqUiTokens = {
     favoriteBorderStrong: 'rgba(251, 191, 36, 0.54)',
     favoriteTextSoft: '#fde68a',
     favoriteTextStrong: '#fef3c7',
+    info: '#60a5fa',
+    infoSurface: 'rgba(37, 99, 235, 0.22)',
+    infoBorder: 'rgba(96, 165, 250, 0.28)',
+    warning: '#f59e0b',
+    warningSurface: 'rgba(180, 83, 9, 0.22)',
+    warningBorder: 'rgba(245, 158, 11, 0.28)',
     success: '#bbf7d0',
     successSurface: 'rgba(21, 128, 61, 0.22)',
     successBorder: 'rgba(34, 197, 94, 0.28)',
@@ -102,6 +108,12 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
       --dq-ui-favorite-border-strong: ${tokens.colors.favoriteBorderStrong};
       --dq-ui-favorite-text-soft: ${tokens.colors.favoriteTextSoft};
       --dq-ui-favorite-text-strong: ${tokens.colors.favoriteTextStrong};
+      --dq-ui-info: ${tokens.colors.info};
+      --dq-ui-info-surface: ${tokens.colors.infoSurface};
+      --dq-ui-info-border: ${tokens.colors.infoBorder};
+      --dq-ui-warning: ${tokens.colors.warning};
+      --dq-ui-warning-surface: ${tokens.colors.warningSurface};
+      --dq-ui-warning-border: ${tokens.colors.warningBorder};
       --dq-ui-success: ${tokens.colors.success};
       --dq-ui-success-surface: ${tokens.colors.successSurface};
       --dq-ui-success-border: ${tokens.colors.successBorder};
