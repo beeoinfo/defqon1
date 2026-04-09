@@ -1,0 +1,96 @@
+.dq-ui-switch {
+  width: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-md);
+  background: var(--dq-ui-surface);
+  color: var(--dq-ui-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    opacity var(--dq-ui-transition-fast),
+    background var(--dq-ui-transition-fast),
+    border-color var(--dq-ui-transition-fast),
+    color var(--dq-ui-transition-fast);
+}
+
+.dq-ui-switch:hover:not(:disabled) {
+  border-color: var(--dq-ui-border);
+  background: var(--dq-ui-panel-strong);
+}
+
+.dq-ui-switch:focus,
+.dq-ui-switch:focus-visible {
+  outline: none;
+}
+
+.dq-ui-switch:focus-visible {
+  border-color: var(--dq-ui-primary-muted);
+  box-shadow: 0 0 0 3px rgba(188, 155, 94, 0.18);
+}
+
+.dq-ui-switch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dq-ui-switch__copy {
+  min-width: 0;
+}
+
+.dq-ui-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 28px;
+  border: 1px solid var(--dq-ui-border);
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-panel);
+  transition:
+    opacity var(--dq-ui-transition-fast),
+    background var(--dq-ui-transition-fast),
+    border-color var(--dq-ui-transition-fast),
+    transform var(--dq-ui-transition-fast);
+}
+
+.dq-ui-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-color-white-soft-strong);
+  transition:
+    transform var(--dq-ui-transition-fast),
+    background var(--dq-ui-transition-fast);
+}
+
+.dq-ui-switch:hover:not(:disabled) .dq-ui-switch__track {
+  border-color: var(--dq-ui-border);
+  background: var(--dq-ui-panel-strong);
+}
+
+.dq-ui-switch:hover:not(:disabled) .dq-ui-switch__thumb {
+  background: var(--dq-ui-color-white);
+}
+
+.dq-ui-switch--checked .dq-ui-switch__track {
+  border-color: var(--dq-ui-primary-muted);
+  background: var(--dq-ui-primary-surface);
+}
+
+.dq-ui-switch--checked .dq-ui-switch__thumb {
+  transform: translateX(18px);
+  background: var(--dq-ui-primary-soft);
+}
+
+.dq-ui-switch--checked:hover:not(:disabled) .dq-ui-switch__track {
+  border-color: var(--dq-ui-primary);
+  background: var(--dq-ui-primary-surface-strong);
+}
+
+.dq-ui-switch--checked:hover:not(:disabled) .dq-ui-switch__thumb {
+  background: var(--dq-ui-color-white);
+}

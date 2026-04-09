@@ -51,6 +51,9 @@ export const dqUiTokens = {
   effects: {
     backgroundBlurFilter: 'blur(24px) saturate(140%)',
     backgroundBlurSurface: 'linear-gradient(180deg, #1c222aad, #161b228f)',
+    backgroundBlurSurfaceHover: 'linear-gradient(180deg, #242b34c7, #1b2128b8)',
+    transitionFast: '0.2s ease',
+    transitionUi: '0.16s ease',
   },
   radius: {
     md: '14px',
@@ -148,6 +151,11 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
       );
       color: var(--dq-ui-text);
       font-family: 'Roboto', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --dq-ui-background-blur-filter: ${tokens.effects.backgroundBlurFilter};
+      --dq-ui-background-blur-surface: ${tokens.effects.backgroundBlurSurface};
+      --dq-ui-background-blur-surface-hover: ${tokens.effects.backgroundBlurSurfaceHover};
+      --dq-ui-transition-fast: ${tokens.effects.transitionFast};
+      --dq-ui-transition-ui: ${tokens.effects.transitionUi};
     }
 
     .dq-ui-theme,

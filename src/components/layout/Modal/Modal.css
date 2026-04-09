@@ -14,8 +14,8 @@
     0 12px 28px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui);
 }
 
 .dq-layout-modal:popover-open {

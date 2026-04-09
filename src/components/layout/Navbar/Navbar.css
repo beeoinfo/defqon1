@@ -67,8 +67,8 @@
     font-weight: 600;
     gap: 3px;
     transition:
-      color 0.18s ease,
-      font-weight 0.18s ease;
+      color var(--dq-ui-transition-fast),
+      font-weight var(--dq-ui-transition-fast);
   }
 
   .dq-layout-navbar__item:hover:not(:disabled),
@@ -123,7 +123,7 @@
     overflow: hidden;
     isolation: isolate;
     transition:
-      color 0.2s ease;
+      color var(--dq-ui-transition-fast);
   }
 
   .dq-layout-navbar__item .dq-ui-button__icon::before {
@@ -138,9 +138,9 @@
     opacity: 0;
     transform: translateX(-50%);
     transition:
-      width 0.2s ease,
-      opacity 0.2s ease,
-      background 0.2s ease;
+      width var(--dq-ui-transition-fast),
+      opacity var(--dq-ui-transition-fast),
+      background var(--dq-ui-transition-fast);
     z-index: -1;
   }
 
@@ -182,7 +182,7 @@
   }
 
   .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__label {
-    animation: dq-layout-navbar-label-fade 0.22s ease both;
+    animation: dq-layout-navbar-label-fade var(--dq-ui-transition-fast) both;
   }
 }
 

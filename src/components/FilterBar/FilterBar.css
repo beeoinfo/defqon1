@@ -63,9 +63,9 @@
   padding-inline-start: 0;
   z-index: 1;
   transition:
-    width 0.16s ease,
-    flex-basis 0.16s ease,
-    padding-inline-start 0.16s ease;
+    width var(--dq-ui-transition-ui),
+    flex-basis var(--dq-ui-transition-ui),
+    padding-inline-start var(--dq-ui-transition-ui);
 }
 
 .dq-filter-bar__sticky--open {
@@ -78,7 +78,7 @@
   width: var(--dq-filter-bar-reset-slot-size);
   flex-basis: var(--dq-filter-bar-reset-slot-size);
   padding-inline-start: 12px;
-  animation: dq-filter-bar-reset-slot-in 0.16s ease both;
+  animation: dq-filter-bar-reset-slot-in var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__sticky--closing {
@@ -86,15 +86,15 @@
   flex-basis: var(--dq-filter-bar-reset-slot-size);
   padding-inline-start: 12px;
   pointer-events: none;
-  animation: dq-filter-bar-reset-slot-out 0.16s ease both;
+  animation: dq-filter-bar-reset-slot-out var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__sticky .dq-ui-button {
   opacity: 0;
   transform: scale(0.84);
   transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui);
   transform-origin: center;
 }
 
@@ -105,13 +105,13 @@
 }
 
 .dq-filter-bar__sticky--opening .dq-ui-button {
-  animation: dq-filter-bar-reset-button-in 0.14s 0.06s ease both;
+  animation: dq-filter-bar-reset-button-in var(--dq-ui-transition-ui) ease 0.06s both;
 }
 
 .dq-filter-bar__sticky--closing .dq-ui-button {
   opacity: 1;
   transform: scale(1);
-  animation: dq-filter-bar-reset-button-out 0.14s ease both;
+  animation: dq-filter-bar-reset-button-out var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__scroll-shell {
@@ -199,21 +199,21 @@
   display: grid;
   grid-template-rows: 1fr;
   overflow: clip;
-  animation: dq-filter-bar-drawer-in 0.16s ease both;
+  animation: dq-filter-bar-drawer-in var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__drawer--closing {
-  animation: dq-filter-bar-drawer-out 0.16s ease both;
+  animation: dq-filter-bar-drawer-out var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__drawer-options {
   width: 100%;
   min-height: 0;
-  animation: dq-filter-bar-drawer-panel-in 0.16s ease both;
+  animation: dq-filter-bar-drawer-panel-in var(--dq-ui-transition-ui) both;
 }
 
 .dq-filter-bar__drawer--closing .dq-filter-bar__drawer-options {
-  animation: dq-filter-bar-drawer-panel-out 0.16s ease both;
+  animation: dq-filter-bar-drawer-panel-out var(--dq-ui-transition-ui) both;
 }
 
 @keyframes dq-filter-bar-drawer-in {

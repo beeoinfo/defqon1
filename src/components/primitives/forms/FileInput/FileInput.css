@@ -1,0 +1,63 @@
+.dq-ui-file-input__control {
+  min-height: 46px;
+  padding: var(--dq-ui-space-sm) var(--dq-ui-space-md);
+  cursor: pointer;
+}
+
+.dq-ui-file-input__input {
+  cursor: pointer;
+}
+
+.dq-ui-file-input__button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dq-ui-space-xs);
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--dq-ui-border);
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-panel);
+  color: var(--dq-ui-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    opacity var(--dq-ui-transition-fast),
+    background var(--dq-ui-transition-fast),
+    color var(--dq-ui-transition-fast),
+    border-color var(--dq-ui-transition-fast);
+}
+
+.dq-ui-file-input__value {
+  flex: 1 1 12rem;
+  min-width: 0;
+  color: var(--dq-ui-text-soft);
+  font-size: 0.92rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition:
+    opacity var(--dq-ui-transition-fast),
+    color var(--dq-ui-transition-fast);
+}
+
+.dq-ui-file-input__control:hover .dq-ui-file-input__button {
+  background: var(--dq-ui-panel-strong);
+  border-color: var(--dq-ui-border);
+  color: var(--dq-ui-color-white);
+}
+
+.dq-ui-file-input__control:hover .dq-ui-file-input__value,
+.dq-ui-file-input__control:focus-within .dq-ui-file-input__value {
+  color: var(--dq-ui-text);
+}
+
+.dq-ui-file-input__control--disabled,
+.dq-ui-file-input__control--disabled .dq-ui-file-input__input {
+  cursor: not-allowed;
+}
+
+.dq-ui-file-input__control--disabled .dq-ui-file-input__button,
+.dq-ui-file-input__control--disabled .dq-ui-file-input__value {
+  opacity: 0.45;
+}

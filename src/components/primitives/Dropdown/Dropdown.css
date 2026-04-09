@@ -21,8 +21,8 @@
   top: 50%;
   left: 50%;
   transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui);
 }
 
 .dq-ui-dropdown__chevron-icon--closed {
@@ -91,22 +91,22 @@
   display: grid;
   grid-template-rows: 1fr;
   overflow: clip;
-  animation: dq-ui-dropdown-drawer-content-in 0.16s ease both;
+  animation: dq-ui-dropdown-drawer-content-in var(--dq-ui-transition-ui) both;
 }
 
 .dq-ui-dropdown-drawer__panel--closing {
-  animation: dq-ui-dropdown-drawer-content-out 0.16s ease both;
+  animation: dq-ui-dropdown-drawer-content-out var(--dq-ui-transition-ui) both;
 }
 
 .dq-ui-dropdown-drawer__panel {
   width: 100%;
   min-height: 0;
   box-sizing: border-box;
-  animation: dq-ui-dropdown-drawer-panel-in 0.16s ease both;
+  animation: dq-ui-dropdown-drawer-panel-in var(--dq-ui-transition-ui) both;
 }
 
 .dq-ui-dropdown-drawer__panel--closing .dq-ui-dropdown-drawer__panel {
-  animation: dq-ui-dropdown-drawer-panel-out 0.16s ease both;
+  animation: dq-ui-dropdown-drawer-panel-out var(--dq-ui-transition-ui) both;
 }
 
 .dq-ui-dropdown__content {
@@ -122,10 +122,10 @@
   transform: translateY(var(--dq-ui-dropdown-enter-y));
   transform-origin: top;
   transition:
-    opacity 0.16s ease,
-    transform 0.16s ease,
-    overlay 0.16s ease allow-discrete,
-    display 0.16s ease allow-discrete;
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui),
+    overlay var(--dq-ui-transition-ui) allow-discrete,
+    display var(--dq-ui-transition-ui) allow-discrete;
 }
 
 .dq-ui-dropdown__content[popover]:not(:popover-open) {

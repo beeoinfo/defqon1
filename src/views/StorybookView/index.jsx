@@ -12,6 +12,7 @@ import Badge from '../../components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
+import { CheckboxInput, FileInput, Switch, TextInput } from '../../components/primitives/forms';
 import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
@@ -465,6 +466,113 @@ const StorybookBody = () => {
         titleCountLabel="performers"
       >
         <StorybookBoxExamples layout="columns" />
+      </Box>
+
+      <Box
+        component="section"
+        title="Forms"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+          gap="var(--dq-ui-space-xxxl)"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Text Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <TextInput
+                label="Username"
+                placeholder="e.g. usera.testa"
+                description="Lowercase letters, numbers, dots, underscores and dashes."
+                autoComplete="username"
+              />
+              <TextInput
+                label="Invite code"
+                defaultValue="DEFQON-2026"
+                successMessage="Invite code looks valid."
+              />
+              <TextInput
+                label="Email"
+                type="email"
+                defaultValue="broken@email"
+                errorMessage="Enter a valid email address."
+                autoComplete="email"
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Checkbox"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <CheckboxInput
+                label="Receive tribe invites"
+                description="Let trusted members send you direct join requests."
+                defaultChecked
+              />
+              <CheckboxInput
+                label="Allow public profile preview"
+                description="Your avatar and handle can be previewed before someone opens your profile."
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="File Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <FileInput
+                label="Profile picture"
+                description="Front-only for now. PNG, JPG or WEBP."
+                accept="image/png,image/jpeg,image/webp"
+              />
+              <FileInput
+                label="Supporting screenshots"
+                description="Multiple files are allowed. The upload flow will come later."
+                multiple
+                accept="image/*"
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Switch"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Switch
+                label="Hide past sets"
+                description="Keep the line-up focused on what is still ahead."
+                defaultChecked
+              />
+              <Switch
+                label="Enable beta maps"
+                description="Standalone switch for immediate settings, without any submit button."
+              />
+            </Box>
+          </Box>
+        </Box>
       </Box>
 
       <Box

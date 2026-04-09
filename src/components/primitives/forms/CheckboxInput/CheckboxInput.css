@@ -1,0 +1,89 @@
+.dq-ui-checkbox-input {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.dq-ui-checkbox-input__input {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  opacity: 0;
+}
+
+.dq-ui-checkbox-input__indicator {
+  position: relative;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 1px solid var(--dq-ui-border);
+  border-radius: 6px;
+  background: var(--dq-ui-surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    opacity var(--dq-ui-transition-fast),
+    background var(--dq-ui-transition-fast),
+    border-color var(--dq-ui-transition-fast),
+    box-shadow var(--dq-ui-transition-fast);
+}
+
+.dq-ui-checkbox-input__indicator::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 4px;
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid var(--dq-ui-color-black);
+  border-bottom: 2px solid var(--dq-ui-color-black);
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.86);
+  transition:
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui);
+}
+
+.dq-ui-checkbox-input__content {
+  min-width: 0;
+}
+
+.dq-ui-checkbox-input:hover .dq-ui-checkbox-input__indicator {
+  border-color: var(--dq-ui-border);
+  background: var(--dq-ui-panel-strong);
+}
+
+.dq-ui-checkbox-input__input:checked + .dq-ui-checkbox-input__indicator {
+  border-color: var(--dq-ui-primary-muted);
+  background: var(--dq-ui-primary);
+}
+
+.dq-ui-checkbox-input:hover .dq-ui-checkbox-input__input:checked + .dq-ui-checkbox-input__indicator {
+  border-color: var(--dq-ui-primary);
+  background: var(--dq-ui-primary-soft);
+}
+
+.dq-ui-checkbox-input__input:checked + .dq-ui-checkbox-input__indicator::after {
+  opacity: 1;
+  transform: rotate(-45deg) scale(1);
+}
+
+.dq-ui-checkbox-input__input:focus + .dq-ui-checkbox-input__indicator,
+.dq-ui-checkbox-input__input:focus-visible + .dq-ui-checkbox-input__indicator {
+  border-color: var(--dq-ui-primary-muted);
+  box-shadow:
+    0 0 0 3px rgba(188, 155, 94, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dq-ui-checkbox-input__input:disabled + .dq-ui-checkbox-input__indicator,
+.dq-ui-checkbox-input__input:disabled ~ .dq-ui-checkbox-input__content {
+  opacity: 0.45;
+}
+
+.dq-ui-checkbox-input--disabled {
+  cursor: not-allowed;
+}
