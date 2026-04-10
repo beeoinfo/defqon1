@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
-import BackToTopNow from '../../components/BackToTopNow';
+import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
@@ -1140,7 +1140,7 @@ const StorybookView = ({ mode = 'view' }) => {
           <StorybookBody />
         </View>
       )}
-      <BackToTopNow />
+      <BackToTop />
     </UiThemeScope>
   );
 };

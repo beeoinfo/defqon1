@@ -160,6 +160,9 @@ It exists to preserve consistency, reduce regressions, and keep long-term decisi
 - Centralize design tokens as much as possible.
 - Centralize common layout classes and shared style patterns as much as possible.
 - Reuse existing tokens, variables, shared classes, and existing component APIs before introducing new ones.
+- When composing a component from an existing component, do not overload or restyle the reused component's visual contract unless the user explicitly asks for that override.
+- Inherited component states such as hover, focus, active, selected, pressed, and disabled must keep their base behavior by default.
+- Local CSS around a reused component should be limited to composition needs such as placement, spacing, sizing, or layout integration unless an explicit visual override was requested.
 - Do not create a token for a value that is only local to a single component part.
 - A token must represent a value with real shared design-system scope, or a value that is intentionally expected to be reused across multiple components or screens.
 - If a value is only relevant inside one component and has no clear shared scope, keep it local to that component instead of promoting it to a token.

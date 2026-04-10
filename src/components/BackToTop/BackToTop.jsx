@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowUpIcon } from '@phosphor-icons/react';
 import Button from '../primitives/Button';
-import './BackToTopNow.css';
+import './BackToTop.css';
 
 const scrollToTopQuickly = () => {
   const startY = window.scrollY || window.pageYOffset || 0;
@@ -29,7 +29,7 @@ const scrollToTopQuickly = () => {
   window.requestAnimationFrame(tick);
 };
 
-const BackToTopNow = ({
+const BackToTop = ({
   ariaLabel = 'Back to top',
   title = 'Back to top',
   showAfter = 240,
@@ -72,8 +72,8 @@ const BackToTopNow = ({
       size="lg"
       radius="md"
       className={[
-        'dq-back-to-top-now',
-        isVisible ? 'dq-back-to-top-now--visible' : '',
+        'dq-back-to-top',
+        isVisible ? 'dq-back-to-top--visible' : '',
         className,
       ].filter(Boolean).join(' ')}
       onClick={handleClick}
@@ -81,4 +81,4 @@ const BackToTopNow = ({
   );
 };
 
-export default BackToTopNow;
+export default BackToTop;
