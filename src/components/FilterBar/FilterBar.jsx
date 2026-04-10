@@ -1,5 +1,5 @@
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../layout/Box';
 import Button from '../primitives/Button';
 import ChoiceButton from '../primitives/ChoiceButton';
@@ -99,7 +99,6 @@ const FilterBar = ({
   ariaLabel = 'Filters',
 }) => {
   const filterBarRef = useRef(null);
-  const filterBarRowRef = useRef(null);
   const [internalValue, setInternalValue] = useState(
     () => defaultValue ?? getInitialValue({ choices, drawers })
   );
@@ -260,39 +259,24 @@ const FilterBar = ({
     };
   }, [openDrawer]);
 
-  useEffect(() => {
-    const element = filterBarRowRef.current;
-    const layoutMain = filterBarRef.current?.closest?.('.dq-layout-main-shell');
+  useLayoutEffect(() => {
+    const filterBarElement = filterBarRef.current;
+    const layoutMain = filterBarElement?.closest?.('.dq-layout-main-shell');
 
-    if (!element || !layoutMain || !floating || resolvedPlacement !== 'top') {
-      layoutMain?.style.removeProperty('--dq-layout-filter-bar-measured-offset');
+    if (!filterBarElement || !layoutMain || !floating || resolvedPlacement !== 'top') {
+      layoutMain?.style.removeProperty('--dq-layout-main-content-offset');
       return undefined;
     }
 
-    const syncFilterBarOffset = () => {
-      layoutMain.style.setProperty(
-        '--dq-layout-filter-bar-measured-offset',
-        `calc(${element.getBoundingClientRect().height}px + var(--dq-ui-space-lg))`
-      );
-    };
+    const closedFilterBarHeight = `${filterBarElement.getBoundingClientRect().height}px`;
 
-    syncFilterBarOffset();
-
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', syncFilterBarOffset);
-
-      return () => {
-        window.removeEventListener('resize', syncFilterBarOffset);
-        layoutMain.style.removeProperty('--dq-layout-filter-bar-measured-offset');
-      };
-    }
-
-    const resizeObserver = new ResizeObserver(syncFilterBarOffset);
-    resizeObserver.observe(element);
+    layoutMain.style.setProperty(
+      '--dq-layout-main-content-offset',
+      `calc(var(--dq-ui-space-lg) + ${closedFilterBarHeight} + var(--dq-ui-layout-block-padding-top))`
+    );
 
     return () => {
-      resizeObserver.disconnect();
-      layoutMain.style.removeProperty('--dq-layout-filter-bar-measured-offset');
+      layoutMain.style.removeProperty('--dq-layout-main-content-offset');
     };
   }, [floating, resolvedPlacement]);
 
@@ -379,7 +363,6 @@ const FilterBar = ({
       aria-label={ariaLabel}
     >
       <Box
-        ref={filterBarRowRef}
         className="dq-filter-bar__row"
         direction="row"
         align="center"

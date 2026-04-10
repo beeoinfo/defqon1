@@ -1,10 +1,6 @@
 .dq-back-to-top {
   --dq-ui-button-bg: var(--dq-ui-background-blur-surface);
-  --dq-ui-button-border-color: var(--dq-ui-border);
-  --dq-ui-button-text-color: var(--dq-ui-text);
   --dq-ui-button-hover-bg: var(--dq-ui-background-blur-surface-hover);
-  --dq-ui-button-hover-border-color: var(--dq-ui-border);
-  --dq-ui-button-hover-text-color: var(--dq-ui-text);
   position: fixed;
   right: max(var(--dq-ui-space-xl), env(safe-area-inset-right, 0px));
   bottom: max(var(--dq-ui-space-xl), env(safe-area-inset-bottom, 0px));

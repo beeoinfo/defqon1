@@ -166,6 +166,51 @@ const STORYBOOK_FILTER_BAR_DRAWERS = [
         label: 'Gold',
         color: '#bc9b5e',
       },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
+            {
+        value: 'gold',
+        label: 'Gold',
+        color: '#bc9b5e',
+      },
     ],
   },
   {
@@ -186,17 +231,6 @@ const STORYBOOK_FILTER_BAR_DRAWERS = [
         label: 'Hardcore',
       },
     ],
-  },
-];
-
-const STORYBOOK_FILTER_BAR_PLACEMENTS = [
-  {
-    value: 'top',
-    label: 'Top',
-  },
-  {
-    value: 'bottom',
-    label: 'Bottom',
   },
 ];
 
@@ -265,12 +299,29 @@ const StorybookBoxExamples = ({ layout = 'flex' }) => {
 const StorybookBody = () => {
   const [openModalDemo, setOpenModalDemo] = useState(null);
   const [filterBarPlacement, setFilterBarPlacement] = useState('top');
-  const [filterBarHideOnScroll, setFilterBarHideOnScroll] = useState(true);
+  const [filterBarHideOnScroll, setFilterBarHideOnScroll] = useState(false);
+  const storybookFilterBarChoices = [
+    ...STORYBOOK_FILTER_BAR_CHOICES,
+    {
+      id: 'storybook-placement-toggle',
+      label: filterBarPlacement === 'bottom' ? 'Bottom' : 'Top',
+      checked: filterBarPlacement === 'bottom',
+      onCheckedChange: (isChecked) => {
+        setFilterBarPlacement(isChecked ? 'bottom' : 'top');
+      },
+    },
+    {
+      id: 'storybook-hide-on-scroll-toggle',
+      label: 'Hide on scroll',
+      checked: filterBarHideOnScroll,
+      onCheckedChange: setFilterBarHideOnScroll,
+    },
+  ];
 
   return (
     <Box gap="var(--dq-ui-space-xxxl)">
       <FilterBar
-        choices={STORYBOOK_FILTER_BAR_CHOICES}
+        choices={storybookFilterBarChoices}
         drawers={STORYBOOK_FILTER_BAR_DRAWERS}
         placement={filterBarPlacement}
         hideOnScroll={filterBarHideOnScroll}
@@ -614,18 +665,6 @@ const StorybookBody = () => {
 
       <Box
         component="section"
-        title="Back To Top"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <Element>
-          Scroll the page: the floating back-to-top control appears after a real scroll threshold and stays pinned to the viewport with a single blur icon-button style.
-        </Element>
-      </Box>
-
-      <Box
-        component="section"
         title="Toggle Buttons"
         titleComponent="h2"
         titleVariant="h2"
@@ -830,41 +869,6 @@ const StorybookBody = () => {
                 },
               ]}
             />
-          </Box>
-        </Box>
-      </Box>
-
-      <Box
-        component="section"
-        title="Filter Bar"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <Box gap="var(--dq-ui-space-lg)">
-          <Element>Live floating demo of the real `FilterBar`. Switch placement here and scroll the page to verify `hideOnScroll` and the reset-button animation.</Element>
-          <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-            {STORYBOOK_FILTER_BAR_PLACEMENTS.map((placementOption) => (
-              <ChoiceButton
-                key={placementOption.value}
-                type="radio"
-                name="storybook-filterbar-placement"
-                checked={filterBarPlacement === placementOption.value}
-                onCheckedChange={(isChecked) => {
-                  if (isChecked) {
-                    setFilterBarPlacement(placementOption.value);
-                  }
-                }}
-              >
-                {placementOption.label}
-              </ChoiceButton>
-            ))}
-            <ChoiceButton
-              checked={filterBarHideOnScroll}
-              onCheckedChange={setFilterBarHideOnScroll}
-            >
-              Hide on scroll
-            </ChoiceButton>
           </Box>
         </Box>
       </Box>

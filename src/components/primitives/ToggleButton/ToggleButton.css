@@ -6,6 +6,10 @@
   color: var(--dq-ui-button-text-color);
 }
 
+.dq-ui-toggle-button:focus-visible {
+  box-shadow: 0 0 0 3px var(--dq-ui-button-focus-ring-color, var(--dq-ui-button-border-color));
+}
+
 .dq-ui-toggle-button:focus:not(:disabled) .dq-ui-button__subtitle,
 .dq-ui-toggle-button:focus-visible .dq-ui-button__subtitle {
   color: var(--dq-ui-button-subtitle-color);
@@ -16,6 +20,10 @@
   background: var(--dq-ui-button-selected-bg);
   border-color: var(--dq-ui-button-selected-border-color);
   color: var(--dq-ui-button-selected-text-color);
+}
+
+.dq-ui-toggle-button.dq-ui-button--selected:focus-visible {
+  box-shadow: 0 0 0 3px var(--dq-ui-button-selected-focus-ring-color, var(--dq-ui-button-selected-border-color));
 }
 
 .dq-ui-toggle-button.dq-ui-button--selected:focus:not(:disabled) .dq-ui-button__subtitle,
@@ -52,6 +60,8 @@
 }
 
 .dq-ui-toggle-button--favorite {
+  --dq-ui-button-focus-ring-color: color-mix(in srgb, var(--dq-ui-yellow) 18%, transparent);
+  --dq-ui-button-selected-focus-ring-color: color-mix(in srgb, var(--dq-ui-yellow) 18%, transparent);
   --dq-ui-button-active-bg: var(--dq-ui-favorite-surface);
   --dq-ui-button-active-border-color: var(--dq-ui-favorite-border);
   --dq-ui-button-active-text-color: var(--dq-ui-favorite-text-soft);

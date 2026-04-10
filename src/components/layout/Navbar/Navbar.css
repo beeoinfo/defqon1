@@ -98,6 +98,13 @@
     color: var(--dq-ui-text);
   }
 
+  .dq-layout-navbar__item:focus-visible,
+  .dq-layout-navbar__item.dq-ui-button--selected:focus-visible,
+  .dq-layout-navbar__item.dq-ui-toggle-button:focus-visible,
+  .dq-layout-navbar__item.dq-ui-toggle-button.dq-ui-button--selected:focus-visible {
+    box-shadow: 0 0 0 0 transparent;
+  }
+
   .dq-layout-navbar__item.dq-ui-button--selected:focus:not(:disabled),
   .dq-layout-navbar__item.dq-ui-button--selected:focus-visible,
   .dq-layout-navbar__item.dq-ui-toggle-button.dq-ui-button--selected:focus:not(:disabled),

@@ -22,6 +22,10 @@
   color: var(--dq-ui-button-text-color);
 }
 
+.dq-ui-choice-button__input:focus-visible + .dq-ui-choice-button__control {
+  box-shadow: 0 0 0 3px var(--dq-ui-button-focus-ring-color, var(--dq-ui-button-border-color));
+}
+
 .dq-ui-choice-button__input:focus + .dq-ui-choice-button__control .dq-ui-button__subtitle,
 .dq-ui-choice-button__input:focus-visible + .dq-ui-choice-button__control .dq-ui-button__subtitle {
   color: var(--dq-ui-button-subtitle-color);
@@ -31,6 +35,10 @@
   background: var(--dq-ui-button-selected-bg);
   border-color: var(--dq-ui-button-selected-border-color);
   color: var(--dq-ui-button-selected-text-color);
+}
+
+.dq-ui-choice-button__input:checked:focus-visible + .dq-ui-choice-button__control {
+  box-shadow: 0 0 0 3px var(--dq-ui-button-selected-focus-ring-color, var(--dq-ui-button-selected-border-color));
 }
 
 .dq-ui-choice-button__input:checked + .dq-ui-choice-button__control .dq-ui-button__subtitle {

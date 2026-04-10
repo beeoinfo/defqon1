@@ -24,12 +24,10 @@
 }
 
 .dq-layout-main-shell {
-  --dq-layout-filter-bar-offset: var(--dq-layout-filter-bar-measured-offset, 0px);
   padding-top:
     calc(
       var(--dq-layout-header-offset) +
-      var(--dq-ui-layout-block-padding-top) +
-      var(--dq-layout-filter-bar-offset)
+      var(--dq-layout-main-content-offset, var(--dq-ui-layout-block-padding-top))
     );
   padding-bottom: var(--dq-ui-layout-block-padding-bottom);
 }

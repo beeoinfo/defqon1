@@ -1,3 +1,7 @@
 .dq-ui-tabs__panel[hidden] {
   display: none;
 }
+
+.dq-ui-tabs__list > .dq-ui-button:focus-visible {
+  box-shadow: 0 0 0 3px var(--dq-ui-button-selected-focus-ring-color, var(--dq-ui-button-focus-ring-color, var(--dq-ui-button-selected-border-color, var(--dq-ui-button-border-color))));
+}

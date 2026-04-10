@@ -1,7 +1,7 @@
 .dq-layout-modal {
   width: min(calc(100vw - 32px), var(--dq-layout-modal-width, 560px));
   max-width: none;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 380px);
   margin: auto;
   inset: 0;
   border: 0;

@@ -1,6 +1,7 @@
 .dq-filter-bar {
   --dq-filter-bar-mask-edge-color: rgba(0, 0, 0, 0.48);
   --dq-filter-bar-mask-solid-color: #000;
+  --dq-filter-bar-focus-ring-size: 3px;
   width: 100%;
   padding-block: 12px;
   padding-inline: 0;
@@ -52,7 +53,7 @@
 
 .dq-filter-bar__row {
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .dq-filter-bar__sticky {
@@ -60,6 +61,8 @@
   width: 0;
   flex: 0 0 0;
   overflow: hidden;
+  margin-block: calc(var(--dq-filter-bar-focus-ring-size) * -1);
+  padding-block: var(--dq-filter-bar-focus-ring-size);
   padding-inline-start: 0;
   z-index: 1;
   transition:
@@ -119,17 +122,33 @@
   min-width: 0;
   flex: 1 1 auto;
   overflow: hidden;
-  clip-path: inset(0 2px 0 2px);
-  -webkit-clip-path: inset(0 2px 0 2px);
+  margin-block: calc(var(--dq-filter-bar-focus-ring-size) * -1);
+  padding-block: var(--dq-filter-bar-focus-ring-size);
+  clip-path:
+    inset(
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+    );
+  -webkit-clip-path:
+    inset(
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+    );
 }
 
 .dq-filter-bar__scroll {
   min-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-inline: 12px;
+  margin-block: calc(var(--dq-filter-bar-focus-ring-size) * -1);
+  padding-block: var(--dq-filter-bar-focus-ring-size);
+  padding-inline: calc(12px + var(--dq-filter-bar-focus-ring-size));
   scrollbar-width: none;
-  scroll-padding-inline: 12px;
+  scroll-padding-inline: calc(12px + var(--dq-filter-bar-focus-ring-size));
   mask-image:
     linear-gradient(
       90deg,
@@ -193,12 +212,33 @@
   transform: translate(-50%, -50%);
 }
 
+.dq-filter-bar__drawer-trigger.dq-ui-button--selected {
+  font-weight: 600;
+}
+
+
 .dq-filter-bar__drawer {
   width: 100%;
   padding-inline: 12px;
+  margin-block: calc(var(--dq-filter-bar-focus-ring-size) * -1);
+  padding-block: var(--dq-filter-bar-focus-ring-size);
   display: grid;
   grid-template-rows: 1fr;
   overflow: clip;
+  clip-path:
+    inset(
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+    );
+  -webkit-clip-path:
+    inset(
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+      calc(var(--dq-filter-bar-focus-ring-size) * -1)
+      0
+    );
   animation: dq-filter-bar-drawer-in var(--dq-ui-transition-ui) both;
 }
 

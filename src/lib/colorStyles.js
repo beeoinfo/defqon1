@@ -116,6 +116,7 @@ export function buildGhostButtonColorVars(color) {
   return {
     '--dq-ui-button-bg': rgbaString(color, 0.08),
     '--dq-ui-button-border-color': theme.accentBorder,
+    '--dq-ui-button-focus-ring-color': rgbaString(color, 0.18),
     '--dq-ui-button-text-color': restTextColor,
     '--dq-ui-button-hover-bg': theme.accentSoft,
     '--dq-ui-button-hover-border-color': theme.accentBorder,
@@ -128,6 +129,7 @@ export function buildGhostButtonColorVars(color) {
     '--dq-ui-button-active-text-color': activeTextColor,
     '--dq-ui-button-selected-bg': color,
     '--dq-ui-button-selected-border-color': color,
+    '--dq-ui-button-selected-focus-ring-color': rgbaString(color, 0.18),
     '--dq-ui-button-selected-text-color': activeTextColor,
     '--dq-ui-button-selected-hover-bg': color,
     '--dq-ui-button-selected-hover-border-color': color,
