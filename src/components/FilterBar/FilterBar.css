@@ -212,10 +212,6 @@
   transform: translate(-50%, -50%);
 }
 
-.dq-filter-bar__drawer-trigger.dq-ui-button--selected {
-  font-weight: 600;
-}
-
 
 .dq-filter-bar__drawer {
   width: 100%;

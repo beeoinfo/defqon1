@@ -9,8 +9,8 @@
 .dq-layout-header__surface {
   border-bottom: 1px solid var(--dq-ui-border-subtle);
   background: var(--dq-ui-background-blur-surface);
-  backdrop-filter: var(--dq-ui-background-blur-filter);
-  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
 }
 
 .dq-layout-header__row {
@@ -49,8 +49,8 @@
   padding: 0 0 calc(env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--dq-ui-border-subtle);
   background: var(--dq-ui-background-blur-surface);
-  backdrop-filter: var(--dq-ui-background-blur-filter);
-  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
 }
 
 .dq-layout-header__mobile-navbar {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUpIcon } from '@phosphor-icons/react';
 import Button from '../primitives/Button';
 import './BackToTop.css';
@@ -10,23 +10,10 @@ const scrollToTopQuickly = () => {
     return;
   }
 
-  const duration = 220;
-  const startTime = performance.now();
-  const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
-
-  const tick = (currentTime) => {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easedProgress = easeOutCubic(progress);
-
-    window.scrollTo(0, Math.round(startY * (1 - easedProgress)));
-
-    if (progress < 1) {
-      window.requestAnimationFrame(tick);
-    }
-  };
-
-  window.requestAnimationFrame(tick);
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
 };
 
 const BackToTop = ({
@@ -38,16 +25,36 @@ const BackToTop = ({
   ...props
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const isVisibleRef = useRef(false);
+  const frameRef = useRef(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > showAfter);
+    const syncVisibility = () => {
+      frameRef.current = 0;
+
+      const nextVisible = window.scrollY > showAfter;
+
+      isVisibleRef.current = nextVisible;
+      setIsVisible((currentVisible) => (
+        currentVisible === nextVisible ? currentVisible : nextVisible
+      ));
     };
 
-    handleScroll();
+    const handleScroll = () => {
+      const nextVisible = window.scrollY > showAfter;
+
+      if (nextVisible === isVisibleRef.current || frameRef.current) {
+        return;
+      }
+
+      frameRef.current = window.requestAnimationFrame(syncVisibility);
+    };
+
+    syncVisibility();
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
+      window.cancelAnimationFrame(frameRef.current);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [showAfter]);

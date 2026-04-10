@@ -67,6 +67,7 @@
     env(safe-area-inset-bottom, 0px)
   );
   --dq-ui-background-blur-filter: blur(24px) saturate(140%);
+  --dq-ui-background-blur-filter-floating: blur(14px) saturate(120%);
   --dq-ui-background-blur-surface: linear-gradient(180deg, #1c222aad, #161b228f);
   --dq-ui-background-blur-surface-hover: linear-gradient(180deg, #242b34c7, #1b2128b8);
   --dq-ui-transition-fast: 0.2s ease;

@@ -307,6 +307,7 @@ function getStorybookMode() {
 }
 
 export default function App() {
+  const storybookMode = useMemo(() => getStorybookMode(), []);
   const bootStateRef = useRef(null);
   if (!bootStateRef.current) {
     bootStateRef.current = getBootAccountState();
@@ -775,6 +776,10 @@ export default function App() {
     }
   }, [view]);
   useEffect(() => {
+    if (storybookMode) {
+      return undefined;
+    }
+
     const handleScroll = () => {
       const currentY = window.scrollY || window.pageYOffset || 0;
 
@@ -810,7 +815,7 @@ export default function App() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isLineupView, openDrawer]);
+  }, [isLineupView, openDrawer, storybookMode]);
   useEffect(() => {
     if (!tribe && showTribeOnly) {
       setShowTribeOnly(false);
@@ -1133,8 +1138,6 @@ export default function App() {
   const selectedStagePillStyle = selectedStageTheme
     ? getStageBadgeStyles(selectedStageTheme, true)
     : null;
-  const storybookMode = useMemo(() => getStorybookMode(), []);
-
   if (!hasLineup || !selectedLineup) {
     return <EmptyState text="No lineup detected" />;
   }

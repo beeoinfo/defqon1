@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
@@ -166,51 +166,6 @@ const STORYBOOK_FILTER_BAR_DRAWERS = [
         label: 'Gold',
         color: '#bc9b5e',
       },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
-            {
-        value: 'gold',
-        label: 'Gold',
-        color: '#bc9b5e',
-      },
     ],
   },
   {
@@ -262,7 +217,67 @@ const STORYBOOK_ALERT_EXAMPLES = [
   },
 ];
 
-const StorybookBoxExamples = ({ layout = 'flex' }) => {
+const STORYBOOK_DROPDOWN_DRAWER_ITEMS = [
+  {
+    value: 'lineup',
+    label: 'Line-up',
+    content: (
+      <Box background="surface">
+        <Element>Line-up panel</Element>
+      </Box>
+    ),
+  },
+  {
+    value: 'tribe',
+    label: 'Tribe',
+    content: (
+      <Box background="surface">
+        <Element>Tribe panel</Element>
+      </Box>
+    ),
+  },
+  {
+    value: 'favorites',
+    label: 'Favorites',
+    content: (
+      <Box background="surface">
+        <Element>Favorites panel</Element>
+      </Box>
+    ),
+  },
+];
+
+const STORYBOOK_TABS_ITEMS = [
+  {
+    value: 'lineup',
+    label: 'Line-up',
+    content: (
+      <Box background="surface">
+        <Element>Line-up panel</Element>
+      </Box>
+    ),
+  },
+  {
+    value: 'tribe',
+    label: 'Tribe',
+    content: (
+      <Box background="surface">
+        <Element>Tribe panel</Element>
+      </Box>
+    ),
+  },
+  {
+    value: 'favorites',
+    label: 'Favorites',
+    content: (
+      <Box background="surface">
+        <Element>Favorites panel</Element>
+      </Box>
+    ),
+  },
+];
+
+const StorybookBoxExamples = memo(({ layout = 'flex' }) => {
   const content = STORYBOOK_BOX_EXAMPLES.map(({
     content: exampleContent = 'Box content',
     elements,
@@ -294,21 +309,25 @@ const StorybookBoxExamples = ({ layout = 'flex' }) => {
       {content}
     </Box>
   );
-};
+});
 
-const StorybookBody = () => {
-  const [openModalDemo, setOpenModalDemo] = useState(null);
+StorybookBoxExamples.displayName = 'StorybookBoxExamples';
+
+const StorybookFloatingFilterBar = memo(() => {
   const [filterBarPlacement, setFilterBarPlacement] = useState('top');
   const [filterBarHideOnScroll, setFilterBarHideOnScroll] = useState(false);
-  const storybookFilterBarChoices = [
+
+  const handlePlacementChange = useCallback((isChecked) => {
+    setFilterBarPlacement(isChecked ? 'bottom' : 'top');
+  }, []);
+
+  const storybookFilterBarChoices = useMemo(() => [
     ...STORYBOOK_FILTER_BAR_CHOICES,
     {
       id: 'storybook-placement-toggle',
       label: filterBarPlacement === 'bottom' ? 'Bottom' : 'Top',
       checked: filterBarPlacement === 'bottom',
-      onCheckedChange: (isChecked) => {
-        setFilterBarPlacement(isChecked ? 'bottom' : 'top');
-      },
+      onCheckedChange: handlePlacementChange,
     },
     {
       id: 'storybook-hide-on-scroll-toggle',
@@ -316,16 +335,42 @@ const StorybookBody = () => {
       checked: filterBarHideOnScroll,
       onCheckedChange: setFilterBarHideOnScroll,
     },
-  ];
+  ], [filterBarPlacement, filterBarHideOnScroll, handlePlacementChange]);
+
+  return (
+    <FilterBar
+      choices={storybookFilterBarChoices}
+      drawers={STORYBOOK_FILTER_BAR_DRAWERS}
+      placement={filterBarPlacement}
+      hideOnScroll={filterBarHideOnScroll}
+    />
+  );
+});
+
+StorybookFloatingFilterBar.displayName = 'StorybookFloatingFilterBar';
+
+const StorybookBody = memo(() => {
+  const [openModalDemo, setOpenModalDemo] = useState(null);
+
+  const handleOpenDefaultModal = useCallback(() => {
+    setOpenModalDemo('default');
+  }, []);
+
+  const handleOpenMinimalModal = useCallback(() => {
+    setOpenModalDemo('minimal');
+  }, []);
+
+  const handleOpenWideModal = useCallback(() => {
+    setOpenModalDemo('wide');
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setOpenModalDemo(null);
+  }, []);
 
   return (
     <Box gap="var(--dq-ui-space-xxxl)">
-      <FilterBar
-        choices={storybookFilterBarChoices}
-        drawers={STORYBOOK_FILTER_BAR_DRAWERS}
-        placement={filterBarPlacement}
-        hideOnScroll={filterBarHideOnScroll}
-      />
+      <StorybookFloatingFilterBar />
 
       <Box
         component="section"
@@ -838,37 +883,7 @@ const StorybookBody = () => {
             titleComponent="h3"
             titleVariant="h4"
           >
-            <DropdownDrawer
-              items={[
-                {
-                  value: 'lineup',
-                  label: 'Line-up',
-                  content: (
-                    <Box background="surface">
-                      <Element>Line-up panel</Element>
-                    </Box>
-                  ),
-                },
-                {
-                  value: 'tribe',
-                  label: 'Tribe',
-                  content: (
-                    <Box background="surface">
-                      <Element>Tribe panel</Element>
-                    </Box>
-                  ),
-                },
-                {
-                  value: 'favorites',
-                  label: 'Favorites',
-                  content: (
-                    <Box background="surface">
-                      <Element>Favorites panel</Element>
-                    </Box>
-                  ),
-                },
-              ]}
-            />
+            <DropdownDrawer items={STORYBOOK_DROPDOWN_DRAWER_ITEMS} />
           </Box>
         </Box>
       </Box>
@@ -890,38 +905,7 @@ const StorybookBody = () => {
           <Box
             className="dq-ui-storybook__button-section"
           >
-            <Tabs
-              ariaLabel="Storybook tabs"
-              items={[
-                {
-                  value: 'lineup',
-                  label: 'Line-up',
-                  content: (
-                    <Box background="surface">
-                      <Element>Line-up panel</Element>
-                    </Box>
-                  ),
-                },
-                {
-                  value: 'tribe',
-                  label: 'Tribe',
-                  content: (
-                    <Box background="surface">
-                      <Element>Tribe panel</Element>
-                    </Box>
-                  ),
-                },
-                {
-                  value: 'favorites',
-                  label: 'Favorites',
-                  content: (
-                    <Box background="surface">
-                      <Element>Favorites panel</Element>
-                    </Box>
-                  ),
-                },
-              ]}
-            />
+            <Tabs ariaLabel="Storybook tabs" items={STORYBOOK_TABS_ITEMS} />
           </Box>
         </Box>
       </Box>
@@ -956,7 +940,7 @@ const StorybookBody = () => {
                 wrap="wrap"
                 gap="var(--dq-ui-space-lg)"
               >
-                <Button onClick={() => setOpenModalDemo('default')}>
+                <Button onClick={handleOpenDefaultModal}>
                   Open default modal
                 </Button>
               </Box>
@@ -979,7 +963,7 @@ const StorybookBody = () => {
                 wrap="wrap"
                 gap="var(--dq-ui-space-lg)"
               >
-                <Button onClick={() => setOpenModalDemo('minimal')}>
+                <Button onClick={handleOpenMinimalModal}>
                   Open minimal modal
                 </Button>
               </Box>
@@ -1002,7 +986,7 @@ const StorybookBody = () => {
                 wrap="wrap"
                 gap="var(--dq-ui-space-lg)"
               >
-                <Button onClick={() => setOpenModalDemo('wide')}>
+                <Button onClick={handleOpenWideModal}>
                   Open locked modal
                 </Button>
               </Box>
@@ -1012,15 +996,15 @@ const StorybookBody = () => {
 
         <Modal
           open={openModalDemo === 'default'}
-          onClose={() => setOpenModalDemo(null)}
+          onClose={handleCloseModal}
           title="Festival settings"
           subtitle="Reusable modal shell with optional header and bottom controls."
           controls={
             <>
-              <Button onClick={() => setOpenModalDemo(null)}>
+              <Button onClick={handleCloseModal}>
                 Cancel
               </Button>
-              <Button selected onClick={() => setOpenModalDemo(null)}>
+              <Button selected onClick={handleCloseModal}>
                 Save changes
               </Button>
             </>
@@ -1034,7 +1018,7 @@ const StorybookBody = () => {
 
         <Modal
           open={openModalDemo === 'minimal'}
-          onClose={() => setOpenModalDemo(null)}
+          onClose={handleCloseModal}
           ariaLabel="Minimal modal example"
         >
           <Box gap="var(--dq-ui-space-lg)">
@@ -1045,17 +1029,17 @@ const StorybookBody = () => {
 
         <Modal
           open={openModalDemo === 'wide'}
-          onClose={() => setOpenModalDemo(null)}
+          onClose={handleCloseModal}
           title="Line-up comparison"
           subtitle="Outside click is disabled here, so use the close button or footer actions."
           closeOnOutsideClick={false}
           maxWidth="720px"
           controls={
             <>
-              <Button onClick={() => setOpenModalDemo(null)}>
+              <Button onClick={handleCloseModal}>
                 Close
               </Button>
-              <Button selected onClick={() => setOpenModalDemo(null)}>
+              <Button selected onClick={handleCloseModal}>
                 Compare artists
               </Button>
             </>
@@ -1126,7 +1110,9 @@ const StorybookBody = () => {
       </Box>
     </Box>
   );
-};
+});
+
+StorybookBody.displayName = 'StorybookBody';
 
 const StorybookView = ({ mode = 'view' }) => {
   const isPage = mode === 'page';

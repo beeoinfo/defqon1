@@ -1,5 +1,5 @@
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../layout/Box';
 import Button from '../primitives/Button';
 import ChoiceButton from '../primitives/ChoiceButton';
@@ -99,6 +99,7 @@ const FilterBar = ({
   ariaLabel = 'Filters',
 }) => {
   const filterBarRef = useRef(null);
+  const openDrawerRef = useRef(null);
   const [internalValue, setInternalValue] = useState(
     () => defaultValue ?? getInitialValue({ choices, drawers })
   );
@@ -106,7 +107,7 @@ const FilterBar = ({
   const [renderedDrawerId, setRenderedDrawerId] = useState(null);
   const [drawerState, setDrawerState] = useState('closed');
   const [resetButtonState, setResetButtonState] = useState('closed');
-  const [isScrollHidden, setIsScrollHidden] = useState(false);
+  const isScrollHiddenRef = useRef(false);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : internalValue;
   const hasSelection = hasFilterValue(currentValue);
@@ -115,6 +116,17 @@ const FilterBar = ({
   const resetButtonOptions = typeof resetButton === 'object' ? resetButton : {};
   const showsResetButton = resetButton !== false && hasSelection;
   const shouldRenderResetButton = resetButtonState !== 'closed';
+
+  const syncScrollHiddenState = (nextHidden) => {
+    const filterBarElement = filterBarRef.current;
+
+    if (!filterBarElement || isScrollHiddenRef.current === nextHidden) {
+      return;
+    }
+
+    isScrollHiddenRef.current = nextHidden;
+    filterBarElement.classList.toggle('dq-filter-bar--scroll-hidden', nextHidden);
+  };
 
   const updateValue = (nextValue) => {
     if (!isControlled) {
@@ -167,6 +179,10 @@ const FilterBar = ({
 
     updateValue(nextValue);
   };
+
+  useEffect(() => {
+    openDrawerRef.current = openDrawer;
+  }, [openDrawer]);
 
   useEffect(() => {
     if (showsResetButton) {
@@ -282,7 +298,7 @@ const FilterBar = ({
 
   useEffect(() => {
     if (!floating || !hideOnScroll) {
-      setIsScrollHidden((currentHidden) => (currentHidden ? false : currentHidden));
+      syncScrollHiddenState(false);
       return undefined;
     }
 
@@ -318,11 +334,13 @@ const FilterBar = ({
 
       if (nextHidden) {
         hideTimeout = window.setTimeout(() => {
-          setIsScrollHidden((currentHidden) => (currentHidden ? currentHidden : true));
-          setOpenDrawer(null);
+          syncScrollHiddenState(true);
+          if (openDrawerRef.current !== null) {
+            setOpenDrawer(null);
+          }
         }, FILTER_BAR_SCROLL_HIDE_DELAY_MS);
       } else {
-        setIsScrollHidden((currentHidden) => (currentHidden ? false : currentHidden));
+        syncScrollHiddenState(false);
       }
 
       accumulatedScroll = 0;
@@ -345,6 +363,7 @@ const FilterBar = ({
       window.clearTimeout(hideTimeout);
       window.cancelAnimationFrame(frame);
       window.removeEventListener('scroll', handleScroll);
+      syncScrollHiddenState(false);
     };
   }, [floating, hideOnScroll]);
 
@@ -357,7 +376,6 @@ const FilterBar = ({
         'dq-filter-bar',
         floating ? 'dq-filter-bar--floating' : '',
         floating ? `dq-filter-bar--floating-${resolvedPlacement}` : '',
-        isScrollHidden ? 'dq-filter-bar--scroll-hidden' : '',
         className,
       ].filter(Boolean).join(' ')}
       aria-label={ariaLabel}
@@ -497,4 +515,4 @@ const FilterBar = ({
   );
 };
 
-export default FilterBar;
+export default memo(FilterBar);

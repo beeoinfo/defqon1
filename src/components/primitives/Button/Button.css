@@ -46,7 +46,6 @@
   justify-content: center;
   gap: var(--dq-ui-button-gap);
   cursor: pointer;
-  font-weight: 500;
   white-space: nowrap;
   transition:
     opacity var(--dq-ui-transition-fast),

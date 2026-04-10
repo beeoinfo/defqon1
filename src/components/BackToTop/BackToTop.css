@@ -8,8 +8,8 @@
   opacity: 0;
   transform: translateY(12px) scale(0.92);
   pointer-events: none;
-  backdrop-filter: var(--dq-ui-background-blur-filter);
-  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
   transition:
     opacity var(--dq-ui-transition-fast),
     transform var(--dq-ui-transition-fast),
