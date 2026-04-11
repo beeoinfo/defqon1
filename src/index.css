@@ -4,7 +4,7 @@
  * text.  Import the family with regular (400), medium (500) and bold (700)
  * weights.
  */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 
 :root {
   /* Default font stack now uses Roboto.  Fall back to Inter/system fonts for

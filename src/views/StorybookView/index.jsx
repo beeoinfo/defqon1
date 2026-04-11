@@ -1,8 +1,9 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon, XIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
+import Card from '../../components/layout/Card';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
@@ -51,19 +52,60 @@ const STORYBOOK_NAV_ITEMS = [
 
 const STORYBOOK_BOX_EXAMPLES = [
   {
-    color: '#0BDBEF',
-    title: 'Line-up Preview',
+    title: 'No Background',
     titleComponent: 'h3',
     titleVariant: 'h4',
-    titleCount: 4,
-    titleCountLabel: 'items',
-    elements: ['Box content', 'Second element'],
+    noBackground: true,
+    cards: [
+      { title: 'Default Card', meta1: 'RED', meta2: 'Friday', meta3: '22:00 – 23:00' },
+    ],
+  },
+  {
+    title: 'Surface Background',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Default on Surface', meta1: 'BLUE', meta2: 'Saturday', meta3: '14:00 – 15:00' },
+    ],
+  },
+  {
+    title: 'Card in Card – No Parent',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Outer Card', meta1: 'RED', meta2: 'Friday', meta3: '22:00 – 23:00', description: 'Card with sub-card, no parent color.', subCard: { title: 'Inner Card', meta1: 'RED', meta2: 'Friday', meta3: '23:00 – 00:00' } },
+    ],
+  },
+  {
+    title: 'Card in Card – Colored Sub',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Outer Card', meta1: 'BLUE', meta2: 'Saturday', meta3: '14:00 – 15:00', subCard: { color: '#0BDBEF', title: 'Blue Sub', meta1: 'BLUE', meta2: 'Saturday', meta3: '15:00 – 16:00' } },
+    ],
+  },
+  {
+    color: '#0BDBEF',
+    title: 'Inherited Blue',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    titleCount: 2,
+    titleCountLabel: 'artists',
+    cards: [
+      { title: 'Wildstylez', meta1: 'BLUE', meta2: 'Saturday', meta3: '14:00 – 15:00' },
+      { title: 'Headhunterz', meta1: 'BLUE', meta2: 'Friday', meta3: '22:00 – 23:00', actionVariant: 'favorite' },
+    ],
   },
   {
     color: '#FF008B',
-    titleCount: 2,
-    titleCountLabel: 'performers',
-    content: 'Box without title',
+    title: 'Inherited Magenta',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    titleCount: 1,
+    titleCountLabel: 'performer',
+    cards: [
+      { title: 'D-Block & S-te-Fan', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '18:00 – 19:00', description: 'Euphoric duo known for delivering anthem after anthem.' },
+    ],
   },
   {
     color: '#D492FF',
@@ -74,39 +116,60 @@ const STORYBOOK_BOX_EXAMPLES = [
   },
   {
     color: '#B95511',
-    title: 'Featured Stage',
+    title: 'Inherited Gold + Close',
     titleBadge: 'GOLD',
     titleComponent: 'h3',
     titleVariant: 'h4',
-    titleCount: 6,
-    titleCountLabel: 'artists',
+    cards: [
+      { title: 'Ran-D', meta1: 'GOLD', meta2: 'Friday', meta3: '23:00 – 00:00', actionVariant: 'close' },
+    ],
+  },
+  {
+    color: '#0BDBEF',
+    title: 'Inherited Sub – Blue',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Wildstylez', meta1: 'BLUE', meta2: 'Saturday', meta3: '14:00 – 15:00', description: 'Inherited card with inherited sub-card.', subCard: { title: 'Bass Modulators', meta1: 'BLUE', meta2: 'Saturday', meta3: '15:00 – 16:00' } },
+    ],
   },
   {
     color: '#00FF00',
-    titleIcon: SparkleIcon,
+    title: 'Inherited Sub – Green',
+    titleComponent: 'h3',
     titleVariant: 'h4',
-    titleCount: 3,
-    titleCountLabel: 'performers',
-    elements: ['Box content', 'Extra content'],
+    cards: [
+      { title: 'Ran-D', meta1: 'GREEN', meta2: 'Friday', meta3: '23:00 – 00:00', actionVariant: 'favorite', subCard: { title: 'Aftershock', meta1: 'GREEN', meta2: 'Saturday', meta3: '00:00 – 01:00' } },
+    ],
   },
   {
-    color: '#3842DA',
-    title: 'Warm Spotlight',
+    color: '#00FF00',
+    title: 'Color on Color – Green',
     titleIcon: SparkleIcon,
     titleComponent: 'h3',
     titleVariant: 'h4',
-    titleCount: 5,
-    titleCountLabel: 'items',
+    cards: [
+      { title: 'Ran-D', meta1: 'GREEN', meta2: 'Friday', meta3: '23:00 – 00:00', description: 'Raw hardstyle legend closing the Friday stage.', actionVariant: 'favorite', subCard: { color: '#0BDBEF', title: 'Blue Sub on Green', meta1: 'BLUE', meta2: 'Saturday', meta3: '00:00 – 01:00' } },
+    ],
+  },
+  {
+    color: '#FF008B',
+    title: 'Color on Color – Magenta',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Main Magenta', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '20:00 – 21:00', subCard: { color: '#0BDBEF', title: 'Blue Sub on Magenta', meta1: 'BLUE', meta2: 'Sunday', meta3: '01:00 – 02:00' } },
+    ],
   },
   {
     color: '#A100FF',
-    title: 'Ignored Icon',
+    title: 'Color on Color – Purple',
     titleBadge: 'PURPLE',
-    titleIcon: SparkleIcon,
+    titleComponent: 'h3',
     titleVariant: 'h4',
-    titleCount: 6,
-    titleCountLabel: 'artists',
-    elements: ['Box content', 'Second element'],
+    cards: [
+      { title: 'Sub Zero Project', meta1: 'PURPLE', meta2: 'Sunday', meta3: '20:00 – 21:00', actionVariant: 'favorite', subCard: { color: '#00FF00', title: 'Green Sub on Purple', meta1: 'GREEN', meta2: 'Sunday', meta3: '22:00 – 23:00' } },
+    ],
   },
 ];
 
@@ -281,14 +344,27 @@ const StorybookBoxExamples = memo(({ layout = 'flex' }) => {
   const content = STORYBOOK_BOX_EXAMPLES.map(({
     content: exampleContent = 'Box content',
     elements,
+    cards,
+    noBackground,
     ...boxProps
   }, index) => (
     <Box
       key={`${boxProps.title ?? 'untitled'}-${boxProps.titleCount}-${index}`}
-      background="surface"
+      background={noBackground ? 'none' : 'surface'}
       {...boxProps}
     >
-      {elements ? (
+      {cards ? (
+        cards.map((cardDef) => {
+          const { subCard, ...cardProps } = cardDef;
+          return (
+            <Card key={cardDef.title} {...cardProps}>
+              {subCard ? (
+                <Card component="div" titleComponent="h4" opaque {...subCard} />
+              ) : null}
+            </Card>
+          );
+        })
+      ) : elements ? (
         elements.map((element) => <Element key={element}>{element}</Element>)
       ) : (
         <Element>{exampleContent}</Element>
@@ -545,9 +621,6 @@ const StorybookBody = memo(() => {
         title="Boxes"
         titleComponent="h2"
         titleVariant="h2"
-        background="surface"
-        titleCount={12}
-        titleCountLabel="performers"
       >
         <StorybookBoxExamples />
       </Box>
@@ -557,9 +630,6 @@ const StorybookBody = memo(() => {
         title="Boxes Columns"
         titleComponent="h2"
         titleVariant="h2"
-        background="surface"
-        titleCount={12}
-        titleCountLabel="performers"
       >
         <StorybookBoxExamples layout="columns" />
       </Box>
