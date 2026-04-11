@@ -1,5 +1,5 @@
 import { XIcon } from '@phosphor-icons/react';
-import { useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import Box from '../Box';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
@@ -30,29 +30,24 @@ const Modal = ({
   const modalId = `dq-layout-modal-${sanitizedId}`;
   const titleId = title ? `${modalId}-title` : undefined;
   const subtitleId = subtitle ? `${modalId}-subtitle` : undefined;
-  const modalRef = useRef(null);
+  const dialogRef = useRef(null);
+  const closeBtnRef = useRef(null);
   const hasHeader = Boolean(title) || Boolean(subtitle) || showCloseButton;
   const hasControls = controls !== null && controls !== undefined && controls !== false;
   const hasHeading = Boolean(title) || Boolean(subtitle);
-  const popoverMode = closeOnOutsideClick ? 'auto' : 'manual';
 
   useEffect(() => {
-    if (!open) {
-      return undefined;
+    const dialogElement = dialogRef.current;
+    if (!dialogElement) return undefined;
+    if (open && !dialogElement.open) {
+      dialogElement.showModal();
+      // Empêche le focus auto sur le bouton close si ouverture par clic
+      if (document.activeElement === closeBtnRef.current) {
+        dialogElement.focus();
+      }
+    } else if (!open && dialogElement.open) {
+      dialogElement.close();
     }
-
-    const modalElement = modalRef.current;
-
-    if (!modalElement) {
-      return undefined;
-    }
-
-    const isPopoverOpen = modalElement.matches(':popover-open');
-
-    if (!isPopoverOpen) {
-      modalElement.showPopover();
-    }
-
     return undefined;
   }, [open]);
 
@@ -73,31 +68,25 @@ const Modal = ({
     };
   }, [open]);
 
-  useEffect(() => {
-    if (!open || closeOnOutsideClick) {
-      return undefined;
+  const handleCancel = useCallback((event) => {
+    event.preventDefault();
+    onClose?.();
+  }, [onClose]);
+
+  const handleClick = useCallback((event) => {
+    if (!closeOnOutsideClick) {
+      return;
     }
 
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onClose?.();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [closeOnOutsideClick, onClose, open]);
-
-  const handleToggle = (event) => {
-    const isPopoverOpen = event.currentTarget.matches(':popover-open');
-
-    if (!isPopoverOpen) {
+    // Click on the dialog backdrop (outside the modal box)
+    if (event.target === dialogRef.current) {
       onClose?.();
     }
-  };
+  }, [closeOnOutsideClick, onClose]);
+
+  const handleClose = useCallback(() => {
+    onClose?.();
+  }, [onClose]);
 
   if (!open) {
     return null;
@@ -106,18 +95,17 @@ const Modal = ({
   return (
     <Box
       {...props}
-      ref={modalRef}
+      ref={dialogRef}
       id={modalId}
-      component="section"
-      popover={popoverMode}
-      role="dialog"
-      aria-modal="true"
+      component="dialog"
       aria-labelledby={titleId}
       aria-describedby={subtitleId}
       aria-label={title ? undefined : ariaLabel}
       background="surface-blur"
       gap="var(--dq-ui-space-lg)"
-      onToggle={handleToggle}
+      onCancel={handleCancel}
+      onClick={handleClick}
+      onClose={handleClose}
       style={{
         '--dq-layout-modal-width': maxWidth,
         ...style,
@@ -165,8 +153,10 @@ const Modal = ({
               ariaLabel={closeLabel}
               size="md"
               className="dq-layout-modal__close"
-              popoverTarget={modalId}
-              popoverTargetAction="hide"
+              onClick={onClose}
+              ref={closeBtnRef}
+              tabIndex={0}
+              onMouseDown={e => e.preventDefault()}
             />
           ) : null}
         </Box>

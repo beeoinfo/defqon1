@@ -52,7 +52,8 @@
   background: var(--dq-layout-box-bg, var(--dq-ui-surface));
 }
 
-section.dq-layout-box--surface {
+section.dq-layout-box--surface,
+dialog.dq-layout-box--surface {
   padding: 20px;
 }
 
@@ -65,7 +66,8 @@ section.dq-layout-box--surface {
   -webkit-backdrop-filter: var(--dq-ui-background-blur-filter);
 }
 
-section.dq-layout-box--surface-blur {
+section.dq-layout-box--surface-blur,
+dialog.dq-layout-box--surface-blur {
   padding: 20px;
 }
 

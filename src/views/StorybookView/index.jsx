@@ -61,14 +61,6 @@ const STORYBOOK_BOX_EXAMPLES = [
     ],
   },
   {
-    title: 'Surface Background',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
-    cards: [
-      { title: 'Default on Surface', meta1: 'BLUE', meta2: 'Saturday', meta3: '14:00 – 15:00' },
-    ],
-  },
-  {
     title: 'Card in Card – No Parent',
     titleComponent: 'h3',
     titleVariant: 'h4',
@@ -172,66 +164,45 @@ const STORYBOOK_BOX_EXAMPLES = [
     ],
   },
   {
-    color: '#0BDBEF',
-    title: 'Review – Moved (Blue → Yellow)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Headhunterz', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '22:00 – 23:00', actionVariant: 'close', subCard: { color: '#F1E300', title: 'Headhunterz', meta1: 'YELLOW', meta2: 'Saturday', meta3: '16:00 – 17:00' } },
+      { color: '#0BDBEF', title: 'Headhunterz', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '22:00 – 23:00', actionVariant: 'close', subCard: { color: '#F1E300', title: 'Headhunterz', meta1: 'YELLOW', meta2: 'Saturday', meta3: '16:00 – 17:00' } },
     ],
   },
   {
-    color: '#FF008B',
-    title: 'Review – Moved (Magenta → Green)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'D-Block & S-te-Fan', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '18:00 – 19:00', actionVariant: 'close', subCard: { color: '#00FF00', title: 'D-Block & S-te-Fan', meta1: 'GREEN', meta2: 'Sunday', meta3: '20:00 – 21:00' } },
+      { color: '#FF008B', title: 'D-Block & S-te-Fan', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '18:00 – 19:00', actionVariant: 'close', subCard: { color: '#00FF00', title: 'D-Block & S-te-Fan', meta1: 'GREEN', meta2: 'Sunday', meta3: '20:00 – 21:00' } },
     ],
   },
   {
-    color: '#B95511',
-    title: 'Review – Moved (Gold → Purple)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Ran-D', metaVariant: 'strikethrough', meta1: 'GOLD', meta2: 'Friday', meta3: '23:00 – 00:00', actionVariant: 'close', subCard: { color: '#A100FF', title: 'Ran-D', meta1: 'PURPLE', meta2: 'Saturday', meta3: '15:00 – 16:00' } },
+      { color: '#B95511', title: 'Ran-D', metaVariant: 'strikethrough', meta1: 'GOLD', meta2: 'Friday', meta3: '23:00 – 00:00', actionVariant: 'close', subCard: { color: '#A100FF', title: 'Ran-D', meta1: 'PURPLE', meta2: 'Saturday', meta3: '15:00 – 16:00' } },
     ],
   },
   {
-    color: '#00FF00',
-    title: 'Review – Removed (Green)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Aftershock', metaVariant: 'strikethrough', meta1: 'GREEN', meta2: 'Saturday', meta3: '00:00 – 01:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+      { color: '#00FF00', title: 'Aftershock', metaVariant: 'strikethrough', meta1: 'GREEN', meta2: 'Saturday', meta3: '00:00 – 01:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
     ],
   },
   {
-    color: '#0BDBEF',
-    title: 'Review – Removed (Blue)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Zatox', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '16:00 – 17:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+      { color: '#0BDBEF', title: 'Zatox', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '16:00 – 17:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
     ],
   },
   {
-    color: '#FF008B',
-    title: 'Review – Removed (Magenta)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Noisecontrollers', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '19:00 – 20:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+      { color: '#FF008B', title: 'Noisecontrollers', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '19:00 – 20:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
     ],
   },
   {
-    color: '#A100FF',
-    title: 'Review – Removed (Purple)',
-    titleComponent: 'h3',
-    titleVariant: 'h4',
+    noBackground: true,
     cards: [
-      { title: 'Warface', metaVariant: 'strikethrough', meta1: 'PURPLE', meta2: 'Sunday', meta3: '21:00 – 22:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+      { color: '#A100FF', title: 'Warface', metaVariant: 'strikethrough', meta1: 'PURPLE', meta2: 'Sunday', meta3: '21:00 – 22:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
     ],
   },
 ];
@@ -523,7 +494,6 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="flex-start"
-         
         >
           <Box className="dq-ui-storybook__title-column" gap="var(--dq-ui-space-xl)">
             <Title component="h1">Heading H1</Title>
@@ -558,6 +528,67 @@ const StorybookBody = memo(() => {
 
       <Box
         component="section"
+        title="Badges"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box
+          className="dq-ui-storybook__button-sections"
+          direction="row"
+          wrap="wrap"
+          align="stretch"
+        >
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Count"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Button badge={3}>Inbox</Button>
+              <Button badge={12}>Alerts</Button>
+            </Box>
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge variant="title">1</Badge>
+              <Badge variant="title">12</Badge>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Pills"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge>DEFAULT</Badge>
+              <Badge color="#22c55e">Live</Badge>
+              <Badge variant="plain">
+                PLAIN
+              </Badge>
+              <Badge variant="plain" color="#ca2323">
+                Hotfix
+              </Badge>
+            </Box>
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge size="sm">DEFAULT SM</Badge>
+              <Badge size="sm" color="#22c55e">Live SM</Badge>
+              <Badge size="sm" variant="plain">
+                PLAIN SM
+              </Badge>
+              <Badge size="sm" variant="plain" color="#ca2323">
+                Hotfix SM
+              </Badge>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
         title="Buttons"
         titleComponent="h2"
         titleVariant="h2"
@@ -568,7 +599,6 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -681,168 +711,6 @@ const StorybookBody = memo(() => {
 
       <Box
         component="section"
-        title="Boxes"
-        titleComponent="h2"
-        titleVariant="h2"
-      >
-        <StorybookBoxExamples />
-      </Box>
-
-      <Box
-        component="section"
-        title="Boxes Columns"
-        titleComponent="h2"
-        titleVariant="h2"
-      >
-        <StorybookBoxExamples layout="columns" />
-      </Box>
-
-      <Box
-        component="section"
-        title="Forms"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <Box
-          className="dq-ui-storybook__button-sections"
-          direction="row"
-          wrap="wrap"
-          align="stretch"
-         
-        >
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Text Input"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <TextInput
-                label="Username"
-                placeholder="e.g. usera.testa"
-                description="Lowercase letters, numbers, dots, underscores and dashes."
-                autoComplete="username"
-              />
-              <TextInput
-                label="Invite code"
-                defaultValue="DEFQON-2026"
-                successMessage="Invite code looks valid."
-              />
-              <TextInput
-                label="Email"
-                type="email"
-                defaultValue="broken@email"
-                errorMessage="Enter a valid email address."
-                autoComplete="email"
-              />
-            </Box>
-          </Box>
-
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Checkbox"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <CheckboxInput
-                label="Receive tribe invites"
-                description="Let trusted members send you direct join requests."
-                defaultChecked
-              />
-              <CheckboxInput
-                label="Allow public profile preview"
-                description="Your avatar and handle can be previewed before someone opens your profile."
-              />
-            </Box>
-          </Box>
-
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="File Input"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <FileInput
-                label="Profile picture"
-                description="Front-only for now. PNG, JPG or WEBP."
-                accept="image/png,image/jpeg,image/webp"
-              />
-              <FileInput
-                label="Supporting screenshots"
-                description="Multiple files are allowed. The upload flow will come later."
-                multiple
-                accept="image/*"
-              />
-            </Box>
-          </Box>
-
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Switch"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <Switch
-                label="Hide past sets"
-                description="Keep the line-up focused on what is still ahead."
-                defaultChecked
-              />
-              <Switch
-                label="Enable beta maps"
-                description="Standalone switch for immediate settings, without any submit button."
-              />
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-
-      <Box
-        component="section"
-        title="Alerts"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <Box gap="var(--dq-ui-space-lg)">
-          {STORYBOOK_ALERT_EXAMPLES.map((example) => (
-            <Alert
-              key={example.variant}
-              variant={example.variant}
-              title={example.title}
-            >
-              {example.message}
-            </Alert>
-          ))}
-
-          <Alert
-            variant="info"
-            title="App update available"
-            actions={(
-              <>
-                <Button size="sm">
-                  Later
-                </Button>
-                <Button size="sm">
-                  Reload now
-                </Button>
-              </>
-            )}
-          >
-            A fresh data bundle is waiting with the latest line-up corrections and tribe updates.
-          </Alert>
-        </Box>
-      </Box>
-
-      <Box
-        component="section"
         title="Toggle Buttons"
         titleComponent="h2"
         titleVariant="h2"
@@ -853,7 +721,6 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -970,7 +837,6 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -1033,13 +899,49 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-         
         >
           <Box
             className="dq-ui-storybook__button-section"
           >
             <Tabs ariaLabel="Storybook tabs" items={STORYBOOK_TABS_ITEMS} />
           </Box>
+        </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Alerts"
+        titleComponent="h2"
+        titleVariant="h2"
+        background="surface"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          {STORYBOOK_ALERT_EXAMPLES.map((example) => (
+            <Alert
+              key={example.variant}
+              variant={example.variant}
+              title={example.title}
+            >
+              {example.message}
+            </Alert>
+          ))}
+
+          <Alert
+            variant="info"
+            title="App update available"
+            actions={(
+              <>
+                <Button size="sm">
+                  Later
+                </Button>
+                <Button size="sm">
+                  Reload now
+                </Button>
+              </>
+            )}
+          >
+            A fresh data bundle is waiting with the latest line-up corrections and tribe updates.
+          </Alert>
         </Box>
       </Box>
 
@@ -1066,7 +968,7 @@ const StorybookBody = memo(() => {
               <Button onClick={handleCloseModal}>
                 Cancel
               </Button>
-              <Button selected onClick={handleCloseModal}>
+              <Button onClick={handleCloseModal}>
                 Save changes
               </Button>
             </>
@@ -1101,7 +1003,7 @@ const StorybookBody = memo(() => {
               <Button onClick={handleCloseModal}>
                 Close
               </Button>
-              <Button selected onClick={handleCloseModal}>
+              <Button onClick={handleCloseModal}>
                 Compare artists
               </Button>
             </>
@@ -1120,7 +1022,7 @@ const StorybookBody = memo(() => {
 
       <Box
         component="section"
-        title="Badges"
+        title="Forms"
         titleComponent="h2"
         titleVariant="h2"
         background="surface"
@@ -1130,55 +1032,116 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-         
         >
           <Box
             className="dq-ui-storybook__button-section"
             background="surface"
-            title="Count"
+            title="Text Input"
             titleComponent="h3"
             titleVariant="h4"
           >
-            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Button badge={3}>Inbox</Button>
-              <Button badge={12}>Alerts</Button>
-            </Box>
-            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Badge variant="title">1</Badge>
-              <Badge variant="title">12</Badge>
+            <Box gap="var(--dq-ui-space-lg)">
+              <TextInput
+                label="Username"
+                placeholder="e.g. usera.testa"
+                description="Lowercase letters, numbers, dots, underscores and dashes."
+                autoComplete="username"
+              />
+              <TextInput
+                label="Invite code"
+                defaultValue="DEFQON-2026"
+                successMessage="Invite code looks valid."
+              />
+              <TextInput
+                label="Email"
+                type="email"
+                defaultValue="broken@email"
+                errorMessage="Enter a valid email address."
+                autoComplete="email"
+              />
             </Box>
           </Box>
 
           <Box
             className="dq-ui-storybook__button-section"
             background="surface"
-            title="Pills"
+            title="Checkbox"
             titleComponent="h3"
             titleVariant="h4"
           >
-            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Badge>DEFAULT</Badge>
-              <Badge color="#22c55e">Live</Badge>
-              <Badge variant="plain">
-                PLAIN
-              </Badge>
-              <Badge variant="plain" color="#ca2323">
-                Hotfix
-              </Badge>
-            </Box>
-            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-              <Badge size="sm">DEFAULT SM</Badge>
-              <Badge size="sm" color="#22c55e">Live SM</Badge>
-              <Badge size="sm" variant="plain">
-                PLAIN SM
-              </Badge>
-              <Badge size="sm" variant="plain" color="#ca2323">
-                Hotfix SM
-              </Badge>
+            <Box gap="var(--dq-ui-space-lg)">
+              <CheckboxInput
+                label="Receive tribe invites"
+                description="Let trusted members send you direct join requests."
+                defaultChecked
+              />
+              <CheckboxInput
+                label="Allow public profile preview"
+                description="Your avatar and handle can be previewed before someone opens your profile."
+              />
             </Box>
           </Box>
 
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="File Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <FileInput
+                label="Profile picture"
+                description="Front-only for now. PNG, JPG or WEBP."
+                accept="image/png,image/jpeg,image/webp"
+              />
+              <FileInput
+                label="Supporting screenshots"
+                description="Multiple files are allowed. The upload flow will come later."
+                multiple
+                accept="image/*"
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Switch"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <Switch
+                label="Hide past sets"
+                description="Keep the line-up focused on what is still ahead."
+                defaultChecked
+              />
+              <Switch
+                label="Enable beta maps"
+                description="Standalone switch for immediate settings, without any submit button."
+              />
+            </Box>
+          </Box>
         </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Boxes"
+        titleComponent="h2"
+        titleVariant="h2"
+      >
+        <StorybookBoxExamples />
+      </Box>
+
+      <Box
+        component="section"
+        title="Boxes Columns"
+        titleComponent="h2"
+        titleVariant="h2"
+      >
+        <StorybookBoxExamples layout="columns" />
       </Box>
     </Box>
   );

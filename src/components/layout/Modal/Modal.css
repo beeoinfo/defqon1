@@ -13,25 +13,27 @@
     0 32px 96px rgba(0, 0, 0, 0.46),
     0 12px 28px rgba(0, 0, 0, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background: var(--dq-ui-background-blur-surface-light);
   transition:
     opacity var(--dq-ui-transition-ui),
     transform var(--dq-ui-transition-ui);
 }
 
-.dq-layout-modal:popover-open {
+.dq-layout-modal[open] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
 @starting-style {
-  .dq-layout-modal:popover-open {
+  .dq-layout-modal[open] {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
   }
 }
 
 .dq-layout-modal::backdrop {
-  background: rgba(6, 8, 12, 0.52);
+  background: rgba(6, 8, 12, 0.54);
+  backdrop-filter: blur(18px) saturate(120%);
 }
 
 .dq-layout-modal__header {

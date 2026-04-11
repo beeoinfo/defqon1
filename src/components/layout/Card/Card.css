@@ -33,7 +33,7 @@
 
 .dq-layout-card__meta--strikethrough .dq-layout-card__meta-item {
   text-decoration: line-through;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 .dq-layout-card__meta--strikethrough .dq-layout-card__meta-item:not(:last-child)::after {

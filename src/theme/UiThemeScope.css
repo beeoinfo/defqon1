@@ -1,4 +1,5 @@
 .dq-ui-theme {
+    --dq-ui-background-blur-surface-light: rgba(44, 52, 64, 0.44);
   --dq-ui-bg: #09090b;
   --dq-ui-color-white: #ffffff;
   --dq-ui-color-black: #111111;

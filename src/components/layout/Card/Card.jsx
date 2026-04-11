@@ -29,16 +29,24 @@ const Card = ({
   ...props
 }) => {
   const Component = component;
-  const parsed = color ? parseColor(color) : null;
-  const cardColorStyle = parsed
-    ? (() => {
-        const mixedBg = parseColor(mixColors(CARD_BG_BASE, color, 0.45));
-        const mixedBorder = parseColor(mixColors(CARD_BG_BASE, color, 0.57));
-        return {
-          '--dq-layout-card-bg': `rgba(${mixedBg.r}, ${mixedBg.g}, ${mixedBg.b}, 0.85)`,
-          '--dq-layout-card-border': `rgba(${mixedBorder.r}, ${mixedBorder.g}, ${mixedBorder.b}, 0.85)`,
-        };
-      })()
+  const isSubCard = component === 'div';
+
+  // Sub-card with color: opaque mix for card-in-card compositing
+  // Standalone card with own color: doubled transparency (like two stacked transparent layers)
+  const cardColorStyle = color
+    ? isSubCard
+      ? (() => {
+          const mixedBg = parseColor(mixColors(CARD_BG_BASE, color, 0.45));
+          const mixedBorder = parseColor(mixColors(CARD_BG_BASE, color, 0.57));
+          return {
+            '--dq-layout-card-bg': `rgba(${mixedBg.r}, ${mixedBg.g}, ${mixedBg.b}, 0.85)`,
+            '--dq-layout-card-border': `rgba(${mixedBorder.r}, ${mixedBorder.g}, ${mixedBorder.b}, 0.85)`,
+          };
+        })()
+      : {
+          '--dq-layout-card-bg': rgbaString(color, 0.29),
+          '--dq-layout-card-border': rgbaString(color, 0.48),
+        }
     : {};
 
   const metaParts = [meta1, meta2, meta3].filter(Boolean);
@@ -46,7 +54,7 @@ const Card = ({
   const hasBody = Boolean(description) || Boolean(children);
 
   const actionElement = actionVariant === 'close'
-    ? <Button icon={XIcon} ariaLabel="Close" onClick={onAction} />
+    ? <Button icon={XIcon} ariaLabel="Close" size="sm" radius="rounded" onClick={onAction} />
     : actionVariant === 'favorite'
       ? <ToggleButton variant="favorite" icon={StarIcon} fillOnPress ariaLabel="Favorite" onPressedChange={onAction} />
       : null;
