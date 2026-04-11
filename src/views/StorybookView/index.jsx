@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon, XIcon } from '@phosphor-icons/react';
+import { CheckIcon, MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon, XIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
@@ -9,6 +9,7 @@ import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
 import Page from '../../components/layout/Page';
+import PeopleCard from '../../components/PeopleCard';
 import View from '../../components/layout/View';
 import Badge from '../../components/primitives/Badge';
 import Button from '../../components/primitives/Button';
@@ -612,6 +613,7 @@ const StorybookDrawerSection = memo(() => {
         meta1="Live"
         meta2="Friday"
         meta3="22:00 – 23:00"
+        description="This panel displays a custom description in the header, separated by a divider, just like the bottom part of a card. Use the description prop to add this text."
       >
         <Box gap="var(--dq-ui-space-lg)">
           {STORYBOOK_DRAWER_SCROLL_ITEMS.map((item) => (
@@ -625,25 +627,11 @@ const StorybookDrawerSection = memo(() => {
 
 StorybookDrawerSection.displayName = 'StorybookDrawerSection';
 
-const StorybookPeopleStackSection = memo(() => {
-  const [lastActionLabel, setLastActionLabel] = useState('No stack clicked yet.');
-
-  const handleDefaultClick = useCallback(() => {
-    setLastActionLabel('Clicked default stack (max 10).');
-  }, []);
-
-  const handleCompactClick = useCallback(() => {
-    setLastActionLabel('Clicked compact stack (max 3).');
-  }, []);
-
-  const handleStringStackClick = useCallback(() => {
-    setLastActionLabel('Clicked string-based stack.');
-  }, []);
-
+const StorybookPeopleSection = memo(() => {
   return (
     <Box
       component="section"
-      title="PeopleStack"
+      title="People"
       titleComponent="h2"
       titleVariant="h2"
       background="surface"
@@ -657,35 +645,25 @@ const StorybookPeopleStackSection = memo(() => {
         <Box
           className="dq-ui-storybook__button-section"
           background="surface"
-          title="Default"
+          title="PeopleStack"
           titleComponent="h3"
           titleVariant="h4"
         >
           <Box gap="var(--dq-ui-space-lg)">
+            <p className="dq-ui-storybook__helper-text">
+              Default max is `10`.
+            </p>
             <PeopleStack
               avatars={STORYBOOK_PEOPLE_STACK_AVATARS}
               ariaLabel="Open tribe details for 12 members"
-              onClick={handleDefaultClick}
             />
             <p className="dq-ui-storybook__helper-text">
-              Default stack shows up to 10 avatars before the `+`.
+              Custom max at `5`.
             </p>
-          </Box>
-        </Box>
-
-        <Box
-          className="dq-ui-storybook__button-section"
-          background="surface"
-          title="Custom Max"
-          titleComponent="h3"
-          titleVariant="h4"
-        >
-          <Box gap="var(--dq-ui-space-lg)">
             <PeopleStack
               avatars={STORYBOOK_PEOPLE_STACK_AVATARS}
-              maxVisible={3}
+              maxVisible={5}
               ariaLabel="Open tribe details for 12 members"
-              onClick={handleCompactClick}
             />
             <PeopleStack
               avatars={[
@@ -694,22 +672,43 @@ const StorybookPeopleStackSection = memo(() => {
                 '/src/assets/avatars/3.png',
                 '/src/assets/avatars/4.png',
               ]}
-              maxVisible={2}
+              maxVisible={5}
               ariaLabel="Open tribe details for 4 members"
-              onClick={handleStringStackClick}
+            />
+          </Box>
+        </Box>
+
+        <Box
+          className="dq-ui-storybook__button-section"
+          background="surface"
+          title="PeopleCard"
+          titleComponent="h3"
+          titleVariant="h4"
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            <PeopleCard
+              avatarSrc="/src/assets/avatars/1.png"
+              name="Dylan Bergozza"
+              handle="@daddydi"
+              owner
+            />
+            <PeopleCard
+              avatarSrc="/src/assets/avatars/2.png"
+              name="Usera Testa"
+              handle="@test"
             />
           </Box>
         </Box>
       </Box>
-
-      <p className="dq-ui-storybook__helper-text">{lastActionLabel}</p>
     </Box>
   );
 });
 
-StorybookPeopleStackSection.displayName = 'StorybookPeopleStackSection';
+StorybookPeopleSection.displayName = 'StorybookPeopleSection';
 
 const StorybookBody = memo(() => {
+  const [radioValue, setRadioValue] = useState('all');
+
   return (
     <Box>
       <StorybookFloatingFilterBar />
@@ -941,7 +940,7 @@ const StorybookBody = memo(() => {
         </Box>
       </Box>
 
-      <StorybookPeopleStackSection />
+      <StorybookPeopleSection />
 
       <Box
         component="section"
@@ -1023,6 +1022,9 @@ const StorybookBody = memo(() => {
                   gap="var(--dq-ui-space-lg)"
                 >
                   <ChoiceButton defaultChecked>Camping</ChoiceButton>
+                  <ChoiceButton defaultChecked selectedIcon={CheckIcon} tag="NEW">
+                    Premium
+                  </ChoiceButton>
                   <ChoiceButton>Parking</ChoiceButton>
                   <ChoiceButton color="#00FF00" radius="rounded">
                     Green
@@ -1043,14 +1045,43 @@ const StorybookBody = memo(() => {
                   wrap="wrap"
                   gap="var(--dq-ui-space-lg)"
                 >
-                  <ChoiceButton type="radio" name="storybook-filter" defaultChecked>
+                  <ChoiceButton
+                    type="radio"
+                    name="storybook-filter"
+                    checked={radioValue === 'all'}
+                    onChange={() => setRadioValue('all')}
+                  >
                     All
                   </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-filter" color="#0BDBEF" radius="rounded" defaultChecked>
+                  <ChoiceButton
+                    type="radio"
+                    name="storybook-filter"
+                    checked={radioValue === 'blue'}
+                    onChange={() => setRadioValue('blue')}
+                    color="#0BDBEF"
+                    radius="rounded"
+                  >
                     Blue
                   </ChoiceButton>
-                  <ChoiceButton type="radio" name="storybook-filter" color="#FF008B" radius="rounded">
+                  <ChoiceButton
+                    type="radio"
+                    name="storybook-filter"
+                    checked={radioValue === 'magenta'}
+                    onChange={() => setRadioValue('magenta')}
+                    color="#FF008B"
+                    radius="rounded"
+                  >
                     Magenta
+                  </ChoiceButton>
+                  <ChoiceButton
+                    type="radio"
+                    name="storybook-filter"
+                    checked={radioValue === 'selected'}
+                    onChange={() => setRadioValue('selected')}
+                    selectedIcon={CheckIcon}
+                    tag="NEW"
+                  >
+                    Selected
                   </ChoiceButton>
                 </Box>
               </Box>

@@ -5,6 +5,7 @@ import {
   getButtonClassName,
   resolveButtonVisualState,
 } from '../Button';
+import Badge from '../Badge';
 import { resolveIconProps } from '../ToggleButton';
 import '../ToggleButton/ToggleButton.css';
 import './ChoiceButton.css';
@@ -19,6 +20,7 @@ const ChoiceButton = ({
   name,
   value,
   icon = null,
+  selectedIcon = null,
   fillOnPress = false,
   iconPosition = 'start',
   imageSrc = '',
@@ -29,6 +31,8 @@ const ChoiceButton = ({
   radius = 'md',
   disabled = false,
   color,
+  tag = null,
+  tagVariant = 'ghost',
   className = '',
   ariaLabel,
   title,
@@ -37,7 +41,10 @@ const ChoiceButton = ({
   const [internalChecked, setInternalChecked] = useState(() => Boolean(defaultChecked));
   const isControlled = checked !== undefined;
   const isChecked = isControlled ? checked : internalChecked;
-  const iconProps = resolveIconProps({ icon, pressed: isChecked, fillOnPress });
+  const effectiveVariant = selectedIcon ? 'ghost' : variant;
+  const buttonIcon = selectedIcon ? null : icon;
+  const SelectedIcon = selectedIcon;
+  const iconProps = resolveIconProps({ icon: buttonIcon, pressed: isChecked, fillOnPress });
   const visualState = resolveButtonVisualState({
     children,
     icon: iconProps.Icon,
@@ -48,6 +55,7 @@ const ChoiceButton = ({
     title,
     ariaLabel,
   });
+  const hasTag = Boolean(tag);
 
   const handleChange = (event) => {
     if (!isControlled && type !== 'radio') {
@@ -62,8 +70,8 @@ const ChoiceButton = ({
     <label
       className={[
         'dq-ui-choice-button',
-        `dq-ui-choice-button--${variant}`,
-        variant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
+        `dq-ui-choice-button--${effectiveVariant}`,
+        effectiveVariant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
         className,
       ]
         .filter(Boolean)
@@ -84,27 +92,52 @@ const ChoiceButton = ({
       <span
         className={[
           getButtonClassName({
-            variant: variant === 'favorite' ? 'ghost' : variant,
+            variant: effectiveVariant === 'favorite' ? 'ghost' : effectiveVariant,
             size,
             resolvedRadius: visualState.resolvedRadius,
             selected: type !== 'radio' && isChecked,
             isRichLarge: visualState.isRichLarge,
             hasImage: visualState.hasImage,
             isIconOnly: visualState.isIconOnly,
+            hasBadge: hasTag,
           }),
-          variant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
+          effectiveVariant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
           fillOnPress ? 'dq-ui-toggle-button--fill-on-press' : '',
+          selectedIcon ? 'dq-ui-choice-button__control--selected-icon' : '',
           'dq-ui-choice-button__control',
         ]
           .filter(Boolean)
           .join(' ')}
         style={{
-          ...((variant === 'ghost' || variant === 'favorite') && color
+          ...((effectiveVariant === 'ghost' || effectiveVariant === 'favorite') && !selectedIcon && color
             ? buildGhostButtonColorVars(color)
             : {}),
+          ...(selectedIcon ? {
+            '--dq-ui-button-selected-bg': 'var(--dq-ui-success-surface)',
+            '--dq-ui-button-selected-border-color': 'var(--dq-ui-success-border)',
+            '--dq-ui-button-selected-text-color': 'var(--dq-ui-success)',
+            '--dq-ui-button-selected-hover-bg': 'var(--dq-ui-success-surface)',
+            '--dq-ui-button-selected-hover-border-color': 'var(--dq-ui-success-border)',
+            '--dq-ui-button-selected-hover-text-color': 'var(--dq-ui-success)',
+            '--dq-ui-button-selected-focus-bg': 'var(--dq-ui-success-surface)',
+            '--dq-ui-button-selected-focus-border-color': 'var(--dq-ui-success-border)',
+            '--dq-ui-button-selected-focus-text-color': 'var(--dq-ui-success)',
+            '--dq-ui-button-selected-active-bg': 'var(--dq-ui-success-surface)',
+            '--dq-ui-button-selected-active-border-color': 'var(--dq-ui-success-border)',
+            '--dq-ui-button-selected-active-text-color': 'var(--dq-ui-success)',
+          } : {}),
         }}
         title={visualState.resolvedTitle}
       >
+        {selectedIcon ? (
+          <span
+            className="dq-ui-choice-button__selected-icon"
+            aria-hidden="true"
+            style={{ '--dq-ui-choice-button-selected-icon-size': `${visualState.iconSize}px` }}
+          >
+            <SelectedIcon size={visualState.iconSize} />
+          </span>
+        ) : null}
         <ButtonContent
           children={children}
           Icon={visualState.Icon}
@@ -117,6 +150,11 @@ const ChoiceButton = ({
           hasLabel={visualState.hasLabel}
           iconSize={visualState.iconSize}
         />
+        {hasTag ? (
+          <Badge size="sm" variant={tagVariant} className="dq-ui-choice-button__tag">
+            {tag}
+          </Badge>
+        ) : null}
       </span>
     </label>
   );

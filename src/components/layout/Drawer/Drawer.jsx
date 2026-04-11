@@ -16,6 +16,7 @@ const Drawer = ({
   onClose,
   title,
   subtitle,
+  description,
   titleComponent = 'h2',
   titleVariant = 'h3',
   meta1,
@@ -349,6 +350,12 @@ const Drawer = ({
                   <p id={subtitleId} className="dq-layout-drawer__subtitle">
                     {subtitle}
                   </p>
+                ) : null}
+                {description ? (
+                  <>
+                    <hr className="dq-layout-drawer__divider" />
+                    <p className="dq-layout-drawer__description">{description}</p>
+                  </>
                 ) : null}
               </Box>
             ) : null}

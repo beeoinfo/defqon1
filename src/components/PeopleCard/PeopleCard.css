@@ -1,0 +1,58 @@
+.dq-people-card {
+  min-height: 48px;
+  padding: 8px 18px 8px 10px;
+  border-radius: var(--dq-ui-radius-md);
+}
+
+.dq-people-card__avatar-shell {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dq-people-card__avatar {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.dq-people-card__content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.dq-people-card__name {
+  margin: 0;
+  display: block;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dq-people-card__handle {
+  display: block;
+  color: var(--dq-ui-text-soft);
+  margin-top: 1px;
+  font-size: 0.87rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dq-people-card__owner {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  --dq-ui-badge-bg: rgba(255, 255, 255, 0.08);
+  --dq-ui-badge-border: var(--dq-ui-border-subtle);
+  --dq-ui-badge-text: var(--dq-ui-text-soft-strong);
+}

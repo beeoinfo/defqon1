@@ -1,3 +1,21 @@
+.dq-layout-drawer__divider {
+  margin: var(--dq-ui-space-sm) 0;
+  border: none;
+  border-top: 1px solid var(--dq-ui-border-faint);
+}
+
+.dq-layout-drawer__description {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .dq-layout-drawer {
   --dq-layout-drawer-translate-x: -50%;
   position: fixed;
