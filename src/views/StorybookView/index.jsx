@@ -359,7 +359,7 @@ const StorybookBoxExamples = memo(({ layout = 'flex' }) => {
           return (
             <Card key={cardDef.title} {...cardProps}>
               {subCard ? (
-                <Card component="div" titleComponent="h4" opaque {...subCard} />
+                <Card component="div" titleComponent="h4" {...subCard} />
               ) : null}
             </Card>
           );

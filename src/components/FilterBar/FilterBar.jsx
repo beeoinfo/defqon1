@@ -370,7 +370,6 @@ const FilterBar = ({
   return (
     <Box
       ref={filterBarRef}
-      component="section"
       background="surface-blur"
       className={[
         'dq-filter-bar',

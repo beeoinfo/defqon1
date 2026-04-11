@@ -1,10 +1,13 @@
 import { StarIcon, XIcon } from '@phosphor-icons/react';
-import { parseColor, rgbaString } from '../../../lib/colorStyles';
+import { mixColors, parseColor, rgbaString } from '../../../lib/colorStyles';
+import { dqUiTokens } from '../../../theme/tokens';
 import Button from '../../primitives/Button';
 import ToggleButton from '../../primitives/ToggleButton';
 import Title from '../../primitives/Title';
 import Box from '../Box';
 import './Card.css';
+
+const CARD_BG_BASE = dqUiTokens.colors.bg;
 
 const Card = ({
   component = 'article',
@@ -26,10 +29,14 @@ const Card = ({
   const Component = component;
   const parsed = color ? parseColor(color) : null;
   const cardColorStyle = parsed
-    ? {
-        '--dq-layout-card-bg': rgbaString(color, 0.24),
-        '--dq-layout-card-border': rgbaString(color, 0.36),
-      }
+    ? (() => {
+        const mixedBg = parseColor(mixColors(CARD_BG_BASE, color, 0.45));
+        const mixedBorder = parseColor(mixColors(CARD_BG_BASE, color, 0.57));
+        return {
+          '--dq-layout-card-bg': `rgba(${mixedBg.r}, ${mixedBg.g}, ${mixedBg.b}, 0.85)`,
+          '--dq-layout-card-border': `rgba(${mixedBorder.r}, ${mixedBorder.g}, ${mixedBorder.b}, 0.85)`,
+        };
+      })()
     : {};
 
   const metaParts = [meta1, meta2, meta3].filter(Boolean);
