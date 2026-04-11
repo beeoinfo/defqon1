@@ -6,6 +6,11 @@
   flex: 1 1 420px;
 }
 
+.dq-ui-storybook__helper-text {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+}
+
 @media (max-width: 991.98px) {
   .dq-ui-storybook__title-column,
   .dq-ui-storybook__button-section {

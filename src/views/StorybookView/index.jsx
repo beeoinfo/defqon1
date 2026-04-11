@@ -15,6 +15,7 @@ import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
 import { CheckboxInput, FileInput, Switch, TextInput } from '../../components/primitives/forms';
+import PeopleStack from '../../components/primitives/PeopleStack';
 import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
@@ -332,6 +333,11 @@ const STORYBOOK_ALERT_EXAMPLES = [
   },
 ];
 
+const STORYBOOK_PEOPLE_STACK_AVATARS = Array.from({ length: 12 }, (_, index) => ({
+  id: `member-${index + 1}`,
+  avatarUrl: `/src/assets/avatars/${index + 1}.png`,
+}));
+
 const STORYBOOK_DROPDOWN_DRAWER_ITEMS = [
   {
     value: 'lineup',
@@ -619,6 +625,90 @@ const StorybookDrawerSection = memo(() => {
 
 StorybookDrawerSection.displayName = 'StorybookDrawerSection';
 
+const StorybookPeopleStackSection = memo(() => {
+  const [lastActionLabel, setLastActionLabel] = useState('No stack clicked yet.');
+
+  const handleDefaultClick = useCallback(() => {
+    setLastActionLabel('Clicked default stack (max 10).');
+  }, []);
+
+  const handleCompactClick = useCallback(() => {
+    setLastActionLabel('Clicked compact stack (max 3).');
+  }, []);
+
+  const handleStringStackClick = useCallback(() => {
+    setLastActionLabel('Clicked string-based stack.');
+  }, []);
+
+  return (
+    <Box
+      component="section"
+      title="PeopleStack"
+      titleComponent="h2"
+      titleVariant="h2"
+      background="surface"
+    >
+      <Box
+        className="dq-ui-storybook__button-sections"
+        direction="row"
+        wrap="wrap"
+        align="stretch"
+      >
+        <Box
+          className="dq-ui-storybook__button-section"
+          background="surface"
+          title="Default"
+          titleComponent="h3"
+          titleVariant="h4"
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            <PeopleStack
+              avatars={STORYBOOK_PEOPLE_STACK_AVATARS}
+              ariaLabel="Open tribe details for 12 members"
+              onClick={handleDefaultClick}
+            />
+            <p className="dq-ui-storybook__helper-text">
+              Default stack shows up to 10 avatars before the `+`.
+            </p>
+          </Box>
+        </Box>
+
+        <Box
+          className="dq-ui-storybook__button-section"
+          background="surface"
+          title="Custom Max"
+          titleComponent="h3"
+          titleVariant="h4"
+        >
+          <Box gap="var(--dq-ui-space-lg)">
+            <PeopleStack
+              avatars={STORYBOOK_PEOPLE_STACK_AVATARS}
+              maxVisible={3}
+              ariaLabel="Open tribe details for 12 members"
+              onClick={handleCompactClick}
+            />
+            <PeopleStack
+              avatars={[
+                '/src/assets/avatars/1.png',
+                '/src/assets/avatars/2.png',
+                '/src/assets/avatars/3.png',
+                '/src/assets/avatars/4.png',
+              ]}
+              maxVisible={2}
+              ariaLabel="Open tribe details for 4 members"
+              onClick={handleStringStackClick}
+            />
+          </Box>
+        </Box>
+      </Box>
+
+      <p className="dq-ui-storybook__helper-text">{lastActionLabel}</p>
+    </Box>
+  );
+});
+
+StorybookPeopleStackSection.displayName = 'StorybookPeopleStackSection';
+
 const StorybookBody = memo(() => {
   return (
     <Box>
@@ -850,6 +940,8 @@ const StorybookBody = memo(() => {
           </Box>
         </Box>
       </Box>
+
+      <StorybookPeopleStackSection />
 
       <Box
         component="section"
