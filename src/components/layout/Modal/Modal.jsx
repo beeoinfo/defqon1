@@ -36,6 +36,7 @@ const Modal = ({
   const closeButtonRef = useRef(null);
   const closeTimeoutRef = useRef(0);
   const openFrameRef = useRef(0);
+  const startedOutsidePointerRef = useRef(false);
   const [dialogState, setDialogState] = useState(open ? 'open' : 'closed');
   const hasHeader = Boolean(title) || Boolean(subtitle) || showCloseButton;
   const hasControls = controls !== null && controls !== undefined && controls !== false;
@@ -111,12 +112,23 @@ const Modal = ({
     onClose?.();
   }, [onClose]);
 
+  const handlePointerDown = useCallback((event) => {
+    startedOutsidePointerRef.current = event.target === dialogRef.current;
+  }, []);
+
   const handleClick = useCallback((event) => {
+    const shouldCloseFromOutsideClick =
+      closeOnOutsideClick &&
+      startedOutsidePointerRef.current &&
+      event.target === dialogRef.current;
+
+    startedOutsidePointerRef.current = false;
+
     if (!closeOnOutsideClick) {
       return;
     }
 
-    if (event.target === dialogRef.current) {
+    if (shouldCloseFromOutsideClick) {
       onClose?.();
     }
   }, [closeOnOutsideClick, onClose]);
@@ -138,6 +150,7 @@ const Modal = ({
       background="surface-blur"
       gap="var(--dq-ui-space-lg)"
       onCancel={handleCancel}
+      onPointerDown={handlePointerDown}
       onClick={handleClick}
       data-state={dialogState}
       style={{

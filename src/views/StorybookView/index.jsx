@@ -4,6 +4,7 @@ import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
 import Card from '../../components/layout/Card';
+import Drawer from '../../components/layout/Drawer';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
@@ -216,6 +217,23 @@ const STORYBOOK_MODAL_SCROLL_ITEMS = [
   'Must-see tribe picks',
   'Sunrise set reminders',
   'Backup stage route',
+];
+
+const STORYBOOK_DRAWER_SCROLL_ITEMS = [
+  'Line-up filters',
+  'Live now',
+  'Favorites only',
+  'Red stage',
+  'Blue stage',
+  'Black stage',
+  'Hardstyle peak',
+  'Raw crossover',
+  'Night session',
+  'Afterparty plan',
+  'Food break',
+  'Camp route',
+  'Merch stop',
+  'Closing set',
 ];
 
 const STORYBOOK_FILTER_BAR_CHOICES = [
@@ -557,6 +575,49 @@ const StorybookModalSection = memo(() => {
 });
 
 StorybookModalSection.displayName = 'StorybookModalSection';
+
+const StorybookDrawerSection = memo(() => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleOpenDrawer = useCallback(() => {
+    setIsDrawerOpen(true);
+  }, []);
+
+  const handleCloseDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+  }, []);
+
+  return (
+    <Box
+      component="section"
+      title="Drawer"
+      titleComponent="h2"
+      titleVariant="h2"
+      background="surface"
+    >
+      <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+        <Button onClick={handleOpenDrawer}>Open bottom drawer</Button>
+      </Box>
+
+      <Drawer
+        open={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        title="Festival quick panel"
+        meta1="Live"
+        meta2="Friday"
+        meta3="22:00 – 23:00"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          {STORYBOOK_DRAWER_SCROLL_ITEMS.map((item) => (
+            <Element key={item}>{item}</Element>
+          ))}
+        </Box>
+      </Drawer>
+    </Box>
+  );
+});
+
+StorybookDrawerSection.displayName = 'StorybookDrawerSection';
 
 const StorybookBody = memo(() => {
   return (
@@ -1027,6 +1088,8 @@ const StorybookBody = memo(() => {
       </Box>
 
       <StorybookModalSection />
+
+      <StorybookDrawerSection />
 
       <Box
         component="section"
