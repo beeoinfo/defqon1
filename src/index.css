@@ -252,7 +252,6 @@ select {
 .alert-banner--danger {
   background: rgba(74, 24, 31, 0.68);
   border-color: rgba(239, 68, 68, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   margin-bottom: 1.5rem;
 }
 .tabs {
@@ -394,7 +393,6 @@ select {
   background: #ffffff;
   border-color: #ffffff;
   color: #111111;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset;
 }
 .filter-badge {
   padding: 0 16px;
@@ -523,7 +521,6 @@ select {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
   transform: translate3d(0, 0, 0);
@@ -656,7 +653,6 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 16px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 .star-button {
   width: 40px;
@@ -809,7 +805,6 @@ select {
     linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
     rgba(255, 255, 255, 0.055);
   border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .suggestion-card > div:first-child {
@@ -829,7 +824,6 @@ select {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .review-card__top {
   position: relative;
@@ -1413,7 +1407,6 @@ select {
     linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025)),
     rgba(12, 17, 24, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   display: grid;
   gap: 16px;
 }
@@ -3080,7 +3073,6 @@ select {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.96);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .filter-stack .filter-row .filter-pill .filter-pill__label,
@@ -3358,7 +3350,6 @@ body::before {
     linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
     rgba(255, 255, 255, 0.055);
   border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .entry-card h3,
@@ -3481,7 +3472,6 @@ body::before {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.96);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .filter-row__sticky::after {
@@ -3962,7 +3952,6 @@ body::before {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.045);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .profile-trigger__image {
@@ -4033,7 +4022,6 @@ body::before {
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.045);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .profile-trigger__details {
@@ -4452,7 +4440,6 @@ body::before {
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
     rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .profile-settings .settings-toggle__slider::before {
@@ -4462,7 +4449,6 @@ body::before {
   height: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .profile-settings .settings-toggle__label input:checked + .settings-toggle__slider {
@@ -4470,7 +4456,6 @@ body::before {
     linear-gradient(180deg, rgba(34, 197, 94, 0.38), rgba(22, 163, 74, 0.22)),
     rgba(20, 83, 45, 0.42);
   border-color: rgba(34, 197, 94, 0.28);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .profile-settings .settings-toggle__label input:checked + .settings-toggle__slider::before {
@@ -4680,7 +4665,6 @@ body::before {
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.055);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   padding: 0 16px;
 }
 
@@ -4890,7 +4874,6 @@ body::before {
   background: rgba(7, 11, 16, 0.62);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .maps-view__day-switcher {
@@ -4973,7 +4956,6 @@ body::before {
   background: rgba(7, 11, 16, 0.66);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .maps-view .mapboxgl-ctrl-group button {

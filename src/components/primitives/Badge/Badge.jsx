@@ -4,6 +4,7 @@ import './Badge.css';
 const Badge = ({
   component = 'span',
   variant = 'ghost',
+  size,
   color,
   backgroundColor,
   borderColor,
@@ -45,7 +46,7 @@ const Badge = ({
   return (
     <Component
       {...props}
-      className={['dq-ui-badge', `dq-ui-badge--${resolvedVariant}`, className].filter(Boolean).join(' ')}
+      className={['dq-ui-badge', `dq-ui-badge--${resolvedVariant}`, size === 'sm' ? 'dq-ui-badge--sm' : '', className].filter(Boolean).join(' ')}
       style={{
         '--dq-ui-badge-bg': resolvedBackgroundColor,
         '--dq-ui-badge-border': resolvedBorderColor,

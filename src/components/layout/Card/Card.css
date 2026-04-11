@@ -31,6 +31,15 @@
   opacity: 0.6;
 }
 
+.dq-layout-card__meta--strikethrough .dq-layout-card__meta-item {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.dq-layout-card__meta--strikethrough .dq-layout-card__meta-item:not(:last-child)::after {
+  text-decoration: none;
+}
+
 .dq-layout-card__action {
   flex: 0 0 auto;
 }
@@ -52,4 +61,8 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.dq-layout-card__description--error {
+  color: var(--dq-ui-danger-text-soft);
 }

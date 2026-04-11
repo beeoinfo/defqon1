@@ -171,6 +171,69 @@ const STORYBOOK_BOX_EXAMPLES = [
       { title: 'Sub Zero Project', meta1: 'PURPLE', meta2: 'Sunday', meta3: '20:00 – 21:00', actionVariant: 'favorite', subCard: { color: '#00FF00', title: 'Green Sub on Purple', meta1: 'GREEN', meta2: 'Sunday', meta3: '22:00 – 23:00' } },
     ],
   },
+  {
+    color: '#0BDBEF',
+    title: 'Review – Moved (Blue → Yellow)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Headhunterz', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '22:00 – 23:00', actionVariant: 'close', subCard: { color: '#F1E300', title: 'Headhunterz', meta1: 'YELLOW', meta2: 'Saturday', meta3: '16:00 – 17:00' } },
+    ],
+  },
+  {
+    color: '#FF008B',
+    title: 'Review – Moved (Magenta → Green)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'D-Block & S-te-Fan', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '18:00 – 19:00', actionVariant: 'close', subCard: { color: '#00FF00', title: 'D-Block & S-te-Fan', meta1: 'GREEN', meta2: 'Sunday', meta3: '20:00 – 21:00' } },
+    ],
+  },
+  {
+    color: '#B95511',
+    title: 'Review – Moved (Gold → Purple)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Ran-D', metaVariant: 'strikethrough', meta1: 'GOLD', meta2: 'Friday', meta3: '23:00 – 00:00', actionVariant: 'close', subCard: { color: '#A100FF', title: 'Ran-D', meta1: 'PURPLE', meta2: 'Saturday', meta3: '15:00 – 16:00' } },
+    ],
+  },
+  {
+    color: '#00FF00',
+    title: 'Review – Removed (Green)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Aftershock', metaVariant: 'strikethrough', meta1: 'GREEN', meta2: 'Saturday', meta3: '00:00 – 01:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+    ],
+  },
+  {
+    color: '#0BDBEF',
+    title: 'Review – Removed (Blue)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Zatox', metaVariant: 'strikethrough', meta1: 'BLUE', meta2: 'Saturday', meta3: '16:00 – 17:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+    ],
+  },
+  {
+    color: '#FF008B',
+    title: 'Review – Removed (Magenta)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Noisecontrollers', metaVariant: 'strikethrough', meta1: 'MAGENTA', meta2: 'Saturday', meta3: '19:00 – 20:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+    ],
+  },
+  {
+    color: '#A100FF',
+    title: 'Review – Removed (Purple)',
+    titleComponent: 'h3',
+    titleVariant: 'h4',
+    cards: [
+      { title: 'Warface', metaVariant: 'strikethrough', meta1: 'PURPLE', meta2: 'Sunday', meta3: '21:00 – 22:00', description: 'No longer in the lineup.', error: true, actionVariant: 'close' },
+    ],
+  },
 ];
 
 const STORYBOOK_MODAL_SCROLL_ITEMS = [
@@ -374,14 +437,14 @@ const StorybookBoxExamples = memo(({ layout = 'flex' }) => {
 
   if (layout === 'columns') {
     return (
-      <Box layout="columns" maxColumns={4} gap="var(--dq-ui-space-xxxl)">
+      <Box layout="columns" maxColumns={4}>
         {content}
       </Box>
     );
   }
 
   return (
-    <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-xxxl)" maxColumns={4}>
+    <Box direction="row" wrap="wrap" maxColumns={4}>
       {content}
     </Box>
   );
@@ -445,7 +508,7 @@ const StorybookBody = memo(() => {
   }, []);
 
   return (
-    <Box gap="var(--dq-ui-space-xxxl)">
+    <Box>
       <StorybookFloatingFilterBar />
 
       <Box
@@ -460,7 +523,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="flex-start"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box className="dq-ui-storybook__title-column" gap="var(--dq-ui-space-xl)">
             <Title component="h1">Heading H1</Title>
@@ -505,7 +568,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -646,7 +709,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -790,7 +853,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -907,7 +970,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -970,7 +1033,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -987,81 +1050,10 @@ const StorybookBody = memo(() => {
         titleVariant="h2"
         background="surface"
       >
-        <Box
-          className="dq-ui-storybook__button-sections"
-          direction="row"
-          wrap="wrap"
-          align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
-        >
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Default"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <Element>Header, close button, content area and bottom controls.</Element>
-              <Box
-                component="div"
-                slot="content"
-                direction="row"
-                wrap="wrap"
-                gap="var(--dq-ui-space-lg)"
-              >
-                <Button onClick={handleOpenDefaultModal}>
-                  Open default modal
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Content Only"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <Element>Optional title removed, close button kept, no bottom controls.</Element>
-              <Box
-                component="div"
-                slot="content"
-                direction="row"
-                wrap="wrap"
-                gap="var(--dq-ui-space-lg)"
-              >
-                <Button onClick={handleOpenMinimalModal}>
-                  Open minimal modal
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-
-          <Box
-            className="dq-ui-storybook__button-section"
-            background="surface"
-            title="Scroll Locked"
-            titleComponent="h3"
-            titleVariant="h4"
-          >
-            <Box gap="var(--dq-ui-space-lg)">
-              <Element>Scrollable body with separators only when overflow exists, and no close on outside click.</Element>
-              <Box
-                component="div"
-                slot="content"
-                direction="row"
-                wrap="wrap"
-                gap="var(--dq-ui-space-lg)"
-              >
-                <Button onClick={handleOpenWideModal}>
-                  Open locked modal
-                </Button>
-              </Box>
-            </Box>
-          </Box>
+        <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+          <Button onClick={handleOpenDefaultModal}>Open default modal</Button>
+          <Button onClick={handleOpenMinimalModal}>Open minimal modal</Button>
+          <Button onClick={handleOpenWideModal}>Open locked modal</Button>
         </Box>
 
         <Modal
@@ -1138,7 +1130,7 @@ const StorybookBody = memo(() => {
           direction="row"
           wrap="wrap"
           align="stretch"
-          gap="var(--dq-ui-space-xxxl)"
+         
         >
           <Box
             className="dq-ui-storybook__button-section"
@@ -1172,6 +1164,16 @@ const StorybookBody = memo(() => {
               </Badge>
               <Badge variant="plain" color="#ca2323">
                 Hotfix
+              </Badge>
+            </Box>
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge size="sm">DEFAULT SM</Badge>
+              <Badge size="sm" color="#22c55e">Live SM</Badge>
+              <Badge size="sm" variant="plain">
+                PLAIN SM
+              </Badge>
+              <Badge size="sm" variant="plain" color="#ca2323">
+                Hotfix SM
               </Badge>
             </Box>
           </Box>

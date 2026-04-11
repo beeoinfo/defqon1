@@ -42,3 +42,11 @@
   border-radius: var(--dq-ui-radius-rounded);
   background: var(--dq-ui-badge-bg, var(--dq-ui-accent));
 }
+
+.dq-ui-badge--sm.dq-ui-badge--ghost,
+.dq-ui-badge--sm.dq-ui-badge--surface,
+.dq-ui-badge--sm.dq-ui-badge--plain {
+  min-height: 22px;
+  padding-inline: 8px;
+  font-size: 0.75rem;
+}

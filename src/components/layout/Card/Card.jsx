@@ -18,7 +18,9 @@ const Card = ({
   meta1,
   meta2,
   meta3,
+  metaVariant,
   description,
+  error,
   actionVariant = 'favorite',
   onAction,
   className = '',
@@ -84,7 +86,7 @@ const Card = ({
               wrap="wrap"
               align="center"
               gap="2px 0"
-              className="dq-layout-card__meta"
+              className={['dq-layout-card__meta', metaVariant === 'strikethrough' ? 'dq-layout-card__meta--strikethrough' : ''].filter(Boolean).join(' ')}
             >
               {metaParts.map((part, index) => (
                 <span key={index} className="dq-layout-card__meta-item">{part}</span>
@@ -108,7 +110,7 @@ const Card = ({
             className="dq-layout-card__body"
           >
             {description ? (
-              <p className="dq-layout-card__description">{description}</p>
+              <p className={['dq-layout-card__description', error ? 'dq-layout-card__description--error' : ''].filter(Boolean).join(' ')}>{description}</p>
             ) : null}
             {children}
           </Box>
