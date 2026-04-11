@@ -180,6 +180,20 @@
   }
 
   .dq-layout-drawer__header {
+    position: relative;
     touch-action: none;
+    padding-top: 12px;
+  }
+
+  .dq-layout-drawer__header::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--dq-ui-border-subtle);
+    transform: translateX(-50%);
   }
 }
