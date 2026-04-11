@@ -459,7 +459,7 @@ const StorybookFloatingFilterBar = memo(() => {
 
 StorybookFloatingFilterBar.displayName = 'StorybookFloatingFilterBar';
 
-const StorybookBody = memo(() => {
+const StorybookModalSection = memo(() => {
   const [openModalDemo, setOpenModalDemo] = useState(null);
 
   const handleOpenDefaultModal = useCallback(() => {
@@ -478,6 +478,87 @@ const StorybookBody = memo(() => {
     setOpenModalDemo(null);
   }, []);
 
+  return (
+    <Box
+      component="section"
+      title="Modal"
+      titleComponent="h2"
+      titleVariant="h2"
+      background="surface"
+    >
+      <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+        <Button onClick={handleOpenDefaultModal}>Open default modal</Button>
+        <Button onClick={handleOpenMinimalModal}>Open minimal modal</Button>
+        <Button onClick={handleOpenWideModal}>Open locked modal</Button>
+      </Box>
+
+      <Modal
+        open={openModalDemo === 'default'}
+        onClose={handleCloseModal}
+        title="Festival settings"
+        subtitle="Reusable modal shell with optional header and bottom controls."
+        controls={(
+          <>
+            <Button onClick={handleCloseModal}>
+              Cancel
+            </Button>
+            <Button onClick={handleCloseModal}>
+              Save changes
+            </Button>
+          </>
+        )}
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          <Element>Body content lives in the central slot and inherits the shared `surface-blur` shell.</Element>
+          <Element>Use this shape for forms, confirmation flows and richer settings content.</Element>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openModalDemo === 'minimal'}
+        onClose={handleCloseModal}
+        ariaLabel="Minimal modal example"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          <Element>This one shows the shell without title or controls.</Element>
+          <Element>The close icon still gives a clean dismiss path when the header copy is optional.</Element>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={openModalDemo === 'wide'}
+        onClose={handleCloseModal}
+        title="Line-up comparison"
+        subtitle="Outside click is disabled here, so use the close button or footer actions."
+        closeOnOutsideClick={false}
+        maxWidth="720px"
+        controls={(
+          <>
+            <Button onClick={handleCloseModal}>
+              Close
+            </Button>
+            <Button onClick={handleCloseModal}>
+              Compare artists
+            </Button>
+          </>
+        )}
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          {STORYBOOK_MODAL_SCROLL_ITEMS.map((item) => (
+            <Box key={item} background="surface">
+              <Element>{item}</Element>
+              <Element>Shared modal shell, scrollable body, and footer actions.</Element>
+            </Box>
+          ))}
+        </Box>
+      </Modal>
+    </Box>
+  );
+});
+
+StorybookModalSection.displayName = 'StorybookModalSection';
+
+const StorybookBody = memo(() => {
   return (
     <Box>
       <StorybookFloatingFilterBar />
@@ -945,80 +1026,7 @@ const StorybookBody = memo(() => {
         </Box>
       </Box>
 
-      <Box
-        component="section"
-        title="Modal"
-        titleComponent="h2"
-        titleVariant="h2"
-        background="surface"
-      >
-        <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
-          <Button onClick={handleOpenDefaultModal}>Open default modal</Button>
-          <Button onClick={handleOpenMinimalModal}>Open minimal modal</Button>
-          <Button onClick={handleOpenWideModal}>Open locked modal</Button>
-        </Box>
-
-        <Modal
-          open={openModalDemo === 'default'}
-          onClose={handleCloseModal}
-          title="Festival settings"
-          subtitle="Reusable modal shell with optional header and bottom controls."
-          controls={
-            <>
-              <Button onClick={handleCloseModal}>
-                Cancel
-              </Button>
-              <Button onClick={handleCloseModal}>
-                Save changes
-              </Button>
-            </>
-          }
-        >
-          <Box gap="var(--dq-ui-space-lg)">
-            <Element>Body content lives in the central slot and inherits the shared `surface-blur` shell.</Element>
-            <Element>Use this shape for forms, confirmation flows and richer settings content.</Element>
-          </Box>
-        </Modal>
-
-        <Modal
-          open={openModalDemo === 'minimal'}
-          onClose={handleCloseModal}
-          ariaLabel="Minimal modal example"
-        >
-          <Box gap="var(--dq-ui-space-lg)">
-            <Element>This one shows the shell without title or controls.</Element>
-            <Element>The close icon still gives a clean dismiss path when the header copy is optional.</Element>
-          </Box>
-        </Modal>
-
-        <Modal
-          open={openModalDemo === 'wide'}
-          onClose={handleCloseModal}
-          title="Line-up comparison"
-          subtitle="Outside click is disabled here, so use the close button or footer actions."
-          closeOnOutsideClick={false}
-          maxWidth="720px"
-          controls={
-            <>
-              <Button onClick={handleCloseModal}>
-                Close
-              </Button>
-              <Button onClick={handleCloseModal}>
-                Compare artists
-              </Button>
-            </>
-          }
-        >
-          <Box gap="var(--dq-ui-space-lg)">
-            {STORYBOOK_MODAL_SCROLL_ITEMS.map((item) => (
-              <Box key={item} background="surface">
-                <Element>{item}</Element>
-                <Element>Shared modal shell, scrollable body, and footer actions.</Element>
-              </Box>
-            ))}
-          </Box>
-        </Modal>
-      </Box>
+      <StorybookModalSection />
 
       <Box
         component="section"

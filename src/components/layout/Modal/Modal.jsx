@@ -1,9 +1,11 @@
 import { XIcon } from '@phosphor-icons/react';
-import { useCallback, useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../Box';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
 import './Modal.css';
+
+const MODAL_ANIMATION_MS = 180;
 
 const Modal = ({
   open = false,
@@ -31,28 +33,64 @@ const Modal = ({
   const titleId = title ? `${modalId}-title` : undefined;
   const subtitleId = subtitle ? `${modalId}-subtitle` : undefined;
   const dialogRef = useRef(null);
-  const closeBtnRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const closeTimeoutRef = useRef(0);
+  const openFrameRef = useRef(0);
+  const [dialogState, setDialogState] = useState(open ? 'open' : 'closed');
   const hasHeader = Boolean(title) || Boolean(subtitle) || showCloseButton;
   const hasControls = controls !== null && controls !== undefined && controls !== false;
   const hasHeading = Boolean(title) || Boolean(subtitle);
+  const isDialogVisible = dialogState !== 'closed';
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialogElement = dialogRef.current;
-    if (!dialogElement) return undefined;
-    if (open && !dialogElement.open) {
-      dialogElement.showModal();
-      // Empêche le focus auto sur le bouton close si ouverture par clic
-      if (document.activeElement === closeBtnRef.current) {
-        dialogElement.focus();
-      }
-    } else if (!open && dialogElement.open) {
-      dialogElement.close();
+
+    if (!dialogElement) {
+      return undefined;
     }
+
+    window.clearTimeout(closeTimeoutRef.current);
+    window.cancelAnimationFrame(openFrameRef.current);
+
+    if (open) {
+      if (!dialogElement.open) {
+        dialogElement.showModal();
+      }
+
+      setDialogState('opening');
+      openFrameRef.current = window.requestAnimationFrame(() => {
+        if (dialogRef.current && document.activeElement === closeButtonRef.current) {
+          dialogRef.current.focus({ preventScroll: true });
+        }
+
+        setDialogState('open');
+      });
+    } else if (dialogElement.open) {
+      setDialogState('closing');
+      closeTimeoutRef.current = window.setTimeout(() => {
+        dialogElement.close();
+        setDialogState('closed');
+      }, MODAL_ANIMATION_MS);
+    } else {
+      setDialogState('closed');
+    }
+
     return undefined;
   }, [open]);
 
+  useEffect(() => (
+    () => {
+      window.clearTimeout(closeTimeoutRef.current);
+      window.cancelAnimationFrame(openFrameRef.current);
+
+      if (dialogRef.current?.open) {
+        dialogRef.current.close();
+      }
+    }
+  ), []);
+
   useEffect(() => {
-    if (!open) {
+    if (!isDialogVisible) {
       return undefined;
     }
 
@@ -66,7 +104,7 @@ const Modal = ({
       document.documentElement.style.overflow = previousHtmlOverflow;
       document.body.style.overflow = previousBodyOverflow;
     };
-  }, [open]);
+  }, [isDialogVisible]);
 
   const handleCancel = useCallback((event) => {
     event.preventDefault();
@@ -78,7 +116,6 @@ const Modal = ({
       return;
     }
 
-    // Click on the dialog backdrop (outside the modal box)
     if (event.target === dialogRef.current) {
       onClose?.();
     }
@@ -88,16 +125,13 @@ const Modal = ({
     onClose?.();
   }, [onClose]);
 
-  if (!open) {
-    return null;
-  }
-
   return (
     <Box
       {...props}
       ref={dialogRef}
       id={modalId}
       component="dialog"
+      tabIndex={-1}
       aria-labelledby={titleId}
       aria-describedby={subtitleId}
       aria-label={title ? undefined : ariaLabel}
@@ -105,9 +139,10 @@ const Modal = ({
       gap="var(--dq-ui-space-lg)"
       onCancel={handleCancel}
       onClick={handleClick}
-      onClose={handleClose}
+      data-state={dialogState}
       style={{
         '--dq-layout-modal-width': maxWidth,
+        '--dq-layout-modal-animation-duration': `${MODAL_ANIMATION_MS}ms`,
         ...style,
       }}
       className={['dq-layout-modal', className].filter(Boolean).join(' ')}
@@ -153,10 +188,8 @@ const Modal = ({
               ariaLabel={closeLabel}
               size="md"
               className="dq-layout-modal__close"
-              onClick={onClose}
-              ref={closeBtnRef}
-              tabIndex={0}
-              onMouseDown={e => e.preventDefault()}
+              ref={closeButtonRef}
+              onClick={handleClose}
             />
           ) : null}
         </Box>
