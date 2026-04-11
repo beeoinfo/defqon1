@@ -1,0 +1,22 @@
+.dq-ui-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--dq-ui-text-link);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dq-ui-link:hover,
+.dq-ui-link:focus-visible {
+  text-decoration: underline;
+}
+
+.dq-ui-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

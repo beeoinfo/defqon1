@@ -2,7 +2,25 @@
   width: 100%;
   max-width: var(--dq-ui-layout-max-width);
   margin: 0 auto;
-  padding-inline: var(--dq-ui-layout-inline-padding);
+  padding-inline: 16px;
+}
+
+@media (min-width: 768px) {
+  .dq-layout-container {
+    padding-inline: 18px;
+  }
+}
+
+@media (min-width: 992px) {
+  .dq-layout-container {
+    padding-inline: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dq-layout-container {
+    padding-inline: 20px;
+  }
 }
 
 .dq-layout-main {

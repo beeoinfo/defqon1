@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { XIcon } from '@phosphor-icons/react';
 import logoMark from '../../../assets/logo.svg';
 import tribeAvatarSample from '../../../assets/avatars/1.png';
 import useMeasuredLayoutMetric from '../../../hooks/useMeasuredLayoutMetric';
@@ -17,6 +18,10 @@ const Header = ({
   profileSubtitle = '@test',
   profileImageSrc = tribeAvatarSample,
   navbar = null,
+  isPageView = false,
+  pageTitle = null,
+  onClosePage = null,
+  onUserClick = null,
   className = '',
   children,
   ...props
@@ -49,6 +54,8 @@ const Header = ({
     )
   );
 
+  const isPageHeader = isPageView && Boolean(pageTitle);
+
   return (
     <Component
       {...props}
@@ -63,30 +70,51 @@ const Header = ({
           gap="16px"
         >
           <Box className="dq-layout-header__brand" direction="row" align="center" gap="12px">
-            <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
-            <Title component="span" variant="h2" className="dq-layout-header__brand-title">
-              {brandTitle}
-            </Title>
+            {isPageHeader ? (
+              <Title component="span" variant="h2" className="dq-layout-header__page-title">
+                {pageTitle}
+              </Title>
+            ) : (
+              <>
+                <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
+                <Title component="span" variant="h2" className="dq-layout-header__brand-title">
+                  {brandTitle}
+                </Title>
+              </>
+            )}
           </Box>
 
-          <Box className="dq-layout-header__nav-slot--desktop" justify="center">
-            {navbar ? renderNavbar(navbar) : null}
-          </Box>
+          {!isPageHeader ? (
+            <Box className="dq-layout-header__nav-slot--desktop" justify="center">
+              {navbar ? renderNavbar(navbar) : null}
+            </Box>
+          ) : null}
 
           <Box className="dq-layout-header__profile" justify="flex-end">
-            <Button
-              size="lg"
-              radius="rounded"
-              imageSrc={profileImageSrc}
-              imageAlt=""
-              subtitle={profileSubtitle}
-            >
-              {profileName}
-            </Button>
+            {isPageHeader ? (
+              <Button
+                icon={XIcon}
+                ariaLabel="Close page"
+                variant="ghost"
+                size="md"
+                onClick={onClosePage}
+              />
+            ) : (
+              <Button
+                size="lg"
+                radius="rounded"
+                imageSrc={profileImageSrc}
+                imageAlt=""
+                subtitle={profileSubtitle}
+                onClick={onUserClick}
+              >
+                {profileName}
+              </Button>
+            )}
           </Box>
         </Box>
 
-        {children ? (
+        {!isPageHeader && children ? (
           <Box className="dq-layout-container" gap="var(--dq-ui-space-lg)">
             {children}
           </Box>

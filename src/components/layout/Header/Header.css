@@ -15,7 +15,9 @@
 
 .dq-layout-header__row {
   position: relative;
-  padding-block: var(--dq-ui-space-lg);
+  height: 77px;
+  min-height: 77px;
+  padding-block: 0;
 }
 
 .dq-layout-header__brand-mark {
@@ -27,6 +29,11 @@
 
 .dq-layout-header__brand-title {
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dq-layout-header__page-title {
+  text-transform: none;
   white-space: nowrap;
 }
 

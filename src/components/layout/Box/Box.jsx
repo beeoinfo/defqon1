@@ -10,7 +10,7 @@ const Box = ({
   layout = 'flex',
   maxColumns,
   direction = 'column',
-  gap = 'var(--dq-ui-space-lg)',
+  gap,
   justify = 'flex-start',
   align = 'stretch',
   alignContent = 'stretch',
@@ -29,6 +29,8 @@ const Box = ({
   slot,
   ...props
 }) => {
+  const defaultGap = component === 'main' ? '40px' : 'var(--dq-ui-space-lg)';
+  const resolvedGap = gap ?? defaultGap;
   const parsedMaxColumns = Number(maxColumns);
   const hasExplicitMaxColumns = Number.isFinite(parsedMaxColumns) && parsedMaxColumns > 0;
   const resolvedLayout = layout === 'columns' ? 'columns' : 'flex';
@@ -48,7 +50,7 @@ const Box = ({
     : {};
   const contentStyle = {
     '--dq-layout-box-direction': direction,
-    '--dq-layout-box-gap': gap,
+    '--dq-layout-box-gap': resolvedGap,
     '--dq-layout-box-justify': justify,
     '--dq-layout-box-align': align,
     '--dq-layout-box-align-content': alignContent,

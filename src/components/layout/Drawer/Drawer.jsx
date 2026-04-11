@@ -305,70 +305,73 @@ const Drawer = ({
             ref={headerRef}
             component="header"
             slot="content"
-            direction="row"
-            justify={hasHeading ? 'space-between' : 'flex-end'}
-            align="flex-start"
-            gap="var(--dq-ui-space-lg)"
             className="dq-layout-drawer__header"
           >
-            {hasHeading ? (
-              <Box
-                component="div"
-                slot="content"
-                gap="var(--dq-ui-space-xs)"
-                className="dq-layout-drawer__heading"
-              >
-                {title ? (
-                  <Title
-                    id={titleId}
-                    component={titleComponent}
-                    variant={titleVariant}
-                    className="dq-layout-drawer__title"
-                  >
-                    {title}
-                  </Title>
-                ) : null}
-                {hasMeta ? (
-                  <Box
-                    component="div"
-                    slot="content"
-                    direction="row"
-                    wrap="wrap"
-                    align="center"
-                    gap="2px 0"
-                    className={[
-                      'dq-layout-drawer__meta',
-                      metaVariant === 'strikethrough' ? 'dq-layout-drawer__meta--strikethrough' : '',
-                    ].filter(Boolean).join(' ')}
-                  >
-                    {metaParts.map((part, index) => (
-                      <span key={index} className="dq-layout-drawer__meta-item">{part}</span>
-                    ))}
-                  </Box>
-                ) : null}
-                {subtitle ? (
-                  <p id={subtitleId} className="dq-layout-drawer__subtitle">
-                    {subtitle}
-                  </p>
-                ) : null}
-                {description ? (
-                  <>
-                    <hr className="dq-layout-drawer__divider" />
-                    <p className="dq-layout-drawer__description">{description}</p>
-                  </>
-                ) : null}
-              </Box>
-            ) : null}
+            <Box
+              direction="row"
+              justify={hasHeading ? 'space-between' : 'flex-end'}
+              align="flex-start"
+              gap="var(--dq-ui-space-lg)"
+            >
+              {hasHeading ? (
+                <Box
+                  component="div"
+                  slot="content"
+                  gap="var(--dq-ui-space-xs)"
+                  className="dq-layout-drawer__heading"
+                >
+                  {title ? (
+                    <Title
+                      id={titleId}
+                      component={titleComponent}
+                      variant={titleVariant}
+                      className="dq-layout-drawer__title"
+                    >
+                      {title}
+                    </Title>
+                  ) : null}
+                  {hasMeta ? (
+                    <Box
+                      component="div"
+                      slot="content"
+                      direction="row"
+                      wrap="wrap"
+                      align="center"
+                      gap="2px 0"
+                      className={[
+                        'dq-layout-drawer__meta',
+                        metaVariant === 'strikethrough' ? 'dq-layout-drawer__meta--strikethrough' : '',
+                      ].filter(Boolean).join(' ')}
+                    >
+                      {metaParts.map((part, index) => (
+                        <span key={index} className="dq-layout-drawer__meta-item">{part}</span>
+                      ))}
+                    </Box>
+                  ) : null}
+                  {subtitle ? (
+                    <p id={subtitleId} className="dq-layout-drawer__subtitle">
+                      {subtitle}
+                    </p>
+                  ) : null}
+                </Box>
+              ) : null}
+              {shouldShowCloseButton ? (
+                <Button
+                  icon={XIcon}
+                  ariaLabel={closeLabel}
+                  size="md"
+                  className="dq-layout-drawer__close"
+                  ref={closeButtonRef}
+                  onClick={handleClose}
+                />
+              ) : null}
+            </Box>
 
-            {shouldShowCloseButton ? (
-              <Button
-                icon={XIcon}
-                ariaLabel={closeLabel}
-                size="md"
-                className="dq-layout-drawer__close"
-                ref={closeButtonRef}
-                onClick={handleClose}
-              />
+            {description ? (
+              <>
+                <hr className="dq-layout-drawer__divider" />
+                <p className="dq-layout-drawer__description">{description}</p>
+              </>
             ) : null}
           </Box>
         ) : null}

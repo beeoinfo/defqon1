@@ -2,9 +2,28 @@
   --dq-filter-bar-mask-edge-color: rgba(0, 0, 0, 0.48);
   --dq-filter-bar-mask-solid-color: #000;
   --dq-filter-bar-focus-ring-size: 3px;
+  --dq-filter-bar-inline-padding: calc(16px - (16px * 0.33));
   width: 100%;
   padding-block: 12px;
   padding-inline: 0;
+}
+
+@media (min-width: 768px) {
+  .dq-filter-bar {
+    --dq-filter-bar-inline-padding: calc(18px - (18px * 0.33));
+  }
+}
+
+@media (min-width: 992px) {
+  .dq-filter-bar {
+    --dq-filter-bar-inline-padding: calc(20px - (20px * 0.33));
+  }
+}
+
+@media (min-width: 1200px) {
+  .dq-filter-bar {
+    --dq-filter-bar-inline-padding: calc(20px - (20px * 0.33));
+  }
 }
 
 .dq-filter-bar--floating {
@@ -13,7 +32,7 @@
   z-index: 110;
   width: min(
     var(--dq-ui-layout-max-width),
-    calc(100% - (var(--dq-ui-layout-inline-padding) * 2))
+    calc(100% - (var(--dq-filter-bar-inline-padding) * 2))
   );
   transform: translateX(-50%);
   transition:

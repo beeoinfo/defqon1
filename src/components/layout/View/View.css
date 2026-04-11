@@ -7,3 +7,11 @@
       );
   }
 }
+
+.dq-layout-view--page .dq-layout-main {
+  min-height: 0;
+}
+
+.dq-layout-view--page .dq-layout-main-shell {
+  padding-top: calc(var(--dq-layout-header-offset) + 20px);
+}

@@ -70,6 +70,7 @@ import ReviewsView from './views/ReviewsView';
 import TribeView from './views/TribeView';
 import ProfileSettingsView from './views/ProfileSettingsView';
 import StorybookView from './views/StorybookView/index';
+import { resolveRoute, getPathForView } from './routes/AppRoutes';
 import { mapLayers as festivalMapLayers } from './data/mapLayers';
 import './index.css';
 
@@ -315,6 +316,7 @@ export default function App() {
   const bootUserId = bootStateRef.current.userId;
   const bootAccount = bootStateRef.current.account;
   // Which lineup JSON is selected
+  const initialRoute = useMemo(() => resolveRoute(window.location.pathname), []);
   const [selectedLineupKey, setSelectedLineupKey] = useState(latestKey);
   const selectedLineup =
     lineupSources.find((lineup) => lineup.key === selectedLineupKey) ?? lineupSources[0] ?? null;
@@ -348,9 +350,41 @@ export default function App() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showTribeOnly, setShowTribeOnly] = useState(false);
   // View state: lineup, reviews, tribe, profileSettings
-  const [view, setView] = useState('lineup');
+  const [view, setView] = useState(initialRoute.view);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isFilterStackVisible, setIsFilterStackVisible] = useState(true);
+
+  useEffect(() => {
+    if (storybookMode) {
+      return undefined;
+    }
+
+    const handlePopState = () => {
+      const nextRoute = resolveRoute(window.location.pathname);
+      setView(nextRoute.view);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [storybookMode]);
+
+  useEffect(() => {
+    if (storybookMode) {
+      return undefined;
+    }
+
+    const nextPath = getPathForView(view);
+    const currentPath = window.location.pathname;
+    if (currentPath === nextPath) {
+      return undefined;
+    }
+
+    const nextUrl = `${nextPath}${window.location.search}${window.location.hash}`;
+    window.history.pushState({}, '', nextUrl);
+    return undefined;
+  }, [view, storybookMode]);
 
   // Local UI state for filter drawers
   // Only one filter drawer can be open at a time: 'day', 'stage' or null

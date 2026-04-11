@@ -8,10 +8,10 @@ import Drawer from '../../components/layout/Drawer';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
-import Page from '../../components/layout/Page';
 import PeopleCard from '../../components/PeopleCard';
-import View from '../../components/layout/View';
-import Badge from '../../components/primitives/Badge';
+import View from '@/components/layout/View';
+import SettingsPage from '@/page/SettingsPage/SettingsPage';
+import Badge from '@/components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
@@ -710,7 +710,7 @@ const StorybookBody = memo(() => {
   const [radioValue, setRadioValue] = useState('all');
 
   return (
-    <Box>
+    <>
       <StorybookFloatingFilterBar />
 
       <Box
@@ -1337,28 +1337,36 @@ const StorybookBody = memo(() => {
       >
         <StorybookBoxExamples layout="columns" />
       </Box>
-    </Box>
+    </>
   );
 });
 
 StorybookBody.displayName = 'StorybookBody';
 
-const StorybookView = ({ mode = 'view' }) => {
-  const isPage = mode === 'page';
+const StorybookView = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const openSettings = () => setIsSettingsOpen(true);
+  const closeSettings = () => setIsSettingsOpen(false);
 
   return (
     <UiThemeScope>
-      {isPage ? (
-        <Page>
+      <View
+        type={isSettingsOpen ? 'page' : 'default'}
+        title={isSettingsOpen ? 'Settings' : null}
+        onClosePage={isSettingsOpen ? closeSettings : undefined}
+        navbar={STORYBOOK_NAV_ITEMS}
+        onUserClick={openSettings}
+      >
+        <Box style={{ display: isSettingsOpen ? 'none' : undefined }}>
           <StorybookBody />
-        </Page>
-      ) : (
-        <View
-          navbar={STORYBOOK_NAV_ITEMS}
-        >
-          <StorybookBody />
-        </View>
-      )}
+        </Box>
+
+        <Box style={{ display: isSettingsOpen ? undefined : 'none' }}>
+          <SettingsPage onClose={closeSettings} />
+        </Box>
+      </View>
+
       <BackToTop />
     </UiThemeScope>
   );
