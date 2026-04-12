@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { lockDocumentScroll, unlockDocumentScroll } from '../lib/documentScrollLock';
 
 const useDocumentScrollLock = (isLocked) => {
   useEffect(() => {
@@ -6,15 +7,10 @@ const useDocumentScrollLock = (isLocked) => {
       return undefined;
     }
 
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockDocumentScroll();
 
     return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
+      unlockDocumentScroll();
     };
   }, [isLocked]);
 };

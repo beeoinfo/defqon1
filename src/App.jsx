@@ -3,7 +3,16 @@ import Page from './components/layout/Page';
 import View from './components/layout/View';
 import useAnimatedPageStack from './hooks/useAnimatedPageStack';
 import useDocumentScrollLock from './hooks/useDocumentScrollLock';
-import { getNextPageStackOnOpen } from './lib/pageStack';
+import {
+  getHistoryPageStack,
+  pushHistoryPageStackState,
+  replaceHistoryPageStackState,
+  syncPageStackIdRef,
+} from './lib/pageHistory';
+import {
+  getNextPageStackOnClose,
+  getNextPageStackOnOpen,
+} from './lib/pageStack';
 import { PAGE_DEFINITIONS } from './page/pageDefinitions';
 import { getUrlForView, resolveRoute } from './routes/AppRoutes';
 import UiThemeScope from './theme/UiThemeScope';
@@ -96,8 +105,16 @@ const App = () => {
     []
   );
   const pageIdRef = useRef(0);
+  const initialPageStack = useMemo(
+    () => getHistoryPageStack({
+      historyState: window.history.state,
+      pageDefinitions: PAGE_DEFINITIONS,
+    }),
+    []
+  );
+  const pageStackRef = useRef(initialPageStack);
   const [activeView, setActiveView] = useState(initialRoute.view);
-  const [pageStack, setPageStack] = useState([]);
+  const [pageStack, setPageStack] = useState(initialPageStack);
   const {
     renderedPageStack,
     hasRenderedPages,
@@ -108,10 +125,31 @@ const App = () => {
   useDocumentScrollLock(hasRenderedPages);
 
   useEffect(() => {
-    const handlePopState = () => {
+    pageStackRef.current = pageStack;
+    syncPageStackIdRef({
+      pageIdRef,
+      pageStack,
+    });
+  }, [pageStack]);
+
+  useEffect(() => {
+    replaceHistoryPageStackState({
+      url: `${window.location.pathname}${window.location.search}`,
+      pageStack,
+    });
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
       const nextRoute = resolveRoute(window.location.pathname, window.location.search);
-      setPageStack([]);
+      const nextPageStack = getHistoryPageStack({
+        historyState: event.state,
+        pageDefinitions: PAGE_DEFINITIONS,
+      });
+
+      pageStackRef.current = nextPageStack;
       setActiveView(nextRoute.view);
+      setPageStack(nextPageStack);
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -121,49 +159,71 @@ const App = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const nextUrl = getUrlForView(activeView);
-    const currentUrl = `${window.location.pathname}${window.location.search}`;
-
-    if (currentUrl === nextUrl) {
-      return undefined;
-    }
-
-    window.history.pushState({}, '', nextUrl);
-
-    return undefined;
-  }, [activeView]);
-
   const openPage = useCallback((type) => {
     if (!PAGE_DEFINITIONS[type]) {
       return;
     }
 
-    setPageStack((currentStack) =>
-      getNextPageStackOnOpen({
-        currentStack,
-        nextType: type,
-        pageDefinitions: PAGE_DEFINITIONS,
-        createPageId: (pageType) => {
-          pageIdRef.current += 1;
-          return `${pageType}-${pageIdRef.current}`;
-        },
-      })
-    );
-  }, []);
+    const nextStack = getNextPageStackOnOpen({
+      currentStack: pageStackRef.current,
+      nextType: type,
+      pageDefinitions: PAGE_DEFINITIONS,
+      createPageId: (pageType) => {
+        pageIdRef.current += 1;
+        return `${pageType}-${pageIdRef.current}`;
+      },
+    });
+
+    if (nextStack === pageStackRef.current) {
+      return;
+    }
+
+    pushHistoryPageStackState({
+      url: getUrlForView(activeView),
+      pageStack: nextStack,
+    });
+
+    pageStackRef.current = nextStack;
+    setPageStack(nextStack);
+  }, [activeView]);
 
   const closePage = useCallback((pageId) => {
-    setPageStack((currentStack) => currentStack.filter((page) => page.id !== pageId));
-  }, []);
+    const nextStack = getNextPageStackOnClose({
+      currentStack: pageStackRef.current,
+      pageId,
+    });
+
+    if (nextStack === pageStackRef.current) {
+      return;
+    }
+
+    pushHistoryPageStackState({
+      url: getUrlForView(activeView),
+      pageStack: nextStack,
+    });
+
+    pageStackRef.current = nextStack;
+    setPageStack(nextStack);
+  }, [activeView]);
 
   const openSettings = useCallback(() => {
     openPage('settings');
   }, [openPage]);
 
   const openView = useCallback((view) => {
+    if (view === activeView && pageStack.length === 0) {
+      return;
+    }
+
+    pushHistoryPageStackState({
+      url: getUrlForView(view),
+      pageStack: [],
+    });
+
+    pageStackRef.current = [];
     setPageStack([]);
     setActiveView(view);
-  }, []);
+  }, [activeView, pageStack.length]);
 
   const openSearch = useCallback(() => {
     openPage('search');

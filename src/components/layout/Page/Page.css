@@ -5,8 +5,14 @@
   min-height: 100dvh;
   overflow-x: clip;
   overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   opacity: 1;
   transition: opacity var(--dq-ui-transition-fast);
+}
+
+.dq-layout-page::-webkit-scrollbar {
+  display: none;
 }
 
 .dq-layout-page--transition-entering,

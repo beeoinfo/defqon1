@@ -1,8 +1,7 @@
 export const dqUiTokens = {
   colors: {
     bg: '#09090b',
-    appBackground:
-      'radial-gradient(circle at 14% 18%, rgba(11, 219, 239, .12), transparent 26%), radial-gradient(circle at 82% 16%, rgba(255, 0, 139, .1), transparent 24%), radial-gradient(circle at 22% 78%, rgba(0, 255, 0, .08), transparent 24%), radial-gradient(circle at 76% 74%, rgba(161, 0, 255, .1), transparent 28%), radial-gradient(circle at 52% 46%, rgba(241, 227, 0, .05), transparent 30%), linear-gradient(180deg, #12161c, #0f1318)',
+    appBackground: 'linear-gradient(180deg, #11171d, #0b0f14)',
     white: '#ffffff',
     black: '#111111',
     blackSoft: 'rgba(17, 17, 17, 0.7)',
@@ -49,6 +48,10 @@ export const dqUiTokens = {
     backdrop: 'rgba(9, 9, 11, 0.42)',
   },
   effects: {
+    appBackgroundGlow:
+      'conic-gradient(from 218deg at 54% 44%, #facc151b, #22c55e17, #38bdf81c, #815cff1b, #ef44441d, #facc151b), radial-gradient(40% 34% at 16% 20%, rgba(56, 189, 248, 0.17), transparent 68%), radial-gradient(38% 32% at 82% 20%, rgba(239, 68, 68, 0.15), transparent 68%), radial-gradient(42% 34% at 74% 78%, rgba(129, 92, 255, 0.14), transparent 70%), radial-gradient(40% 34% at 20% 78%, rgba(34, 197, 94, 0.12), transparent 68%), radial-gradient(36% 28% at 48% 12%, rgba(250, 204, 21, 0.11), transparent 64%)',
+    appBackgroundGlowOpacity: '0.75',
+    appBackgroundGlowFilter: 'blur(176px) saturate(110%) brightness(0.96)',
     backgroundBlurFilter: 'blur(24px) saturate(140%)',
     backgroundBlurFilterFloating: 'blur(14px) saturate(120%)',
     backgroundBlurSurface: 'linear-gradient(180deg, #1c222aad, #161b228f)',
@@ -77,6 +80,7 @@ export const dqUiTokens = {
     blockPaddingTop: '24px',
     blockPaddingBottom: '40px',
     mobileBottomNavControlSize: '42px',
+    mobileBottomNavMinHeight: '58px',
   },
 };
 
@@ -85,6 +89,9 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
     .dq-ui-theme {
       --dq-ui-bg: ${tokens.colors.bg};
       --dq-ui-app-background: ${tokens.colors.appBackground};
+      --dq-ui-app-background-glow: ${tokens.effects.appBackgroundGlow};
+      --dq-ui-app-background-glow-opacity: ${tokens.effects.appBackgroundGlowOpacity};
+      --dq-ui-app-background-glow-filter: ${tokens.effects.appBackgroundGlowFilter};
       --dq-ui-color-white: ${tokens.colors.white};
       --dq-ui-color-black: ${tokens.colors.black};
       --dq-ui-color-black-soft: ${tokens.colors.blackSoft};
@@ -145,8 +152,9 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
       --dq-ui-layout-block-padding-top: ${tokens.layout.blockPaddingTop};
       --dq-ui-layout-block-padding-bottom: ${tokens.layout.blockPaddingBottom};
       --dq-ui-layout-mobile-bottom-nav-control-size: ${tokens.layout.mobileBottomNavControlSize};
+      --dq-ui-layout-mobile-bottom-nav-min-height: ${tokens.layout.mobileBottomNavMinHeight};
       --dq-ui-layout-mobile-bottom-nav-offset: calc(
-        var(--dq-ui-layout-mobile-bottom-nav-control-size) +
+        var(--dq-ui-layout-mobile-bottom-nav-min-height) +
         (var(--dq-ui-space-xs) * 2) +
         1px +
         env(safe-area-inset-bottom, 0px)

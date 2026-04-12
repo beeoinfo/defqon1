@@ -1,5 +1,6 @@
 import { XIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { lockDocumentScroll, unlockDocumentScroll } from '../../../lib/documentScrollLock';
 import Box from '../Box';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
@@ -95,15 +96,10 @@ const Modal = ({
       return undefined;
     }
 
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockDocumentScroll();
 
     return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
+      unlockDocumentScroll();
     };
   }, [isDialogVisible]);
 

@@ -52,35 +52,42 @@ const Alert = ({
       <Box
         component="div"
         slot="content"
-        direction="row"
-        align="flex-start"
         gap="var(--dq-ui-space-lg)"
         className="dq-alert__inner"
       >
-        <Box
-          component="span"
-          slot="content"
-          justify="center"
-          align="center"
-          className="dq-alert__icon-shell"
-        >
-          <Icon
-            aria-hidden="true"
-            size={22}
-            weight={variant === 'neutral' ? 'regular' : 'fill'}
-          />
-        </Box>
-
         <Box component="div" slot="content" gap="var(--dq-ui-space-sm)" className="dq-alert__content">
-          {title ? (
-            <Title
-              component={titleComponent}
-              variant={titleVariant}
-              className="dq-alert__title"
+          <Box
+            component="div"
+            slot="content"
+            direction="row"
+            align="center"
+            gap="var(--dq-ui-space-md)"
+            className="dq-alert__header"
+          >
+            <Box
+              component="span"
+              slot="content"
+              justify="center"
+              align="center"
+              className="dq-alert__icon"
             >
-              {title}
-            </Title>
-          ) : null}
+              <Icon
+                aria-hidden="true"
+                size={26}
+                weight={variant === 'neutral' ? 'regular' : 'fill'}
+              />
+            </Box>
+
+            {title ? (
+              <Title
+                component={titleComponent}
+                variant={titleVariant}
+                className="dq-alert__title"
+              >
+                {title}
+              </Title>
+            ) : null}
+          </Box>
 
           {children ? (
             <Box component="div" slot="content" className="dq-alert__body">

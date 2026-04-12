@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
@@ -13,8 +13,18 @@ import PeopleCard from '../../components/PeopleCard';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import View from '@/components/layout/View';
-import { getNextPageStackOnOpen } from '@/lib/pageStack';
+import {
+  getHistoryPageStack,
+  pushHistoryPageStackState,
+  replaceHistoryPageStackState,
+  syncPageStackIdRef,
+} from '@/lib/pageHistory';
+import {
+  getNextPageStackOnClose,
+  getNextPageStackOnOpen,
+} from '@/lib/pageStack';
 import { PAGE_DEFINITIONS } from '@/page/pageDefinitions';
+import { resolveRoute } from '@/routes/AppRoutes';
 import Badge from '@/components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
@@ -1392,7 +1402,12 @@ StorybookPageLayer.displayName = 'StorybookPageLayer';
 
 const StorybookView = ({ onOpenView = null }) => {
   const pageIdRef = useRef(0);
-  const [pageStack, setPageStack] = useState([]);
+  const initialPageStack = useMemo(() => getHistoryPageStack({
+    historyState: window.history.state,
+    pageDefinitions: PAGE_DEFINITIONS,
+  }), []);
+  const pageStackRef = useRef(initialPageStack);
+  const [pageStack, setPageStack] = useState(initialPageStack);
   const {
     renderedPageStack,
     hasRenderedPages,
@@ -1402,26 +1417,90 @@ const StorybookView = ({ onOpenView = null }) => {
 
   useDocumentScrollLock(hasRenderedPages);
 
+  useEffect(() => {
+    pageStackRef.current = pageStack;
+    syncPageStackIdRef({
+      pageIdRef,
+      pageStack,
+    });
+  }, [pageStack]);
+
+  useEffect(() => {
+    replaceHistoryPageStackState({
+      url: `${window.location.pathname}${window.location.search}`,
+      pageStack,
+    });
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const nextRoute = resolveRoute(window.location.pathname, window.location.search);
+
+      if (nextRoute.view !== 'storybook') {
+        return;
+      }
+
+      const nextPageStack = getHistoryPageStack({
+        historyState: event.state,
+        pageDefinitions: PAGE_DEFINITIONS,
+      });
+
+      pageStackRef.current = nextPageStack;
+      setPageStack(nextPageStack);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   const openPage = useCallback((type) => {
     if (!PAGE_DEFINITIONS[type]) {
       return;
     }
 
-    setPageStack((currentStack) =>
-      getNextPageStackOnOpen({
-        currentStack,
-        nextType: type,
-        pageDefinitions: PAGE_DEFINITIONS,
-        createPageId: (pageType) => {
-          pageIdRef.current += 1;
-          return `${pageType}-${pageIdRef.current}`;
-        },
-      })
-    );
+    const nextStack = getNextPageStackOnOpen({
+      currentStack: pageStackRef.current,
+      nextType: type,
+      pageDefinitions: PAGE_DEFINITIONS,
+      createPageId: (pageType) => {
+        pageIdRef.current += 1;
+        return `${pageType}-${pageIdRef.current}`;
+      },
+    });
+
+    if (nextStack === pageStackRef.current) {
+      return;
+    }
+
+    pushHistoryPageStackState({
+      url: `${window.location.pathname}${window.location.search}`,
+      pageStack: nextStack,
+    });
+
+    pageStackRef.current = nextStack;
+    setPageStack(nextStack);
   }, []);
 
   const closePage = useCallback((pageId) => {
-    setPageStack((currentStack) => currentStack.filter((page) => page.id !== pageId));
+    const nextStack = getNextPageStackOnClose({
+      currentStack: pageStackRef.current,
+      pageId,
+    });
+
+    if (nextStack === pageStackRef.current) {
+      return;
+    }
+
+    pushHistoryPageStackState({
+      url: `${window.location.pathname}${window.location.search}`,
+      pageStack: nextStack,
+    });
+
+    pageStackRef.current = nextStack;
+    setPageStack(nextStack);
   }, []);
 
   const openSettings = useCallback(() => {

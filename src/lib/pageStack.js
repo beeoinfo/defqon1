@@ -59,3 +59,13 @@ export const getNextPageStackOnOpen = ({
     },
   ];
 };
+
+export const getNextPageStackOnClose = ({ currentStack, pageId }) => {
+  const hasMatchingPage = currentStack.some((page) => page.id === pageId);
+
+  if (!hasMatchingPage) {
+    return currentStack;
+  }
+
+  return currentStack.filter((page) => page.id !== pageId);
+};
