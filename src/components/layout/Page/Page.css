@@ -1,0 +1,28 @@
+.dq-layout-page {
+  position: fixed;
+  inset: 0;
+  z-index: calc(200 + var(--dq-layout-page-layer-index, 0));
+  min-height: 100dvh;
+  overflow-x: clip;
+  overflow-y: auto;
+  opacity: 1;
+  transition: opacity var(--dq-ui-transition-fast);
+}
+
+.dq-layout-page--transition-entering,
+.dq-layout-page--transition-exiting {
+  opacity: 0;
+}
+
+.dq-layout-page--hidden-stack {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dq-layout-page__body {
+  min-height: 100dvh;
+}
+
+.dq-layout-page__main {
+  min-height: 0;
+}

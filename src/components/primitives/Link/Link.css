@@ -1,19 +1,28 @@
 .dq-ui-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
   border: none;
   background: transparent;
   color: var(--dq-ui-text-link);
   font: inherit;
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.18s cubic-bezier(.4,0,.2,1), text-decoration-color 0.18s cubic-bezier(.4,0,.2,1);
   cursor: pointer;
   padding: 0;
 }
 
 .dq-ui-link:hover,
-.dq-ui-link:focus-visible {
+.dq-ui-link:focus-visible, .dq-ui-link:hover {
+  text-decoration-color: var(--dq-ui-text-link);
+}
+
+.dq-ui-link:hover {
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .dq-ui-link:disabled {

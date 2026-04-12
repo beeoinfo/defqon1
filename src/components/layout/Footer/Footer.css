@@ -15,8 +15,18 @@
 .dq-layout-footer__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   margin-top: 8px;
+}
+
+.dq-layout-footer__separator {
+  opacity: 0.6;
+  color: var(--dq-ui-text-soft, rgba(255,255,255,0.58));
+  font-size: 1em;
+  user-select: none;
+  text-decoration: none !important;
+  display: inline-block;
+  vertical-align: middle;
+  margin-inline: 6px;
 }
 
 @media (max-width: 767.98px) {

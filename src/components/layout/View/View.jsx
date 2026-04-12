@@ -1,45 +1,39 @@
+import useHiddenStackLayer from '../../../hooks/useHiddenStackLayer';
 import Header from '../Header';
 import Box from '../Box';
-import Footer from '../Footer';
 import '../layout.css';
 import './View.css';
 
 const View = ({
   component = 'div',
-  title = null,
-  type = 'default',
   navbar = null,
-  onClosePage = null,
   onUserClick = null,
+  isHidden = false,
   className = '',
   children,
   ...props
 }) => {
-  const isPageView = type === 'page';
   const Component = component;
+  const layerRef = useHiddenStackLayer(isHidden);
 
   return (
     <Component
       {...props}
-      className={['dq-layout-view', isPageView ? 'dq-layout-view--page' : '', className]
+      ref={layerRef}
+      className={['dq-layout-view', isHidden ? 'dq-layout-view--hidden-stack' : '', className]
         .filter(Boolean)
         .join(' ')}
     >
       <Header
-        navbar={isPageView ? null : navbar}
-        isPageView={isPageView}
-        pageTitle={isPageView ? title : null}
-        onClosePage={isPageView ? onClosePage : null}
-        onUserClick={isPageView ? null : onUserClick}
+        navbar={navbar}
+        onUserClick={onUserClick}
       >
-        {!isPageView ? title : null}
+        {null}
       </Header>
 
       <Box component="main" className="dq-layout-main dq-layout-view__main dq-layout-container dq-layout-main-shell">
         {children}
       </Box>
-
-      <Footer />
     </Component>
   );
 };

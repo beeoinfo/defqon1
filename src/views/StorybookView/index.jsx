@@ -1,5 +1,5 @@
-import { memo, useCallback, useMemo, useState } from 'react';
-import { CheckIcon, MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon, XIcon } from '@phosphor-icons/react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { CheckIcon, MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
@@ -8,9 +8,13 @@ import Drawer from '../../components/layout/Drawer';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
+import Page from '../../components/layout/Page';
 import PeopleCard from '../../components/PeopleCard';
+import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
+import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import View from '@/components/layout/View';
-import SettingsPage from '@/page/SettingsPage/SettingsPage';
+import { getNextPageStackOnOpen } from '@/lib/pageStack';
+import { PAGE_DEFINITIONS } from '@/page/pageDefinitions';
 import Badge from '@/components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
@@ -1343,31 +1347,112 @@ const StorybookBody = memo(() => {
 
 StorybookBody.displayName = 'StorybookBody';
 
-const StorybookView = () => {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+const StorybookBaseView = memo(({ onOpenSettings, isHidden }) => (
+  <View
+    navbar={STORYBOOK_NAV_ITEMS}
+    onUserClick={onOpenSettings}
+    isHidden={isHidden}
+  >
+    <StorybookBody />
+  </View>
+));
 
-  const openSettings = () => setIsSettingsOpen(true);
-  const closeSettings = () => setIsSettingsOpen(false);
+StorybookBaseView.displayName = 'StorybookBaseView';
+
+const StorybookPageLayer = memo(({
+  page,
+  layerIndex,
+  onOpenPage,
+  onClosePage,
+  isHidden,
+  transitionState,
+}) => {
+  const pageDefinition = PAGE_DEFINITIONS[page.type];
+
+  if (!pageDefinition) {
+    return null;
+  }
+
+  const PageContent = pageDefinition.Component;
+
+  return (
+    <Page
+      title={pageDefinition.title}
+      onClose={() => onClosePage(page.id)}
+      onOpenPage={onOpenPage}
+      isHidden={isHidden}
+      transitionState={transitionState}
+      layerIndex={layerIndex}
+    >
+      <PageContent onOpenPage={onOpenPage} />
+    </Page>
+  );
+});
+
+StorybookPageLayer.displayName = 'StorybookPageLayer';
+
+const StorybookView = () => {
+  const pageIdRef = useRef(0);
+  const [pageStack, setPageStack] = useState([]);
+  const {
+    renderedPageStack,
+    hasRenderedPages,
+    shouldHideBaseView,
+    getIsPageHidden,
+  } = useAnimatedPageStack(pageStack);
+
+  useDocumentScrollLock(hasRenderedPages);
+
+  const openPage = useCallback((type) => {
+    if (!PAGE_DEFINITIONS[type]) {
+      return;
+    }
+
+    setPageStack((currentStack) =>
+      getNextPageStackOnOpen({
+        currentStack,
+        nextType: type,
+        pageDefinitions: PAGE_DEFINITIONS,
+        createPageId: (pageType) => {
+          pageIdRef.current += 1;
+          return `${pageType}-${pageIdRef.current}`;
+        },
+      })
+    );
+  }, []);
+
+  const closePage = useCallback((pageId) => {
+    setPageStack((currentStack) => currentStack.filter((page) => page.id !== pageId));
+  }, []);
+
+  const openSettings = useCallback(() => {
+    openPage('settings');
+  }, [openPage]);
+
+  const baseView = useMemo(() => (
+    <StorybookBaseView
+      onOpenSettings={openSettings}
+      isHidden={shouldHideBaseView}
+    />
+  ), [openSettings, shouldHideBaseView]);
 
   return (
     <UiThemeScope>
-      <View
-        type={isSettingsOpen ? 'page' : 'default'}
-        title={isSettingsOpen ? 'Settings' : null}
-        onClosePage={isSettingsOpen ? closeSettings : undefined}
-        navbar={STORYBOOK_NAV_ITEMS}
-        onUserClick={openSettings}
-      >
-        <Box style={{ display: isSettingsOpen ? 'none' : undefined }}>
-          <StorybookBody />
-        </Box>
+      {baseView}
 
-        <Box style={{ display: isSettingsOpen ? undefined : 'none' }}>
-          <SettingsPage onClose={closeSettings} />
-        </Box>
-      </View>
+      {renderedPageStack.map((page, index) => (
+        <StorybookPageLayer
+          key={page.id}
+          page={page}
+          layerIndex={index}
+          onOpenPage={openPage}
+          onClosePage={closePage}
+          isHidden={getIsPageHidden(index)}
+          transitionState={page.transitionState}
+        />
+      ))}
 
-      <BackToTop />
+      {!hasRenderedPages ? <BackToTop /> : null}
     </UiThemeScope>
   );
 };

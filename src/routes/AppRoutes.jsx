@@ -1,11 +1,6 @@
 export const APP_ROUTES = [
   { path: '/', view: 'lineup' },
   { path: '/lineup', view: 'lineup' },
-  { path: '/maps', view: 'maps' },
-  { path: '/reviews', view: 'reviews' },
-  { path: '/tribe', view: 'tribe' },
-  { path: '/search', view: 'search' },
-  { path: '/profile', view: 'profileSettings' },
 ];
 
 const normalizePath = (pathname) => pathname.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
