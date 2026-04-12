@@ -11,6 +11,7 @@ const View = ({
   onOpenView = null,
   onOpenSearch = null,
   onUserClick = null,
+  headerTransitionState = 'open',
   isHidden = false,
   className = '',
   children,
@@ -33,6 +34,7 @@ const View = ({
         onOpenView={onOpenView}
         onOpenSearch={onOpenSearch}
         onUserClick={onUserClick}
+        contentTransitionState={headerTransitionState}
       >
         {null}
       </Header>

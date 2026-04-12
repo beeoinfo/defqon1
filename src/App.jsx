@@ -34,6 +34,7 @@ const AppBaseView = memo(({
   onOpenView,
   onOpenSearch,
   onOpenSettings,
+  headerTransitionState,
   isHidden,
 }) => {
   const ActiveViewComponent = VIEW_COMPONENTS[activeView];
@@ -49,6 +50,7 @@ const AppBaseView = memo(({
       onOpenView={onOpenView}
       onOpenSearch={onOpenSearch}
       onUserClick={onOpenSettings}
+      headerTransitionState={headerTransitionState}
       isHidden={isHidden}
     >
       <ActiveViewComponent />
@@ -119,6 +121,7 @@ const App = () => {
     renderedPageStack,
     hasRenderedPages,
     shouldHideBaseView,
+    topPageTransitionState,
     getIsPageHidden,
   } = useAnimatedPageStack(pageStack);
 
@@ -229,15 +232,32 @@ const App = () => {
     openPage('search');
   }, [openPage]);
 
+  const baseViewHeaderTransitionState = useMemo(() => {
+    if (!hasRenderedPages) {
+      return 'open';
+    }
+
+    if (topPageTransitionState === 'entering') {
+      return 'exiting';
+    }
+
+    if (topPageTransitionState === 'exiting') {
+      return 'entering';
+    }
+
+    return 'covered';
+  }, [hasRenderedPages, topPageTransitionState]);
+
   const baseView = useMemo(() => (
     <AppBaseView
       activeView={activeView}
       onOpenView={openView}
       onOpenSearch={openSearch}
       onOpenSettings={openSettings}
+      headerTransitionState={baseViewHeaderTransitionState}
       isHidden={shouldHideBaseView}
     />
-  ), [activeView, openSearch, openSettings, openView, shouldHideBaseView]);
+  ), [activeView, baseViewHeaderTransitionState, openSearch, openSettings, openView, shouldHideBaseView]);
 
   if (activeView === 'storybook') {
     return <StorybookView onOpenView={openView} />;

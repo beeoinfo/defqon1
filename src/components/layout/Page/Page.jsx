@@ -51,6 +51,7 @@ const Page = ({
         hideBrand={hideHeaderBrand}
         showCloseButton={showCloseButton}
         inlineCloseButton={inlineCloseButton}
+        contentTransitionState={transitionState}
         onClosePage={onClose}
       />
 

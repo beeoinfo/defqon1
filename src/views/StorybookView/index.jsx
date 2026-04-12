@@ -1346,6 +1346,7 @@ const StorybookBaseView = memo(({
   onOpenView,
   onOpenSearch,
   onOpenSettings,
+  headerTransitionState,
   isHidden,
 }) => (
   <View
@@ -1353,6 +1354,7 @@ const StorybookBaseView = memo(({
     onOpenView={onOpenView}
     onOpenSearch={onOpenSearch}
     onUserClick={onOpenSettings}
+    headerTransitionState={headerTransitionState}
     isHidden={isHidden}
   >
     <StorybookBody />
@@ -1412,6 +1414,7 @@ const StorybookView = ({ onOpenView = null }) => {
     renderedPageStack,
     hasRenderedPages,
     shouldHideBaseView,
+    topPageTransitionState,
     getIsPageHidden,
   } = useAnimatedPageStack(pageStack);
 
@@ -1511,12 +1514,29 @@ const StorybookView = ({ onOpenView = null }) => {
     openPage('search');
   }, [openPage]);
 
+  const baseViewHeaderTransitionState = useMemo(() => {
+    if (!hasRenderedPages) {
+      return 'open';
+    }
+
+    if (topPageTransitionState === 'entering') {
+      return 'exiting';
+    }
+
+    if (topPageTransitionState === 'exiting') {
+      return 'entering';
+    }
+
+    return 'covered';
+  }, [hasRenderedPages, topPageTransitionState]);
+
   return (
     <UiThemeScope>
       <StorybookBaseView
         onOpenView={onOpenView}
         onOpenSearch={openSearch}
         onOpenSettings={openSettings}
+        headerTransitionState={baseViewHeaderTransitionState}
         isHidden={shouldHideBaseView}
       />
 

@@ -139,6 +139,7 @@ const useAnimatedPageStack = (pageStack) => {
     renderedPageStack,
     hasRenderedPages: renderedPageStack.length > 0,
     shouldHideBaseView,
+    topPageTransitionState: topPage?.transitionState ?? 'closed',
     getIsPageHidden: (index) => index < firstVisiblePageIndex,
   };
 };

@@ -30,6 +30,7 @@ const Header = ({
   onOpenSearch = null,
   centerContent = null,
   wideCenterContent = false,
+  contentTransitionState = 'open',
   hideBrand = false,
   showCloseButton = true,
   inlineCloseButton = false,
@@ -112,6 +113,7 @@ const Header = ({
     <Component
       {...props}
       className={['dq-layout-header', className].filter(Boolean).join(' ')}
+      data-content-transition={contentTransitionState}
     >
       <Box ref={surfaceRef} className="dq-layout-header__surface" gap="var(--dq-ui-space-lg)">
         <Box
@@ -122,7 +124,12 @@ const Header = ({
           gap="16px"
         >
           {shouldRenderBrand ? (
-            <Box className="dq-layout-header__brand" direction="row" align="center" gap="12px">
+            <Box
+              className="dq-layout-header__brand dq-layout-header__motion-item dq-layout-header__motion-item--1"
+              direction="row"
+              align="center"
+              gap="12px"
+            >
               {shouldShowPageTitle ? (
                 <Title component="span" variant="h2" className="dq-layout-header__page-title">
                   {pageTitle}
@@ -139,7 +146,10 @@ const Header = ({
           ) : null}
 
           {shouldRenderDesktopNavbar ? (
-            <Box className="dq-layout-header__nav-slot--desktop" justify="center">
+            <Box
+              className="dq-layout-header__nav-slot--desktop dq-layout-header__motion-item dq-layout-header__motion-item--2"
+              justify="center"
+            >
               {navbar ? renderNavbar(navbar) : null}
             </Box>
           ) : null}
@@ -148,6 +158,8 @@ const Header = ({
             <Box
               className={[
                 'dq-layout-header__center-slot',
+                'dq-layout-header__motion-item',
+                'dq-layout-header__motion-item--2',
                 wideCenterContent ? 'dq-layout-header__center-slot--wide' : '',
                 shouldRenderInlinePageControls ? 'dq-layout-header__center-slot--inline-page' : '',
               ].filter(Boolean).join(' ')}
@@ -172,7 +184,10 @@ const Header = ({
           ) : null}
 
           {shouldRenderTrailingProfile ? (
-            <Box className="dq-layout-header__profile" justify="flex-end">
+            <Box
+              className="dq-layout-header__profile dq-layout-header__motion-item dq-layout-header__motion-item--3"
+              justify="flex-end"
+            >
               {isPageView ? (
                 <Button
                   icon={XIcon}
@@ -206,7 +221,10 @@ const Header = ({
 
       {navbar ? (
         <Box ref={mobileNavRef} className="dq-layout-header__mobile-nav" gap="0">
-          <Box className="dq-layout-header__mobile-nav-shell" gap="0">
+          <Box
+            className="dq-layout-header__mobile-nav-shell dq-layout-header__motion-item dq-layout-header__motion-item--4"
+            gap="0"
+          >
             <Box className="dq-layout-container" gap="0">
               {renderNavbar(navbar, 'dq-layout-header__mobile-navbar')}
             </Box>

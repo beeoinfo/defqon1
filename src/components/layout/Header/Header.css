@@ -13,6 +13,51 @@
   -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
 }
 
+.dq-layout-header__motion-item {
+  --dq-layout-header-motion-delay: 0ms;
+  transition:
+    opacity 240ms ease,
+    transform 240ms ease;
+  transition-delay: var(--dq-layout-header-motion-delay);
+  will-change: opacity, transform;
+}
+
+.dq-layout-header__motion-item--1 {
+  --dq-layout-header-motion-delay: 0ms;
+}
+
+.dq-layout-header__motion-item--2 {
+  --dq-layout-header-motion-delay: 44ms;
+}
+
+.dq-layout-header__motion-item--3 {
+  --dq-layout-header-motion-delay: 88ms;
+}
+
+.dq-layout-header__motion-item--4 {
+  --dq-layout-header-motion-delay: 132ms;
+}
+
+.dq-layout-header[data-content-transition='covered'] .dq-layout-header__motion-item,
+.dq-layout-header[data-content-transition='exiting'] .dq-layout-header__motion-item {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.dq-layout-header[data-content-transition='entering'] .dq-layout-header__motion-item,
+.dq-layout-header[data-content-transition='open'] .dq-layout-header__motion-item {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .dq-layout-header[data-content-transition='entering'] .dq-layout-header__motion-item {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
 .dq-layout-header__row {
   position: relative;
   height: 77px;
@@ -38,15 +83,15 @@
 }
 
 .dq-layout-header__nav-slot--desktop {
-  position: absolute;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  position: static;
+  margin: 0 auto;
+  transform: none;
 }
 
 .dq-layout-header__center-slot {
-  position: absolute;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  position: static;
+  margin: 0 auto;
+  transform: none;
   width: min(520px, calc(100% - 280px));
 }
 
@@ -156,5 +201,11 @@
     bottom: 0;
     z-index: 121;
     display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dq-layout-header__motion-item {
+    transition: none;
   }
 }
