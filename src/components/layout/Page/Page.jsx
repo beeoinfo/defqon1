@@ -10,6 +10,13 @@ const Page = ({
   title,
   onClose,
   onOpenPage = null,
+  onOpenView = null,
+  headerContent = null,
+  showFooter = true,
+  wideHeaderContent = false,
+  hideHeaderBrand = false,
+  showCloseButton = true,
+  inlineCloseButton = false,
   isHidden = false,
   transitionState = 'open',
   className = '',
@@ -39,6 +46,11 @@ const Page = ({
       <Header
         isPageView
         pageTitle={title}
+        centerContent={headerContent}
+        wideCenterContent={wideHeaderContent}
+        hideBrand={hideHeaderBrand}
+        showCloseButton={showCloseButton}
+        inlineCloseButton={inlineCloseButton}
         onClosePage={onClose}
       />
 
@@ -47,7 +59,7 @@ const Page = ({
           {children}
         </Box>
 
-        <Footer onOpenPage={onOpenPage} />
+        {showFooter ? <Footer onOpenPage={onOpenPage} onOpenView={onOpenView} /> : null}
       </Box>
     </Component>
   );

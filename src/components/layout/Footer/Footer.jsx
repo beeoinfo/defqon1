@@ -1,21 +1,40 @@
-import Box from '../Box';
+import { isStorybookViewEnabled } from '../../../routes/AppRoutes';
 import Link from '../../primitives/Link';
+import Box from '../Box';
 import './Footer.css';
 
-const Footer = ({ component = 'footer', onOpenPage = null, className = '', ...props }) => {
+const Footer = ({
+  component = 'footer',
+  onOpenPage = null,
+  onOpenView = null,
+  className = '',
+  ...props
+}) => {
   const Component = component;
+  const shouldShowStorybookLink = isStorybookViewEnabled && typeof onOpenView === 'function';
 
-  const handleOpenAbout = () => {
-    onOpenPage?.('about');
-  };
-
-  const handleOpenRoadmap = () => {
-    onOpenPage?.('roadmap');
-  };
-
-  const handleOpenLegal = () => {
-    onOpenPage?.('legal');
-  };
+  const footerLinks = [
+    {
+      id: 'about',
+      label: 'About',
+      onClick: () => onOpenPage?.('about'),
+    },
+    {
+      id: 'roadmap',
+      label: 'Roadmap',
+      onClick: () => onOpenPage?.('roadmap'),
+    },
+    {
+      id: 'legal',
+      label: 'Legal',
+      onClick: () => onOpenPage?.('legal'),
+    },
+    ...(shouldShowStorybookLink ? [{
+      id: 'storybook',
+      label: 'Storybook',
+      onClick: () => onOpenView?.('storybook'),
+    }] : []),
+  ];
 
   return (
     <Component
@@ -32,14 +51,14 @@ const Footer = ({ component = 'footer', onOpenPage = null, className = '', ...pr
           Made with 🩷 by <strong>Dylan Bergozza</strong>
         </p>
         <p className="dq-layout-footer__version">
-          <em>v0.2α</em>
+          <em>v0.2a</em>
         </p>
         <Box className="dq-layout-footer__links" direction="row" wrap="wrap" gap={0}>
-          <Link onClick={handleOpenAbout}>About</Link>
-          <span className="dq-layout-footer__separator" aria-hidden="true">•</span>
-          <Link onClick={handleOpenRoadmap}>Roadmap</Link>
-          <span className="dq-layout-footer__separator" aria-hidden="true">•</span>
-          <Link onClick={handleOpenLegal}>Legal</Link>
+          {footerLinks.map((link) => (
+            <span key={link.id} className="dq-layout-footer__link-item">
+              <Link onClick={link.onClick}>{link.label}</Link>
+            </span>
+          ))}
         </Box>
       </Box>
     </Component>

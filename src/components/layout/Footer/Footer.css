@@ -8,6 +8,10 @@
   line-height: 1.16;
 }
 
+.dq-layout-footer__heart {
+  color: #ff5fa2;
+}
+
 .dq-layout-footer__version {
   color: rgba(255, 255, 255, 0.58);
 }
@@ -18,15 +22,17 @@
   margin-top: 8px;
 }
 
-.dq-layout-footer__separator {
+.dq-layout-footer__link-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.dq-layout-footer__link-item:not(:last-child)::after {
+  content: '•';
+  margin-inline: 6px;
   opacity: 0.6;
   color: var(--dq-ui-text-soft, rgba(255,255,255,0.58));
-  font-size: 1em;
-  user-select: none;
-  text-decoration: none !important;
-  display: inline-block;
-  vertical-align: middle;
-  margin-inline: 6px;
 }
 
 @media (max-width: 767.98px) {

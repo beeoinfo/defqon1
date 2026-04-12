@@ -1,12 +1,12 @@
 export const dqUiTokens = {
   colors: {
     bg: '#09090b',
+    appBackground:
+      'radial-gradient(circle at 14% 18%, rgba(11, 219, 239, .12), transparent 26%), radial-gradient(circle at 82% 16%, rgba(255, 0, 139, .1), transparent 24%), radial-gradient(circle at 22% 78%, rgba(0, 255, 0, .08), transparent 24%), radial-gradient(circle at 76% 74%, rgba(161, 0, 255, .1), transparent 28%), radial-gradient(circle at 52% 46%, rgba(241, 227, 0, .05), transparent 30%), linear-gradient(180deg, #12161c, #0f1318)',
     white: '#ffffff',
     black: '#111111',
     blackSoft: 'rgba(17, 17, 17, 0.7)',
     whiteSoftStrong: 'rgba(255, 255, 255, 0.74)',
-    appBackground:
-      'radial-gradient(circle at 14% 18%, rgba(11, 219, 239, .12), transparent 26%), radial-gradient(circle at 82% 16%, rgba(255, 0, 139, .1), transparent 24%), radial-gradient(circle at 22% 78%, rgba(0, 255, 0, .08), transparent 24%), radial-gradient(circle at 76% 74%, rgba(161, 0, 255, .1), transparent 28%), radial-gradient(circle at 52% 46%, rgba(241, 227, 0, .05), transparent 30%), linear-gradient(180deg, #12161c, #0f1318)',
     surface: 'rgba(255, 255, 255, 0.04)',
     panel: 'rgba(255, 255, 255, 0.05)',
     panelStrong: 'rgba(255, 255, 255, 0.08)',
@@ -84,6 +84,7 @@ export function createDqUiThemeCss(tokens = dqUiTokens) {
   return `
     .dq-ui-theme {
       --dq-ui-bg: ${tokens.colors.bg};
+      --dq-ui-app-background: ${tokens.colors.appBackground};
       --dq-ui-color-white: ${tokens.colors.white};
       --dq-ui-color-black: ${tokens.colors.black};
       --dq-ui-color-black-soft: ${tokens.colors.blackSoft};

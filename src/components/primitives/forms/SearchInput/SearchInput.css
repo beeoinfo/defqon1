@@ -1,0 +1,46 @@
+.dq-ui-search-input {
+  --dq-ui-form-control-bg: var(--dq-ui-panel);
+  --dq-ui-form-control-hover-bg: var(--dq-ui-panel-strong);
+}
+
+.dq-ui-search-input__control {
+  min-height: 46px;
+  padding-inline: 14px;
+  border-radius: var(--dq-ui-radius-rounded);
+}
+
+.dq-ui-search-input__icon-shell {
+  flex: 0 0 auto;
+  color: var(--dq-ui-text-soft);
+}
+
+.dq-ui-search-input__input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--dq-ui-text);
+  -webkit-text-fill-color: var(--dq-ui-text);
+  transition:
+    color var(--dq-ui-transition-fast),
+    -webkit-text-fill-color var(--dq-ui-transition-fast);
+}
+
+.dq-ui-search-input__input::placeholder {
+  color: var(--dq-ui-text-soft);
+  -webkit-text-fill-color: var(--dq-ui-text-soft);
+}
+
+.dq-ui-search-input__input:focus,
+.dq-ui-search-input__input:focus-visible {
+  outline: none;
+}
+
+.dq-ui-search-input__input::-webkit-search-decoration,
+.dq-ui-search-input__input::-webkit-search-cancel-button,
+.dq-ui-search-input__input::-webkit-search-results-button,
+.dq-ui-search-input__input::-webkit-search-results-decoration {
+  display: none;
+}

@@ -6,7 +6,10 @@ import './View.css';
 
 const View = ({
   component = 'div',
-  navbar = null,
+  navbar = true,
+  activeView = null,
+  onOpenView = null,
+  onOpenSearch = null,
   onUserClick = null,
   isHidden = false,
   className = '',
@@ -26,6 +29,9 @@ const View = ({
     >
       <Header
         navbar={navbar}
+        activeView={activeView}
+        onOpenView={onOpenView}
+        onOpenSearch={onOpenSearch}
         onUserClick={onUserClick}
       >
         {null}

@@ -1,7 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ToggleButton from '../../primitives/ToggleButton';
 import Box from '../Box';
 import './Navbar.css';
+
+const DEFAULT_NAVBAR_ITEMS = [
+  {
+    id: 'lineup',
+    label: 'Line-up',
+    icon: MusicNoteIcon,
+  },
+  {
+    id: 'maps',
+    label: 'Maps',
+    icon: MapTrifoldIcon,
+  },
+  {
+    id: 'reviews',
+    label: 'Reviews',
+    icon: StarIcon,
+  },
+  {
+    id: 'tribe',
+    label: 'Tribe',
+    icon: UsersIcon,
+  },
+];
 
 const getItemKey = (item) => item.id ?? item.label;
 
@@ -14,14 +38,40 @@ const getActiveItemKey = (items) => {
 const Navbar = ({
   component = 'nav',
   items = [],
+  activeView = null,
+  onOpenView = null,
+  onOpenSearch = null,
   className = '',
   children,
   ariaLabel = 'Main navigation',
   ...props
 }) => {
   const Component = component;
-  const hasItems = items.length > 0;
-  const incomingActiveKey = getActiveItemKey(items);
+  const resolvedItems = useMemo(() => {
+    if (items.length > 0) {
+      return items;
+    }
+
+    return [
+      ...DEFAULT_NAVBAR_ITEMS.map((item) => ({
+        ...item,
+        active: item.id === activeView,
+        onClick: () => onOpenView?.(item.id),
+      })),
+      {
+        id: 'search',
+        label: 'Search',
+        icon: MagnifyingGlassIcon,
+        ariaLabel: 'Open search',
+        title: 'Open search',
+        togglesActive: false,
+        showIconDesktop: true,
+        onClick: () => onOpenSearch?.(),
+      },
+    ];
+  }, [activeView, items, onOpenSearch, onOpenView]);
+  const hasItems = resolvedItems.length > 0;
+  const incomingActiveKey = getActiveItemKey(resolvedItems);
   const [internalActiveKey, setInternalActiveKey] = useState(() => incomingActiveKey);
   const [bouncingItemKey, setBouncingItemKey] = useState(null);
   const resolvedActiveKey = internalActiveKey;
@@ -78,10 +128,11 @@ const Navbar = ({
           justify="center"
           gap="var(--dq-ui-space-sm)"
         >
-          {items.map((item) => {
+          {resolvedItems.map((item) => {
             const Icon = item.icon;
             const itemKey = getItemKey(item);
-            const isActive = itemKey === resolvedActiveKey;
+            const togglesActive = item.togglesActive !== false;
+            const isActive = togglesActive && itemKey === resolvedActiveKey;
 
             return (
               <Box
@@ -90,6 +141,7 @@ const Navbar = ({
                 className={[
                   'dq-layout-navbar__item-shell',
                   itemKey === bouncingItemKey ? 'dq-layout-navbar__item-shell--bouncing' : '',
+                  item.showIconDesktop ? 'dq-layout-navbar__item-shell--show-icon-desktop' : '',
                   item.mobileOnly ? 'dq-layout-navbar__item-shell--mobile-only' : '',
                   item.desktopOnly ? 'dq-layout-navbar__item-shell--desktop-only' : '',
                 ].filter(Boolean).join(' ')}
@@ -104,6 +156,10 @@ const Navbar = ({
                   ariaLabel={item.ariaLabel}
                   title={item.title}
                   onPressedChange={() => {
+                    if (!togglesActive) {
+                      return;
+                    }
+
                     const shouldAnimate = itemKey !== resolvedActiveKey;
 
                     setInternalActiveKey(itemKey);

@@ -1,5 +1,12 @@
 .dq-ui-theme {
-    --dq-ui-background-blur-surface-light: rgba(44, 52, 64, 0.44);
+  --dq-ui-background-blur-surface-light: rgba(44, 52, 64, 0.44);
+  --dq-ui-app-background:
+    radial-gradient(circle at 14% 18%, rgba(11, 219, 239, 0.12), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(255, 0, 139, 0.1), transparent 24%),
+    radial-gradient(circle at 22% 78%, rgba(0, 255, 0, 0.08), transparent 24%),
+    radial-gradient(circle at 76% 74%, rgba(161, 0, 255, 0.1), transparent 28%),
+    radial-gradient(circle at 52% 46%, rgba(241, 227, 0, 0.05), transparent 30%),
+    linear-gradient(180deg, #12161c 0%, #0f1318 100%);
   --dq-ui-bg: #09090b;
   --dq-ui-color-white: #ffffff;
   --dq-ui-color-black: #111111;

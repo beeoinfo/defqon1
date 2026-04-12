@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { CheckIcon, MapTrifoldIcon, MusicNoteIcon, MagnifyingGlassIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import { CheckIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
@@ -19,43 +19,13 @@ import Badge from '@/components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
-import { CheckboxInput, FileInput, Switch, TextInput } from '../../components/primitives/forms';
+import { CheckboxInput, FileInput, SearchInput, Switch, TextInput } from '../../components/primitives/forms';
 import PeopleStack from '../../components/primitives/PeopleStack';
 import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
 import UiThemeScope from '../../theme/UiThemeScope';
 import './StorybookView.css';
-
-const STORYBOOK_NAV_ITEMS = [
-  {
-    id: 'lineup',
-    label: 'Line-up',
-    icon: MusicNoteIcon,
-    active: true,
-  },
-  {
-    id: 'maps',
-    label: 'Maps',
-    icon: MapTrifoldIcon,
-  },
-  {
-    id: 'reviews',
-    label: 'Reviews',
-    icon: StarIcon,
-  },
-  {
-    id: 'tribe',
-    label: 'Tribe',
-    icon: UsersIcon,
-  },
-  {
-    id: 'search',
-    label: 'Search',
-    icon: MagnifyingGlassIcon,
-    mobileOnly: true,
-  },
-];
 
 const STORYBOOK_BOX_EXAMPLES = [
   {
@@ -1234,6 +1204,21 @@ const StorybookBody = memo(() => {
           <Box
             className="dq-ui-storybook__button-section"
             background="surface"
+            title="Search Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <SearchInput
+                ariaLabel="Search"
+                placeholder="Search artist, duo, show..."
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
             title="Text Input"
             titleComponent="h3"
             titleVariant="h4"
@@ -1347,9 +1332,16 @@ const StorybookBody = memo(() => {
 
 StorybookBody.displayName = 'StorybookBody';
 
-const StorybookBaseView = memo(({ onOpenSettings, isHidden }) => (
+const StorybookBaseView = memo(({
+  onOpenView,
+  onOpenSearch,
+  onOpenSettings,
+  isHidden,
+}) => (
   <View
-    navbar={STORYBOOK_NAV_ITEMS}
+    navbar
+    onOpenView={onOpenView}
+    onOpenSearch={onOpenSearch}
     onUserClick={onOpenSettings}
     isHidden={isHidden}
   >
@@ -1374,12 +1366,19 @@ const StorybookPageLayer = memo(({
   }
 
   const PageContent = pageDefinition.Component;
+  const HeaderContent = pageDefinition.HeaderContentComponent;
 
   return (
     <Page
       title={pageDefinition.title}
       onClose={() => onClosePage(page.id)}
       onOpenPage={onOpenPage}
+      headerContent={HeaderContent ? <HeaderContent onClosePage={() => onClosePage(page.id)} /> : null}
+      showFooter={pageDefinition.showFooter !== false}
+      wideHeaderContent={pageDefinition.wideHeaderContent === true}
+      hideHeaderBrand={pageDefinition.hideHeaderBrand === true}
+      showCloseButton={pageDefinition.showCloseButton !== false}
+      inlineCloseButton={pageDefinition.inlineCloseButton === true}
       isHidden={isHidden}
       transitionState={transitionState}
       layerIndex={layerIndex}
@@ -1391,7 +1390,7 @@ const StorybookPageLayer = memo(({
 
 StorybookPageLayer.displayName = 'StorybookPageLayer';
 
-const StorybookView = () => {
+const StorybookView = ({ onOpenView = null }) => {
   const pageIdRef = useRef(0);
   const [pageStack, setPageStack] = useState([]);
   const {
@@ -1429,16 +1428,18 @@ const StorybookView = () => {
     openPage('settings');
   }, [openPage]);
 
-  const baseView = useMemo(() => (
-    <StorybookBaseView
-      onOpenSettings={openSettings}
-      isHidden={shouldHideBaseView}
-    />
-  ), [openSettings, shouldHideBaseView]);
+  const openSearch = useCallback(() => {
+    openPage('search');
+  }, [openPage]);
 
   return (
     <UiThemeScope>
-      {baseView}
+      <StorybookBaseView
+        onOpenView={onOpenView}
+        onOpenSearch={openSearch}
+        onOpenSettings={openSettings}
+        isHidden={shouldHideBaseView}
+      />
 
       {renderedPageStack.map((page, index) => (
         <StorybookPageLayer

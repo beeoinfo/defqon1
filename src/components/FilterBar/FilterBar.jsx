@@ -84,6 +84,10 @@ const getDrawerSelection = (drawer, drawerValue) => {
   };
 };
 
+const getLayoutRoot = (element) => (
+  element?.closest?.('.dq-layout-view, .dq-layout-page') ?? null
+);
+
 const FilterBar = ({
   choices = [],
   drawers = [],
@@ -277,22 +281,19 @@ const FilterBar = ({
 
   useLayoutEffect(() => {
     const filterBarElement = filterBarRef.current;
-    const layoutMain = filterBarElement?.closest?.('.dq-layout-main-shell');
+    const layoutRoot = getLayoutRoot(filterBarElement);
 
-    if (!filterBarElement || !layoutMain || !floating || resolvedPlacement !== 'top') {
-      layoutMain?.style.removeProperty('--dq-layout-main-content-offset');
+    if (!filterBarElement || !layoutRoot || !floating || resolvedPlacement !== 'top') {
+      layoutRoot?.style.removeProperty('--dq-layout-filter-bar-content-offset');
       return undefined;
     }
 
-    const closedFilterBarHeight = `${filterBarElement.getBoundingClientRect().height}px`;
+    const filterBarBottom = filterBarElement.getBoundingClientRect().bottom;
 
-    layoutMain.style.setProperty(
-      '--dq-layout-main-content-offset',
-      `calc(var(--dq-ui-space-lg) + ${closedFilterBarHeight} + var(--dq-ui-layout-block-padding-top))`
-    );
+    layoutRoot.style.setProperty('--dq-layout-filter-bar-content-offset', `${filterBarBottom + 20}px`);
 
     return () => {
-      layoutMain.style.removeProperty('--dq-layout-main-content-offset');
+      layoutRoot.style.removeProperty('--dq-layout-filter-bar-content-offset');
     };
   }, [floating, resolvedPlacement]);
 

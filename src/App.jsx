@@ -5,30 +5,44 @@ import useAnimatedPageStack from './hooks/useAnimatedPageStack';
 import useDocumentScrollLock from './hooks/useDocumentScrollLock';
 import { getNextPageStackOnOpen } from './lib/pageStack';
 import { PAGE_DEFINITIONS } from './page/pageDefinitions';
-import { getPathForView, resolveRoute } from './routes/AppRoutes';
+import { getUrlForView, resolveRoute } from './routes/AppRoutes';
 import UiThemeScope from './theme/UiThemeScope';
 import LineUpView from './views/LineUpView';
+import MapsView from './views/MapsView';
+import ReviewsView from './views/ReviewsView';
 import StorybookView from './views/StorybookView';
+import TribeView from './views/TribeView';
 
-const getStorybookMode = () => {
-  if (!import.meta.env.DEV || typeof window === 'undefined') {
-    return null;
-  }
-
-  const searchParams = new URLSearchParams(window.location.search);
-  const mode = searchParams.get('storybook');
-
-  return mode === 'view' || mode === 'page' ? mode : null;
+const VIEW_COMPONENTS = {
+  lineup: LineUpView,
+  maps: MapsView,
+  reviews: ReviewsView,
+  tribe: TribeView,
 };
 
-const AppBaseView = memo(({ activeView, onOpenSettings, isHidden }) => {
-  if (activeView !== 'lineup') {
+const AppBaseView = memo(({
+  activeView,
+  onOpenView,
+  onOpenSearch,
+  onOpenSettings,
+  isHidden,
+}) => {
+  const ActiveViewComponent = VIEW_COMPONENTS[activeView];
+
+  if (!ActiveViewComponent) {
     return null;
   }
 
   return (
-    <View onUserClick={onOpenSettings} isHidden={isHidden}>
-      <LineUpView />
+    <View
+      navbar
+      activeView={activeView}
+      onOpenView={onOpenView}
+      onOpenSearch={onOpenSearch}
+      onUserClick={onOpenSettings}
+      isHidden={isHidden}
+    >
+      <ActiveViewComponent />
     </View>
   );
 });
@@ -40,6 +54,7 @@ const AppPageLayer = memo(({
   layerIndex,
   onClosePage,
   onOpenPage,
+  onOpenView,
   isHidden,
   transitionState,
 }) => {
@@ -50,12 +65,20 @@ const AppPageLayer = memo(({
   }
 
   const PageContent = pageDefinition.Component;
+  const HeaderContent = pageDefinition.HeaderContentComponent;
 
   return (
     <Page
       title={pageDefinition.title}
       onClose={() => onClosePage(page.id)}
       onOpenPage={onOpenPage}
+      onOpenView={onOpenView}
+      headerContent={HeaderContent ? <HeaderContent onClosePage={() => onClosePage(page.id)} /> : null}
+      showFooter={pageDefinition.showFooter !== false}
+      wideHeaderContent={pageDefinition.wideHeaderContent === true}
+      hideHeaderBrand={pageDefinition.hideHeaderBrand === true}
+      showCloseButton={pageDefinition.showCloseButton !== false}
+      inlineCloseButton={pageDefinition.inlineCloseButton === true}
       isHidden={isHidden}
       transitionState={transitionState}
       layerIndex={layerIndex}
@@ -68,8 +91,10 @@ const AppPageLayer = memo(({
 AppPageLayer.displayName = 'AppPageLayer';
 
 const App = () => {
-  const storybookMode = useMemo(() => getStorybookMode(), []);
-  const initialRoute = useMemo(() => resolveRoute(window.location.pathname), []);
+  const initialRoute = useMemo(
+    () => resolveRoute(window.location.pathname, window.location.search),
+    []
+  );
   const pageIdRef = useRef(0);
   const [activeView, setActiveView] = useState(initialRoute.view);
   const [pageStack, setPageStack] = useState([]);
@@ -83,12 +108,9 @@ const App = () => {
   useDocumentScrollLock(hasRenderedPages);
 
   useEffect(() => {
-    if (storybookMode) {
-      return undefined;
-    }
-
     const handlePopState = () => {
-      const nextRoute = resolveRoute(window.location.pathname);
+      const nextRoute = resolveRoute(window.location.pathname, window.location.search);
+      setPageStack([]);
       setActiveView(nextRoute.view);
     };
 
@@ -97,25 +119,20 @@ const App = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [storybookMode]);
+  }, []);
 
   useEffect(() => {
-    if (storybookMode) {
+    const nextUrl = getUrlForView(activeView);
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    if (currentUrl === nextUrl) {
       return undefined;
     }
 
-    const nextPath = getPathForView(activeView);
-    const currentPath = window.location.pathname;
-
-    if (currentPath === nextPath) {
-      return undefined;
-    }
-
-    const nextUrl = `${nextPath}${window.location.search}${window.location.hash}`;
     window.history.pushState({}, '', nextUrl);
 
     return undefined;
-  }, [activeView, storybookMode]);
+  }, [activeView]);
 
   const openPage = useCallback((type) => {
     if (!PAGE_DEFINITIONS[type]) {
@@ -143,16 +160,27 @@ const App = () => {
     openPage('settings');
   }, [openPage]);
 
+  const openView = useCallback((view) => {
+    setPageStack([]);
+    setActiveView(view);
+  }, []);
+
+  const openSearch = useCallback(() => {
+    openPage('search');
+  }, [openPage]);
+
   const baseView = useMemo(() => (
     <AppBaseView
       activeView={activeView}
+      onOpenView={openView}
+      onOpenSearch={openSearch}
       onOpenSettings={openSettings}
       isHidden={shouldHideBaseView}
     />
-  ), [activeView, openSettings, shouldHideBaseView]);
+  ), [activeView, openSearch, openSettings, openView, shouldHideBaseView]);
 
-  if (storybookMode) {
-    return <StorybookView mode={storybookMode} />;
+  if (activeView === 'storybook') {
+    return <StorybookView onOpenView={openView} />;
   }
 
   return (
@@ -166,6 +194,7 @@ const App = () => {
           layerIndex={index}
           onClosePage={closePage}
           onOpenPage={openPage}
+          onOpenView={openView}
           isHidden={getIsPageHidden(index)}
           transitionState={page.transitionState}
         />

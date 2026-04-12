@@ -25,14 +25,11 @@
 
 .dq-layout-main {
   --dq-layout-header-control-size: 48px;
-  --dq-layout-header-offset:
-    var(
-      --dq-layout-header-measured-offset,
-      calc(
-        var(--dq-layout-header-control-size) +
-        (var(--dq-ui-space-lg) * 2) +
-        1px
-      )
+  --dq-layout-header-fallback-offset:
+    calc(
+      var(--dq-layout-header-control-size) +
+      (var(--dq-ui-space-lg) * 2) +
+      1px
     );
   min-height: 100dvh;
   display: flex;
@@ -43,23 +40,26 @@
 
 .dq-layout-main-shell {
   padding-top:
-    calc(
-      var(--dq-layout-header-offset) +
-      var(--dq-layout-main-content-offset, var(--dq-ui-layout-block-padding-top))
+    var(
+      --dq-layout-filter-bar-content-offset,
+      var(
+        --dq-layout-header-content-offset,
+        calc(
+          var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset)) +
+          20px
+        )
+      )
     );
   padding-bottom: var(--dq-ui-layout-block-padding-bottom);
 }
 
 @media (max-width: 767.98px) {
   .dq-layout-main {
-    --dq-layout-header-offset:
-      var(
-        --dq-layout-header-measured-offset,
-        calc(
-          var(--dq-layout-header-control-size) +
-          (var(--dq-ui-space-sm) * 2) +
-          1px
-        )
+    --dq-layout-header-fallback-offset:
+      calc(
+        var(--dq-layout-header-control-size) +
+        (var(--dq-ui-space-sm) * 2) +
+        1px
       );
   }
 }

@@ -43,6 +43,65 @@
   transform: translateX(-50%);
 }
 
+.dq-layout-header__center-slot {
+  position: absolute;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 280px));
+}
+
+.dq-layout-header__center-slot--wide {
+  width: min(568px, calc(100% - 32px));
+}
+
+.dq-layout-header__center-slot > * {
+  width: 100%;
+}
+
+.dq-layout-header__center-slot--inline-page {
+  position: static;
+  inset-inline-start: auto;
+  transform: none;
+  width: auto;
+  max-width: calc(100% - 32px);
+  flex: 0 1 auto;
+  gap: 6px;
+}
+
+.dq-layout-header__center-slot--inline-page > * {
+  width: auto;
+}
+
+.dq-layout-header__center-slot--inline-page .dq-ui-search-input {
+  flex: 0 1 520px;
+  width: min(520px, calc(100vw - 32px - 42px - 6px));
+  min-width: 0;
+}
+
+.dq-layout-header__center-slot--inline-page .dq-ui-search-input__control {
+  min-height: 42px;
+}
+
+.dq-layout-header__center-slot--inline-page .dq-ui-search-input__input {
+  min-height: 40px;
+}
+
+.dq-layout-header__inline-close-button {
+  --dq-ui-button-height: 46px;
+  --dq-ui-button-bg: var(--dq-ui-panel);
+  --dq-ui-button-border-color: var(--dq-ui-border-subtle);
+  --dq-ui-button-hover-bg: var(--dq-ui-panel-strong);
+  --dq-ui-button-hover-border-color: var(--dq-ui-border);
+  --dq-ui-button-hover-text-color: var(--dq-ui-text);
+  --dq-ui-button-focus-bg: var(--dq-ui-panel-strong);
+  --dq-ui-button-focus-border-color: var(--dq-ui-primary-muted);
+  --dq-ui-button-focus-text-color: var(--dq-ui-text);
+  --dq-ui-button-active-bg: var(--dq-ui-panel-strong);
+  --dq-ui-button-active-border-color: var(--dq-ui-border);
+  --dq-ui-button-active-text-color: var(--dq-ui-text);
+  flex: 0 0 auto;
+}
+
 .dq-layout-header__nav-slot--desktop .dq-layout-navbar {
   width: max-content;
   padding-block: 0;
@@ -71,6 +130,20 @@
 
   .dq-layout-header__nav-slot--desktop {
     display: none;
+  }
+
+  .dq-layout-header__center-slot {
+    width: calc(100% - 180px);
+  }
+
+  .dq-layout-header__center-slot--wide {
+    width: calc(100% - 32px);
+  }
+
+  .dq-layout-header__center-slot--inline-page {
+    width: 100%;
+    max-width: 100%;
+    flex-basis: auto;
   }
 
   .dq-layout-header__profile .dq-ui-button__subtitle {

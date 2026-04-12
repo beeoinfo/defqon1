@@ -25,6 +25,22 @@
   display: none;
 }
 
+.dq-layout-navbar:not(.dq-layout-header__mobile-navbar) .dq-layout-navbar__item-shell--show-icon-desktop .dq-ui-button__icon {
+  display: inline-flex;
+}
+
+.dq-layout-navbar:not(.dq-layout-header__mobile-navbar) .dq-layout-navbar__item-shell--show-icon-desktop .dq-layout-navbar__item {
+  --dq-ui-button-gap: 0;
+}
+
+.dq-layout-navbar:not(.dq-layout-header__mobile-navbar) .dq-layout-navbar__item-shell--show-icon-desktop .dq-ui-button__label {
+  display: none;
+}
+
+.dq-layout-navbar:not(.dq-layout-header__mobile-navbar) .dq-layout-navbar__item-shell--show-icon-desktop .dq-ui-button__content {
+  display: none;
+}
+
 @media (max-width: 767.98px) {
   .dq-layout-navbar {
     padding-block: var(--dq-ui-space-xs);

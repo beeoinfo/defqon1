@@ -41,7 +41,11 @@
 }
 
 .dq-filter-bar--floating-top {
-  top: calc(var(--dq-layout-header-offset, 80px) + var(--dq-ui-space-lg));
+  top:
+    calc(
+      var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 80px)) +
+      var(--dq-ui-space-lg)
+    );
 }
 
 .dq-filter-bar--floating-bottom {
