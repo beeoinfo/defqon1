@@ -18,12 +18,20 @@
 }
 
 .dq-ui-badge--ghost,
-.dq-ui-badge--surface {
+.dq-ui-badge--surface,
+.dq-ui-badge--floating {
   min-height: 32px;
   padding-inline: 12px;
   border: 1px solid var(--dq-ui-badge-border, var(--dq-ui-border));
   border-radius: var(--dq-ui-radius-rounded);
   background: var(--dq-ui-badge-bg, var(--dq-ui-surface));
+}
+
+.dq-ui-badge--floating {
+  background: var(--dq-ui-badge-bg, var(--dq-ui-background-blur-surface));
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  font-weight: 700;
 }
 
 .dq-ui-badge--title {
@@ -45,6 +53,7 @@
 
 .dq-ui-badge--sm.dq-ui-badge--ghost,
 .dq-ui-badge--sm.dq-ui-badge--surface,
+.dq-ui-badge--sm.dq-ui-badge--floating,
 .dq-ui-badge--sm.dq-ui-badge--plain {
   min-height: 22px;
   padding-inline: 8px;

@@ -9,6 +9,7 @@ import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
 import Modal from '../../components/layout/Modal';
 import Page from '../../components/layout/Page';
+import SlidingColumns from '../../components/layout/SlidingColumns';
 import PeopleCard from '../../components/PeopleCard';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
@@ -221,6 +222,86 @@ const STORYBOOK_DRAWER_SCROLL_ITEMS = [
   'Merch stop',
   'Closing set',
 ];
+
+const STORYBOOK_SLIDING_COLUMNS_SECTIONS = [
+  {
+    id: 'friday',
+    label: 'Friday',
+    color: '#bc9b5e',
+    intro: 'Short opening column to test early hide states and skipped next targets.',
+    items: [
+      'Opening ceremony',
+      'Locker access plan',
+      'Friends arrival sync',
+      'Dinner slot check',
+    ],
+  },
+  {
+    id: 'saturday',
+    label: 'Saturday',
+    color: '#38bdf8',
+    intro: 'Tall dense column so the rail still has a living target after shorter neighbors are already passed.',
+    items: [
+      'Peak crowd flow',
+      'Favorite clashes',
+      'Raw after dark',
+      'Food break window',
+      'Merch stop timing',
+      'Night session plan',
+      'Purple stage backup',
+      'Taxi estimate note',
+      'Blue route fallback',
+      'Crew meetup note',
+      'Power bank check',
+      'Rain gear backup',
+      'Late bus timing',
+    ],
+  },
+  {
+    id: 'sunday',
+    label: 'Sunday',
+    color: '#22c55e',
+    intro: 'Very short column so it should get skipped once its own section has already been passed.',
+    items: [
+      'Closing run',
+      'Last map check',
+      'Back home shortlist',
+    ],
+  },
+  {
+    id: 'weekend',
+    label: 'Weekend',
+    color: '#a855f7',
+    intro: 'Extra tall catch-all column to validate long-range skip logic in both directions.',
+    items: [
+      'Must-see shortlist',
+      'Fallback plan',
+      'Rain gear note',
+      'Power bank check',
+      'Camping route',
+      'Transport reminder',
+      'Hydration reminder',
+      'Emergency contact note',
+      'Camp wake-up reminder',
+      'Food budget note',
+      'Locker backup code',
+      'Night exit route',
+      'Taxi meeting point',
+      'Photo spot reminder',
+      'Water refill note',
+      'Phone charge plan',
+    ],
+  },
+];
+
+const renderStorybookSlidingColumnContent = (section, keyPrefix = '') => (
+  <Box gap="var(--dq-ui-space-lg)">
+    <Element>{section.intro}</Element>
+    {section.items.map((item) => (
+      <Element key={`${keyPrefix}${section.id}-${item}`}>{item}</Element>
+    ))}
+  </Box>
+);
 
 const STORYBOOK_FILTER_BAR_CHOICES = [
   {
@@ -611,6 +692,59 @@ const StorybookDrawerSection = memo(() => {
 
 StorybookDrawerSection.displayName = 'StorybookDrawerSection';
 
+const StorybookSlidingColumnsSection = memo(() => (
+  <Box
+    component="section"
+    title="Sliding Columns"
+    titleComponent="h2"
+    titleVariant="h2"
+    background="surface"
+  >
+    <Box gap="var(--dq-ui-space-xl)">
+      <Box
+        background="surface"
+        title="Stacked Default"
+        titleComponent="h3"
+        titleVariant="h4"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          <p className="dq-ui-storybook__helper-text">
+            Default behavior stays in one stacked column with a floating badge sticky above each section.
+          </p>
+          <SlidingColumns
+            sections={STORYBOOK_SLIDING_COLUMNS_SECTIONS.map((section) => ({
+              ...section,
+              content: renderStorybookSlidingColumnContent(section),
+            }))}
+          />
+        </Box>
+      </Box>
+
+      <Box
+        background="surface"
+        title="Responsive Variant"
+        titleComponent="h3"
+        titleVariant="h4"
+      >
+        <Box gap="var(--dq-ui-space-lg)">
+          <p className="dq-ui-storybook__helper-text">
+            `variant=&quot;responsive&quot;` stays stacked on desktop and only switches to the horizontal synced rail on touch devices below the desktop breakpoint.
+          </p>
+          <SlidingColumns
+            variant="responsive"
+            sections={STORYBOOK_SLIDING_COLUMNS_SECTIONS.map((section) => ({
+              ...section,
+              content: renderStorybookSlidingColumnContent(section, 'responsive-'),
+            }))}
+          />
+        </Box>
+      </Box>
+    </Box>
+  </Box>
+));
+
+StorybookSlidingColumnsSection.displayName = 'StorybookSlidingColumnsSection';
+
 const StorybookPeopleSection = memo(() => {
   return (
     <Box
@@ -797,6 +931,21 @@ const StorybookBody = memo(() => {
               <Badge size="sm" variant="plain" color="#ca2323">
                 Hotfix SM
               </Badge>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Floating"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
+              <Badge variant="floating">Friday</Badge>
+              <Badge variant="floating" color="#38bdf8">Saturday</Badge>
+              <Badge variant="floating" color="#22c55e">Sunday</Badge>
+              <Badge variant="floating" color="#a855f7">Weekend</Badge>
             </Box>
           </Box>
         </Box>
@@ -1197,6 +1346,8 @@ const StorybookBody = memo(() => {
       <StorybookModalSection />
 
       <StorybookDrawerSection />
+
+      <StorybookSlidingColumnsSection />
 
       <Box
         component="section"

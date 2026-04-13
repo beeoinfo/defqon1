@@ -16,6 +16,7 @@ const Badge = ({
 }) => {
   const Component = component;
   const resolvedVariant = variant === 'surface' ? 'ghost' : variant;
+  const isFloatingVariant = resolvedVariant === 'floating';
   const generatedTheme = color ? buildColorTheme(color) : null;
   const resolvedBackgroundColor =
     backgroundColor ??
@@ -25,13 +26,15 @@ const Badge = ({
         ? generatedTheme?.accent
         : resolvedVariant === 'title'
           ? 'var(--dq-ui-danger-surface)'
+          : isFloatingVariant
+            ? 'var(--dq-ui-background-blur-surface)'
           : generatedTheme?.accentSoft);
   const resolvedBorderColor =
     borderColor ??
-    ((resolvedVariant === 'ghost' || resolvedVariant === 'title')
+    ((resolvedVariant === 'ghost' || resolvedVariant === 'title' || isFloatingVariant)
       ? resolvedVariant === 'title'
         ? 'var(--dq-ui-danger-border)'
-        : generatedTheme?.accentBorder
+        : generatedTheme?.accentBorder ?? 'var(--dq-ui-border)'
       : undefined);
   const resolvedTextColor =
     textColor ??
@@ -39,9 +42,9 @@ const Badge = ({
       ? getContrastTextColor(resolvedBackgroundColor)
       : resolvedVariant === 'count'
         ? 'var(--dq-ui-color-white)'
-      : resolvedVariant === 'title'
-        ? 'var(--dq-ui-accent-soft)'
-      : generatedTheme?.accentText);
+        : resolvedVariant === 'title'
+          ? 'var(--dq-ui-accent-soft)'
+          : generatedTheme?.accentText ?? 'var(--dq-ui-text)');
 
   return (
     <Component
