@@ -8,7 +8,7 @@ import Card from '@/components/primitives/Card';
 import Drawer from '@/components/layout/Drawer';
 import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
-import { getEntryDayLabel, getEntryDisplayName, getEntryMetaLabel } from '@/lib/lineup';
+import { compareLineupEntries, getEntryDayLabel, getEntryDisplayName, getEntryMetaLabel } from '@/lib/lineup';
 import { getCanonicalStageName, getStageTheme } from '@/lib/stageThemes';
 import './LineUpView.css';
 
@@ -39,6 +39,20 @@ const compareStages = (leftStage, rightStage) => {
   }
 
   return String(leftCanonical).localeCompare(String(rightCanonical));
+};
+
+const compareStageSections = (leftStage, rightStage) => {
+  const leftStageOrder = leftStage.entries[0]?.stageOrder;
+  const rightStageOrder = rightStage.entries[0]?.stageOrder;
+
+  if (leftStageOrder !== undefined || rightStageOrder !== undefined) {
+    return (
+      (leftStageOrder ?? 999) - (rightStageOrder ?? 999) ||
+      compareStages(leftStage.stage, rightStage.stage)
+    );
+  }
+
+  return compareStages(leftStage.stage, rightStage.stage);
 };
 
 const getEntryCardMetaProps = (entry) => ({
@@ -98,10 +112,7 @@ const LineUpView = ({
       });
 
       alternatives.sort(
-        (leftEntry, rightEntry) =>
-          (leftEntry.dayOrder ?? 999) - (rightEntry.dayOrder ?? 999) ||
-          compareStages(leftEntry.stage, rightEntry.stage) ||
-          leftEntry.artistRaw.localeCompare(rightEntry.artistRaw)
+        (leftEntry, rightEntry) => compareLineupEntries(leftEntry, rightEntry)
       );
 
       alternativesByEntryId.set(entry.id, alternatives);
@@ -122,8 +133,9 @@ const LineUpView = ({
               id: `${day}-${stage}`,
               stage,
               entries: stageEntries,
+              color: stageEntries.find((entry) => entry.stageColor)?.stageColor ?? null,
             }))
-            .sort((leftStage, rightStage) => compareStages(leftStage.stage, rightStage.stage)),
+            .sort(compareStageSections),
         }))
         .filter((section) => section.stages.length > 0),
     [groupedEntries]
@@ -139,13 +151,14 @@ const LineUpView = ({
           <Box className="dq-lineup-view__stage-sections">
             {section.stages.map((stageSection) => {
               const stageTheme = getStageTheme(stageSection.stage);
+              const stageColor = stageSection.color ?? stageTheme.accent;
 
               return (
                 <Box
                   key={stageSection.id}
                   component="section"
                   background="surface"
-                  color={stageTheme.accent}
+                  color={stageColor}
                   titleBadge={stageSection.stage}
                   titleCount={stageSection.entries.length}
                   titleCountLabel={stageSection.entries.length === 1 ? 'artist' : 'artists'}
@@ -168,7 +181,7 @@ const LineUpView = ({
                       return (
                         <Card
                           key={entry.id}
-                          color={stageTheme.accent}
+                          color={entry.stageColor ?? stageColor}
                           title={getEntryDisplayName(entry)}
                           {...getEntryCardMetaProps(entry)}
                           actionVariant={canToggleFavorites ? 'favorite' : null}
@@ -214,13 +227,14 @@ const LineUpView = ({
                               <Box gap="var(--dq-ui-space-sm)">
                                 {relatedSuggestions.map((suggestion) => {
                                   const suggestionTheme = getStageTheme(suggestion.stage);
+                                  const suggestionColor = suggestion.stageColor ?? suggestionTheme.accent;
                                   const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
 
                                   return (
                                     <Card
                                       key={suggestion.id}
                                       component="div"
-                                      color={suggestionTheme.accent}
+                                      color={suggestionColor}
                                       title={getEntryDisplayName(suggestion)}
                                       {...getEntryCardMetaProps(suggestion)}
                                       actionVariant={canToggleFavorites ? 'favorite' : null}

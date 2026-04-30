@@ -32,10 +32,12 @@ import {
   getDays,
   getStages,
   groupEntriesByDayAndStage,
+  hasScheduledDate,
   loadBetaFeaturesPreference,
   loadHidePastEventsPreference,
   loadHideUndatedEventsPreference,
   loadViewPreferences,
+  reconcileFavoriteItemsWithEntries,
   removeFavoriteByEntryId,
   removeFavoriteByKey,
   resolveFavoriteItems,
@@ -70,8 +72,7 @@ import {
   syncFavoriteSnapshots,
   updateCurrentUserTribeName,
 } from './lib/supabase';
-import { getStageTheme } from './lib/stageThemes';
-import { mapLayers as festivalMapLayers } from './data/mapLayers';
+import { getCanonicalStageName, getStageTheme } from './lib/stageThemes';
 import { PAGE_DEFINITIONS } from './page/pageDefinitions';
 import { getUrlForView, resolveRoute } from './routes/AppRoutes';
 import UiThemeScope from './theme/UiThemeScope';
@@ -247,14 +248,44 @@ const extractLineupEntries = (moduleValue) => {
   const payload = moduleValue?.default ?? moduleValue ?? null;
 
   if (Array.isArray(payload)) {
-    return payload;
+    return payload.filter((entry) => !entry.host);
   }
 
   if (Array.isArray(payload?.entries)) {
-    return payload.entries;
+    return payload.entries.filter((entry) => !entry.host);
+  }
+
+  if (Array.isArray(payload?.lineup)) {
+    return payload.lineup.flatMap((day) =>
+      (day.stages ?? []).flatMap((stage, stageIndex) =>
+        (stage.artists ?? []).map((artist, artistIndex) => {
+          const artistName = artist.artistName ?? artist.artistRaw ?? '';
+
+          return {
+            ...artist,
+            daySlug: day.daySlug,
+            dayOrder: day.dayOrder,
+            stageOrder: stage.stageOrder ?? stageIndex + 1,
+            stage: stage.stageName ?? stage.stage ?? 'Unknown stage',
+            stageSlug: stage.stageSlug,
+            stageCanonical: stage.stageCanonical,
+            stageColor: stage.stageColor ?? artist.stageColor ?? null,
+            artistOrder: artist.artistOrder ?? artistIndex + 1,
+            artistName,
+            artistRaw: artist.artistRaw ?? artistName,
+            timeLabel: artist.timeLabel ?? null,
+          };
+        })
+      )
+    ).filter((entry) => !entry.host);
   }
 
   return [];
+};
+
+const extractLineupMapLayers = (moduleValue) => {
+  const payload = moduleValue?.default ?? moduleValue ?? null;
+  return Array.isArray(payload?.mapboxLayers) ? payload.mapboxLayers : [];
 };
 
 const formatLineupLabel = (path) => {
@@ -280,6 +311,7 @@ const lineupSources = [...lineupKeysAsc]
     key,
     label: formatLineupLabel(key),
     entries: extractLineupEntries(lineupModules[key]),
+    mapLayers: extractLineupMapLayers(lineupModules[key]),
     isLatest: key === latestKey,
   }));
 
@@ -448,7 +480,13 @@ const App = () => {
     [selectedLineupKey]
   );
   const selectedEntries = useMemo(() => selectedLineup?.entries ?? [], [selectedLineup]);
+  const selectedMapLayers = useMemo(() => selectedLineup?.mapLayers ?? [], [selectedLineup]);
+  const activeMapLayers =
+    selectedMapLayers.length > 0
+      ? selectedMapLayers
+      : lineupSources.find((lineup) => lineup.mapLayers.length > 0)?.mapLayers ?? [];
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
+  const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
   const favoritesReadOnly = !isLatestLineupSelected;
   const archiveLineupNotice =
     'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
@@ -462,8 +500,8 @@ const App = () => {
     [selectedEntries, deferredFavoriteItems]
   );
   const favoriteIdSet = useMemo(
-    () => new Set(favoriteItems.map((item) => item?.id).filter(Boolean)),
-    [favoriteItems]
+    () => new Set(favoriteResolution.ids),
+    [favoriteResolution]
   );
   const reviewFavorites = favoriteResolution.reviewItems;
   const baseVisibleReviewFavorites = useMemo(
@@ -472,24 +510,35 @@ const App = () => {
   );
   const visibleReviewFavorites = useMemo(
     () =>
-      hidePastEvents
+      shouldHidePastEvents
         ? filterExpiredReviewFavorites(baseVisibleReviewFavorites, currentTime)
         : baseVisibleReviewFavorites,
-    [baseVisibleReviewFavorites, hidePastEvents, currentTime]
+    [baseVisibleReviewFavorites, currentTime, shouldHidePastEvents]
   );
-  const reviewCount = visibleReviewFavorites.length;
+  const reviewCount = isLatestLineupSelected ? visibleReviewFavorites.length : 0;
   const baseBrowseableEntries = useMemo(
     () => (hideUndatedEvents ? filterUndatedEntries(selectedEntries) : selectedEntries),
     [hideUndatedEvents, selectedEntries]
   );
   const browseableEntries = useMemo(
     () =>
-      hidePastEvents
+      shouldHidePastEvents
         ? filterExpiredEntries(baseBrowseableEntries, currentTime)
         : baseBrowseableEntries,
-    [baseBrowseableEntries, hidePastEvents, currentTime]
+    [baseBrowseableEntries, currentTime, shouldHidePastEvents]
   );
   const activeProfile = profile ?? buildOptimisticProfile(authUser);
+
+  useEffect(() => {
+    if (!isLatestLineupSelected) {
+      return;
+    }
+
+    setFavoriteItems((previousItems) => {
+      const reconciledItems = reconcileFavoriteItemsWithEntries(selectedEntries, previousItems);
+      return reconciledItems === previousItems ? previousItems : reconciledItems;
+    });
+  }, [favoriteItems, isLatestLineupSelected, selectedEntries]);
 
   const tribeLikesByEntryId = useMemo(() => {
     if (!tribe?.members?.length) {
@@ -513,7 +562,15 @@ const App = () => {
         let matchedEntry = null;
 
         if (favorite.id && entriesById.has(favorite.id)) {
-          matchedEntry = entriesById.get(favorite.id);
+          const entryById = entriesById.get(favorite.id);
+          const hasChangedHash =
+            favorite.hash &&
+            entryById.hash &&
+            favorite.hash !== entryById.hash;
+
+          if (!hasChangedHash || !hasScheduledDate(favorite)) {
+            matchedEntry = entryById;
+          }
         } else if (favorite.hash && entriesByHash.has(favorite.hash)) {
           matchedEntry = entriesByHash.get(favorite.hash);
         }
@@ -548,6 +605,19 @@ const App = () => {
     () => getStages(browseableEntries, selectedDay),
     [browseableEntries, selectedDay]
   );
+  const stageColorsByName = useMemo(() => {
+    const colorsByName = new Map();
+
+    browseableEntries.forEach((entry) => {
+      const stageName = entry.stageCanonical ?? getCanonicalStageName(entry.stage);
+
+      if (stageName && entry.stageColor && !colorsByName.has(stageName)) {
+        colorsByName.set(stageName, entry.stageColor);
+      }
+    });
+
+    return colorsByName;
+  }, [browseableEntries]);
   const baseFilteredEntries = useMemo(
     () =>
       filterEntries(browseableEntries, {
@@ -1024,6 +1094,15 @@ const App = () => {
   }, [showTribeOnly, tribe]);
 
   useEffect(() => {
+    if (isLatestLineupSelected) {
+      return;
+    }
+
+    setShowFavoritesOnly(false);
+    setShowTribeOnly(false);
+  }, [isLatestLineupSelected]);
+
+  useEffect(() => {
     if (!authUser || !isAccountReady || !pendingTribeInviteCode || tribe || isTribeBusy) {
       return;
     }
@@ -1094,7 +1173,12 @@ const App = () => {
       if (entry) {
         setFavoriteItems((previousItems) => {
           const isAlreadyFavorite = previousItems.some(
-            (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
+            (item) =>
+              (item.hash && entry.hash && item.hash === entry.hash) ||
+              (
+                item.id === entry.id &&
+                (!item.hash || !entry.hash || item.hash === entry.hash || !hasScheduledDate(item))
+              )
           );
 
           if (isAlreadyFavorite) {
@@ -1132,7 +1216,12 @@ const App = () => {
 
     setFavoriteItems((previousItems) => {
       const isAlreadyFavorite = previousItems.some(
-        (item) => item.id === entry.id || (item.hash && entry.hash && item.hash === entry.hash)
+        (item) =>
+          (item.hash && entry.hash && item.hash === entry.hash) ||
+          (
+            item.id === entry.id &&
+            (!item.hash || !entry.hash || item.hash === entry.hash || !hasScheduledDate(item))
+          )
       );
 
       if (isAlreadyFavorite) {
@@ -1274,10 +1363,10 @@ const App = () => {
       ...stages.map((stage) => ({
         value: stage,
         label: stage,
-        color: getStageTheme(stage).accent,
+        color: stageColorsByName.get(stage) ?? getStageTheme(stage).accent,
       })),
     ],
-    [stages]
+    [stageColorsByName, stages]
   );
 
   const lineupFilterBar = useMemo(() => ({
@@ -1306,13 +1395,13 @@ const App = () => {
     },
     hideOnScroll: true,
     choices: [
-      ...(authUser && tribe ? [{
+      ...(isLatestLineupSelected && authUser && tribe ? [{
         id: 'tribe',
         label: 'My tribe',
         icon: UsersIcon,
         fillOnPress: true,
       }] : []),
-      ...(authUser ? [{
+      ...(isLatestLineupSelected && authUser ? [{
         id: 'favorites',
         label: 'My favorites',
         icon: StarIcon,
@@ -1334,11 +1423,13 @@ const App = () => {
   }), [
     authUser,
     dayDrawerOptions,
+    isLatestLineupSelected,
     resetBrowseState,
     selectedDay,
     selectedStage,
     showFavoritesOnly,
     showTribeOnly,
+    stageColorsByName,
     stageDrawerOptions,
     tribe,
   ]);
@@ -1444,10 +1535,10 @@ const App = () => {
       filterBar: lineupFilterBar,
     },
     maps: {
-      mapLayers: festivalMapLayers,
+      mapLayers: activeMapLayers,
     },
     reviews: {
-      reviewFavorites: visibleReviewFavorites,
+      reviewFavorites: isLatestLineupSelected ? visibleReviewFavorites : [],
       favoriteIdSet,
       toggleFavorite,
       removeReviewFavorite,
@@ -1470,6 +1561,7 @@ const App = () => {
   }), [
     archiveLineupNotice,
     authUser,
+    activeMapLayers,
     favoriteIdSet,
     favoritesReadOnly,
     groupedVisibleEntries,
@@ -1479,6 +1571,7 @@ const App = () => {
     handleRenameTribe,
     isTribeBusy,
     isTribeReady,
+    isLatestLineupSelected,
     lineupFilterBar,
     pendingTribeInviteCode,
     removeReviewFavorite,

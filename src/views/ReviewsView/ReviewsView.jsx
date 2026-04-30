@@ -25,6 +25,14 @@ const ReviewsView = ({
     );
   }
 
+  if (archiveNotice) {
+    return (
+      <Alert variant="warning" title="Snapshot">
+        {archiveNotice}
+      </Alert>
+    );
+  }
+
   if (!reviewFavorites.length) {
     return <EmptyState text="No favorites require a review right now." />;
   }
@@ -47,15 +55,9 @@ const ReviewsView = ({
         </Badge>
       </Box>
 
-      {archiveNotice ? (
-        <Alert variant="warning" title="Archived line-up snapshot">
-          {archiveNotice}
-        </Alert>
-      ) : (
-        <Alert variant="warning" title="A few saved favorites need a quick review">
-          {REVIEW_SECTION_MESSAGE}
-        </Alert>
-      )}
+      <Alert variant="warning" title="A few saved favorites need a quick review">
+        {REVIEW_SECTION_MESSAGE}
+      </Alert>
 
       <Box
         layout="columns"
@@ -65,13 +67,14 @@ const ReviewsView = ({
       >
         {reviewFavorites.map((favorite) => {
           const favoriteTheme = getStageTheme(favorite.stage);
-          const hasSuggestions = !archiveNotice && (favorite.suggestions?.length > 0);
+          const favoriteColor = favorite.stageColor ?? favoriteTheme.accent;
+          const hasSuggestions = favorite.suggestions?.length > 0;
 
           return (
             <Card
               key={favorite.favoriteKey}
-              color={favoriteTheme.accent}
-              title={favorite.artistRaw}
+              color={favoriteColor}
+              title={getEntryDisplayName(favorite)}
               meta1={getSavedFavoritePreviousLabel(favorite)}
               metaVariant="strikethrough"
               actionVariant={canManageFavorites ? 'close' : null}
@@ -79,18 +82,19 @@ const ReviewsView = ({
               onAction={() => removeReviewFavorite?.(favorite.favoriteKey)}
               description={hasSuggestions ? 'You may be looking for this instead' : 'Uh oh... It seems your artist disappeared :('}
             >
-              {archiveNotice ? null : favorite.suggestions?.length ? (
+              {favorite.suggestions?.length ? (
                 <Box gap="var(--dq-ui-space-sm)">
                   <Box gap="var(--dq-ui-space-sm)">
                     {favorite.suggestions.map((suggestion) => {
                       const suggestionTheme = getStageTheme(suggestion.stage);
+                      const suggestionColor = suggestion.stageColor ?? suggestionTheme.accent;
                       const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
 
                       return (
                         <Card
                           key={suggestion.id}
                           component="div"
-                          color={suggestionTheme.accent}
+                          color={suggestionColor}
                           title={getEntryDisplayName(suggestion)}
                           meta1={getEntryMetaLabel(suggestion)}
                           actionVariant={canManageFavorites ? 'favorite' : null}

@@ -59,6 +59,17 @@ function dedupeBy(items, getKey) {
   });
 }
 
+export function compareLineupEntries(leftEntry, rightEntry) {
+  return (
+    (leftEntry.dayOrder ?? 999) - (rightEntry.dayOrder ?? 999) ||
+    (leftEntry.stageOrder ?? 999) - (rightEntry.stageOrder ?? 999) ||
+    String(leftEntry.stage ?? '').localeCompare(String(rightEntry.stage ?? '')) ||
+    (leftEntry.artistOrder ?? 999) - (rightEntry.artistOrder ?? 999) ||
+    String(leftEntry.startAt ?? '').localeCompare(String(rightEntry.startAt ?? '')) ||
+    getEntryDisplayName(leftEntry).localeCompare(getEntryDisplayName(rightEntry))
+  );
+}
+
 function buildLegacyStageSlug(stage) {
   return slugifyValue(stage).replace(/^u-v$/, 'uv');
 }
@@ -97,6 +108,10 @@ function sanitizeArtistTags(item) {
     return [String(item.artistRaw).trim()];
   }
 
+  if (item.artistName) {
+    return [String(item.artistName).trim()];
+  }
+
   return [];
 }
 
@@ -124,11 +139,15 @@ function buildSnapshotFromEntry(entry, overrides = {}) {
     dayOrder: entry.dayOrder ?? DAY_ORDERS[entry.daySlug] ?? null,
     stage: entry.stage ?? 'Unknown stage',
     stageSlug: entry.stageSlug ?? buildLegacyStageSlug(entry.stage),
+    stageOrder: entry.stageOrder ?? null,
     stageCanonical:
       entry.stageCanonical ??
       getCanonicalStageName(entry.stage ?? ''),
-    artistRaw: entry.artistRaw ?? entry.rawName ?? '',
-    artistSlug: entry.artistSlug ?? slugifyValue(entry.artistRaw ?? entry.rawName),
+    stageColor: entry.stageColor ?? null,
+    artistName: entry.artistName ?? entry.artistRaw ?? entry.rawName ?? '',
+    artistRaw: entry.artistRaw ?? entry.artistName ?? entry.rawName ?? '',
+    artistSlug: entry.artistSlug ?? slugifyValue(entry.artistName ?? entry.artistRaw ?? entry.rawName),
+    artistOrder: entry.artistOrder ?? null,
     artistTags,
     artistTokens,
     startAt: entry.startAt ?? null,
@@ -305,11 +324,15 @@ function normalizeStoredSnapshot(item) {
       null,
     stage: item.stage ?? 'Unknown stage',
     stageSlug: item.stageSlug ?? buildLegacyStageSlug(item.stage),
+    stageOrder: item.stageOrder ?? null,
     stageCanonical:
       item.stageCanonical ??
       (item.stage ? getCanonicalStageName(item.stage) : null),
-    artistRaw: item.artistRaw ?? item.rawName ?? '',
-    artistSlug: item.artistSlug ?? slugifyValue(item.artistRaw ?? item.rawName),
+    stageColor: item.stageColor ?? null,
+    artistName: item.artistName ?? item.artistRaw ?? item.rawName ?? '',
+    artistRaw: item.artistRaw ?? item.artistName ?? item.rawName ?? '',
+    artistSlug: item.artistSlug ?? slugifyValue(item.artistName ?? item.artistRaw ?? item.rawName),
+    artistOrder: item.artistOrder ?? null,
     artistTags,
     artistTokens,
     startAt: item.startAt ?? null,
@@ -399,9 +422,7 @@ export function getReviewSuggestions(savedFavorite, entries) {
     .sort(
       (a, b) =>
         b.score - a.score ||
-        (a.entry.dayOrder ?? 999) - (b.entry.dayOrder ?? 999) ||
-        a.entry.stage.localeCompare(b.entry.stage) ||
-        a.entry.artistRaw.localeCompare(b.entry.artistRaw)
+        compareLineupEntries(a.entry, b.entry)
     )
     .slice(0, 5)
     .map(({ entry }) => entry);
@@ -433,8 +454,8 @@ export function validateLineupPayload(payload) {
       throw new Error(`Invalid entry stageCanonical for ${entry.id}.`);
     }
 
-    if (!entry.artistRaw || typeof entry.artistRaw !== 'string') {
-      throw new Error(`Invalid entry artistRaw for ${entry.id}.`);
+    if (!getEntryDisplayName(entry)) {
+      throw new Error(`Invalid entry artistName for ${entry.id}.`);
     }
 
     if (!entry.artistSlug || typeof entry.artistSlug !== 'string') {
@@ -462,7 +483,7 @@ export function getEntryDayLabel(entry) {
 }
 
 export function getEntryDisplayName(entry) {
-  return entry.artistRaw;
+  return entry.artistName ?? entry.artistRaw ?? '';
 }
 
 export function getEntryMetaLabel(entry) {
@@ -508,7 +529,7 @@ export function getStages(entries, dayFilter = 'All days') {
       : entries.filter((entry) => getEntryDayLabel(entry) === dayFilter);
 
   return Array.from(
-    new Set(filtered.map((entry) => getCanonicalStageName(entry.stage)))
+    new Set(filtered.slice().sort(compareLineupEntries).map((entry) => getCanonicalStageName(entry.stage)))
   );
 }
 
@@ -568,7 +589,7 @@ export function filterEntries(entries, { query, day, stage }) {
   if (normalizedQuery) {
     result = result.filter((entry) => {
       return (
-        entry.artistRaw.toLowerCase().includes(normalizedQuery) ||
+        getEntryDisplayName(entry).toLowerCase().includes(normalizedQuery) ||
         entry.artistTags.some((tag) => tag.toLowerCase().includes(normalizedQuery)) ||
         entry.artistTokens.some((token) => token.includes(normalizedQuery))
       );
@@ -597,7 +618,7 @@ export function filterReviewFavorites(reviewFavorites, { query, day, stage }) {
   if (normalizedQuery) {
     result = result.filter((favorite) => {
       return (
-        favorite.artistRaw.toLowerCase().includes(normalizedQuery) ||
+        getEntryDisplayName(favorite).toLowerCase().includes(normalizedQuery) ||
         favorite.artistTags.some((tag) => tag.toLowerCase().includes(normalizedQuery)) ||
         favorite.artistTokens.some((token) => token.includes(normalizedQuery))
       );
@@ -622,7 +643,7 @@ function selectedStageToCanonical(selectedStage, fallbackStage) {
 }
 
 export function groupEntriesByDayAndStage(entries) {
-  return entries.reduce((acc, entry) => {
+  return entries.slice().sort(compareLineupEntries).reduce((acc, entry) => {
     const dayLabel = getEntryDayLabel(entry);
 
     if (!acc[dayLabel]) {
@@ -678,9 +699,13 @@ export function saveFavorites(favoriteItems) {
       dayOrder: item.dayOrder ?? null,
       stage: item.stage ?? '',
       stageSlug: item.stageSlug ?? null,
+      stageOrder: item.stageOrder ?? null,
       stageCanonical: item.stageCanonical ?? null,
+      stageColor: item.stageColor ?? null,
+      artistName: item.artistName ?? item.artistRaw ?? '',
       artistRaw: item.artistRaw ?? '',
       artistSlug: item.artistSlug ?? null,
+      artistOrder: item.artistOrder ?? null,
       artistTags: item.artistTags ?? [],
       artistTokens: item.artistTokens ?? [],
       startAt: item.startAt ?? null,
@@ -713,6 +738,21 @@ export function resolveFavoriteItems(entries, favoriteItems) {
 
     if (favorite.id && currentEntriesById.has(favorite.id)) {
       matchedEntry = currentEntriesById.get(favorite.id);
+
+      if (
+        favorite.hash &&
+        matchedEntry.hash &&
+        favorite.hash !== matchedEntry.hash &&
+        hasScheduledDate(favorite)
+      ) {
+        reviewItems.push({
+          ...favorite,
+          suggestions: [matchedEntry, ...getReviewSuggestions(favorite, entries)]
+            .filter(Boolean)
+            .filter((entry, index, list) => list.findIndex((item) => item.id === entry.id) === index),
+        });
+        return;
+      }
     } else if (favorite.hash && currentEntriesByHash.has(favorite.hash)) {
       matchedEntry = currentEntriesByHash.get(favorite.hash);
     }
@@ -736,6 +776,35 @@ export function resolveFavoriteItems(entries, favoriteItems) {
     entries: dedupedMatchedEntries,
     reviewItems: dedupedReviewItems,
   };
+}
+
+export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
+  const currentEntriesById = new Map(entries.map((entry) => [entry.id, entry]));
+  let didChange = false;
+
+  const nextItems = favoriteItems.map((favorite) => {
+    if (!favorite.id || !currentEntriesById.has(favorite.id)) {
+      return favorite;
+    }
+
+    const currentEntry = currentEntriesById.get(favorite.id);
+
+    if (
+      favorite.hash !== currentEntry.hash &&
+      !hasScheduledDate(favorite)
+    ) {
+      didChange = true;
+      return buildSnapshotFromEntry(currentEntry, {
+        favoriteKey: favorite.favoriteKey,
+        legacyId: favorite.legacyId,
+        savedAt: favorite.savedAt,
+      });
+    }
+
+    return favorite;
+  });
+
+  return didChange ? dedupeBy(nextItems, (item) => item.favoriteKey) : favoriteItems;
 }
 
 export function upsertFavoriteEntry(favoriteItems, entry) {
@@ -901,8 +970,7 @@ export function findAlternativeEntries(targetEntry, allEntries) {
     })
     .sort(
       (a, b) =>
-        (a.dayOrder ?? 999) - (b.dayOrder ?? 999) ||
-        a.stage.localeCompare(b.stage)
+        compareLineupEntries(a, b)
     );
 }
 
