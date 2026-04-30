@@ -30,8 +30,8 @@ export const PAGE_DEFINITIONS = {
     showFooter: false,
     wideHeaderContent: true,
     hideHeaderBrand: true,
-    showCloseButton: false,
-    inlineCloseButton: false,
+    showCloseButton: true,
+    inlineCloseButton: true,
     HeaderContentComponent: SearchPageHeaderContent,
   },
 };

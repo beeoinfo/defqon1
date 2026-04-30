@@ -132,7 +132,7 @@
 }
 
 .dq-layout-header__inline-close-button {
-  --dq-ui-button-height: 46px;
+  --dq-ui-button-height: 42px;
   --dq-ui-button-bg: var(--dq-ui-panel);
   --dq-ui-button-border-color: var(--dq-ui-border-subtle);
   --dq-ui-button-hover-bg: var(--dq-ui-panel-strong);
@@ -144,6 +144,7 @@
   --dq-ui-button-active-bg: var(--dq-ui-panel-strong);
   --dq-ui-button-active-border-color: var(--dq-ui-border);
   --dq-ui-button-active-text-color: var(--dq-ui-text);
+  width: var(--dq-ui-button-height);
   flex: 0 0 auto;
 }
 
@@ -168,7 +169,7 @@
   padding-block: var(--dq-ui-space-xs);
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .dq-layout-header__row {
     padding-block: var(--dq-ui-space-sm);
   }
@@ -202,10 +203,56 @@
     z-index: 121;
     display: block;
   }
+
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+    --dq-layout-header-motion-delay: 0ms;
+    transition:
+      opacity 240ms ease,
+      transform 240ms ease;
+    transition-delay: var(--dq-layout-header-motion-delay);
+    will-change: opacity, transform;
+  }
+
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell:nth-child(2) {
+    --dq-layout-header-motion-delay: 44ms;
+  }
+
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell:nth-child(3) {
+    --dq-layout-header-motion-delay: 88ms;
+  }
+
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell:nth-child(4) {
+    --dq-layout-header-motion-delay: 132ms;
+  }
+
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell:nth-child(5) {
+    --dq-layout-header-motion-delay: 176ms;
+  }
+
+  .dq-layout-header[data-content-transition='covered'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
+  .dq-layout-header[data-content-transition='exiting'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
+
+  .dq-layout-header[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
+  .dq-layout-header[data-content-transition='open'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    .dq-layout-header[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dq-layout-header__motion-item {
+  .dq-layout-header__motion-item,
+  .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
     transition: none;
   }
 }

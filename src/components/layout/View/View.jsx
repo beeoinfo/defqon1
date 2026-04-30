@@ -7,6 +7,10 @@ import './View.css';
 const View = ({
   component = 'div',
   navbar = true,
+  brandTitle,
+  profileName,
+  profileSubtitle,
+  profileImageSrc,
   activeView = null,
   onOpenView = null,
   onOpenSearch = null,
@@ -30,6 +34,10 @@ const View = ({
     >
       <Header
         navbar={navbar}
+        brandTitle={brandTitle}
+        profileName={profileName}
+        profileSubtitle={profileSubtitle}
+        profileImageSrc={profileImageSrc}
         activeView={activeView}
         onOpenView={onOpenView}
         onOpenSearch={onOpenSearch}

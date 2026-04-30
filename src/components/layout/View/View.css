@@ -3,12 +3,23 @@
   pointer-events: none;
 }
 
-@media (max-width: 767.98px) {
+.dq-app-view--maps .dq-layout-view__main {
+  max-width: none;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-inline: 0;
+}
+
+@media (max-width: 575.98px) {
   .dq-layout-view__main {
     padding-bottom:
       calc(
         var(--dq-ui-layout-mobile-bottom-nav-offset) +
         var(--dq-ui-layout-block-padding-bottom)
       );
+  }
+
+  .dq-app-view--maps .dq-layout-view__main {
+    padding-bottom: 0;
   }
 }

@@ -136,7 +136,7 @@
   --dq-ui-button-padding-x: 12px;
   --dq-ui-button-gap: 6px;
   border-radius: var(--dq-ui-radius-rounded);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
 }
 
 .dq-ui-button--md {
@@ -216,6 +216,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  gap: 0.125rem;
 }
 
 .dq-ui-button--rich .dq-ui-button__content {
@@ -235,7 +236,7 @@
   min-width: 0;
   color: var(--dq-ui-button-subtitle-color);
   margin-top: -2px;
-  font-size: 0.76rem;
+  font-size: 0.875rem;
   transition: color var(--dq-ui-transition-fast);
   white-space: nowrap;
   overflow: hidden;

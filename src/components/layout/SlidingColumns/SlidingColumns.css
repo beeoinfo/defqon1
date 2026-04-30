@@ -39,12 +39,15 @@
         --dq-layout-header-content-offset,
         calc(
           var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset)) +
-          20px
+          var(--dq-layout-sticky-gap, var(--dq-ui-space-lg))
         )
       )
     );
   z-index: 109;
-  padding-top: 2px;
+}
+
+.dq-layout--has-top-filter-bar .dq-layout-sliding-columns__stacked-header {
+  transition: top 0.2s ease;
 }
 
 .dq-layout-sliding-columns__stacked-body {
@@ -94,7 +97,7 @@
         --dq-layout-header-content-offset,
         calc(
           var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset)) +
-          20px
+          var(--dq-layout-sticky-gap, var(--dq-ui-space-lg))
         )
       )
     );
@@ -103,6 +106,10 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: clip;
+}
+
+.dq-layout--has-top-filter-bar .dq-layout-sliding-columns__rail {
+  transition: top 0.2s ease;
 }
 
 .dq-layout-sliding-columns__rail-viewport {
@@ -180,7 +187,7 @@
   display: none;
 }
 
-@media (max-width: 1199.98px) {
+@media (max-width: 575.98px) {
   .dq-layout-sliding-columns--touch .dq-layout-sliding-columns__grid-shell {
     overflow-x: auto;
     overflow-y: visible;
@@ -204,42 +211,6 @@
     min-width: 100%;
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: clamp(
-      280px,
-      calc(
-        (
-          var(--dq-layout-sliding-columns-shell-width)
-          - (var(--dq-layout-sliding-columns-shell-inline-padding) * 2)
-          - (var(--dq-layout-sliding-columns-gap) * 2)
-          - (var(--dq-layout-sliding-columns-fit-safety) * 3)
-        ) / 3
-      ),
-      380px
-    );
-  }
-}
-
-@media (max-width: 991.98px) {
-  .dq-layout-sliding-columns--touch .dq-layout-sliding-columns__rail-track,
-  .dq-layout-sliding-columns--touch .dq-layout-sliding-columns__columns {
-    grid-auto-columns: clamp(
-      280px,
-      calc(
-        (
-          var(--dq-layout-sliding-columns-shell-width)
-          - (var(--dq-layout-sliding-columns-shell-inline-padding) * 2)
-          - var(--dq-layout-sliding-columns-gap)
-          - (var(--dq-layout-sliding-columns-fit-safety) * 2)
-        ) / 2
-      ),
-      420px
-    );
-  }
-}
-
-@media (max-width: 767.98px) {
-  .dq-layout-sliding-columns--touch .dq-layout-sliding-columns__rail-track,
-  .dq-layout-sliding-columns--touch .dq-layout-sliding-columns__columns {
     grid-auto-columns: calc(
       var(--dq-layout-sliding-columns-shell-width) -
       (var(--dq-layout-sliding-columns-shell-inline-padding) * 2) -

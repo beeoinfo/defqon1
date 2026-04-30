@@ -1,0 +1,132 @@
+.dq-profile {
+  width: 100%;
+  min-width: 0;
+  gap: var(--dq-ui-space-xl);
+  text-align: center;
+}
+
+.dq-profile__summary {
+  width: 100%;
+  padding-top: 4rem;
+}
+
+.dq-profile__avatar-shell {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: var(--dq-ui-radius-rounded);
+  background: var(--dq-ui-panel-strong);
+  box-shadow: inset 0 0 0 1px var(--dq-ui-border);
+}
+
+.dq-profile__avatar {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.dq-profile__avatar-action {
+  --dq-ui-button-bg: var(--dq-ui-background-blur-surface);
+  --dq-ui-button-hover-bg: var(--dq-ui-background-blur-surface-hover);
+  position: absolute;
+  top: 14%;
+  left: 86%;
+  transform: translate(-50%, -50%);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-profile__name {
+  color: var(--dq-ui-text);
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  line-height: 1.05;
+}
+
+.dq-profile__username {
+  color: var(--dq-ui-text-soft);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.dq-profile__form-zone {
+  width: 100%;
+  min-width: 0;
+}
+
+.dq-profile__actions {
+  animation: dq-profile-actions-in var(--dq-ui-transition-fast) both;
+}
+
+.dq-profile__editor {
+  width: 100%;
+  text-align: left;
+  transform-origin: top center;
+  animation: dq-profile-editor-in 0.24s ease both;
+}
+
+.dq-profile__error {
+  margin: 0;
+  color: var(--dq-ui-accent-soft);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 575.98px) {
+  .dq-profile__summary {
+    padding-top: 2rem;
+  }
+
+  .dq-profile__avatar-shell {
+    width: 112px;
+    height: 112px;
+  }
+
+  .dq-profile__name {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 890.98px) {
+  .dq-profile__summary {
+    padding-top: 2.5rem;
+  }
+}
+
+@media (min-width: 891px) and (max-width: 1199.98px) {
+  .dq-profile__summary {
+    padding-top: 3rem;
+  }
+}
+
+@keyframes dq-profile-actions-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dq-profile-editor-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dq-profile__actions,
+  .dq-profile__editor {
+    animation: none;
+  }
+}

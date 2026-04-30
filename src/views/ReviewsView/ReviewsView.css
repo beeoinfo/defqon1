@@ -1,1 +1,16 @@
+.dq-reviews-view__header {
+  width: 100%;
+}
 
+.dq-reviews-view__title {
+  margin: 0;
+}
+
+.dq-reviews-view__count {
+  min-width: 2.25rem;
+  justify-content: center;
+}
+
+.dq-reviews-view__columns {
+  width: 100%;
+}

@@ -17,6 +17,16 @@ const getThemeScope = (element) => (
   element?.closest?.('.dq-ui-theme') ?? document.documentElement
 );
 
+const getPixelCustomProperty = (element, propertyName, fallbackValue = 0) => {
+  if (!element) {
+    return fallbackValue;
+  }
+
+  const parsedValue = Number.parseFloat(getComputedStyle(element).getPropertyValue(propertyName));
+
+  return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
+};
+
 const Header = ({
   component = 'header',
   brandTitle = 'DEFQON',
@@ -55,9 +65,10 @@ const Header = ({
     }
 
     const headerBottom = headerSurface.getBoundingClientRect().bottom;
+    const stickyGap = getPixelCustomProperty(layoutRoot, '--dq-layout-sticky-gap', 14);
 
     layoutRoot.style.setProperty('--dq-layout-header-offset', `${headerBottom}px`);
-    layoutRoot.style.setProperty('--dq-layout-header-content-offset', `${headerBottom + 20}px`);
+    layoutRoot.style.setProperty('--dq-layout-header-content-offset', `${headerBottom + stickyGap}px`);
 
     return () => {
       layoutRoot.style.removeProperty('--dq-layout-header-offset');
@@ -76,11 +87,25 @@ const Header = ({
       };
     }
 
-    const mobileNavHeight = mobileNavRef.current?.getBoundingClientRect().height ?? 0;
+    const syncMobileNavOffset = () => {
+      const mobileNavHeight = mobileNavRef.current?.getBoundingClientRect().height ?? 0;
 
-    scope.style.setProperty('--dq-ui-layout-mobile-bottom-nav-offset', `${mobileNavHeight}px`);
+      scope.style.setProperty('--dq-ui-layout-mobile-bottom-nav-offset', `${mobileNavHeight}px`);
+    };
+
+    syncMobileNavOffset();
+    window.addEventListener('resize', syncMobileNavOffset, { passive: true });
+
+    const resizeObserver =
+      typeof ResizeObserver === 'function' && mobileNavRef.current
+        ? new ResizeObserver(syncMobileNavOffset)
+        : null;
+
+    resizeObserver?.observe(mobileNavRef.current);
 
     return () => {
+      window.removeEventListener('resize', syncMobileNavOffset);
+      resizeObserver?.disconnect();
       scope.style.removeProperty('--dq-ui-layout-mobile-bottom-nav-offset');
     };
   }, [navbar]);
@@ -222,7 +247,7 @@ const Header = ({
       {navbar ? (
         <Box ref={mobileNavRef} className="dq-layout-header__mobile-nav" gap="0">
           <Box
-            className="dq-layout-header__mobile-nav-shell dq-layout-header__motion-item dq-layout-header__motion-item--4"
+            className="dq-layout-header__mobile-nav-shell"
             gap="0"
           >
             <Box className="dq-layout-container" gap="0">

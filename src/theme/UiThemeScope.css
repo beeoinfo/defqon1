@@ -30,7 +30,9 @@
   --dq-ui-primary-surface: rgba(188, 155, 94, 0.18);
   --dq-ui-primary-surface-strong: rgba(188, 155, 94, 0.22);
   --dq-ui-accent: #f87171;
+  --dq-ui-accent-strong: #ef4444;
   --dq-ui-accent-soft: #fecaca;
+  --dq-ui-badge-count-bg: var(--dq-ui-accent-strong);
   --dq-ui-yellow: #facc15;
   --dq-ui-favorite-surface: rgba(133, 77, 14, 0.3);
   --dq-ui-favorite-border: rgba(250, 204, 21, 0.26);
@@ -67,7 +69,7 @@
   --dq-ui-space-xl: 18px;
   --dq-ui-space-xxl: 22px;
   --dq-ui-space-xxxl: 24px;
-  --dq-ui-layout-max-width: 1200px;
+  --dq-ui-layout-max-width: 1280px;
   --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
   --dq-ui-layout-block-padding-top: 24px;
   --dq-ui-layout-block-padding-bottom: 40px;

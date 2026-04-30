@@ -1,25 +1,10 @@
 .dq-search-page__header-content {
-  width: min(568px, calc(100vw - 32px));
+  width: min(520px, calc(100vw - 32px - 42px - 6px));
   max-width: 100%;
+  flex: 0 1 520px;
 }
 
 .dq-search-page__header-input {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.dq-search-page__header-close {
-  --dq-ui-button-height: 46px;
-  --dq-ui-button-bg: var(--dq-ui-panel);
-  --dq-ui-button-border-color: var(--dq-ui-border-subtle);
-  --dq-ui-button-hover-bg: var(--dq-ui-panel-strong);
-  --dq-ui-button-hover-border-color: var(--dq-ui-border);
-  --dq-ui-button-hover-text-color: var(--dq-ui-text);
-  --dq-ui-button-focus-bg: var(--dq-ui-panel-strong);
-  --dq-ui-button-focus-border-color: var(--dq-ui-primary-muted);
-  --dq-ui-button-focus-text-color: var(--dq-ui-text);
-  --dq-ui-button-active-bg: var(--dq-ui-panel-strong);
-  --dq-ui-button-active-border-color: var(--dq-ui-border);
-  --dq-ui-button-active-text-color: var(--dq-ui-text);
-  flex: 0 0 auto;
 }

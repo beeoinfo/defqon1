@@ -1,5 +1,5 @@
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Box from '../layout/Box';
 import Button from '../primitives/Button';
 import ChoiceButton from '../primitives/ChoiceButton';
@@ -85,8 +85,20 @@ const getDrawerSelection = (drawer, drawerValue) => {
 };
 
 const getLayoutRoot = (element) => (
-  element?.closest?.('.dq-layout-view, .dq-layout-page') ?? null
+  element?.closest?.('.dq-layout-main, .dq-layout-view, .dq-layout-page') ?? null
 );
+
+const getPixelCustomProperty = (element, propertyName, fallbackValue = 0) => {
+  if (!element) {
+    return fallbackValue;
+  }
+
+  const parsedValue = Number.parseFloat(getComputedStyle(element).getPropertyValue(propertyName));
+
+  return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
+};
+
+const TOP_FILTER_BAR_LAYOUT_CLASS = 'dq-layout--has-top-filter-bar';
 
 const FilterBar = ({
   choices = [],
@@ -99,10 +111,12 @@ const FilterBar = ({
   floating = true,
   placement = 'top',
   hideOnScroll = false,
+  width = 'full',
   className = '',
   ariaLabel = 'Filters',
 }) => {
   const filterBarRef = useRef(null);
+  const scrollRef = useRef(null);
   const openDrawerRef = useRef(null);
   const [internalValue, setInternalValue] = useState(
     () => defaultValue ?? getInitialValue({ choices, drawers })
@@ -120,6 +134,44 @@ const FilterBar = ({
   const resetButtonOptions = typeof resetButton === 'object' ? resetButton : {};
   const showsResetButton = resetButton !== false && hasSelection;
   const shouldRenderResetButton = resetButtonState !== 'closed';
+  const shouldControlTopStickyOffset = floating && resolvedPlacement === 'top';
+
+  const syncContentOffset = useCallback((isHidden = isScrollHiddenRef.current) => {
+    const filterBarElement = filterBarRef.current;
+    const layoutRoot = getLayoutRoot(filterBarElement);
+    const shouldControlStickyOffset =
+      Boolean(filterBarElement) && shouldControlTopStickyOffset;
+
+    if (!layoutRoot) {
+      return;
+    }
+
+    layoutRoot.classList.toggle(TOP_FILTER_BAR_LAYOUT_CLASS, shouldControlStickyOffset);
+
+    if (!shouldControlStickyOffset || isHidden) {
+      layoutRoot.style.removeProperty('--dq-layout-filter-bar-content-offset');
+      return;
+    }
+
+    const filterBarRow = filterBarElement.querySelector('.dq-filter-bar__row');
+    const measuredElement = filterBarRow ?? filterBarElement;
+    const filterBarPaddingBottom = filterBarRow
+      ? getPixelCustomProperty(filterBarElement, 'padding-bottom', 0)
+      : 0;
+    const headerBottom = getPixelCustomProperty(
+      layoutRoot,
+      '--dq-layout-header-offset',
+      getPixelCustomProperty(layoutRoot, '--dq-layout-header-fallback-offset', 0)
+    );
+    const filterBarBottom =
+      filterBarElement.offsetTop +
+      measuredElement.offsetTop +
+      measuredElement.offsetHeight +
+      filterBarPaddingBottom;
+    const stickyGap = Math.max(filterBarElement.offsetTop - headerBottom, 0);
+
+    layoutRoot.style.setProperty('--dq-layout-filter-bar-content-offset', `${filterBarBottom + stickyGap}px`);
+  }, [shouldControlTopStickyOffset]);
 
   const syncScrollHiddenState = (nextHidden) => {
     const filterBarElement = filterBarRef.current;
@@ -130,7 +182,38 @@ const FilterBar = ({
 
     isScrollHiddenRef.current = nextHidden;
     filterBarElement.classList.toggle('dq-filter-bar--scroll-hidden', nextHidden);
+
+    if (shouldControlTopStickyOffset) {
+      syncContentOffset(nextHidden);
+    }
   };
+
+  const scrollFilterButtonIntoView = useCallback((buttonElement) => {
+    const scrollElement = scrollRef.current;
+
+    if (!scrollElement || !buttonElement) {
+      return;
+    }
+
+    const scrollRect = scrollElement.getBoundingClientRect();
+    const buttonRect = buttonElement.getBoundingClientRect();
+    const scrollPadding = 12;
+
+    if (buttonRect.left < scrollRect.left + scrollPadding) {
+      scrollElement.scrollBy({
+        left: buttonRect.left - scrollRect.left - scrollPadding,
+        behavior: 'smooth',
+      });
+      return;
+    }
+
+    if (buttonRect.right > scrollRect.right - scrollPadding) {
+      scrollElement.scrollBy({
+        left: buttonRect.right - scrollRect.right + scrollPadding,
+        behavior: 'smooth',
+      });
+    }
+  }, []);
 
   const updateValue = (nextValue) => {
     if (!isControlled) {
@@ -280,22 +363,21 @@ const FilterBar = ({
   }, [openDrawer]);
 
   useLayoutEffect(() => {
-    const filterBarElement = filterBarRef.current;
-    const layoutRoot = getLayoutRoot(filterBarElement);
+    const handleResize = () => {
+      syncContentOffset();
+    };
 
-    if (!filterBarElement || !layoutRoot || !floating || resolvedPlacement !== 'top') {
-      layoutRoot?.style.removeProperty('--dq-layout-filter-bar-content-offset');
-      return undefined;
-    }
-
-    const filterBarBottom = filterBarElement.getBoundingClientRect().bottom;
-
-    layoutRoot.style.setProperty('--dq-layout-filter-bar-content-offset', `${filterBarBottom + 20}px`);
+    syncContentOffset();
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
-      layoutRoot.style.removeProperty('--dq-layout-filter-bar-content-offset');
+      const layoutRoot = getLayoutRoot(filterBarRef.current);
+
+      window.removeEventListener('resize', handleResize);
+      layoutRoot?.style.removeProperty('--dq-layout-filter-bar-content-offset');
+      layoutRoot?.classList.remove(TOP_FILTER_BAR_LAYOUT_CLASS);
     };
-  }, [floating, resolvedPlacement]);
+  }, [syncContentOffset]);
 
   useEffect(() => {
     if (!floating || !hideOnScroll) {
@@ -376,6 +458,7 @@ const FilterBar = ({
         'dq-filter-bar',
         floating ? 'dq-filter-bar--floating' : '',
         floating ? `dq-filter-bar--floating-${resolvedPlacement}` : '',
+        width === 'content' ? 'dq-filter-bar--width-content' : '',
         className,
       ].filter(Boolean).join(' ')}
       aria-label={ariaLabel}
@@ -409,6 +492,7 @@ const FilterBar = ({
 
         <Box className="dq-filter-bar__scroll-shell">
           <Box
+            ref={scrollRef}
             className={[
               'dq-filter-bar__scroll',
               shouldRenderResetButton ? 'dq-filter-bar__scroll--with-reset' : '',
@@ -429,7 +513,10 @@ const FilterBar = ({
                   name={choice.name}
                   value={choice.value ?? choice.id}
                   checked={choiceChecked}
-                  onCheckedChange={(checked) => updateChoice(choice, checked)}
+                  onCheckedChange={(checked, event) => {
+                    scrollFilterButtonIntoView(event.target.closest('.dq-ui-choice-button'));
+                    updateChoice(choice, checked);
+                  }}
                   radius="rounded"
                   color={choice.color}
                   icon={choice.icon}
@@ -449,7 +536,6 @@ const FilterBar = ({
                 <ToggleButton
                   key={drawer.id}
                   pressed={isOpen || drawerSelection.hasSelection}
-                  onPressedChange={() => setOpenDrawer(isOpen ? null : drawer.id)}
                   radius="rounded"
                   color={drawerSelection.color}
                   icon={DropdownChevron}
@@ -458,6 +544,10 @@ const FilterBar = ({
                   aria-controls={renderedDrawer ? `dq-filter-bar-drawer-${renderedDrawer.id}` : undefined}
                   data-open={isOpen ? 'true' : 'false'}
                   className="dq-filter-bar__drawer-trigger"
+                  onPressedChange={(nextPressed, event) => {
+                    scrollFilterButtonIntoView(event.currentTarget);
+                    setOpenDrawer(isOpen ? null : drawer.id);
+                  }}
                 >
                   {drawerSelection.label}
                 </ToggleButton>

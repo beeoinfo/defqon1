@@ -150,6 +150,7 @@ const Navbar = ({
                   className="dq-layout-navbar__item"
                   pressed={isActive}
                   icon={Icon}
+                  badge={item.badge}
                   fillOnPress
                   radius="rounded"
                   aria-current={isActive ? 'page' : undefined}

@@ -8,19 +8,19 @@
   padding-inline: 0;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 576px) {
   .dq-filter-bar {
     --dq-filter-bar-inline-padding: calc(18px - (18px * 0.33));
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 891px) {
   .dq-filter-bar {
     --dq-filter-bar-inline-padding: calc(20px - (20px * 0.33));
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .dq-filter-bar {
     --dq-filter-bar-inline-padding: calc(20px - (20px * 0.33));
   }
@@ -52,6 +52,24 @@
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--dq-ui-space-lg));
 }
 
+.dq-filter-bar--width-content {
+  width: max-content;
+  max-width: calc(100% - (var(--dq-filter-bar-inline-padding) * 2));
+}
+
+.dq-filter-bar--floating.dq-filter-bar--width-content {
+  width: max-content;
+}
+
+.dq-filter-bar--width-content .dq-filter-bar__row {
+  width: max-content;
+  max-width: 100%;
+}
+
+.dq-filter-bar--width-content .dq-filter-bar__scroll {
+  min-width: 0;
+}
+
 .dq-filter-bar--floating-top.dq-filter-bar--scroll-hidden {
   opacity: 0;
   pointer-events: none;
@@ -64,7 +82,7 @@
   transform: translate(-50%, calc(100% + var(--dq-ui-space-lg)));
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .dq-filter-bar--floating-bottom {
     bottom:
       calc(
@@ -144,23 +162,8 @@
   position: relative;
   min-width: 0;
   flex: 1 1 auto;
-  overflow: hidden;
   margin-block: calc(var(--dq-filter-bar-focus-ring-size) * -1);
   padding-block: var(--dq-filter-bar-focus-ring-size);
-  clip-path:
-    inset(
-      calc(var(--dq-filter-bar-focus-ring-size) * -1)
-      0
-      calc(var(--dq-filter-bar-focus-ring-size) * -1)
-      0
-    );
-  -webkit-clip-path:
-    inset(
-      calc(var(--dq-filter-bar-focus-ring-size) * -1)
-      0
-      calc(var(--dq-filter-bar-focus-ring-size) * -1)
-      0
-    );
 }
 
 .dq-filter-bar__scroll {

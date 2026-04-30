@@ -146,12 +146,14 @@ It exists to preserve consistency, reduce regressions, and keep long-term decisi
 ### Layout breakpoints
 
 - Use the project layout breakpoint scale consistently.
-- The current layout breakpoints are Bootstrap-like: desktop `>= 1200px`, large `>= 992px`, medium `>= 768px`, then mobile below `768px`.
-- When writing `max-width` media queries for these thresholds, use the non-overlapping values `1199.98px`, `991.98px`, and `767.98px`.
+- The current layout breakpoints are tokenized for JavaScript in `src/theme/tokens.js`: tablet `>= 576px`, laptop `>= 891px`, and desktop `>= 1280px`.
+- When writing `min-width` media queries for these thresholds, use `576px`, `891px`, and `1280px`.
+- When writing `max-width` media queries for these thresholds, use the non-overlapping derived values `575.98px`, `890.98px`, and `1199.98px`.
 - CSS custom properties must not be used as breakpoint tokens inside `@media` queries because they are not reliable for that use in standard CSS.
-- Until a build-time token system such as custom media, PostCSS, or SCSS is explicitly introduced, breakpoint values are centralized by this documented convention and repeated exactly where needed.
+- Until a build-time token system such as custom media, PostCSS, or SCSS is explicitly introduced, breakpoint values are centralized in the theme JS tokens for JavaScript usage and repeated as literal CSS values where `@media` requires them.
+- Visual CSS variables are declared in `src/theme/UiThemeScope.css`; do not duplicate the full visual token set in JavaScript unless a value is genuinely needed by runtime JS logic.
 - `Box` column layouts must never exceed 4 columns.
-- `Box` column layouts should reduce from 4 to 3 to 2 to 1 columns across those breakpoints.
+- `Box` column layouts should reduce from 4 to 3 to 2 to 1 columns across desktop, laptop, tablet, and phone ranges.
 
 ## Styling conventions
 

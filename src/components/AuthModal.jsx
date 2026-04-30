@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
-import { XIcon } from '@phosphor-icons/react';
+import Alert from './Alert';
+import Box from './layout/Box';
+import Modal from './layout/Modal';
+import Button from './primitives/Button';
+import Title from './primitives/Title';
+import { TextInput } from './primitives/forms';
 import {
   isSupabaseConfigured,
   signInWithUsername,
@@ -32,18 +37,18 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    if (open) {
-      setTab(defaultTab);
-      setErrorMessage('');
-      setSuccessMessage('');
-      setUsername('');
-      setPassword('');
+    if (!open) {
+      return;
     }
-  }, [open, defaultTab]);
 
-  if (!open) {
-    return null;
-  }
+    setTab(defaultTab);
+    setErrorMessage('');
+    setSuccessMessage('');
+    setFirstName('');
+    setLastName('');
+    setUsername('');
+    setPassword('');
+  }, [open, defaultTab]);
 
   const isSignup = tab === 'signup';
 
@@ -118,25 +123,21 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-panel modal-panel--auth" onClick={(event) => event.stopPropagation()}>
-        <div className="modal-panel__header">
-          <div>
-            <h2>{isSignup ? 'Create your account' : 'Welcome back'}</h2>
-          </div>
-          <button
-            type="button"
-            className="icon-button"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <XIcon size={18} />
-          </button>
-        </div>
-        <div className="modal-tabs modal-tabs--auth">
-          <button
-            type="button"
-            className={tab === 'login' ? 'modal-tab modal-tab--active' : 'modal-tab'}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isSignup ? 'Create your account' : 'Welcome back'}
+      subtitle={
+        isSignup
+          ? 'Create an account to sync favorites, tribe activity and profile settings.'
+          : 'Log in to recover your synced profile, tribe and saved favorites.'
+      }
+      maxWidth="560px"
+    >
+      <Box gap="var(--dq-ui-space-lg)">
+        <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+          <Button
+            selected={tab === 'login'}
             onClick={() => {
               setTab('login');
               setErrorMessage('');
@@ -144,10 +145,9 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
             }}
           >
             Login
-          </button>
-          <button
-            type="button"
-            className={tab === 'signup' ? 'modal-tab modal-tab--active' : 'modal-tab'}
+          </Button>
+          <Button
+            selected={tab === 'signup'}
             onClick={() => {
               setTab('signup');
               setErrorMessage('');
@@ -155,60 +155,80 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
             }}
           >
             Sign up
-          </button>
-        </div>
-        <form className="form-grid form-grid--auth" onSubmit={handleSubmit}>
-          {isSignup && (
-            <>
-              <label className="field">
-                <span>First name</span>
-                <input
-                  value={firstName}
-                  onChange={(event) => setFirstName(event.target.value)}
-                  autoComplete="given-name"
-                />
-              </label>
-              <label className="field">
-                <span>Last name</span>
-                <input
-                  value={lastName}
-                  onChange={(event) => setLastName(event.target.value)}
-                  autoComplete="family-name"
-                />
-              </label>
-            </>
-          )}
-          <label className="field">
-            <span>Username</span>
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              autoComplete="username"
-            />
-          </label>
-          <label className="field">
-            <span>Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete={isSignup ? 'new-password' : 'current-password'}
-            />
-          </label>
-          {isSignup && (
-            <p className="form-help">
-              Minimum 8 characters with uppercase, lowercase, number and symbol.
-            </p>
-          )}
-          {successMessage && <div className="form-success">{successMessage}</div>}
-          {errorMessage && <div className="form-error">{errorMessage}</div>}
-          <div className="modal-actions">
-            <button type="submit" className="button-primary" disabled={isBusy}>
+          </Button>
+        </Box>
+
+        <Box component="form" gap="var(--dq-ui-space-lg)" onSubmit={handleSubmit}>
+          {isSignup ? (
+            <Box direction="row" wrap="wrap" maxColumns={2}>
+              <TextInput
+                label="First name"
+                value={firstName}
+                onChange={(event) => setFirstName(event.target.value)}
+                autoComplete="given-name"
+                required
+              />
+              <TextInput
+                label="Last name"
+                value={lastName}
+                onChange={(event) => setLastName(event.target.value)}
+                autoComplete="family-name"
+                required
+              />
+            </Box>
+          ) : null}
+
+          <TextInput
+            label={isSignup ? 'Username' : 'Username or email'}
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            autoComplete="username"
+            description={
+              isSignup
+                ? 'Use lowercase letters, numbers, dots, underscores or dashes.'
+                : undefined
+            }
+            required
+          />
+
+          <TextInput
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete={isSignup ? 'new-password' : 'current-password'}
+            description={
+              isSignup
+                ? 'Minimum 8 characters with uppercase, lowercase, number and symbol.'
+                : undefined
+            }
+            required
+          />
+
+          {successMessage ? (
+            <Alert variant="success" title="Account created">
+              {successMessage}
+            </Alert>
+          ) : null}
+
+          {errorMessage ? (
+            <Alert variant="error" title="Authentication failed">
+              {errorMessage}
+            </Alert>
+          ) : null}
+
+          <Box direction="row" justify="space-between" align="center" wrap="wrap">
+            <Title component="span" variant="h6">
+              {isSignup
+                ? 'Your synced profile is ready right after sign-up.'
+                : 'Your favorites and tribe stay attached to your account.'}
+            </Title>
+            <Button type="submit" disabled={isBusy}>
               {isBusy ? 'Please wait...' : isSignup ? 'Create account' : 'Login'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    </Modal>
   );
 }

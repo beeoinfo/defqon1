@@ -1,18 +1,12 @@
-import React from 'react';
+import Alert from './Alert';
 
-/**
- * Render a simple empty state message. This component is used across
- * multiple pages when no results are available after filtering or
- * searching. It accepts a single text prop to display a friendly
- * message to the user.
- *
- * Props:
- *   text (string): Message to show inside the empty state.
- */
-export default function EmptyState({ text }) {
-  return (
-    <div className="empty-state">
-      <p>{text}</p>
-    </div>
-  );
-}
+const EmptyState = ({
+  title = 'Nothing to show',
+  text,
+}) => (
+  <Alert variant="neutral" title={title}>
+    {text}
+  </Alert>
+);
+
+export default EmptyState;

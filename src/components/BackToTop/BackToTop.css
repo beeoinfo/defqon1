@@ -24,7 +24,7 @@
   pointer-events: auto;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .dq-back-to-top {
     right: max(var(--dq-ui-space-lg), env(safe-area-inset-right, 0px));
     bottom: calc(var(--dq-ui-layout-mobile-bottom-nav-offset) + var(--dq-ui-space-lg));

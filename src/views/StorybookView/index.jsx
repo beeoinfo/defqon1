@@ -11,6 +11,7 @@ import Modal from '../../components/layout/Modal';
 import Page from '../../components/layout/Page';
 import SlidingColumns from '../../components/layout/SlidingColumns';
 import PeopleCard from '../../components/PeopleCard';
+import Profile from '../../components/Profile';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import View from '@/components/layout/View';
@@ -36,6 +37,7 @@ import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
 import UiThemeScope from '../../theme/UiThemeScope';
+import { getPresetAvatarUrl, getRandomPresetAvatarIndex } from '@/lib/presetAvatars';
 import './StorybookView.css';
 
 const STORYBOOK_BOX_EXAMPLES = [
@@ -826,6 +828,8 @@ StorybookPeopleSection.displayName = 'StorybookPeopleSection';
 
 const StorybookBody = memo(() => {
   const [radioValue, setRadioValue] = useState('all');
+  const [profileAvatarPreset, setProfileAvatarPreset] = useState(1);
+  const profileAvatarSrc = getPresetAvatarUrl(profileAvatarPreset);
 
   return (
     <>
@@ -1071,6 +1075,25 @@ const StorybookBody = memo(() => {
             </Box>
           </Box>
         </Box>
+      </Box>
+
+      <Box
+        component="section"
+        title="Profile"
+        titleComponent="h2"
+        titleVariant="h2"
+      >
+        <Profile
+          firstName="Dylan"
+          lastName="Bergozza"
+          username="daddydi"
+          avatarSrc={profileAvatarSrc}
+          onChangePreset={() => {
+            const nextPreset = getRandomPresetAvatarIndex(profileAvatarPreset);
+            setProfileAvatarPreset(nextPreset);
+            return getPresetAvatarUrl(nextPreset);
+          }}
+        />
       </Box>
 
       <StorybookPeopleSection />

@@ -1,0 +1,9 @@
+.dq-lineup-view__stage-sections,
+.dq-lineup-view__stage-section {
+  width: 100%;
+}
+
+.dq-lineup-view__tribe-note {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+}

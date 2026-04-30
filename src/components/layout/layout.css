@@ -5,25 +5,27 @@
   padding-inline: 16px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 576px) {
   .dq-layout-container {
     padding-inline: 18px;
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 891px) {
   .dq-layout-container {
     padding-inline: 20px;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .dq-layout-container {
     padding-inline: 20px;
   }
 }
 
 .dq-layout-main {
+  --dq-layout-sticky-gap: var(--dq-ui-space-lg);
+  --dq-layout-filter-bar-sticky-gap: var(--dq-layout-sticky-gap);
   --dq-layout-header-control-size: 48px;
   --dq-layout-header-fallback-offset:
     calc(
@@ -46,14 +48,14 @@
         --dq-layout-header-content-offset,
         calc(
           var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset)) +
-          20px
+          var(--dq-layout-sticky-gap, var(--dq-ui-space-lg))
         )
       )
     );
   padding-bottom: var(--dq-ui-layout-block-padding-bottom);
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .dq-layout-main {
     --dq-layout-header-fallback-offset:
       calc(

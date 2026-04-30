@@ -1,9 +1,10 @@
+import { forwardRef } from 'react';
 import { buildColorTheme } from '../../../lib/colorStyles';
 import Badge from '../../primitives/Badge';
 import Title from '../../primitives/Title';
 import './Box.css';
 
-const Box = ({
+const Box = forwardRef(({
   component = 'div',
   background = 'none',
   color,
@@ -28,7 +29,7 @@ const Box = ({
   style,
   slot,
   ...props
-}) => {
+}, ref) => {
   const defaultGap = component === 'main' ? '40px' : 'var(--dq-ui-space-lg)';
   const resolvedGap = gap ?? defaultGap;
   const parsedMaxColumns = Number(maxColumns);
@@ -43,9 +44,9 @@ const Box = ({
   const columnStyle = resolvedMaxColumns
     ? {
         '--dq-layout-box-columns-desktop': resolvedMaxColumns,
-        '--dq-layout-box-columns-tablet': Math.min(resolvedMaxColumns, 3),
-        '--dq-layout-box-columns-mobile-large': Math.min(resolvedMaxColumns, 2),
-        '--dq-layout-box-columns-mobile': 1,
+        '--dq-layout-box-columns-laptop': Math.min(resolvedMaxColumns, 3),
+        '--dq-layout-box-columns-tablet': Math.min(resolvedMaxColumns, 2),
+        '--dq-layout-box-columns-phone': 1,
       }
     : {};
   const contentStyle = {
@@ -68,6 +69,7 @@ const Box = ({
     return (
       <ContentComponent
         {...props}
+        ref={ref}
         className={['dq-layout-box__content', ...layoutClasses, className].filter(Boolean).join(' ')}
         style={{
           ...contentStyle,
@@ -120,6 +122,7 @@ const Box = ({
     return (
       <Component
         {...props}
+        ref={ref}
         className={[
           'dq-layout-box',
           'dq-layout-box--content-root',
@@ -143,6 +146,7 @@ const Box = ({
   return (
     <Component
       {...props}
+      ref={ref}
       className={['dq-layout-box', `dq-layout-box--${resolvedBackground}`, className]
         .filter(Boolean)
         .join(' ')}
@@ -221,6 +225,8 @@ const Box = ({
       </Box>
     </Component>
   );
-};
+});
+
+Box.displayName = 'Box';
 
 export default Box;

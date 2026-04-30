@@ -1,11 +1,12 @@
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { dqUiBreakpointMedia } from '../../../theme/tokens';
 import Badge from '../../primitives/Badge';
 import Button from '../../primitives/Button';
 import Box from '../Box';
 import './SlidingColumns.css';
 
-const TOUCH_COLUMNS_MEDIA_QUERY = '(max-width: 1199.98px) and (hover: none) and (pointer: coarse)';
+const TOUCH_COLUMNS_MEDIA_QUERY = `${dqUiBreakpointMedia.phoneDown} and (hover: none) and (pointer: coarse)`;
 
 const getInitialTouchMode = () => (
   typeof window !== 'undefined' &&
@@ -55,7 +56,6 @@ const SlidingColumns = ({
   const sectionRefs = useRef(new Map());
   const cellRefs = useRef(new Map());
   const [isTouchDevice, setIsTouchDevice] = useState(getInitialTouchMode);
-  const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id ?? null);
   const [hiddenSections, setHiddenSections] = useState({});
   const hasSections = sections.length > 0;
   const isResponsiveVariant = variant === 'responsive';
@@ -84,7 +84,6 @@ const SlidingColumns = ({
       return undefined;
     }
 
-    setActiveSectionId(sections[0]?.id ?? null);
     setHiddenSections({});
 
     cellRefs.current.forEach((cell) => {
@@ -154,10 +153,6 @@ const SlidingColumns = ({
           activeSectionId = section.id;
         }
       });
-
-      setActiveSectionId((currentActiveSectionId) => (
-        currentActiveSectionId === activeSectionId ? currentActiveSectionId : activeSectionId
-      ));
 
       sections.forEach((section) => {
         const cell = cellRefs.current.get(section.id);
@@ -390,8 +385,6 @@ const SlidingColumns = ({
               const nextIndex = navigationTargets.nextIndex;
               const previousSection = previousIndex !== null ? sections[previousIndex] : null;
               const nextSection = nextIndex !== null ? sections[nextIndex] : null;
-              const isActiveSection = section.id === activeSectionId;
-
               return (
                 <Box
                   key={section.id}
@@ -411,7 +404,7 @@ const SlidingColumns = ({
                     {section.content}
                   </Box>
 
-                  {sections.length > 1 && isActiveSection ? (
+                  {sections.length > 1 ? (
                     <Box
                       className="dq-layout-sliding-columns__mobile-nav"
                       aria-label={`${getLabelText(section.label, `Section ${index + 1}`)} navigation`}
@@ -455,7 +448,7 @@ const SlidingColumns = ({
         </Box>
       </Box>
     </Box>
-  ), [activeSectionId, scrollToSectionIndex, sections, touchNavigationTargets]);
+  ), [scrollToSectionIndex, sections, touchNavigationTargets]);
 
   if (!hasSections) {
     return null;

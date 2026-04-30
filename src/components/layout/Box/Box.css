@@ -137,7 +137,7 @@ dialog.dq-layout-box--surface-ghost-blur {
   justify-self: end;
   align-self: start;
   color: var(--dq-layout-box-title-meta-color, var(--dq-ui-text-soft));
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -158,18 +158,18 @@ dialog.dq-layout-box--surface-ghost-blur {
 
 @media (max-width: 1199.98px) {
   .dq-layout-box--max-columns {
+    --dq-layout-box-columns: var(--dq-layout-box-columns-laptop, 1);
+  }
+}
+
+@media (max-width: 890.98px) {
+  .dq-layout-box--max-columns {
     --dq-layout-box-columns: var(--dq-layout-box-columns-tablet, 1);
   }
 }
 
-@media (max-width: 991.98px) {
+@media (max-width: 575.98px) {
   .dq-layout-box--max-columns {
-    --dq-layout-box-columns: var(--dq-layout-box-columns-mobile-large, 1);
-  }
-}
-
-@media (max-width: 767.98px) {
-  .dq-layout-box--max-columns {
-    --dq-layout-box-columns: var(--dq-layout-box-columns-mobile, 1);
+    --dq-layout-box-columns: var(--dq-layout-box-columns-phone, 1);
   }
 }

@@ -43,7 +43,7 @@
     linear-gradient(180deg, #12161c, #0f1318); */
   --background-blur-filter: blur(24px) saturate(140%);
   --background-blur-surface: linear-gradient(180deg, #1c222aad, #161b228f);
-  --dq-ui-layout-max-width: 1200px;
+  --dq-ui-layout-max-width: 1280px;
   --dq-ui-layout-inline-padding: clamp(16px, 3vw, 32px);
   --dq-ui-layout-block-padding-top: 24px;
   --dq-ui-layout-block-padding-bottom: 40px;
@@ -362,7 +362,7 @@ select {
   gap: 10px;
 }
 .filters-group__label {
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.72);
   letter-spacing: 0.04em;
@@ -622,7 +622,7 @@ select {
   min-height: 32px;
   padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-weight: 800;
 }
 .card-list {
@@ -874,7 +874,7 @@ select {
 }
 .profile-summary__username {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -978,7 +978,7 @@ select {
 .form-help {
   margin: -4px 0 0;
   color: var(--text-soft);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
 }
 .form-error {
   border-radius: 16px;
@@ -1573,7 +1573,7 @@ select {
 }
 .tribe-member-card__copy span {
   color: rgba(255, 255, 255, 0.62);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
 }
 .tribe-member-card__meta {
   display: grid;
@@ -1583,7 +1583,7 @@ select {
 }
 .tribe-member-card__role {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 .tribe-pending-invite {
@@ -1596,7 +1596,7 @@ select {
 }
 .tribe-pending-invite__label {
   color: rgba(255, 255, 255, 0.66);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
 }
 .tribe-pending-invite--warning {
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1760,7 +1760,7 @@ select {
   color: white;
   padding: 8px 16px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   cursor: pointer;
   position: relative;
   transition: background 0.2s ease, color 0.2s ease;
@@ -1807,7 +1807,7 @@ select {
 }
 .profile-trigger__name {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
 }
 .profile-trigger__username {
   font-size: 0.7rem;
@@ -2610,7 +2610,7 @@ select {
   color: white;
   padding: 6px 12px;
   border-radius: 16px;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -3712,7 +3712,7 @@ body::before {
 }
 
 .tribe-like-card__name span {
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.68);
 }
 
@@ -4425,7 +4425,7 @@ body::before {
 }
 
 .profile-settings__lineup-meta {
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.58);
 }
 

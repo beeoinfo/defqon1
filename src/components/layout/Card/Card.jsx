@@ -1,13 +1,13 @@
+import { Children } from 'react';
 import { StarIcon, XIcon } from '@phosphor-icons/react';
 import { mixColors, parseColor, rgbaString } from '../../../lib/colorStyles';
-import { dqUiTokens } from '../../../theme/tokens';
 import Button from '../../primitives/Button';
 import ToggleButton from '../../primitives/ToggleButton';
 import Title from '../../primitives/Title';
 import Box from '../Box';
 import './Card.css';
 
-const CARD_BG_BASE = dqUiTokens.colors.bg;
+const CARD_BG_BASE = '#09090b';
 
 const Card = ({
   component = 'article',
@@ -22,6 +22,8 @@ const Card = ({
   description,
   error,
   actionVariant = 'favorite',
+  actionPressed = false,
+  actionAriaLabel,
   onAction,
   className = '',
   children,
@@ -51,12 +53,22 @@ const Card = ({
 
   const metaParts = [meta1, meta2, meta3].filter(Boolean);
   const hasMeta = metaParts.length > 0;
-  const hasBody = Boolean(description) || Boolean(children);
+  const bodyChildren = Children.toArray(children);
+  const hasBody = Boolean(description) || bodyChildren.length > 0;
 
   const actionElement = actionVariant === 'close'
-    ? <Button icon={XIcon} ariaLabel="Close" size="sm" radius="rounded" onClick={onAction} />
+    ? <Button icon={XIcon} ariaLabel={actionAriaLabel ?? 'Close'} size="sm" radius="rounded" onClick={onAction} />
     : actionVariant === 'favorite'
-      ? <ToggleButton variant="favorite" icon={StarIcon} fillOnPress ariaLabel="Favorite" onPressedChange={onAction} />
+      ? (
+        <ToggleButton
+          variant="favorite"
+          icon={StarIcon}
+          pressed={actionPressed}
+          fillOnPress
+          ariaLabel={actionAriaLabel ?? 'Favorite'}
+          onPressedChange={onAction}
+        />
+      )
       : null;
 
   return (
@@ -120,7 +132,7 @@ const Card = ({
             {description ? (
               <p className={['dq-layout-card__description', error ? 'dq-layout-card__description--error' : ''].filter(Boolean).join(' ')}>{description}</p>
             ) : null}
-            {children}
+            {bodyChildren}
           </Box>
         </>
       ) : null}

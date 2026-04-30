@@ -16,7 +16,7 @@
 
 .dq-layout-card__meta {
   color: var(--dq-ui-text-soft);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
 }
 
 .dq-layout-card__meta-item {
@@ -53,7 +53,7 @@
 .dq-layout-card__description {
   margin: 0;
   color: var(--dq-ui-text-soft);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-style: italic;
   line-height: 1.4;
   display: -webkit-box;

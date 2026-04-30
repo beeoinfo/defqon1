@@ -4,7 +4,7 @@
   justify-content: center;
   white-space: nowrap;
   text-transform: uppercase;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--dq-ui-badge-text, var(--dq-ui-color-white));
 }
@@ -48,7 +48,7 @@
   height: 20px;
   padding-inline: 6px;
   border-radius: var(--dq-ui-radius-rounded);
-  background: var(--dq-ui-badge-bg, var(--dq-ui-accent));
+  background: var(--dq-ui-badge-bg, var(--dq-ui-badge-count-bg, var(--dq-ui-accent)));
 }
 
 .dq-ui-badge--sm.dq-ui-badge--ghost,

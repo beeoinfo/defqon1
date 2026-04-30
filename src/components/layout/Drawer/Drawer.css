@@ -7,7 +7,7 @@
 .dq-layout-drawer__description {
   margin: 0;
   color: var(--dq-ui-text-soft);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   font-style: italic;
   line-height: 1.4;
   display: -webkit-box;
@@ -108,7 +108,7 @@
 
 .dq-layout-drawer__meta {
   color: var(--dq-ui-text-soft);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
 }
 
 .dq-layout-drawer__meta-item {
@@ -173,7 +173,7 @@
   display: none;
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .dq-layout-drawer {
     --dq-layout-drawer-translate-x: 0px;
   }

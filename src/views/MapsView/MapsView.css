@@ -1,1 +1,93 @@
+.dq-maps-view {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(12, 16, 22, 0.86), rgba(7, 10, 14, 0.98)),
+    var(--dq-ui-surface);
+}
 
+.dq-maps-view__canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.dq-maps-view__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 12, 16, 0.58), rgba(9, 12, 16, 0.12) 28%, rgba(9, 12, 16, 0.34)),
+    radial-gradient(circle at top left, rgba(188, 155, 94, 0.18), transparent 36%);
+  pointer-events: none;
+}
+
+.dq-maps-view__controls {
+  position: absolute;
+  top:
+    calc(
+      var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 77px)) +
+      var(--dq-ui-space-lg)
+    );
+  right: 16px;
+  z-index: 2;
+}
+
+.dq-maps-view__zoom-button {
+  --dq-ui-button-bg: var(--dq-ui-background-blur-surface);
+  --dq-ui-button-hover-bg: var(--dq-ui-background-blur-surface-hover);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-maps-view__filter-bar {
+  z-index: 3;
+}
+
+.dq-maps-view__status {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--dq-ui-space-md);
+  padding: 14px 16px;
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-lg);
+  background: var(--dq-ui-background-blur-surface);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-maps-view__status--error {
+  border-color: var(--dq-ui-danger-border);
+  background: linear-gradient(180deg, rgba(76, 17, 17, 0.78), rgba(49, 12, 12, 0.92));
+}
+
+.dq-maps-view__status p,
+.dq-maps-view__status strong {
+  margin: 0;
+}
+
+.dq-maps-view__status p {
+  color: var(--dq-ui-text-soft);
+}
+
+@media (max-width: 575.98px) {
+  .dq-maps-view__controls {
+    top:
+      calc(
+        var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 77px)) +
+        var(--dq-ui-space-lg)
+      );
+    right: 12px;
+  }
+
+  .dq-maps-view__status {
+    left: 12px;
+    right: 12px;
+  }
+}
