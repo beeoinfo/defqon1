@@ -15,14 +15,14 @@ import {
   StarIcon,
   UsersIcon,
 } from '@phosphor-icons/react';
-import AuthModal from './components/AuthModal';
-import BackToTop from './components/BackToTop';
-import EmptyState from './components/EmptyState';
-import Page from './components/layout/Page';
-import View from './components/layout/View';
-import Badge from './components/primitives/Badge';
-import useAnimatedPageStack from './hooks/useAnimatedPageStack';
-import useDocumentScrollLock from './hooks/useDocumentScrollLock';
+import AuthModal from '@/components/AuthModal';
+import BackToTop from '@/components/BackToTop';
+import EmptyState from '@/components/EmptyState';
+import Page from '@/components/layout/Page';
+import View from '@/components/layout/View';
+import Badge from '@/components/primitives/Badge';
+import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
+import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import {
   filterExpiredEntries,
   filterExpiredReviewFavorites,

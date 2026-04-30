@@ -1,7 +1,7 @@
 import { MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ToggleButton from '../../primitives/ToggleButton';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import './Navbar.css';
 
 const DEFAULT_NAVBAR_ITEMS = [

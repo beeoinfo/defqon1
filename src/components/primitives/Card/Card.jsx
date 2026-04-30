@@ -4,7 +4,7 @@ import { mixColors, parseColor, rgbaString } from '../../../lib/colorStyles';
 import Button from '../../primitives/Button';
 import ToggleButton from '../../primitives/ToggleButton';
 import Title from '../../primitives/Title';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import './Card.css';
 
 const CARD_BG_BASE = '#09090b';

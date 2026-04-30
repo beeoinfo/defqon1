@@ -1,6 +1,6 @@
 import { isStorybookViewEnabled } from '../../../routes/AppRoutes';
 import Link from '../../primitives/Link';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import './Footer.css';
 
 const Footer = ({

@@ -4,7 +4,7 @@ import logoMark from '../../../assets/logo.svg';
 import tribeAvatarSample from '../../../assets/avatars/1.png';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import Navbar from '../Navbar';
 import '../layout.css';
 import './Header.css';

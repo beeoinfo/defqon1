@@ -3,7 +3,7 @@ import { CheckIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/rea
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
-import Card from '../../components/layout/Card';
+import Card from '@/components/primitives/Card';
 import Drawer from '../../components/layout/Drawer';
 import Element from '../../components/layout/Element';
 import FilterBar from '../../components/FilterBar';
@@ -32,7 +32,7 @@ import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
 import { CheckboxInput, FileInput, SearchInput, Switch, TextInput } from '../../components/primitives/forms';
-import PeopleStack from '../../components/primitives/PeopleStack';
+import PeopleStack from '@/components/PeopleStack';
 import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';

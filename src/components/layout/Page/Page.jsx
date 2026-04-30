@@ -1,6 +1,6 @@
 import useHiddenStackLayer from '../../../hooks/useHiddenStackLayer';
 import Header from '../Header';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import Footer from '../Footer';
 import '../layout.css';
 import './Page.css';

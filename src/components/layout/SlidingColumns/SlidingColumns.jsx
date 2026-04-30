@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { dqUiBreakpointMedia } from '../../../theme/tokens';
 import Badge from '../../primitives/Badge';
 import Button from '../../primitives/Button';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import './SlidingColumns.css';
 
 const TOUCH_COLUMNS_MEDIA_QUERY = `${dqUiBreakpointMedia.phoneDown} and (hover: none) and (pointer: coarse)`;

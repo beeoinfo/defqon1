@@ -1,7 +1,7 @@
 import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
 import Box from '@/components/layout/Box';
-import Card from '@/components/layout/Card';
+import Card from '@/components/primitives/Card';
 import Badge from '@/components/primitives/Badge';
 import Title from '@/components/primitives/Title';
 import { REVIEW_SECTION_MESSAGE, getEntryDisplayName, getEntryMetaLabel, getSavedFavoritePreviousLabel } from '@/lib/lineup';
@@ -65,6 +65,7 @@ const ReviewsView = ({
       >
         {reviewFavorites.map((favorite) => {
           const favoriteTheme = getStageTheme(favorite.stage);
+          const hasSuggestions = !archiveNotice && (favorite.suggestions?.length > 0);
 
           return (
             <Card
@@ -76,19 +77,10 @@ const ReviewsView = ({
               actionVariant={canManageFavorites ? 'close' : null}
               actionAriaLabel="Dismiss review"
               onAction={() => removeReviewFavorite?.(favorite.favoriteKey)}
-              description="We kept your previous saved slot and checked the current line-up for nearby matches."
+              description={hasSuggestions ? 'You may be looking for this instead' : 'Uh oh... It seems your artist disappeared :('}
             >
               {archiveNotice ? null : favorite.suggestions?.length ? (
                 <Box gap="var(--dq-ui-space-sm)">
-                  <p
-                    style={{
-                      margin: 0,
-                      color: 'var(--dq-ui-text-soft)',
-                    }}
-                  >
-                    You may be looking for one of these updated slots instead.
-                  </p>
-
                   <Box gap="var(--dq-ui-space-sm)">
                     {favorite.suggestions.map((suggestion) => {
                       const suggestionTheme = getStageTheme(suggestion.stage);
@@ -112,11 +104,7 @@ const ReviewsView = ({
                     })}
                   </Box>
                 </Box>
-              ) : (
-                <Alert variant="neutral" title="No replacement found yet">
-                  This artist does not currently match any close result in the latest line-up snapshot.
-                </Alert>
-              )}
+              ) : undefined}
             </Card>
           );
         })}

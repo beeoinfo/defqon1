@@ -1,7 +1,7 @@
 import { XIcon } from '@phosphor-icons/react';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { lockDocumentScroll, unlockDocumentScroll } from '../../../lib/documentScrollLock';
-import Box from '../Box';
+import Box from '@/components/layout/Box';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
 import './Modal.css';
