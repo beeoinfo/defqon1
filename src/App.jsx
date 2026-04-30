@@ -80,13 +80,11 @@ import LineUpView from './views/LineUpView';
 import MapsView from './views/MapsView';
 import ReviewsView from './views/ReviewsView';
 import StorybookView from './views/StorybookView';
-import TribeView from './views/TribeView';
 
 const VIEW_COMPONENTS = {
   lineup: LineUpView,
   maps: MapsView,
   reviews: ReviewsView,
-  tribe: TribeView,
 };
 
 const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
@@ -841,18 +839,6 @@ const App = () => {
     openView('reviews');
   }, [authUser, openView, requestAuth, resetBrowseState]);
 
-  const handleTribeNav = useCallback(() => {
-    if (!authUser) {
-      requestAuth({ type: 'open-tribe' });
-      return;
-    }
-
-    startTransition(() => {
-      resetBrowseState();
-    });
-    openView('tribe');
-  }, [authUser, openView, requestAuth, resetBrowseState]);
-
   useEffect(() => {
     saveViewPreferences({ selectedDay, selectedStage });
   }, [selectedDay, selectedStage]);
@@ -1119,7 +1105,7 @@ const App = () => {
     joinCurrentUserTribeByCode(pendingTribeInviteCode)
       .then((nextTribe) => {
         setTribe(nextTribe);
-        replaceViewInPlace('tribe');
+        openSettings();
         writePendingTribeInviteCode('');
         setPendingTribeInviteCode('');
       })
@@ -1129,7 +1115,7 @@ const App = () => {
       .finally(() => {
         setIsTribeBusy(false);
       });
-  }, [authUser, isAccountReady, isTribeBusy, pendingTribeInviteCode, replaceViewInPlace, tribe]);
+  }, [authUser, isAccountReady, isTribeBusy, openSettings, pendingTribeInviteCode, tribe]);
 
   const clearPendingTribeInvite = useCallback(() => {
     writePendingTribeInviteCode('');
@@ -1149,8 +1135,8 @@ const App = () => {
 
     clearPendingTribeInvite();
     setTribeInviteAlert('Leave your current tribe before joining another one.');
-    replaceViewInPlace('tribe');
-  }, [clearPendingTribeInvite, pendingTribeInviteCode, replaceViewInPlace, tribe]);
+    openSettings();
+  }, [clearPendingTribeInvite, openSettings, pendingTribeInviteCode, tribe]);
 
   useEffect(() => {
     if (!authUser || !isAccountReady || !pendingAction) {
@@ -1164,7 +1150,7 @@ const App = () => {
 
     if (pendingAction.type === 'open-tribe') {
       resetBrowseState();
-      openView('tribe');
+      openSettings();
     }
 
     if (pendingAction.type === 'toggle-favorite' && isLatestLineupSelected) {
@@ -1196,7 +1182,7 @@ const App = () => {
 
     setPendingAction(null);
     setIsAuthModalOpen(false);
-  }, [authUser, entriesById, isAccountReady, isLatestLineupSelected, openView, pendingAction, resetBrowseState]);
+  }, [authUser, entriesById, isAccountReady, isLatestLineupSelected, openSettings, openView, pendingAction, resetBrowseState]);
 
   const toggleFavorite = useCallback((entryId) => {
     if (favoritesReadOnly) {
@@ -1459,13 +1445,6 @@ const App = () => {
         onClick: handleReviewsNav,
       },
       {
-        id: 'tribe',
-        label: 'Tribe',
-        icon: UsersIcon,
-        active: activeView === 'tribe',
-        onClick: handleTribeNav,
-      },
-      {
         id: 'search',
         label: 'Search',
         icon: MagnifyingGlassIcon,
@@ -1483,7 +1462,6 @@ const App = () => {
       handleLineupNav,
       handleMapsNav,
       handleReviewsNav,
-      handleTribeNav,
       openSearch,
       reviewCount,
     ]
@@ -1546,18 +1524,6 @@ const App = () => {
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       isAuthenticated: Boolean(authUser),
     },
-    tribe: {
-      user: authUser,
-      tribe,
-      isBusy: isTribeBusy,
-      isHydrating: authUser ? !isTribeReady : false,
-      pendingInviteCode: pendingTribeInviteCode,
-      inviteConflictMessage: tribeInviteAlert,
-      onCreateTribe: handleCreateTribe,
-      onJoinTribe: handleJoinTribe,
-      onLeaveTribe: handleLeaveTribe,
-      onRenameTribe: handleRenameTribe,
-    },
   }), [
     archiveLineupNotice,
     authUser,
@@ -1565,20 +1531,11 @@ const App = () => {
     favoriteIdSet,
     favoritesReadOnly,
     groupedVisibleEntries,
-    handleCreateTribe,
-    handleJoinTribe,
-    handleLeaveTribe,
-    handleRenameTribe,
-    isTribeBusy,
-    isTribeReady,
     isLatestLineupSelected,
     lineupFilterBar,
-    pendingTribeInviteCode,
     removeReviewFavorite,
     showTribeOnly,
     toggleFavorite,
-    tribe,
-    tribeInviteAlert,
     tribeLikesByEntryId,
     visibleReviewFavorites,
     visibleEntries,
@@ -1588,6 +1545,11 @@ const App = () => {
     settings: {
       user: authUser,
       profile: activeProfile,
+      tribe,
+      isTribeBusy,
+      isTribeHydrating: authUser ? !isTribeReady : false,
+      pendingTribeInviteCode,
+      tribeInviteAlert,
       betaFeaturesEnabled,
       hidePastEvents,
       hideUndatedEvents,
@@ -1599,6 +1561,10 @@ const App = () => {
       onHideUndatedEventsChange: setHideUndatedEvents,
       onProfileUpdated: handleProfileUpdated,
       onSignedOut: handleSignedOut,
+      onCreateTribe: handleCreateTribe,
+      onJoinTribe: handleJoinTribe,
+      onLeaveTribe: handleLeaveTribe,
+      onRenameTribe: handleRenameTribe,
     },
     search: {
       query,
@@ -1623,14 +1589,23 @@ const App = () => {
     favoritesReadOnly,
     groupedSearchEntries,
     handleProfileUpdated,
+    handleCreateTribe,
+    handleJoinTribe,
+    handleLeaveTribe,
+    handleRenameTribe,
     handleSelectLineup,
     handleSignedOut,
     hidePastEvents,
     hideUndatedEvents,
+    isTribeBusy,
+    isTribeReady,
+    pendingTribeInviteCode,
     query,
     searchEntries,
     selectedLineupKey,
     toggleFavorite,
+    tribe,
+    tribeInviteAlert,
     tribeLikesByEntryId,
   ]);
 

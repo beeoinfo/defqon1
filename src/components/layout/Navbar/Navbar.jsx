@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ToggleButton from '../../primitives/ToggleButton';
 import Box from '@/components/layout/Box';
@@ -19,11 +19,6 @@ const DEFAULT_NAVBAR_ITEMS = [
     id: 'reviews',
     label: 'Reviews',
     icon: StarIcon,
-  },
-  {
-    id: 'tribe',
-    label: 'Tribe',
-    icon: UsersIcon,
   },
 ];
 

@@ -5,7 +5,6 @@ export const APP_ROUTES = [
   { path: '/lineup', view: 'lineup' },
   { path: '/maps', view: 'maps' },
   { path: '/reviews', view: 'reviews' },
-  { path: '/tribe', view: 'tribe' },
 ];
 
 export const STORYBOOK_VIEW_ROUTE = {

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   PencilSimpleIcon,
-  PlusIcon,
   QrCodeIcon,
   ShareNetworkIcon,
   UsersIcon,
@@ -163,7 +162,7 @@ const TribeView = ({
     const nextName = String(tribeName ?? '').trim();
 
     if (!nextName) {
-      setErrorMessage('Please enter a tribe name.');
+      setErrorMessage('Please enter a name.');
       return;
     }
 
@@ -229,55 +228,51 @@ const TribeView = ({
 
       {!tribe ? (
         <>
-          <Box direction="row" wrap="wrap" maxColumns={2}>
-            <Box
-              background="surface"
-              title="Create your tribe"
-              titleIcon={PlusIcon}
-            >
-              <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-                Pick a name, generate a private invite link, then share it with your people.
-              </p>
-              <TextInput
-                label="Tribe name"
-                value={tribeName}
-                onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
-                placeholder="Weekend crew"
-                maxLength={48}
-                autoComplete="off"
-              />
-              <Button onClick={handleCreate} disabled={isBusy}>
-                {isBusy ? 'Creating...' : 'Create tribe'}
-              </Button>
-            </Box>
-
-            <Box
-              background="surface"
-              title="Join with a code"
-              titleIcon={UsersIcon}
-            >
-              <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-                Enter a code or open a tribe link. Invite links stay attached to this tab until you sign in.
-              </p>
-              <Box component="form" gap="var(--dq-ui-space-lg)" onSubmit={handleJoin}>
+          <Box background="surface">
+            <Box direction="row" wrap="wrap" maxColumns={2}>
+              <Box gap="var(--dq-ui-space-lg)">
+                <strong className="dq-tribe-view__section-label">Create your tribe</strong>
+                <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+                  Pick a name, generate a private invite link, then share it with your people.
+                </p>
                 <TextInput
-                  label="Invite code"
-                  value={joinCode}
-                  onChange={(event) => setJoinCode(normalizeTribeCode(event.target.value))}
-                  placeholder="Enter code"
-                  maxLength={8}
+                  label="Name"
+                  value={tribeName}
+                  onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
+                  placeholder="Weekend crew"
+                  maxLength={48}
                   autoComplete="off"
                 />
-                <Button type="submit" disabled={isBusy || !joinCode}>
-                  {isBusy ? 'Joining...' : 'Join tribe'}
+                <Button onClick={handleCreate} disabled={isBusy}>
+                  {isBusy ? 'Creating...' : 'Create tribe'}
                 </Button>
               </Box>
 
-              {pendingInviteCode ? (
-                <Alert variant="info" title="Invite waiting in this tab">
-                  {pendingInviteCode}
-                </Alert>
-              ) : null}
+              <Box gap="var(--dq-ui-space-lg)">
+                <strong className="dq-tribe-view__section-label">Join with a code</strong>
+                <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+                  Enter a code or open a tribe link. Invite links stay attached to this tab until you sign in.
+                </p>
+                <Box component="form" gap="var(--dq-ui-space-lg)" onSubmit={handleJoin}>
+                  <TextInput
+                    label="Invite code"
+                    value={joinCode}
+                    onChange={(event) => setJoinCode(normalizeTribeCode(event.target.value))}
+                    placeholder="Enter code"
+                    maxLength={8}
+                    autoComplete="off"
+                  />
+                  <Button type="submit" disabled={isBusy || !joinCode}>
+                    {isBusy ? 'Joining...' : 'Join tribe'}
+                  </Button>
+                </Box>
+
+                {pendingInviteCode ? (
+                  <Alert variant="info" title="Invite waiting in this tab">
+                    {pendingInviteCode}
+                  </Alert>
+                ) : null}
+              </Box>
             </Box>
           </Box>
 
@@ -289,57 +284,49 @@ const TribeView = ({
         </>
       ) : (
         <>
-          <Box direction="row" wrap="wrap" maxColumns={2}>
-            <Box
-              background="surface"
-              title="Your tribe"
-              titleIcon={UsersIcon}
-            >
-              {isEditingName ? (
-                <Box gap="var(--dq-ui-space-md)">
-                  <TextInput
-                    label="Tribe name"
-                    value={tribeName}
-                    onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
-                    placeholder="Tribe name"
-                    maxLength={48}
-                    autoComplete="off"
-                  />
-                  <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-                    <Button onClick={handleRename} disabled={isBusy}>
-                      Save
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setTribeName(getTribeDisplayName(tribe));
-                        setErrorMessage('');
-                        setIsEditingName(false);
-                      }}
-                      disabled={isBusy}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Box gap="var(--dq-ui-space-lg)">
-                  <Box direction="row" justify="space-between" align="center" wrap="wrap">
-                    <Box gap="var(--dq-ui-space-xs)">
-                      <p
-                        className="dq-tribe-view__meta-label"
-                      >
-                        Tribe name
-                      </p>
-                      <strong className="dq-tribe-view__name">{getTribeDisplayName(tribe)}</strong>
-                    </Box>
-                    <Button
-                      icon={PencilSimpleIcon}
-                      ariaLabel="Rename tribe"
-                      onClick={() => setIsEditingName(true)}
+          <Box background="surface" title="Your tribe" titleIcon={UsersIcon}>
+            <Box direction="row" wrap="wrap" maxColumns={2} align="flex-start">
+              <Box gap="var(--dq-ui-space-lg)">
+                {isEditingName ? (
+                  <Box gap="var(--dq-ui-space-md)">
+                    <TextInput
+                      label="Name"
+                      value={tribeName}
+                      onChange={(event) => setTribeName(event.target.value.slice(0, 48))}
+                      placeholder="Name"
+                      maxLength={48}
+                      autoComplete="off"
                     />
+                    <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+                      <Button onClick={handleRename} disabled={isBusy}>
+                        Save
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setTribeName(getTribeDisplayName(tribe));
+                          setErrorMessage('');
+                          setIsEditingName(false);
+                        }}
+                        disabled={isBusy}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                ) : (
+                  <Box gap="var(--dq-ui-space-lg)">
+                    <Box direction="row" justify="space-between" align="center" wrap="wrap">
+                      <Box gap="var(--dq-ui-space-xs)">
+                        <strong className="dq-tribe-view__name">{getTribeDisplayName(tribe)}</strong>
+                      </Box>
+                      <Button
+                        icon={PencilSimpleIcon}
+                        ariaLabel="Rename tribe"
+                        onClick={() => setIsEditingName(true)}
+                      />
+                    </Box>
+                  </Box>
+                )}
 
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
                 <Button icon={QrCodeIcon} onClick={() => setIsQrModalOpen(true)}>
@@ -364,35 +351,35 @@ const TribeView = ({
                   {errorMessage}
                 </Alert>
               ) : null}
-            </Box>
+              </Box>
 
-            <Box
-              background="surface"
-              title={`${tribe.memberCount} member${tribe.memberCount === 1 ? '' : 's'}`}
-              titleIcon={UsersIcon}
-            >
-              <Box gap="var(--dq-ui-space-sm)">
-                {sortedMembers.map((member) => {
-                  const profile = member.profile ?? {};
-                  const username = String(profile.username ?? '').trim();
-                  const firstName =
-                    String(profile.first_name ?? '').trim() ||
-                    username ||
-                    `Member ${String(member.userId ?? '').slice(0, 6)}`;
-                  const lastName = String(profile.last_name ?? '').trim();
-                  const fullName = [firstName, lastName].filter(Boolean).join(' ');
+              <Box gap="var(--dq-ui-space-md)">
+                <strong className="dq-tribe-view__section-label">
+                  {tribe.memberCount} member{tribe.memberCount === 1 ? '' : 's'}
+                </strong>
+                <Box gap="var(--dq-ui-space-sm)">
+                  {sortedMembers.map((member) => {
+                    const profile = member.profile ?? {};
+                    const username = String(profile.username ?? '').trim();
+                    const firstName =
+                      String(profile.first_name ?? '').trim() ||
+                      username ||
+                      `Member ${String(member.userId ?? '').slice(0, 6)}`;
+                    const lastName = String(profile.last_name ?? '').trim();
+                    const fullName = [firstName, lastName].filter(Boolean).join(' ');
 
-                  return (
-                    <PeopleCard
-                      key={member.userId}
-                      avatarSrc={resolveProfileAvatarUrl(profile)}
-                      avatarAlt={fullName}
-                      name={fullName}
-                      handle={username ? `@${username}` : 'Profile unavailable'}
-                      owner={member.role === 'owner'}
-                    />
-                  );
-                })}
+                    return (
+                      <PeopleCard
+                        key={member.userId}
+                        avatarSrc={resolveProfileAvatarUrl(profile)}
+                        avatarAlt={fullName}
+                        name={fullName}
+                        handle={username ? `@${username}` : 'Profile unavailable'}
+                        owner={member.role === 'owner'}
+                      />
+                    );
+                  })}
+                </Box>
               </Box>
             </Box>
           </Box>

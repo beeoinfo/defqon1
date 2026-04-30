@@ -9,6 +9,12 @@
   line-height: 1.1;
 }
 
+.dq-tribe-view__section-label {
+  color: var(--dq-ui-text);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
 .dq-tribe-view__qr-modal-content {
   width: 100%;
 }

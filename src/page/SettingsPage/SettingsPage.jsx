@@ -8,11 +8,17 @@ import ChoiceButton from '@/components/primitives/ChoiceButton';
 import { Switch } from '@/components/primitives/forms';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
+import TribeView from '@/views/TribeView';
 import './SettingsPage.css';
 
 const SettingsPage = ({
   user,
   profile,
+  tribe,
+  isTribeBusy = false,
+  isTribeHydrating = false,
+  pendingTribeInviteCode = '',
+  tribeInviteAlert = '',
   betaFeaturesEnabled,
   hidePastEvents,
   hideUndatedEvents,
@@ -24,6 +30,10 @@ const SettingsPage = ({
   onHideUndatedEventsChange,
   onProfileUpdated,
   onSignedOut,
+  onCreateTribe,
+  onJoinTribe,
+  onLeaveTribe,
+  onRenameTribe,
 }) => {
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -122,6 +132,19 @@ const SettingsPage = ({
           };
         }}
         onSave={handleProfileSave}
+      />
+
+      <TribeView
+        user={user}
+        tribe={tribe}
+        isBusy={isTribeBusy}
+        isHydrating={isTribeHydrating}
+        pendingInviteCode={pendingTribeInviteCode}
+        inviteConflictMessage={tribeInviteAlert}
+        onCreateTribe={onCreateTribe}
+        onJoinTribe={onJoinTribe}
+        onLeaveTribe={onLeaveTribe}
+        onRenameTribe={onRenameTribe}
       />
 
       <Box background="surface" title="App settings">
