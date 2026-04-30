@@ -1,0 +1,360 @@
+.dq-timetable-view {
+  --dq-timetable-header-height: 64px;
+  --dq-timetable-body-offset: 1rem;
+  --dq-timetable-time-axis-width: 58px;
+  --dq-timetable-time-label-width: 34px;
+  --dq-timetable-time-label-offset: 8px;
+  --dq-timetable-stage-column-width: max(250px, calc((100vw - 96px) / 3));
+  --dq-timetable-entry-gap-block: 0.25rem;
+  --dq-timetable-entry-offset-block: 0.125rem;
+  --dq-timetable-hour-line: rgba(255, 255, 255, 0.09);
+  --dq-timetable-sticky-top:
+    calc(
+      var(--dq-layout-filter-bar-content-offset, var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 80px))) +
+      var(--dq-ui-space-sm)
+    );
+}
+
+@media (min-width: 576px) {
+  .dq-timetable-view {
+    --dq-timetable-time-axis-width: 64px;
+    --dq-timetable-stage-column-width: max(250px, calc((100vw - 132px) / 4));
+  }
+}
+
+@media (min-width: 891px) {
+  .dq-timetable-view {
+    --dq-timetable-stage-column-width: max(250px, calc((100vw - 168px) / 5));
+  }
+}
+
+.dq-timetable-view__shell {
+  position: relative;
+  width: 100%;
+}
+
+.dq-timetable-view__left-rail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: var(--dq-timetable-time-axis-width);
+  height: calc(
+    var(--dq-timetable-header-height) +
+    var(--dq-timetable-body-offset) +
+    var(--dq-timetable-timeline-height)
+  );
+  pointer-events: none;
+}
+
+.dq-timetable-view__left-rail::before {
+  content: none;
+}
+
+.dq-timetable-view__left-rail::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--dq-timetable-header-height) + var(--dq-timetable-body-offset));
+  right: -1px;
+  bottom: 0;
+  width: 1px;
+  background: var(--dq-ui-border);
+}
+
+.dq-timetable-view__sticky-head {
+  position: sticky;
+  top: var(--dq-timetable-sticky-top);
+  z-index: 20;
+}
+
+.dq-layout--has-top-filter-bar .dq-timetable-view__sticky-head {
+  transition: top 0.2s ease;
+}
+
+.dq-timetable-view__header-scroll,
+.dq-timetable-view__scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dq-timetable-view__header-scroll::-webkit-scrollbar,
+.dq-timetable-view__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dq-timetable-view__header-scroll {
+  background: transparent;
+}
+
+.dq-timetable-view__scroll {
+  margin-top: var(--dq-timetable-body-offset);
+  background: transparent;
+}
+
+.dq-timetable-view__header-grid,
+.dq-timetable-view__grid {
+  display: grid;
+  gap: 0;
+  min-width: max-content;
+  align-items: stretch;
+}
+
+.dq-timetable-view__header-grid {
+  grid-template-rows: var(--dq-timetable-header-height);
+}
+
+.dq-timetable-view__grid {
+  position: relative;
+  grid-template-rows: var(--dq-timetable-timeline-height);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      var(--dq-timetable-hour-line) 0,
+      var(--dq-timetable-hour-line) 1px,
+      transparent 1px,
+      transparent var(--dq-timetable-hour-height)
+    );
+  background-position: var(--dq-timetable-time-axis-width) 0;
+  background-repeat: no-repeat;
+  background-size: calc(100% - var(--dq-timetable-time-axis-width)) 100%;
+}
+
+.dq-timetable-view__grid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--dq-ui-border);
+  pointer-events: none;
+}
+
+.dq-timetable-view__grid::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: var(--dq-timetable-time-axis-width);
+  height: 1px;
+  background: var(--dq-ui-border);
+  pointer-events: none;
+}
+
+.dq-timetable-view__corner,
+.dq-timetable-view__stage-header {
+  grid-row: 1;
+  min-height: var(--dq-timetable-header-height);
+}
+
+.dq-timetable-view__corner {
+  grid-column: 1;
+  padding: 8px;
+  border-top: 0;
+  color: var(--dq-ui-text-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.dq-timetable-view__stage-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0;
+  padding: 12px 10px 9px;
+  border: 1px solid var(--dq-ui-border);
+  border-top: 0;
+}
+
+.dq-timetable-view__stage-header:not(:last-child) {
+  border-right: 0;
+}
+
+.dq-timetable-view__stage-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  left: -1px;
+  height: 3px;
+  background: var(--dq-timetable-stage-color);
+  pointer-events: none;
+}
+
+.dq-timetable-view__stage-name,
+.dq-timetable-view__stage-count {
+  display: block;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.dq-timetable-view__stage-name {
+  color: var(--dq-ui-text);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.dq-timetable-view__stage-count {
+  color: var(--dq-ui-text-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dq-timetable-view__stage-column {
+  grid-row: 1;
+  gap: 0;
+  min-height: var(--dq-timetable-timeline-height);
+  position: relative;
+  border-left: 1px solid var(--dq-ui-border);
+  border-bottom: 1px solid var(--dq-ui-border);
+}
+
+.dq-timetable-view__time-marker {
+  position: absolute;
+  top: calc(
+    var(--dq-timetable-header-height) +
+    var(--dq-timetable-body-offset) +
+    var(--dq-timetable-marker-top)
+  );
+  right: var(--dq-timetable-time-label-offset);
+  width: var(--dq-timetable-time-label-width);
+  z-index: 1;
+  transform: translateY(-50%);
+  color: var(--dq-ui-text-soft);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: right;
+}
+
+.dq-timetable-view__time-marker::before,
+.dq-timetable-view__time-marker::after {
+  content: "";
+  position: absolute;
+  top: 54%;
+  height: 1px;
+  background: var(--dq-ui-border);
+  transform: translateY(-50%);
+}
+
+.dq-timetable-view__time-marker:last-child::before,
+.dq-timetable-view__time-marker:last-child::after {
+  top: 45%;
+}
+
+.dq-timetable-view__time-marker::before {
+  right: 100%;
+  width: calc(
+    var(--dq-timetable-time-axis-width) -
+    var(--dq-timetable-time-label-width) -
+    var(--dq-timetable-time-label-offset)
+  );
+}
+
+.dq-timetable-view__time-marker::after {
+  left: calc(100% + 4px);
+  width: calc(var(--dq-timetable-time-label-offset) - 4px);
+}
+
+.dq-timetable-view__entry {
+  position: absolute;
+  top: calc(var(--dq-timetable-entry-top) + var(--dq-timetable-entry-offset-block));
+  right: 2px;
+  left: 2px;
+  height: max(
+    calc(var(--dq-timetable-entry-height) - var(--dq-timetable-entry-gap-block)),
+    1px
+  );
+  min-height: 0;
+  padding: 7px 42px 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--dq-timetable-stage-color) 56%, transparent);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--dq-timetable-stage-color) 24%, var(--dq-ui-panel-strong)),
+      color-mix(in srgb, var(--dq-timetable-stage-color) 16%, var(--dq-ui-panel))
+  );
+  color: var(--dq-ui-text);
+}
+
+.dq-timetable-view__measurement-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  display: grid;
+  gap: 0;
+  min-width: max-content;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dq-timetable-view__measurement-column {
+  grid-row: 1;
+}
+
+.dq-timetable-view__entry--measurement {
+  position: relative;
+  top: auto;
+  right: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  margin: 0 2px;
+}
+
+.dq-timetable-view__entry-content {
+  width: 100%;
+  gap: 0.25rem;
+}
+
+.dq-timetable-view__entry-name,
+.dq-timetable-view__entry-time {
+  display: block;
+  min-width: 0;
+}
+
+.dq-timetable-view__entry-name {
+  color: var(--dq-ui-text);
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.dq-timetable-view__entry-time {
+  color: var(--dq-ui-text-soft);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.dq-timetable-view__entry-duration {
+  font-weight: 400;
+}
+
+.dq-timetable-view__entry--compact .dq-timetable-view__entry-content {
+  gap: 0.125rem;
+}
+
+.dq-timetable-view__entry--compact .dq-timetable-view__entry-name {
+  font-size: calc(1rem - 1px);
+}
+
+.dq-timetable-view__entry--compact .dq-timetable-view__entry-time {
+  font-size: calc(0.875rem - 1px);
+}
+
+.dq-timetable-view__favorite {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  --dq-ui-button-height: 28px;
+}

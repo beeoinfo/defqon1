@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon } from '@phosphor-icons/react';
+import { CalendarDotsIcon, MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ToggleButton from '../../primitives/ToggleButton';
 import Box from '@/components/layout/Box';
@@ -9,6 +9,11 @@ const DEFAULT_NAVBAR_ITEMS = [
     id: 'lineup',
     label: 'Line-up',
     icon: MusicNoteIcon,
+  },
+  {
+    id: 'timetable',
+    label: 'Timetable',
+    icon: CalendarDotsIcon,
   },
   {
     id: 'maps',

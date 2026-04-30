@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 import {
+  CalendarDotsIcon,
   MagnifyingGlassIcon,
   MapTrifoldIcon,
   MusicNoteIcon,
@@ -32,6 +33,7 @@ import {
   getDays,
   getStages,
   groupEntriesByDayAndStage,
+  hasCompleteSchedule,
   hasScheduledDate,
   loadBetaFeaturesPreference,
   loadHidePastEventsPreference,
@@ -80,11 +82,13 @@ import LineUpView from './views/LineUpView';
 import MapsView from './views/MapsView';
 import ReviewsView from './views/ReviewsView';
 import StorybookView from './views/StorybookView';
+import TimetableView from './views/TimetableView';
 
 const VIEW_COMPONENTS = {
   lineup: LineUpView,
   maps: MapsView,
   reviews: ReviewsView,
+  timetable: TimetableView,
 };
 
 const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
@@ -441,6 +445,9 @@ const App = () => {
   const [selectedStage, setSelectedStage] = useState(
     () => loadViewPreferences()?.selectedStage || 'All stages'
   );
+  const [selectedTimetableDay, setSelectedTimetableDay] = useState(
+    () => loadViewPreferences()?.selectedTimetableDay || ''
+  );
   const [query, setQuery] = useState('');
   const [betaFeaturesEnabled, setBetaFeaturesEnabled] = useState(() => loadBetaFeaturesPreference());
   const [hidePastEvents, setHidePastEvents] = useState(() => loadHidePastEventsPreference());
@@ -479,10 +486,13 @@ const App = () => {
   );
   const selectedEntries = useMemo(() => selectedLineup?.entries ?? [], [selectedLineup]);
   const selectedMapLayers = useMemo(() => selectedLineup?.mapLayers ?? [], [selectedLineup]);
-  const activeMapLayers =
-    selectedMapLayers.length > 0
-      ? selectedMapLayers
-      : lineupSources.find((lineup) => lineup.mapLayers.length > 0)?.mapLayers ?? [];
+  const activeMapLayers = useMemo(
+    () =>
+      selectedMapLayers.length > 0
+        ? selectedMapLayers
+        : lineupSources.find((lineup) => lineup.mapLayers.length > 0)?.mapLayers ?? [],
+    [selectedMapLayers]
+  );
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
   const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
   const favoritesReadOnly = !isLatestLineupSelected;
@@ -599,6 +609,24 @@ const App = () => {
     [tribeLikesByEntryId]
   );
   const days = useMemo(() => getDays(browseableEntries), [browseableEntries]);
+  const timetableDays = useMemo(
+    () => getDays(browseableEntries.filter((entry) => hasCompleteSchedule(entry))),
+    [browseableEntries]
+  );
+  const defaultTimetableDay = timetableDays[0] ?? '';
+  useEffect(() => {
+    if (timetableDays.length === 0) {
+      if (selectedTimetableDay) {
+        setSelectedTimetableDay('');
+      }
+
+      return;
+    }
+
+    if (!timetableDays.includes(selectedTimetableDay)) {
+      setSelectedTimetableDay(timetableDays[0]);
+    }
+  }, [selectedTimetableDay, timetableDays]);
   const stages = useMemo(
     () => getStages(browseableEntries, selectedDay),
     [browseableEntries, selectedDay]
@@ -648,6 +676,37 @@ const App = () => {
     () => groupEntriesByDayAndStage(visibleEntries),
     [visibleEntries]
   );
+  const selectedTimetableDayLabel = selectedTimetableDay || defaultTimetableDay;
+  const baseTimetableEntries = useMemo(
+    () =>
+      selectedTimetableDayLabel
+        ? filterEntries(browseableEntries.filter((entry) => hasCompleteSchedule(entry)), {
+            query: '',
+            day: selectedTimetableDayLabel,
+            stage: 'All stages',
+          })
+        : [],
+    [browseableEntries, selectedTimetableDayLabel]
+  );
+  const visibleTimetableEntries = useMemo(() => {
+    let nextEntries = baseTimetableEntries;
+
+    if (showTribeOnly) {
+      nextEntries = nextEntries.filter((entry) => tribeLikedEntryIds.has(entry.id));
+    }
+
+    if (showFavoritesOnly) {
+      nextEntries = nextEntries.filter((entry) => favoriteIdSet.has(entry.id));
+    }
+
+    return nextEntries;
+  }, [
+    baseTimetableEntries,
+    favoriteIdSet,
+    showFavoritesOnly,
+    showTribeOnly,
+    tribeLikedEntryIds,
+  ]);
   const searchEntries = useMemo(
     () =>
       query.trim()
@@ -816,6 +875,13 @@ const App = () => {
     openView('lineup');
   }, [openView, resetBrowseState]);
 
+  const handleTimetableNav = useCallback(() => {
+    startTransition(() => {
+      resetBrowseState();
+    });
+    openView('timetable');
+  }, [openView, resetBrowseState]);
+
   const handleMapsNav = useCallback(() => {
     if (!betaFeaturesEnabled) {
       return;
@@ -840,8 +906,8 @@ const App = () => {
   }, [authUser, openView, requestAuth, resetBrowseState]);
 
   useEffect(() => {
-    saveViewPreferences({ selectedDay, selectedStage });
-  }, [selectedDay, selectedStage]);
+    saveViewPreferences({ selectedDay, selectedStage, selectedTimetableDay });
+  }, [selectedDay, selectedStage, selectedTimetableDay]);
 
   useEffect(() => {
     saveBetaFeaturesPreference(betaFeaturesEnabled);
@@ -1355,6 +1421,16 @@ const App = () => {
     [stageColorsByName, stages]
   );
 
+  const timetableDayDrawerOptions = useMemo(
+    () =>
+      timetableDays.map((day, index) => ({
+        value: day,
+        label: day,
+        defaultChecked: index === 0,
+      })),
+    [timetableDays]
+  );
+
   const lineupFilterBar = useMemo(() => ({
     value: {
       day: selectedDay === 'All days' ? null : selectedDay,
@@ -1415,8 +1491,68 @@ const App = () => {
     selectedStage,
     showFavoritesOnly,
     showTribeOnly,
-    stageColorsByName,
     stageDrawerOptions,
+    tribe,
+  ]);
+
+  const timetableFilterBar = useMemo(() => ({
+    value: {
+      day: selectedTimetableDayLabel || null,
+      favorites: showFavoritesOnly,
+      tribe: showTribeOnly,
+    },
+    onChange: (nextValue) => {
+      const nextDay = nextValue.day ?? defaultTimetableDay;
+      const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
+      const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
+      const nextFavoritesOnly = didEnableTribe ? false : Boolean(nextValue.favorites);
+      const nextTribeOnly = didEnableFavorites ? false : Boolean(nextValue.tribe);
+
+      setSelectedTimetableDay(nextDay);
+      setShowFavoritesOnly(nextFavoritesOnly);
+      setShowTribeOnly(nextTribeOnly);
+      setQuery('');
+    },
+    onReset: () => {
+      setSelectedTimetableDay(defaultTimetableDay);
+      setShowFavoritesOnly(false);
+      setShowTribeOnly(false);
+      setQuery('');
+    },
+    resetButton:
+      showFavoritesOnly ||
+      showTribeOnly ||
+      (Boolean(defaultTimetableDay) && selectedTimetableDayLabel !== defaultTimetableDay),
+    hideOnScroll: true,
+    choices: [
+      ...(isLatestLineupSelected && authUser && tribe ? [{
+        id: 'tribe',
+        label: 'My tribe',
+        icon: UsersIcon,
+        fillOnPress: true,
+      }] : []),
+      ...(isLatestLineupSelected && authUser ? [{
+        id: 'favorites',
+        label: 'My favorites',
+        icon: StarIcon,
+        fillOnPress: true,
+      }] : []),
+    ],
+    drawers: timetableDayDrawerOptions.length > 0
+      ? [{
+          id: 'day',
+          label: 'Day',
+          options: timetableDayDrawerOptions,
+        }]
+      : [],
+  }), [
+    authUser,
+    defaultTimetableDay,
+    isLatestLineupSelected,
+    selectedTimetableDayLabel,
+    showFavoritesOnly,
+    showTribeOnly,
+    timetableDayDrawerOptions,
     tribe,
   ]);
 
@@ -1428,6 +1564,13 @@ const App = () => {
         icon: MusicNoteIcon,
         active: activeView === 'lineup',
         onClick: handleLineupNav,
+      },
+      {
+        id: 'timetable',
+        label: 'Timetable',
+        icon: CalendarDotsIcon,
+        active: activeView === 'timetable',
+        onClick: handleTimetableNav,
       },
       ...(betaFeaturesEnabled ? [{
         id: 'maps',
@@ -1462,6 +1605,7 @@ const App = () => {
       handleLineupNav,
       handleMapsNav,
       handleReviewsNav,
+      handleTimetableNav,
       openSearch,
       reviewCount,
     ]
@@ -1512,6 +1656,15 @@ const App = () => {
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       filterBar: lineupFilterBar,
     },
+    timetable: {
+      entries: visibleTimetableEntries,
+      selectedDay: selectedTimetableDayLabel,
+      favoriteIdSet,
+      toggleFavorite,
+      canToggleFavorites: !favoritesReadOnly,
+      archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
+      filterBar: timetableFilterBar,
+    },
     maps: {
       mapLayers: activeMapLayers,
     },
@@ -1534,9 +1687,12 @@ const App = () => {
     isLatestLineupSelected,
     lineupFilterBar,
     removeReviewFavorite,
+    selectedTimetableDayLabel,
     showTribeOnly,
+    timetableFilterBar,
     toggleFavorite,
     tribeLikesByEntryId,
+    visibleTimetableEntries,
     visibleReviewFavorites,
     visibleEntries,
   ]);

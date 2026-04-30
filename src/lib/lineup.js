@@ -569,6 +569,10 @@ export function hasScheduledDate(item) {
   return parseEntryDateTime(item?.startAt) !== null || parseEntryDateTime(item?.endAt) !== null;
 }
 
+export function hasCompleteSchedule(item) {
+  return parseEntryDateTime(item?.startAt) !== null && parseEntryDateTime(item?.endAt) !== null;
+}
+
 export function filterUndatedEntries(entries) {
   return entries.filter((entry) => hasScheduledDate(entry));
 }
@@ -874,7 +878,7 @@ export function saveHidePastEventsPreference(value) {
   }
 
   try {
-    if (Boolean(value)) {
+    if (value) {
       window.localStorage.removeItem(HIDE_PAST_EVENTS_STORAGE_KEY);
       return;
     }
@@ -902,7 +906,7 @@ export function saveHideUndatedEventsPreference(value) {
   }
 
   try {
-    if (!Boolean(value)) {
+    if (!value) {
       window.localStorage.removeItem(HIDE_UNDATED_EVENTS_STORAGE_KEY);
       return;
     }
@@ -930,7 +934,7 @@ export function saveBetaFeaturesPreference(value) {
   }
 
   try {
-    if (!Boolean(value)) {
+    if (!value) {
       window.localStorage.removeItem(BETA_FEATURES_STORAGE_KEY);
       return;
     }
