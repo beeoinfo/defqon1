@@ -5379,9 +5379,9 @@
       "stages": [
         {
           "stageId": "H8dAuDCVQTel_m8f2x7JDg",
-          "stageName": "RED: The Closing Ceremony",
+          "stageName": "The Closing Ceremony",
           "stageSlug": "red-the-closing-ceremony",
-          "stageCanonical": "RED",
+          "stageCanonical": "Red",
           "stageColor": "#ff0000",
           "artists": [
             {

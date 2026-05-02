@@ -79,7 +79,7 @@ function getPerformanceArtistTags(perf) {
 
 function getStageCanonical(stageName, stageNames) {
   if (String(stageName || '').trim().toLowerCase() === 'the closing ceremony') {
-    return 'RED';
+    return 'Red';
   }
 
   const normalizedStageName = String(stageName || '').trim().toLowerCase();
@@ -94,14 +94,6 @@ function getStageCanonical(stageName, stageNames) {
     .sort((a, b) => b.length - a.length)[0];
 
   return canonicalMatch || stageName;
-}
-
-function getStageName(stageName) {
-  if (String(stageName || '').trim().toLowerCase() === 'the closing ceremony') {
-    return 'RED: The Closing Ceremony';
-  }
-
-  return stageName;
 }
 
 function getStageSortName(stage) {
@@ -217,7 +209,7 @@ async function main() {
     stageDays.forEach((stageDay) => {
       const stage = stageDay.stage || {};
       const sourceStageName = stage.name || stage.cmsName || 'UNKNOWN';
-      const stageName = getStageName(sourceStageName);
+      const stageName = sourceStageName;
       const stageSlug = slugify(stageName);
       const stageCanonical = getStageCanonical(sourceStageName, stageNames);
       const stageId = stage.id || null;
