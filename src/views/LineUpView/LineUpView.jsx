@@ -160,7 +160,7 @@ const LineUpView = ({
                   color={stageColor}
                   titleBadge={stageSection.stage}
                   titleCount={stageSection.entries.length}
-                  titleCountLabel={stageSection.entries.length === 1 ? 'artist' : 'artists'}
+                  titleCountLabel={stageSection.entries.length === 1 ? 'show' : 'shows'}
                   className="dq-lineup-view__stage-section"
                 >
                   <Box
@@ -281,7 +281,7 @@ const LineUpView = ({
         ) : null}
 
         {sections.length === 0 ? (
-          <EmptyState text="No artists match the current filters." />
+          <EmptyState text="No shows match the current filters." />
         ) : (
           <SlidingColumns sections={sections} variant={stackDays ? 'stacked' : 'responsive'} />
         )}

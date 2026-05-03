@@ -1,19 +1,77 @@
 import Alert from '@/components/Alert';
 import Box from '@/components/layout/Box';
+import Button from '@/components/primitives/Button';
 
-const AboutPage = () => (
+const ABOUT_FEATURES = [
+  {
+    title: 'Line-up browsing',
+    text: 'Explore artists, stages, days and time slots with filters that stay close to the way the festival is actually planned.',
+  },
+  {
+    title: 'Favorites and reviews',
+    text: 'Save sets, review changes between snapshots and spot timetable conflicts before they turn into last-minute choices.',
+  },
+  {
+    title: 'Tribe sharing',
+    text: 'See what your group likes, compare plans and keep the weekend easier to coordinate without turning it into admin work.',
+  },
+];
+
+const ABOUT_PRINCIPLES = [
+  'Keep the interface fast to scan on mobile during the festival.',
+  'Make saved favorites portable across line-up updates where possible.',
+  'Show conflicts and missing data clearly instead of hiding uncertainty.',
+  'Stay fan-made, focused and separate from the official festival experience.',
+];
+
+const AboutPage = ({ onOpenPage }) => (
   <Box gap="var(--dq-ui-space-xl)">
     <Alert variant="info" title="Built as a focused Defqon.1 companion">
-      This app helps browse the line-up faster, save favorites, spot schedule changes and share the weekend with a tribe.
+      A fan-made planning app for browsing the line-up, saving favorites, reviewing updates and coordinating with a tribe.
     </Alert>
 
-    <Box background="surface" title="Why it exists">
+    <Box background="surface" title="What this app is">
       <p>
-        Built by Dylan Bergozza as a fan-made utility, this project aims to make festival data easier to read and more personal to use.
+        This project is a personal festival utility built by Dylan Bergozza for people who want a calmer, more practical way to prepare their Defqon.1 weekend.
       </p>
       <p>
-        The goal is not to replace the official experience, but to offer a calmer way to explore artists, compare slots and keep your own weekend organized.
+        It is not meant to replace official channels. It exists to make the schedule easier to compare, the saved sets easier to maintain and the group planning easier to read at a glance.
       </p>
+    </Box>
+
+    <Box background="surface" title="What it helps with">
+      <Box layout="columns" maxColumns={3} gap="var(--dq-ui-space-md)">
+        {ABOUT_FEATURES.map((feature) => (
+          <Box key={feature.title} background="none" gap="var(--dq-ui-space-xs)">
+            <strong>{feature.title}</strong>
+            <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+              {feature.text}
+            </p>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+
+    <Box background="surface" title="Product principles">
+      <Box component="ul" gap="var(--dq-ui-space-sm)" style={{ margin: 0, paddingInlineStart: '1.25rem' }}>
+        {ABOUT_PRINCIPLES.map((principle) => (
+          <li key={principle}>{principle}</li>
+        ))}
+      </Box>
+    </Box>
+
+    <Box background="surface" title="Independence">
+      <p>
+        This app is independent, unofficial and fan-made. Festival names, stage names, artist names and related references belong to their respective owners.
+      </p>
+      <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+        <Button onClick={() => onOpenPage?.('roadmap')}>
+          View roadmap
+        </Button>
+        <Button variant="ghost" onClick={() => onOpenPage?.('legal')}>
+          Legal details
+        </Button>
+      </Box>
     </Box>
   </Box>
 );

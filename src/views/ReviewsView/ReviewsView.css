@@ -1,16 +1,104 @@
-.dq-reviews-view__header {
-  width: 100%;
-}
-
-.dq-reviews-view__title {
-  margin: 0;
-}
-
-.dq-reviews-view__count {
-  min-width: 2.25rem;
-  justify-content: center;
-}
-
 .dq-reviews-view__columns {
   width: 100%;
+}
+
+.dq-reviews-view__conflict-groups {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dq-ui-space-md);
+}
+
+.dq-reviews-view__conflict-group {
+  width: 100%;
+  height: 100%;
+  gap: 6px;
+}
+
+.dq-reviews-view__conflict-group-head {
+  width: 100%;
+}
+
+.dq-reviews-view__conflict-group-head strong {
+  display: block;
+  color: var(--dq-ui-text);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.dq-reviews-view__conflict-time-start,
+.dq-reviews-view__conflict-time-end {
+  width: 100%;
+  color: var(--dq-ui-text-soft);
+  font-size: 0.875rem;
+}
+
+.dq-reviews-view__conflict-timeline {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dq-reviews-view__conflict-show {
+  position: relative;
+  width: var(--dq-reviews-conflict-width);
+  margin-inline-start: var(--dq-reviews-conflict-left);
+  padding: 7px 46px 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--dq-reviews-conflict-color) 58%, transparent);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--dq-reviews-conflict-color) 24%, var(--dq-ui-panel-strong)),
+      color-mix(in srgb, var(--dq-reviews-conflict-color) 14%, var(--dq-ui-panel))
+    );
+}
+
+.dq-reviews-view__conflict-show .dq-timetable-view__entry-time {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+}
+
+.dq-reviews-view__conflict-show .dq-timetable-view__entry-time span {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.dq-reviews-view__conflict-show .dq-timetable-view__entry-time span:not(:last-child)::after {
+  content: '\2022';
+  margin-inline: 6px;
+  opacity: 0.6;
+}
+
+.dq-reviews-view__people-stack {
+  margin-top: 0.125rem;
+  min-height: 24px;
+}
+
+.dq-reviews-view__show-conflict-button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+@media (max-width: 575.98px) {
+  .dq-reviews-view__show-conflict-button {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+@media (min-width: 891px) {
+  .dq-reviews-view__conflict-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .dq-reviews-view__conflict-groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

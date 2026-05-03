@@ -1,6 +1,6 @@
 .dq-timetable-view {
   --dq-timetable-header-height: 64px;
-  --dq-timetable-body-offset: 1rem;
+  --dq-timetable-body-offset: 0.5rem;
   --dq-timetable-time-axis-width: 58px;
   --dq-timetable-time-label-width: 34px;
   --dq-timetable-time-label-offset: 8px;
@@ -9,10 +9,7 @@
   --dq-timetable-entry-offset-block: 0.125rem;
   --dq-timetable-hour-line: rgba(255, 255, 255, 0.09);
   --dq-timetable-sticky-top:
-    calc(
-      var(--dq-layout-filter-bar-content-offset, var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 80px))) +
-      var(--dq-ui-space-sm)
-    );
+    var(--dq-layout-filter-bar-content-offset, var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 80px)));
 }
 
 @media (min-width: 576px) {
@@ -42,7 +39,8 @@
   height: calc(
     var(--dq-timetable-header-height) +
     var(--dq-timetable-body-offset) +
-    var(--dq-timetable-timeline-height)
+    var(--dq-timetable-timeline-height) +
+    0.5rem
   );
   pointer-events: none;
 }
@@ -66,6 +64,7 @@
 .dq-timetable-view__sticky-head {
   position: sticky;
   top: var(--dq-timetable-sticky-top);
+  margin-top: 0.5rem;
   z-index: 20;
 }
 
@@ -202,14 +201,12 @@
 .dq-timetable-view__stage-name {
   color: var(--dq-ui-text);
   font-size: 1rem;
-  font-weight: 800;
   line-height: 1.15;
 }
 
 .dq-timetable-view__stage-count {
   color: var(--dq-ui-text-soft);
   font-size: 0.875rem;
-  font-weight: 600;
 }
 
 .dq-timetable-view__stage-column {
@@ -225,7 +222,8 @@
   top: calc(
     var(--dq-timetable-header-height) +
     var(--dq-timetable-body-offset) +
-    var(--dq-timetable-marker-top)
+    var(--dq-timetable-marker-top) +
+    0.5rem
   );
   right: var(--dq-timetable-time-label-offset);
   width: var(--dq-timetable-time-label-width);
@@ -277,7 +275,7 @@
     1px
   );
   min-height: 0;
-  padding: 7px 42px 7px 8px;
+  padding: 7px 46px 7px 8px;
   border: 1px solid color-mix(in srgb, var(--dq-timetable-stage-color) 56%, transparent);
   border-radius: 6px;
   background:
@@ -329,19 +327,20 @@
 .dq-timetable-view__entry-name {
   color: var(--dq-ui-text);
   font-size: 1rem;
+  font-weight: 500;
   line-height: 1.15;
 }
 
 .dq-timetable-view__entry-time {
   color: var(--dq-ui-text-soft);
   font-size: 0.875rem;
-  font-weight: 500;
   line-height: 1.1;
   white-space: nowrap;
 }
 
-.dq-timetable-view__entry-duration {
-  font-weight: 400;
+.dq-timetable-view__people-stack {
+  margin-top: 0.125rem;
+  min-height: 24px;
 }
 
 .dq-timetable-view__entry--compact .dq-timetable-view__entry-content {
@@ -360,5 +359,5 @@
   position: absolute;
   top: 7px;
   right: 8px;
-  --dq-ui-button-height: 28px;
+  --dq-ui-button-height: 32px;
 }

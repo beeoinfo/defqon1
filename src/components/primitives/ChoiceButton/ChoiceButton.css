@@ -140,3 +140,12 @@
   flex-shrink: 0;
   align-self: center;
 }
+
+.dq-ui-choice-button--floating-tag .dq-ui-choice-button__tag {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 1;
+  margin-inline-start: 0;
+  pointer-events: none;
+}

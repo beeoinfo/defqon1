@@ -4,6 +4,9 @@ import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
 import FilterBar from '@/components/FilterBar';
 import Box from '@/components/layout/Box';
+import Drawer from '@/components/layout/Drawer';
+import PeopleCard from '@/components/PeopleCard';
+import PeopleStack from '@/components/PeopleStack';
 import ToggleButton from '@/components/primitives/ToggleButton';
 import {
   compareLineupEntries,
@@ -27,6 +30,7 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   minute: '2-digit',
   hourCycle: 'h23',
 });
+const MAX_VISIBLE_TRIBE_AVATARS = 6;
 
 const parseTimestamp = (value) => {
   if (!value) {
@@ -148,6 +152,10 @@ const getStageSortValue = (stage) => (
 
 const getPixelValue = (value) => Number.parseFloat(value) || 0;
 
+const getMemberDisplayName = (member) => (
+  [member.firstName, member.lastName].filter(Boolean).join(' ').trim() || 'Tribe member'
+);
+
 const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
   const scheduledEntries = entries
     .map((entry) => {
@@ -199,8 +207,8 @@ const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
   const stagesByKey = new Map();
 
   scheduledEntries.forEach((entry) => {
-    const stageLabel = entry.stage ?? 'Unknown stage';
-    const stageKey = entry.stageSlug ?? stageLabel;
+    const stageLabel = entry.stageCanonical ?? entry.stage ?? 'Unknown stage';
+    const stageKey = stageLabel;
     const stageTheme = getStageTheme(stageLabel);
     const stageColor = entry.stageColor ?? stageTheme.accent;
 
@@ -251,9 +259,11 @@ const TimetableView = ({
   favoriteIdSet = new Set(),
   toggleFavorite,
   canToggleFavorites = true,
+  tribeLikesByEntryId = new Map(),
   archiveNotice = null,
   filterBar = null,
 }) => {
+  const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
   const shellRef = useRef(null);
   const headerScrollRef = useRef(null);
   const bodyScrollRef = useRef(null);
@@ -263,16 +273,17 @@ const TimetableView = ({
       entries
         .map((entry) => [
           entry.id,
-          entry.stageSlug,
+          entry.stageCanonical,
           entry.stage,
           entry.startAt,
           entry.endAt,
           entry.timeLabel,
+          (tribeLikesByEntryId.get(entry.id) ?? []).length,
           getEntryDisplayName(entry),
         ].join(':'))
         .join('|'),
     ].join('::'),
-    [entries, selectedDay]
+    [entries, selectedDay, tribeLikesByEntryId]
   );
   const [hourHeightState, setHourHeightState] = useState(null);
   const hasMeasuredHourHeight = hourHeightState?.key === measurementKey;
@@ -386,6 +397,25 @@ const TimetableView = ({
     };
   }, [favoriteIdSet, measurementKey, timetableData.stages]);
 
+  const renderTribeStack = (entry) => {
+    const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
+    const tribeLikesFromOthers = tribeLikes.filter((member) => !member.isCurrentUser);
+
+    if (tribeLikesFromOthers.length === 0) {
+      return null;
+    }
+
+    return (
+      <PeopleStack
+        avatars={tribeLikesFromOthers}
+        maxVisible={MAX_VISIBLE_TRIBE_AVATARS}
+        className="dq-timetable-view__people-stack"
+        ariaLabel={`Open tribe details for ${tribeLikesFromOthers.length} member${tribeLikesFromOthers.length === 1 ? '' : 's'}`}
+        onClick={() => setSelectedTribeEntry({ entry, likes: tribeLikesFromOthers })}
+      />
+    );
+  };
+
   return (
     <Box className="dq-timetable-view" gap="0">
       {filterBar ? <FilterBar {...filterBar} /> : null}
@@ -445,15 +475,16 @@ const TimetableView = ({
                           className="dq-timetable-view__entry-content"
                           gap="0.125rem"
                         >
-                          <strong className="dq-timetable-view__entry-name">
+                          <span className="dq-timetable-view__entry-name">
                             {entry.displayName}
-                          </strong>
+                          </span>
                           <span className="dq-timetable-view__entry-time">
                             {entry.displayTime}{' '}
                             <span className="dq-timetable-view__entry-duration">
                               ({entry.displayDuration})
                             </span>
                           </span>
+                          {renderTribeStack(entry)}
                         </Box>
 
                         {canToggleFavorites ? (
@@ -521,7 +552,7 @@ const TimetableView = ({
                     >
                       <span className="dq-timetable-view__stage-name">{stage.label}</span>
                       <span className="dq-timetable-view__stage-count">
-                        {stage.entries.length} artist{stage.entries.length === 1 ? '' : 's'}
+                        {stage.entries.length} show{stage.entries.length === 1 ? '' : 's'}
                       </span>
                     </Box>
                   ))}
@@ -572,15 +603,16 @@ const TimetableView = ({
                             className="dq-timetable-view__entry-content"
                             gap="0.125rem"
                           >
-                            <strong className="dq-timetable-view__entry-name">
+                            <span className="dq-timetable-view__entry-name">
                               {entry.displayName}
-                            </strong>
+                            </span>
                             <span className="dq-timetable-view__entry-time">
                               {entry.displayTime}{' '}
                               <span className="dq-timetable-view__entry-duration">
                                 ({entry.displayDuration})
                               </span>
                             </span>
+                            {renderTribeStack(entry)}
                           </Box>
 
                           {canToggleFavorites ? (
@@ -608,6 +640,29 @@ const TimetableView = ({
           </Box>
         )}
       </Box>
+
+      <Drawer
+        open={Boolean(selectedTribeEntry)}
+        onClose={() => setSelectedTribeEntry(null)}
+        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
+        subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
+      >
+        <Box gap="var(--dq-ui-space-md)">
+          {selectedTribeEntry?.likes.map((member) => {
+            const fullName = getMemberDisplayName(member);
+
+            return (
+              <PeopleCard
+                key={member.userId}
+                avatarSrc={member.avatarUrl}
+                avatarAlt={fullName}
+                name={fullName}
+                handle={member.username ? `@${member.username}` : 'Profile unavailable'}
+              />
+            );
+          })}
+        </Box>
+      </Drawer>
     </Box>
   );
 };

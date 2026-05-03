@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import Box from '@/components/layout/Box';
+import Modal from '@/components/layout/Modal';
 import Profile from '@/components/Profile';
 import Button from '@/components/primitives/Button';
 import ChoiceButton from '@/components/primitives/ChoiceButton';
@@ -21,11 +22,15 @@ const SettingsPage = ({
   tribeInviteAlert = '',
   hidePastEvents,
   hideUndatedEvents,
+  ignoreSmallConflicts,
+  favoriteCount = 0,
   lineups = [],
   selectedLineupKey,
   onSelectLineup,
   onHidePastEventsChange,
   onHideUndatedEventsChange,
+  onIgnoreSmallConflictsChange,
+  onResetFavorites,
   onProfileUpdated,
   onSignedOut,
   onCreateTribe,
@@ -35,10 +40,17 @@ const SettingsPage = ({
 }) => {
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isResetFavoritesModalOpen, setIsResetFavoritesModalOpen] = useState(false);
 
   useEffect(() => {
     setErrorMessage('');
   }, [profile]);
+
+  useEffect(() => {
+    if (favoriteCount <= 0) {
+      setIsResetFavoritesModalOpen(false);
+    }
+  }, [favoriteCount]);
 
   if (!user) {
     return (
@@ -104,6 +116,15 @@ const SettingsPage = ({
     } finally {
       setIsBusy(false);
     }
+  };
+
+  const handleResetFavorites = () => {
+    if (favoriteCount <= 0) {
+      return;
+    }
+
+    onResetFavorites?.();
+    setIsResetFavoritesModalOpen(false);
   };
 
   return (
@@ -183,6 +204,29 @@ const SettingsPage = ({
             onCheckedChange={onHideUndatedEventsChange}
           />
 
+          <Switch
+            label="Ignore small favorite conflicts"
+            description="Ignore overlaps that are 25% or less of the shorter favorite set."
+            checked={ignoreSmallConflicts}
+            onCheckedChange={onIgnoreSmallConflictsChange}
+          />
+
+          <Box gap="var(--dq-ui-space-sm)">
+            <strong>Favorites</strong>
+            <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+              Reset all saved favorites attached to this account.
+            </p>
+            <Box direction="row" justify="flex-start" wrap="wrap" gap="var(--dq-ui-space-sm)">
+              <Button
+                variant="danger"
+                onClick={() => setIsResetFavoritesModalOpen(true)}
+                disabled={isBusy || favoriteCount <= 0}
+              >
+                Reset favorites ({favoriteCount})
+              </Button>
+            </Box>
+          </Box>
+
           <Box direction="row" justify="flex-end">
             <Button variant="danger" onClick={handleSignOut} disabled={isBusy}>
               Sign out
@@ -190,6 +234,35 @@ const SettingsPage = ({
           </Box>
         </Box>
       </Box>
+
+      <Modal
+        open={isResetFavoritesModalOpen}
+        onClose={() => setIsResetFavoritesModalOpen(false)}
+        title="Reset favorites?"
+        subtitle="This will remove every saved favorite attached to your account."
+        controls={(
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setIsResetFavoritesModalOpen(false)}
+              disabled={isBusy}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleResetFavorites}
+              disabled={isBusy || favoriteCount <= 0}
+            >
+              Reset favorites
+            </Button>
+          </>
+        )}
+      >
+        <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+          You currently have {favoriteCount} saved favorite{favoriteCount === 1 ? '' : 's'}.
+        </p>
+      </Modal>
     </Box>
   );
 };

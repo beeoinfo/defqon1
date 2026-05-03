@@ -490,27 +490,29 @@ const MapsView = ({ mapLayers = [] }) => {
         />
       </Box>
 
-      <FilterBar
-        className="dq-maps-view__filter-bar"
-        placement="bottom"
-        hideOnScroll={false}
-        width="content"
-        resetButton={false}
-        ariaLabel="Select festival day"
-        value={{ mapLayer: activeLayer?.id ?? '' }}
-        onChange={(nextValue) => {
-          if (nextValue.mapLayer && nextValue.mapLayer !== activeLayer?.id) {
-            setSelectedLayerId(nextValue.mapLayer);
-          }
-        }}
-        choices={mapLayers.map((layer) => ({
-          id: layer.id,
-          name: 'mapLayer',
-          type: 'radio',
-          value: layer.id,
-          label: layer.label,
-        }))}
-      />
+      {mapLayers.length > 1 ? (
+        <FilterBar
+          className="dq-maps-view__filter-bar"
+          placement="bottom"
+          hideOnScroll={false}
+          width="content"
+          resetButton={false}
+          ariaLabel="Select festival day"
+          value={{ mapLayer: activeLayer?.id ?? '' }}
+          onChange={(nextValue) => {
+            if (nextValue.mapLayer && nextValue.mapLayer !== activeLayer?.id) {
+              setSelectedLayerId(nextValue.mapLayer);
+            }
+          }}
+          choices={mapLayers.map((layer) => ({
+            id: layer.id,
+            name: 'mapLayer',
+            type: 'radio',
+            value: layer.id,
+            label: layer.label,
+          }))}
+        />
+      ) : null}
 
       {viewerState === 'error' || viewerState === 'unsupported' ? (
         <Box

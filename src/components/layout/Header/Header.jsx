@@ -38,6 +38,7 @@ const Header = ({
   activeView = null,
   onOpenView = null,
   onOpenSearch = null,
+  onBrandClick = null,
   centerContent = null,
   wideCenterContent = false,
   contentTransitionState = 'open',
@@ -134,6 +135,7 @@ const Header = ({
   const shouldRenderInlinePageControls =
     shouldRenderCenterContent && inlineCloseButton && showCloseButton;
   const shouldRenderBrand = !hideBrand || shouldShowPageTitle;
+  const isBrandActionable = Boolean(onBrandClick) && !shouldShowPageTitle;
   const shouldRenderTrailingProfile = !hideProfile && (
     isPageView
       ? showCloseButton && !shouldRenderInlinePageControls
@@ -157,6 +159,8 @@ const Header = ({
         >
           {shouldRenderBrand ? (
             <Box
+              component={isBrandActionable ? 'button' : 'span'}
+              {...(isBrandActionable ? { type: 'button', onClick: onBrandClick } : {})}
               className="dq-layout-header__brand dq-layout-header__motion-item dq-layout-header__motion-item--1"
               direction="row"
               align="center"

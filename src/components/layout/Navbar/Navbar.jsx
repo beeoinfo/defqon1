@@ -174,6 +174,7 @@ const Navbar = ({
                   icon={NavbarIcon}
                   fillOnPress
                   radius="rounded"
+                  badge={item.badge}
                   aria-current={isActive ? 'page' : undefined}
                   ariaLabel={item.ariaLabel}
                   title={item.title}

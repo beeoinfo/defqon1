@@ -4,6 +4,7 @@ export const FAVORITES_STORAGE_KEY = 'defqon1-favorites';
 export const VIEW_STORAGE_KEY = 'defqon1-view';
 export const HIDE_PAST_EVENTS_STORAGE_KEY = 'hidePastEvents';
 export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
+export const IGNORE_SMALL_CONFLICTS_STORAGE_KEY = 'ignoreSmallConflicts';
 export const BETA_FEATURES_STORAGE_KEY = 'defqon1-beta-features';
 
 export const REVIEW_SECTION_MESSAGE =
@@ -970,6 +971,34 @@ export function saveHideUndatedEventsPreference(value) {
       return;
     }
     window.localStorage.setItem(HIDE_UNDATED_EVENTS_STORAGE_KEY, JSON.stringify(true));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function loadIgnoreSmallConflictsPreference() {
+  if (typeof window === 'undefined') {
+    return true;
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(IGNORE_SMALL_CONFLICTS_STORAGE_KEY) ?? 'true');
+  } catch {
+    return true;
+  }
+}
+
+export function saveIgnoreSmallConflictsPreference(value) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (value) {
+      window.localStorage.removeItem(IGNORE_SMALL_CONFLICTS_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(IGNORE_SMALL_CONFLICTS_STORAGE_KEY, JSON.stringify(false));
   } catch {
     // Ignore storage errors
   }

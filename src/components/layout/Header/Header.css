@@ -65,6 +65,18 @@
   padding-block: 0;
 }
 
+.dq-layout-header__brand {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
+button.dq-layout-header__brand {
+  cursor: pointer;
+}
+
 .dq-layout-header__brand-mark {
   width: auto;
   height: 36px;

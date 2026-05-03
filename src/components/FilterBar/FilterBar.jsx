@@ -705,6 +705,9 @@ const FilterBar = ({
                     icon={choice.icon}
                     fillOnPress={choice.fillOnPress}
                     variant={choice.variant ?? 'ghost'}
+                    tag={choice.tag}
+                    tagVariant={choice.tagVariant}
+                    className={choice.className}
                   >
                     {choice.label}
                   </ChoiceButton>

@@ -51,7 +51,7 @@ const Footer = ({
           Made with 🩷 by <strong>Dylan Bergozza</strong>
         </p>
         <p className="dq-layout-footer__version">
-          <em>v0.2a</em>
+          <em>v2.1.0</em>
         </p>
         <Box className="dq-layout-footer__links" direction="row" wrap="wrap" gap={0}>
           {footerLinks.map((link) => (

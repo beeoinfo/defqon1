@@ -1,13 +1,13 @@
 import Box from '@/components/layout/Box';
 
 const ROADMAP_ITEMS = [
-  'Smarter recommendations between favorites and tribe activity.',
-  'Cleaner mobile flows for search, filters and review management.',
-  'More account settings and better archive browsing for older line-ups.',
+  '🔄️ Live lineup updates checker.',
+  '👆 Interactive maps action.',
+  '🎵 Filters by musical styles.',
 ];
 
 const RoadmapPage = () => (
-  <Box background="surface" title="What comes next">
+  <Box>
     <p>
       The roadmap stays focused on practical improvements that make the festival weekend easier to browse and easier to share.
     </p>

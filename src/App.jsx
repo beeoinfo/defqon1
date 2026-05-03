@@ -10,8 +10,9 @@ import {
 } from 'react';
 import {
   ArrowLeftIcon,
-  CalendarDotsIcon,
+  HeartBreakIcon,
   HeartIcon,
+  LightningIcon,
   MagnifyingGlassIcon,
   MapTrifoldIcon,
   MusicNoteIcon,
@@ -41,6 +42,7 @@ import {
   hasScheduledDate,
   loadHidePastEventsPreference,
   loadHideUndatedEventsPreference,
+  loadIgnoreSmallConflictsPreference,
   loadViewPreferences,
   reconcileFavoriteItemsWithEntries,
   removeFavoriteByEntryId,
@@ -48,6 +50,7 @@ import {
   resolveFavoriteItems,
   saveHidePastEventsPreference,
   saveHideUndatedEventsPreference,
+  saveIgnoreSmallConflictsPreference,
   saveViewPreferences,
   upsertFavoriteEntry,
   validateLineupPayload,
@@ -96,6 +99,55 @@ const VIEW_COMPONENTS = {
 
 const getHeaderModeForView = (view) => (view === 'search' ? 'search' : 'default');
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
+const CONFLICT_OVERLAP_THRESHOLD = 0.25;
+const getEntryTimestamp = (value) => {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
+};
+
+const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConflicts) => {
+  const scheduledFavorites = entries
+    .filter((entry) => favoriteIdSet.has(entry.id))
+    .map((entry) => ({
+      entry,
+      startTimestamp: getEntryTimestamp(entry.startAt),
+      endTimestamp: getEntryTimestamp(entry.endAt),
+    }))
+    .filter((item) => (
+      item.startTimestamp !== null &&
+      item.endTimestamp !== null &&
+      item.endTimestamp > item.startTimestamp
+    ))
+    .sort((leftItem, rightItem) => leftItem.startTimestamp - rightItem.startTimestamp);
+  const conflictingIds = new Set();
+
+  scheduledFavorites.forEach((currentItem, currentIndex) => {
+    for (let index = currentIndex + 1; index < scheduledFavorites.length; index += 1) {
+      const candidateItem = scheduledFavorites[index];
+
+      if (candidateItem.startTimestamp >= currentItem.endTimestamp) {
+        break;
+      }
+
+      const overlapDuration = Math.min(currentItem.endTimestamp, candidateItem.endTimestamp) -
+        Math.max(currentItem.startTimestamp, candidateItem.startTimestamp);
+      const largestDuration = Math.max(
+        currentItem.endTimestamp - currentItem.startTimestamp,
+        candidateItem.endTimestamp - candidateItem.startTimestamp
+      );
+      const hasMeaningfulOverlap = ignoreSmallConflicts
+        ? largestDuration > 0 && overlapDuration > largestDuration * CONFLICT_OVERLAP_THRESHOLD
+        : overlapDuration > 0;
+
+      if (hasMeaningfulOverlap) {
+        conflictingIds.add(currentItem.entry.id);
+        conflictingIds.add(candidateItem.entry.id);
+      }
+    }
+  });
+
+  return conflictingIds;
+};
 
 const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
 const LAST_AUTHENTICATED_USER_ID_KEY = 'last-authenticated-user-id:v1';
@@ -333,10 +385,12 @@ for (const lineupSource of lineupSources) {
 
 const AppBaseView = memo(({
   activeView,
+  viewRefreshKey,
   viewPropsByView,
   navbarItems,
   onOpenView,
   onOpenSearch,
+  onOpenHome,
   onOpenSettings,
   headerContent,
   wideHeaderContent,
@@ -368,6 +422,7 @@ const AppBaseView = memo(({
       activeView={activeView}
       onOpenView={onOpenView}
       onOpenSearch={onOpenSearch}
+      onBrandClick={onOpenHome}
       onUserClick={onOpenSettings}
       headerContent={headerContent}
       wideHeaderContent={wideHeaderContent}
@@ -382,7 +437,10 @@ const AppBaseView = memo(({
       isHidden={isHidden}
       className={`dq-app-view--${activeView}`}
     >
-      <ActiveViewComponent {...(viewPropsByView[activeView] ?? {})} />
+      <ActiveViewComponent
+        key={`${activeView}-${viewRefreshKey}`}
+        {...(viewPropsByView[activeView] ?? {})}
+      />
     </View>
   );
 });
@@ -455,6 +513,7 @@ const App = () => {
   );
   const pageStackRef = useRef(initialPageStack);
   const [activeView, setActiveView] = useState(initialRoute.view);
+  const [viewRefreshKey, setViewRefreshKey] = useState(0);
   const previousSearchViewRef = useRef(initialRoute.view === 'search' ? null : initialRoute.view);
   const [searchHeaderQuery, setSearchHeaderQuery] = useState('');
   const [headerMode, setHeaderMode] = useState(() => getHeaderModeForView(initialRoute.view));
@@ -482,10 +541,14 @@ const App = () => {
   );
   const [hidePastEvents, setHidePastEvents] = useState(() => loadHidePastEventsPreference());
   const [hideUndatedEvents, setHideUndatedEvents] = useState(() => loadHideUndatedEventsPreference());
+  const [ignoreSmallConflicts, setIgnoreSmallConflicts] = useState(() =>
+    loadIgnoreSmallConflictsPreference()
+  );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [favoriteItems, setFavoriteItems] = useState(() => bootAccount?.favorites ?? []);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showTribeOnly, setShowTribeOnly] = useState(false);
+  const [showConflictsOnly, setShowConflictsOnly] = useState(false);
   const activeHydrationIdRef = useRef(0);
   const authHydrationTimeoutRef = useRef(0);
   const lastAuthenticatedUserIdRef = useRef(bootUserId);
@@ -565,7 +628,6 @@ const App = () => {
         : baseVisibleReviewFavorites,
     [baseVisibleReviewFavorites, currentTime, shouldHidePastEvents]
   );
-  const reviewCount = isLatestLineupSelected ? visibleReviewFavorites.length : 0;
   const baseBrowseableEntries = useMemo(
     () => (hideUndatedEvents ? filterUndatedEntries(selectedEntries) : selectedEntries),
     [hideUndatedEvents, selectedEntries]
@@ -735,6 +797,19 @@ const App = () => {
     [searchVisibleEntries]
   );
   const selectedTimetableDayLabel = selectedTimetableDay || defaultTimetableDay;
+  const favoriteTimetableConflictEntries = useMemo(() => {
+    const timetableEntries = browseableEntries.filter((entry) => hasCompleteSchedule(entry));
+    const conflictIds = getConflictingFavoriteEntryIds(
+      timetableEntries,
+      favoriteIdSet,
+      ignoreSmallConflicts
+    );
+
+    return timetableEntries.filter((entry) => conflictIds.has(entry.id));
+  }, [browseableEntries, favoriteIdSet, ignoreSmallConflicts]);
+  const reviewCount = isLatestLineupSelected
+    ? visibleReviewFavorites.length + favoriteTimetableConflictEntries.length
+    : 0;
   const baseTimetableEntries = useMemo(
     () =>
       selectedTimetableDayLabel
@@ -746,8 +821,18 @@ const App = () => {
         : [],
     [browseableEntries, selectedTimetableDayLabel]
   );
+  const conflictingFavoriteEntryIds = useMemo(
+    () => getConflictingFavoriteEntryIds(baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts),
+    [baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts]
+  );
+  const conflictCount = conflictingFavoriteEntryIds.size;
   const visibleTimetableEntries = useMemo(() => {
     let nextEntries = baseTimetableEntries;
+
+    if (showConflictsOnly) {
+      nextEntries = nextEntries.filter((entry) => conflictingFavoriteEntryIds.has(entry.id));
+      return nextEntries;
+    }
 
     if (showTribeOnly) {
       nextEntries = nextEntries.filter((entry) => tribeFilterEntryIds.has(entry.id));
@@ -760,7 +845,9 @@ const App = () => {
     return nextEntries;
   }, [
     baseTimetableEntries,
+    conflictingFavoriteEntryIds,
     favoriteIdSet,
+    showConflictsOnly,
     showFavoritesOnly,
     showTribeOnly,
     tribeFilterEntryIds,
@@ -911,11 +998,35 @@ const App = () => {
   }, []);
 
   const resetBrowseState = useCallback(() => {
+    setSearchHeaderQuery('');
     setSelectedDay('All days');
     setSelectedStage('All stages');
+    setSelectedTimetableDay('');
     setShowFavoritesOnly(false);
     setShowTribeOnly(false);
+    setShowConflictsOnly(false);
   }, []);
+
+  const openHomeView = useCallback(() => {
+    startTransition(() => {
+      resetBrowseState();
+      setViewRefreshKey((currentKey) => currentKey + 1);
+    });
+
+    const syncHistoryState = activeView === defaultScheduleView && pageStackRef.current.length === 0
+      ? replaceHistoryPageStackState
+      : pushHistoryPageStackState;
+
+    syncHistoryState({
+      url: getUrlForView(defaultScheduleView),
+      pageStack: [],
+    });
+
+    pageStackRef.current = [];
+    setPageStack([]);
+    setActiveView(defaultScheduleView);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [activeView, defaultScheduleView, resetBrowseState]);
 
   const openSearch = useCallback(() => {
     if (activeView !== 'search') {
@@ -955,6 +1066,18 @@ const App = () => {
     openView('timetable');
   }, [openView, resetBrowseState]);
 
+  const handleOpenTimetableConflicts = useCallback((day) => {
+    if (!hasTimetableView) {
+      return;
+    }
+
+    setSelectedTimetableDay(day || defaultTimetableDay);
+    setShowFavoritesOnly(false);
+    setShowConflictsOnly(true);
+    setShowTribeOnly(false);
+    openView('timetable');
+  }, [defaultTimetableDay, hasTimetableView, openView]);
+
   const handleMapsNav = useCallback(() => {
     if (!hasMapsView) {
       return;
@@ -989,6 +1112,10 @@ const App = () => {
   useEffect(() => {
     saveHideUndatedEventsPreference(hideUndatedEvents);
   }, [hideUndatedEvents]);
+
+  useEffect(() => {
+    saveIgnoreSmallConflictsPreference(ignoreSmallConflicts);
+  }, [ignoreSmallConflicts]);
 
   useEffect(() => {
     const shouldReplaceLineup = activeView === 'lineup' && hasTimetableView;
@@ -1235,6 +1362,7 @@ const App = () => {
     }
 
     setShowFavoritesOnly(false);
+    setShowConflictsOnly(false);
     setShowTribeOnly(false);
   }, [isLatestLineupSelected]);
 
@@ -1375,6 +1503,14 @@ const App = () => {
 
     setFavoriteItems((previousItems) => removeFavoriteByKey(previousItems, favoriteKey));
   }, [authUser, favoritesReadOnly]);
+
+  const resetFavorites = useCallback(() => {
+    if (!authUser) {
+      return;
+    }
+
+    setFavoriteItems([]);
+  }, [authUser]);
 
   const handleCreateTribe = useCallback(async (name) => {
     if (!authUser) {
@@ -1527,6 +1663,11 @@ const App = () => {
       setShowTribeOnly(false);
     }
   }, [hasTribeEntries, showTribeOnly]);
+  useEffect(() => {
+    if (showConflictsOnly && conflictCount === 0) {
+      setShowConflictsOnly(false);
+    }
+  }, [conflictCount, showConflictsOnly]);
   const lineupChoices = useMemo(() => [
     ...(isLatestLineupSelected && authUser && hasFavoriteEntries ? [{
       id: 'favorites',
@@ -1593,6 +1734,16 @@ const App = () => {
   ]);
 
   const timetableChoices = useMemo(() => [
+    ...(isLatestLineupSelected && authUser && conflictCount > 0 ? [{
+      id: 'conflicts',
+      label: 'Conflicts',
+      icon: LightningIcon,
+      fillOnPress: true,
+      variant: 'favorite',
+      tag: conflictCount,
+      tagVariant: 'count',
+      className: 'dq-ui-choice-button--floating-tag',
+    }] : []),
     ...(isLatestLineupSelected && authUser && hasFavoriteEntries ? [{
       id: 'favorites',
       label: 'My favorites',
@@ -1607,7 +1758,7 @@ const App = () => {
       fillOnPress: true,
       variant: 'favorite',
     }] : []),
-  ], [authUser, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, tribe]);
+  ], [authUser, conflictCount, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, tribe]);
   const timetableDrawers = useMemo(() => (timetableDayDrawerOptions.length > 1
     ? [{
         id: 'day',
@@ -1620,22 +1771,30 @@ const App = () => {
     value: {
       day: selectedTimetableDayLabel || null,
       favorites: showFavoritesOnly,
+      conflicts: showConflictsOnly,
       tribe: showTribeOnly,
     },
     onChange: (nextValue) => {
       const nextDay = nextValue.day ?? defaultTimetableDay;
       const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
+      const didEnableConflicts = Boolean(nextValue.conflicts) && !showConflictsOnly;
       const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
-      const nextFavoritesOnly = didEnableTribe ? false : Boolean(nextValue.favorites);
-      const nextTribeOnly = didEnableFavorites ? false : Boolean(nextValue.tribe);
+      const nextFavoritesOnly =
+        didEnableConflicts || didEnableTribe ? false : Boolean(nextValue.favorites);
+      const nextConflictsOnly =
+        didEnableFavorites || didEnableTribe ? false : Boolean(nextValue.conflicts);
+      const nextTribeOnly =
+        didEnableConflicts || didEnableFavorites ? false : Boolean(nextValue.tribe);
 
       setSelectedTimetableDay(nextDay);
       setShowFavoritesOnly(nextFavoritesOnly);
+      setShowConflictsOnly(nextConflictsOnly);
       setShowTribeOnly(nextTribeOnly);
     },
     onReset: () => {
       setSelectedTimetableDay(defaultTimetableDay);
       setShowFavoritesOnly(false);
+      setShowConflictsOnly(false);
       setShowTribeOnly(false);
     },
     resetButton: false,
@@ -1644,6 +1803,7 @@ const App = () => {
   } : null), [
     defaultTimetableDay,
     selectedTimetableDayLabel,
+    showConflictsOnly,
     showFavoritesOnly,
     showTribeOnly,
     timetableChoices,
@@ -1662,7 +1822,7 @@ const App = () => {
       ...(hasTimetableView ? [{
         id: 'timetable',
         label: 'Timetable',
-        icon: CalendarDotsIcon,
+        icon: MusicNoteIcon,
         active: activeView === 'timetable',
         onClick: handleTimetableNav,
       }] : []),
@@ -1676,7 +1836,7 @@ const App = () => {
       {
         id: 'reviews',
         label: 'Reviews',
-        icon: HeartIcon,
+        icon: HeartBreakIcon,
         active: activeView === 'reviews',
         badge: authUser && reviewCount > 0 ? <Badge variant="count">{reviewCount}</Badge> : null,
         togglesActive: Boolean(authUser),
@@ -1793,6 +1953,7 @@ const App = () => {
       favoriteIdSet,
       toggleFavorite,
       canToggleFavorites: !favoritesReadOnly,
+      tribeLikesByEntryId,
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       filterBar: timetableFilterBar,
     },
@@ -1801,9 +1962,13 @@ const App = () => {
     },
     reviews: {
       reviewFavorites: isLatestLineupSelected ? visibleReviewFavorites : [],
+      conflictEntries: isLatestLineupSelected ? favoriteTimetableConflictEntries : [],
       favoriteIdSet,
       toggleFavorite,
       removeReviewFavorite,
+      onOpenTimetableConflicts: handleOpenTimetableConflicts,
+      tribeLikesByEntryId,
+      ignoreSmallConflicts,
       canManageFavorites: !favoritesReadOnly,
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       isAuthenticated: Boolean(authUser),
@@ -1812,9 +1977,12 @@ const App = () => {
     archiveLineupNotice,
     authUser,
     favoriteIdSet,
+    favoriteTimetableConflictEntries,
     favoritesReadOnly,
     groupedVisibleEntries,
     groupedSearchVisibleEntries,
+    handleOpenTimetableConflicts,
+    ignoreSmallConflicts,
     isLatestLineupSelected,
     lineupFilterBar,
     removeReviewFavorite,
@@ -1842,11 +2010,15 @@ const App = () => {
       tribeInviteAlert,
       hidePastEvents,
       hideUndatedEvents,
+      ignoreSmallConflicts,
+      favoriteCount: favoriteItems.length,
       lineups: lineupSources,
       selectedLineupKey,
       onSelectLineup: handleSelectLineup,
       onHidePastEventsChange: setHidePastEvents,
       onHideUndatedEventsChange: setHideUndatedEvents,
+      onIgnoreSmallConflictsChange: setIgnoreSmallConflicts,
+      onResetFavorites: resetFavorites,
       onProfileUpdated: handleProfileUpdated,
       onSignedOut: handleSignedOut,
       onCreateTribe: handleCreateTribe,
@@ -1870,9 +2042,12 @@ const App = () => {
     handleSignedOut,
     hidePastEvents,
     hideUndatedEvents,
+    ignoreSmallConflicts,
+    favoriteItems.length,
     isTribeBusy,
     isTribeReady,
     pendingTribeInviteCode,
+    resetFavorites,
     selectedLineupKey,
     tribe,
     tribeInviteAlert,
@@ -1900,10 +2075,12 @@ const App = () => {
   const baseView = useMemo(() => (
     <AppBaseView
       activeView={activeView}
+      viewRefreshKey={viewRefreshKey}
       viewPropsByView={viewPropsByView}
       navbarItems={navbarItems}
       onOpenView={openView}
       onOpenSearch={openSearch}
+      onOpenHome={openHomeView}
       onOpenSettings={handleProfileButtonClick}
       headerContent={isSearchHeaderMode ? searchHeaderContent : null}
       wideHeaderContent={isSearchHeaderMode}
@@ -1923,6 +2100,7 @@ const App = () => {
     handleProfileButtonClick,
     isSearchHeaderMode,
     navbarItems,
+    openHomeView,
     openSearch,
     openView,
     profileImageSrc,
@@ -1931,6 +2109,7 @@ const App = () => {
     searchHeaderContent,
     shouldHideBaseView,
     shouldKeepMobileNavbarVisible,
+    viewRefreshKey,
     viewPropsByView,
   ]);
 
