@@ -4,6 +4,7 @@ const ROADMAP_ITEMS = [
   '🔄️ Live lineup updates checker.',
   '👆 Interactive maps action.',
   '🎵 Filters by musical styles.',
+  '🚀 Complete PWA support with offline mode and push notifications.',
 ];
 
 const RoadmapPage = () => (
