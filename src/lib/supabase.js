@@ -24,6 +24,15 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HIDDEN_AUTH_EMAIL_DOMAIN = 'auth.beeoinfo.local';
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+const COMPACT_FAVORITE_SNAPSHOT_KEYS = new Set([
+  'id',
+  'artistName',
+  'artistTokens',
+  'stageColor',
+  'startAt',
+  'endAt',
+  'savedAt',
+]);
 
 function ensureSupabase() {
   if (!supabase) {
@@ -35,14 +44,64 @@ function ensureSupabase() {
 function dedupeFavoriteItems(items) {
   const seen = new Set();
   return items.filter((item) => {
-    const key =
-      item.favoriteKey ?? item.hash ?? item.id ?? `${item.daySlug}-${item.stageSlug}-${item.artistSlug}`;
+    const key = getFavoriteItemKey(item);
     if (!key || seen.has(key)) {
       return false;
     }
     seen.add(key);
     return true;
   });
+}
+
+function getFavoriteItemKey(item) {
+  if (item?.favoriteKey || item?.hash || item?.id) {
+    return item.favoriteKey ?? item.hash ?? item.id;
+  }
+
+  if (item?.daySlug || item?.stageSlug || item?.artistSlug) {
+    return `${item.daySlug}-${item.stageSlug}-${item.artistSlug}`;
+  }
+
+  return null;
+}
+
+function compactFavoriteSnapshot(item, { resetSchedule = false } = {}) {
+  return {
+    id: item?.id ?? null,
+    artistName: item?.artistName ?? item?.artistRaw ?? null,
+    artistTokens: Array.isArray(item?.artistTokens) ? item.artistTokens : [],
+    stageColor: item?.stageColor ?? null,
+    startAt: resetSchedule ? null : item?.startAt ?? null,
+    endAt: resetSchedule ? null : item?.endAt ?? null,
+    savedAt: item?.savedAt ?? new Date().toISOString(),
+  };
+}
+
+function isLegacyFavoriteSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+    return true;
+  }
+
+  return Object.keys(snapshot).some((key) => !COMPACT_FAVORITE_SNAPSHOT_KEYS.has(key));
+}
+
+function normalizeRemoteFavoriteRows(rows) {
+  let hasLegacySnapshots = false;
+  const items = (rows ?? []).map((row) => {
+    const snapshot = row.snapshot ?? {};
+    const shouldResetSchedule = isLegacyFavoriteSnapshot(snapshot);
+
+    if (shouldResetSchedule) {
+      hasLegacySnapshots = true;
+    }
+
+    return {
+      ...compactFavoriteSnapshot(snapshot, { resetSchedule: shouldResetSchedule }),
+      favoriteKey: row.favorite_key,
+    };
+  });
+
+  return { items, hasLegacySnapshots };
 }
 
 function fileToImage(file) {
@@ -296,9 +355,26 @@ export async function loadAccountBundle(userId, authUser = null) {
   if (favoritesError) {
     throw favoritesError;
   }
+  const { items: favoriteItems, hasLegacySnapshots } = normalizeRemoteFavoriteRows(favorites);
+
+  if (hasLegacySnapshots && favoriteItems.length > 0) {
+    const rows = favoriteItems.map((item) => ({
+      user_id: userId,
+      favorite_key: item.favoriteKey,
+      snapshot: compactFavoriteSnapshot(item),
+    }));
+    const { error: migrationError } = await client
+      .from('user_favorites')
+      .upsert(rows, { onConflict: 'user_id,favorite_key' });
+
+    if (migrationError) {
+      throw migrationError;
+    }
+  }
+
   return {
     profile,
-    favorites: (favorites ?? []).map((row) => ({ ...row.snapshot, favoriteKey: row.favorite_key })),
+    favorites: favoriteItems,
   };
 }
 
@@ -317,7 +393,11 @@ export async function syncFavoriteSnapshots(userId, favoriteItems) {
     throw existingError;
   }
   if (cleanItems.length > 0) {
-    const rows = cleanItems.map((item) => ({ user_id: userId, favorite_key: item.favoriteKey, snapshot: item }));
+    const rows = cleanItems.map((item) => ({
+      user_id: userId,
+      favorite_key: getFavoriteItemKey(item),
+      snapshot: compactFavoriteSnapshot(item),
+    }));
     const { error: upsertError } = await client
       .from('user_favorites')
       .upsert(rows, { onConflict: 'user_id,favorite_key' });
@@ -325,7 +405,7 @@ export async function syncFavoriteSnapshots(userId, favoriteItems) {
       throw upsertError;
     }
   }
-  const keepKeys = new Set(cleanItems.map((item) => item.favoriteKey));
+  const keepKeys = new Set(cleanItems.map((item) => getFavoriteItemKey(item)));
   const deleteKeys = (existingRows ?? [])
     .map((row) => row.favorite_key)
     .filter((favoriteKey) => !keepKeys.has(favoriteKey));
@@ -531,7 +611,10 @@ export async function loadTribeBundle(userId) {
   const profilesById = new Map(memberProfiles.map((profile) => [profile.id, profile]));
   const favoritesByUserId = memberFavorites.reduce((acc, row) => {
     const current = acc.get(row.user_id) ?? [];
-    current.push({ ...row.snapshot, favoriteKey: row.favorite_key });
+    current.push({
+      ...compactFavoriteSnapshot(row.snapshot),
+      favoriteKey: row.favorite_key,
+    });
     acc.set(row.user_id, current);
     return acc;
   }, new Map());

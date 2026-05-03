@@ -4,7 +4,7 @@ import Box from '@/components/layout/Box';
 const AboutPage = () => (
   <Box gap="var(--dq-ui-space-xl)">
     <Alert variant="info" title="Built as a focused Defqon.1 companion">
-      This app helps browse the line-up faster, save likes, spot schedule changes and share the weekend with a tribe.
+      This app helps browse the line-up faster, save favorites, spot schedule changes and share the weekend with a tribe.
     </Alert>
 
     <Box background="surface" title="Why it exists">

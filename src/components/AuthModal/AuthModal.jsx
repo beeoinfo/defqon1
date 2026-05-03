@@ -111,8 +111,8 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
       title={isSignup ? 'Create your account' : 'Welcome back'}
       subtitle={
         isSignup
-          ? 'Create an account to sync likes, tribe activity and profile settings.'
-          : 'Log in to recover your synced profile, tribe and saved likes.'
+          ? 'Create an account to sync favorites, tribe activity and profile settings.'
+          : 'Log in to recover your synced profile, tribe and saved favorites.'
       }
       maxWidth="560px"
     >
@@ -191,7 +191,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
             <Title component="span" variant="h6">
               {isSignup
                 ? 'Your synced profile is ready right after sign-up.'
-                : 'Your likes and tribe stay attached to your account.'}
+                : 'Your favorites and tribe stay attached to your account.'}
             </Title>
             <Button type="submit" disabled={isBusy}>
               {isBusy ? 'Please wait...' : isSignup ? 'Create account' : 'Login'}

@@ -7,7 +7,7 @@ export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
 export const BETA_FEATURES_STORAGE_KEY = 'defqon1-beta-features';
 
 export const REVIEW_SECTION_MESSAGE =
-  'Some saved likes seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
+  'Some saved favorites seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
 
 const DAY_LABELS = {
   thursday: 'Thursday',
@@ -174,6 +174,23 @@ function buildSnapshotFromEntry(entry, overrides = {}) {
 
   snapshot.favoriteKey = buildFavoriteKeyFromSnapshot(snapshot);
   return snapshot;
+}
+
+function buildCompactFavoriteSnapshot(item, overrides = {}) {
+  return {
+    favoriteKey: item.favoriteKey ?? overrides.favoriteKey,
+    id: item.id ?? null,
+    artistName: item.artistName ?? item.artistRaw ?? '',
+    artistTokens: Array.isArray(overrides.artistTokens)
+      ? overrides.artistTokens
+      : Array.isArray(item.artistTokens)
+        ? item.artistTokens
+        : [],
+    stageColor: item.stageColor ?? overrides.stageColor ?? null,
+    startAt: overrides.startAt ?? item.startAt ?? null,
+    endAt: overrides.endAt ?? item.endAt ?? null,
+    savedAt: overrides.savedAt ?? item.savedAt ?? new Date().toISOString(),
+  };
 }
 
 function buildStageMetaIndex(entries) {
@@ -398,11 +415,11 @@ function normalizeFavoriteItems(rawItems, currentEntries, previousEntries) {
 }
 
 function buildSavedTokenSet(snapshot) {
-  return new Set(snapshot.artistTokens.map((token) => String(token).toLowerCase()));
+  return new Set((snapshot.artistTokens ?? []).map((token) => String(token).toLowerCase()));
 }
 
 function buildSavedTagSet(snapshot) {
-  return new Set(snapshot.artistTags.map((tag) => normalizeText(tag)));
+  return new Set((snapshot.artistTags ?? []).map((tag) => normalizeText(tag)));
 }
 
 export function getReviewSuggestions(savedFavorite, entries) {
@@ -825,16 +842,25 @@ export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
     }
 
     const currentEntry = currentEntriesById.get(favorite.id);
+    const missingStageColor = !favorite.stageColor && currentEntry.stageColor;
+    const missingArtistTokens = !Array.isArray(favorite.artistTokens) || favorite.artistTokens.length === 0;
 
     if (
       !hasScheduledDate(favorite) &&
       hasScheduledDate(currentEntry)
     ) {
       didChange = true;
-      return buildSnapshotFromEntry(currentEntry, {
+      return buildCompactFavoriteSnapshot(currentEntry, {
         favoriteKey: favorite.favoriteKey,
-        legacyId: favorite.legacyId,
         savedAt: favorite.savedAt,
+      });
+    }
+
+    if (missingStageColor || missingArtistTokens) {
+      didChange = true;
+      return buildCompactFavoriteSnapshot(favorite, {
+        stageColor: currentEntry.stageColor,
+        artistTokens: currentEntry.artistTokens,
       });
     }
 

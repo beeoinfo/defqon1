@@ -4,9 +4,63 @@ import Box from '@/components/layout/Box';
 import Card from '@/components/primitives/Card';
 import Badge from '@/components/primitives/Badge';
 import Title from '@/components/primitives/Title';
-import { REVIEW_SECTION_MESSAGE, getEntryDayLabel, getEntryDisplayName } from '@/lib/lineup';
+import { REVIEW_SECTION_MESSAGE, getDayLabel, getEntryDayLabel, getEntryDisplayName } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
 import './ReviewsView.css';
+
+const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+const formatTimeRange = (startAt, endAt) => {
+  const startDate = startAt ? new Date(startAt) : null;
+  const endDate = endAt ? new Date(endAt) : null;
+  const hasStart = startDate && !Number.isNaN(startDate.getTime());
+  const hasEnd = endDate && !Number.isNaN(endDate.getTime());
+
+  if (hasStart && hasEnd) {
+    return `${TIME_FORMATTER.format(startDate)} - ${TIME_FORMATTER.format(endDate)}`;
+  }
+
+  if (hasStart) {
+    return TIME_FORMATTER.format(startDate);
+  }
+
+  if (hasEnd) {
+    return TIME_FORMATTER.format(endDate);
+  }
+
+  return null;
+};
+
+const getReviewReferenceEntry = (favorite) => favorite.suggestions?.[0] ?? null;
+
+const getSavedIdParts = (id) => {
+  const parts = String(id ?? '').split('_').filter(Boolean);
+
+  return {
+    daySlug: parts[0] ?? null,
+    stageSlug: parts[1] ?? null,
+  };
+};
+
+const getStageLabelFromSlug = (stageSlug) => {
+  if (!stageSlug) {
+    return null;
+  }
+
+  if (stageSlug === 'uv' || stageSlug === 'u-v') {
+    return 'U.V.';
+  }
+
+  return stageSlug
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.toUpperCase())
+    .join(' ');
+};
 
 const ReviewsView = ({
   reviewFavorites = [],
@@ -19,8 +73,8 @@ const ReviewsView = ({
 }) => {
   if (!isAuthenticated) {
     return (
-      <Alert variant="neutral" title="Sign in to review saved likes">
-        Reviews become useful once your likes are synced to your account.
+      <Alert variant="neutral" title="Sign in to review saved favorites">
+        Reviews become useful once your favorites are synced to your account.
       </Alert>
     );
   }
@@ -34,7 +88,7 @@ const ReviewsView = ({
   }
 
   if (!reviewFavorites.length) {
-    return <EmptyState text="No likes require a review right now." />;
+    return <EmptyState text="No favorites require a review right now." />;
   }
 
   return (
@@ -55,7 +109,7 @@ const ReviewsView = ({
         </Badge>
       </Box>
 
-      <Alert variant="warning" title="A few saved likes need a quick review">
+      <Alert variant="warning" title="A few saved favorites need a quick review">
         {REVIEW_SECTION_MESSAGE}
       </Alert>
 
@@ -66,7 +120,12 @@ const ReviewsView = ({
         className="dq-reviews-view__columns"
       >
         {reviewFavorites.map((favorite) => {
-          const favoriteTheme = getStageTheme(favorite.stage);
+          const referenceEntry = getReviewReferenceEntry(favorite);
+          const favoriteIdParts = getSavedIdParts(favorite.id);
+          const favoriteStage = getStageLabelFromSlug(favoriteIdParts.stageSlug);
+          const favoriteDay = favoriteIdParts.daySlug ? getDayLabel(favoriteIdParts.daySlug) : null;
+          const favoriteTime = favorite.timeLabel ?? formatTimeRange(favorite.startAt, favorite.endAt);
+          const favoriteTheme = getStageTheme(favoriteStage);
           const favoriteColor = favorite.stageColor ?? favoriteTheme.accent;
           const hasSuggestions = favorite.suggestions?.length > 0;
 
@@ -75,9 +134,9 @@ const ReviewsView = ({
               key={favorite.favoriteKey}
               color={favoriteColor}
               title={getEntryDisplayName(favorite)}
-              meta1={favorite.stage}
-              meta2={getEntryDayLabel(favorite)}
-              meta3={favorite.timeLabel}
+              meta1={favoriteStage}
+              meta2={favoriteDay}
+              meta3={favoriteTime}
               metaVariant="strikethrough"
               actionVariant={canManageFavorites ? 'close' : null}
               actionAriaLabel="Dismiss review"
@@ -104,7 +163,7 @@ const ReviewsView = ({
                           actionVariant={canManageFavorites ? 'likes' : null}
                           actionPressed={isSuggestionFavorite}
                           actionAriaLabel={
-                            isSuggestionFavorite ? 'Remove like' : 'Add like'
+                            isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
                           }
                           onAction={() => toggleFavorite?.(suggestion.id)}
                         />

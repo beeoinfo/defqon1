@@ -465,7 +465,7 @@ const TimetableView = ({
                             radius="rounded"
                             pressed={isFavorite}
                             fillOnPress
-                            ariaLabel={isFavorite ? 'Remove like' : 'Add like'}
+                            ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
                           />
                         ) : null}
                       </Box>
@@ -592,7 +592,7 @@ const TimetableView = ({
                               radius="rounded"
                               pressed={isFavorite}
                               fillOnPress
-                              ariaLabel={isFavorite ? 'Remove like' : 'Add like'}
+                              ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
                               onPressedChange={() => toggleFavorite?.(entry.id)}
                             />
                           ) : null}

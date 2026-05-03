@@ -9,10 +9,10 @@ const LegalPage = () => (
 
     <Box background="surface" title="Data used by the app">
       <p>
-        Account data is limited to the information needed to power the experience: profile details, tribe membership and liked set snapshots.
+        Account data is limited to the information needed to power the experience: profile details, tribe membership and favorite snapshots.
       </p>
       <p>
-        The app is designed to keep those flows understandable and tied to explicit user actions like signing in, editing a profile, saving likes or joining a tribe.
+        The app is designed to keep those flows understandable and tied to explicit user actions like signing in, editing a profile, saving favorites or joining a tribe.
       </p>
     </Box>
   </Box>

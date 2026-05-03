@@ -1,7 +1,7 @@
 import Box from '@/components/layout/Box';
 
 const ROADMAP_ITEMS = [
-  'Smarter recommendations between likes and tribe activity.',
+  'Smarter recommendations between favorites and tribe activity.',
   'Cleaner mobile flows for search, filters and review management.',
   'More account settings and better archive browsing for older line-ups.',
 ];

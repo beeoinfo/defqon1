@@ -185,7 +185,7 @@ const LineUpView = ({
                           {...getEntryCardMetaProps(entry)}
                           actionVariant={canToggleFavorites ? 'likes' : null}
                           actionPressed={isFavorite}
-                          actionAriaLabel={isFavorite ? 'Remove like' : 'Add like'}
+                          actionAriaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
                           onAction={() => toggleFavorite?.(entry.id)}
                         >
                           {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
@@ -239,7 +239,7 @@ const LineUpView = ({
                                       actionVariant={canToggleFavorites ? 'likes' : null}
                                       actionPressed={isSuggestionFavorite}
                                       actionAriaLabel={
-                                        isSuggestionFavorite ? 'Remove like' : 'Add like'
+                                        isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
                                       }
                                       onAction={() => toggleFavorite?.(suggestion.id)}
                                     />

@@ -539,7 +539,7 @@ const App = () => {
   const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
   const favoritesReadOnly = !isLatestLineupSelected;
   const archiveLineupNotice =
-    'You are browsing an older line-up snapshot in read-only mode, so likes cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
+    'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
   const entriesById = useMemo(
     () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
     [selectedEntries]
