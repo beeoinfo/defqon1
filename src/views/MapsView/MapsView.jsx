@@ -158,6 +158,13 @@ const normalizeStyleDefinition = (styleDefinition, owner, styleId, layer) => {
   nextStyleDefinition.projection = { name: 'mercator' };
   delete nextStyleDefinition.fog;
 
+  if (Array.isArray(nextStyleDefinition.layers)) {
+    nextStyleDefinition.layers = nextStyleDefinition.layers.map((styleLayer) => {
+      const { scope, ...nextStyleLayer } = styleLayer;
+      return nextStyleLayer;
+    });
+  }
+
   const sourceBounds = layer?.bounds;
 
   if (sourceBounds && nextStyleDefinition.sources?.composite) {

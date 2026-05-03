@@ -37,8 +37,11 @@ import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
 import ToggleButton from '../../components/primitives/ToggleButton';
 import UiThemeScope from '../../theme/UiThemeScope';
-import { getPresetAvatarUrl, getRandomPresetAvatarIndex } from '@/lib/presetAvatars';
+import { getPresetAvatarUrl, getRandomPresetAvatarIndex, presetAvatarOptions } from '@/lib/presetAvatars';
+import { activeSite } from '@/sites/siteDefinitions';
 import './StorybookView.css';
+
+const STORYBOOK_PRIMARY_COLOR = activeSite.theme.primary;
 
 const STORYBOOK_BOX_EXAMPLES = [
   {
@@ -229,7 +232,7 @@ const STORYBOOK_SLIDING_COLUMNS_SECTIONS = [
   {
     id: 'friday',
     label: 'Friday',
-    color: '#bc9b5e',
+    color: STORYBOOK_PRIMARY_COLOR,
     intro: 'Short opening column to test early hide states and skipped next targets.',
     items: [
       'Opening ceremony',
@@ -314,7 +317,7 @@ const STORYBOOK_FILTER_BAR_CHOICES = [
   {
     id: 'special',
     label: 'Special',
-    color: '#bc9b5e',
+    color: STORYBOOK_PRIMARY_COLOR,
   },
   {
     id: 'favorite',
@@ -348,7 +351,7 @@ const STORYBOOK_FILTER_BAR_DRAWERS = [
       {
         value: 'gold',
         label: 'Gold',
-        color: '#bc9b5e',
+        color: STORYBOOK_PRIMARY_COLOR,
       },
     ],
   },
@@ -401,9 +404,9 @@ const STORYBOOK_ALERT_EXAMPLES = [
   },
 ];
 
-const STORYBOOK_PEOPLE_STACK_AVATARS = Array.from({ length: 12 }, (_, index) => ({
-  id: `member-${index + 1}`,
-  avatarUrl: `/src/assets/avatars/${index + 1}.png`,
+const STORYBOOK_PEOPLE_STACK_AVATARS = presetAvatarOptions.map((avatar) => ({
+  id: `member-${avatar.index}`,
+  avatarUrl: avatar.url,
 }));
 
 const STORYBOOK_DROPDOWN_DRAWER_ITEMS = [
@@ -786,12 +789,7 @@ const StorybookPeopleSection = memo(() => {
               ariaLabel="Open tribe details for 12 members"
             />
             <PeopleStack
-              avatars={[
-                '/src/assets/avatars/1.png',
-                '/src/assets/avatars/2.png',
-                '/src/assets/avatars/3.png',
-                '/src/assets/avatars/4.png',
-              ]}
+              avatars={presetAvatarOptions.slice(0, 4).map((avatar) => avatar.url)}
               maxVisible={5}
               ariaLabel="Open tribe details for 4 members"
             />
@@ -807,13 +805,13 @@ const StorybookPeopleSection = memo(() => {
         >
           <Box gap="var(--dq-ui-space-lg)">
             <PeopleCard
-              avatarSrc="/src/assets/avatars/1.png"
+              avatarSrc={getPresetAvatarUrl(1)}
               name="Dylan Bergozza"
               handle="@daddydi"
               owner
             />
             <PeopleCard
-              avatarSrc="/src/assets/avatars/2.png"
+              avatarSrc={getPresetAvatarUrl(2)}
               name="Usera Testa"
               handle="@test"
             />
@@ -1063,7 +1061,7 @@ const StorybookBody = memo(() => {
               <Button
                 size="lg"
                 radius="rounded"
-                imageSrc="/src/assets/avatars/1.png"
+                imageSrc={getPresetAvatarUrl(1)}
                 imageAlt=""
                 subtitle="@test"
               >

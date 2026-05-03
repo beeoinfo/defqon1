@@ -81,7 +81,16 @@ import {
 } from './lib/supabase';
 import { getCanonicalStageName, getStageTheme } from './lib/stageThemes';
 import { PAGE_DEFINITIONS } from './page/pageDefinitions';
-import { getUrlForView, resolveRoute } from './routes/AppRoutes';
+import {
+  APP_DOCUMENT_TITLE,
+  formatDocumentTitle,
+  getTitleForView,
+  getUrlForView,
+  resolveRoute,
+} from './routes/AppRoutes';
+import { activeSiteAssets } from './sites/siteAssets';
+import { activeSite } from './sites/siteDefinitions';
+import { getSiteLineupModuleEntries } from './sites/siteLineupData';
 import UiThemeScope from './theme/UiThemeScope';
 import LineUpView from './views/LineUpView';
 import MapsView from './views/MapsView';
@@ -98,6 +107,7 @@ const VIEW_COMPONENTS = {
 };
 
 const getHeaderModeForView = (view) => (view === 'search' ? 'search' : 'default');
+const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favicon}?site=${activeSite.slug}`;
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const getEntryTimestamp = (value) => {
@@ -149,7 +159,7 @@ const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConfl
   return conflictingIds;
 };
 
-const ACCOUNT_CACHE_KEY_PREFIX = 'account-cache:v1:';
+const ACCOUNT_CACHE_KEY_PREFIX = `account-cache:v1:${activeSite.slug}:`;
 const LAST_AUTHENTICATED_USER_ID_KEY = 'last-authenticated-user-id:v1';
 const PENDING_TRIBE_INVITE_KEY = 'pending-tribe-invite:v1';
 
@@ -352,7 +362,7 @@ const extractLineupMapLayers = (moduleValue) => {
 
 const formatLineupLabel = (path) => {
   const fileName = path.split('/').pop() ?? path;
-  const match = fileName.match(/^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_defqon_lineup\.json$/);
+  const match = fileName.match(/^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_(?:.+_)?lineup\.json$/);
 
   if (!match) {
     return fileName;
@@ -362,18 +372,15 @@ const formatLineupLabel = (path) => {
   return `${day}/${month}/${year} - ${hour}:${minute}`;
 };
 
-const lineupModules = import.meta.glob('./data/*_defqon_lineup.json', {
-  eager: true,
-});
-const lineupKeysAsc = Object.keys(lineupModules).sort();
-const latestKey = lineupKeysAsc.at(-1) ?? null;
-const lineupSources = [...lineupKeysAsc]
+const lineupModuleEntries = getSiteLineupModuleEntries(activeSite);
+const latestKey = lineupModuleEntries.at(-1)?.[0] ?? null;
+const lineupSources = [...lineupModuleEntries]
   .reverse()
-  .map((key) => ({
+  .map(([key, moduleValue]) => ({
     key,
     label: formatLineupLabel(key),
-    entries: extractLineupEntries(lineupModules[key]),
-    mapLayers: extractLineupMapLayers(lineupModules[key]),
+    entries: extractLineupEntries(moduleValue),
+    mapLayers: extractLineupMapLayers(moduleValue),
     isLatest: key === latestKey,
   }));
 
@@ -405,6 +412,7 @@ const AppBaseView = memo(({
   profileName,
   profileSubtitle,
   profileImageSrc,
+  brandLogoSrc,
 }) => {
   const ActiveViewComponent = VIEW_COMPONENTS[activeView];
 
@@ -415,7 +423,8 @@ const AppBaseView = memo(({
   return (
     <View
       navbar={navbarItems}
-      brandTitle="DEFQON.1"
+      brandTitle={APP_DOCUMENT_TITLE}
+      brandLogoSrc={brandLogoSrc}
       profileName={profileName}
       profileSubtitle={profileSubtitle}
       profileImageSrc={profileImageSrc}
@@ -470,6 +479,8 @@ const AppPageLayer = memo(({
   return (
     <Page
       title={pageDefinition.title}
+      brandTitle={APP_DOCUMENT_TITLE}
+      brandLogoSrc={activeSiteAssets.logoSrc}
       onClose={() => onClosePage(page.id)}
       onOpenPage={onOpenPage}
       onOpenView={onOpenView}
@@ -572,6 +583,30 @@ const App = () => {
   const attemptedInviteJoinKeyRef = useRef('');
 
   useDocumentScrollLock(hasRenderedPages);
+
+  useEffect(() => {
+    const topPage = pageStack.at(-1);
+    const pageTitle = topPage ? PAGE_DEFINITIONS[topPage.type]?.title : null;
+
+    document.title = formatDocumentTitle(pageTitle ?? getTitleForView(activeView));
+  }, [activeView, pageStack]);
+
+  useEffect(() => {
+    const faviconHref = getSiteFaviconHref();
+    const faviconType = activeSite.assets.favicon.endsWith('.ico') ? 'image/x-icon' : 'image/svg+xml';
+    const existingIcons = Array.from(document.querySelectorAll('link[rel="icon"]'));
+    const faviconLink = existingIcons[0] ?? document.createElement('link');
+
+    faviconLink.setAttribute('rel', 'icon');
+    faviconLink.setAttribute('href', faviconHref);
+    faviconLink.setAttribute('type', faviconType);
+
+    if (!faviconLink.parentNode) {
+      document.head.appendChild(faviconLink);
+    }
+
+    existingIcons.slice(1).forEach((iconLink) => iconLink.remove());
+  }, []);
 
   useEffect(() => () => {
     if (headerModeTransitionTimeoutRef.current) {
@@ -2093,6 +2128,7 @@ const App = () => {
       profileName={profileName}
       profileSubtitle={profileSubtitle}
       profileImageSrc={profileImageSrc}
+      brandLogoSrc={activeSiteAssets.logoSrc}
     />
   ), [
     activeView,

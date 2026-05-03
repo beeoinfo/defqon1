@@ -85,19 +85,22 @@ alter table public.tribe_members
 -- Snapshot-based favorites stored per user.
 create table if not exists public.user_favorites (
   user_id uuid not null references auth.users(id) on delete cascade,
+  site_slug text not null default 'defqon1',
   favorite_key text not null,
   snapshot jsonb not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  primary key (user_id, favorite_key)
+  primary key (user_id, site_slug, favorite_key)
 );
 
 alter table public.user_favorites
+  add column if not exists site_slug text default 'defqon1',
   add column if not exists snapshot jsonb,
   add column if not exists created_at timestamptz default now(),
   add column if not exists updated_at timestamptz default now();
 
 alter table public.user_favorites
+  alter column site_slug set default 'defqon1',
   alter column created_at set default now(),
   alter column updated_at set default now();
 
@@ -148,8 +151,8 @@ set
     else 'preset'
   end,
   avatar_preset = case
-    when coalesce(avatar_preset, 0) between 1 and 34 then avatar_preset
-    else floor(random() * 34 + 1)::int
+    when coalesce(avatar_preset, 0) >= 1 then avatar_preset
+    else 1
   end,
   created_at = coalesce(created_at, now()),
   updated_at = coalesce(updated_at, now())
@@ -163,7 +166,7 @@ where
       then lower(trim(coalesce(avatar_kind, 'preset')))
     else 'preset'
   end
-  or coalesce(avatar_preset, 0) not between 1 and 34
+  or coalesce(avatar_preset, 0) < 1
   or created_at is null
   or updated_at is null;
 
@@ -197,10 +200,12 @@ where
 
 update public.user_favorites
 set
+  site_slug = coalesce(nullif(trim(site_slug), ''), 'defqon1'),
   created_at = coalesce(created_at, now()),
   updated_at = coalesce(updated_at, now())
 where
-  created_at is null
+  nullif(trim(site_slug), '') is null
+  or created_at is null
   or updated_at is null;
 
 update public.avatar_cleanup_queue
@@ -232,9 +237,17 @@ alter table public.tribe_members
   alter column created_at set not null;
 
 alter table public.user_favorites
+  alter column site_slug set not null,
   alter column snapshot set not null,
   alter column created_at set not null,
   alter column updated_at set not null;
+
+alter table public.user_favorites
+  drop constraint if exists user_favorites_pkey;
+
+alter table public.user_favorites
+  add constraint user_favorites_pkey
+  primary key (user_id, site_slug, favorite_key);
 
 alter table public.avatar_cleanup_queue
   alter column reason set not null,
@@ -252,7 +265,7 @@ alter table public.profiles
 
 alter table public.profiles
   add constraint profiles_avatar_preset_check
-  check (avatar_preset between 1 and 34);
+  check (avatar_preset >= 1);
 
 alter table public.profiles
   drop constraint if exists profiles_username_format_check;
@@ -325,7 +338,7 @@ begin
       )
     ),
     'preset',
-    floor(random() * 34 + 1)::int
+    1
   )
   on conflict (id) do nothing;
 
@@ -437,8 +450,8 @@ select
   ),
   coalesce(p.avatar_kind, 'preset'),
   case
-    when coalesce(p.avatar_preset, 0) between 1 and 34 then p.avatar_preset
-    else floor(random() * 34 + 1)::int
+    when coalesce(p.avatar_preset, 0) >= 1 then p.avatar_preset
+    else 1
   end
 from auth.users u
 left join public.profiles p
@@ -460,7 +473,7 @@ set
   end,
   avatar_kind = coalesce(public.profiles.avatar_kind, excluded.avatar_kind, 'preset'),
   avatar_preset = case
-    when coalesce(public.profiles.avatar_preset, 0) between 1 and 34 then public.profiles.avatar_preset
+    when coalesce(public.profiles.avatar_preset, 0) >= 1 then public.profiles.avatar_preset
     else excluded.avatar_preset
   end;
 

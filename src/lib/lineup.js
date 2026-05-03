@@ -1,11 +1,14 @@
+import { activeSite } from '@/sites/siteDefinitions';
 import { getCanonicalStageName } from './stageThemes';
 
-export const FAVORITES_STORAGE_KEY = 'defqon1-favorites';
-export const VIEW_STORAGE_KEY = 'defqon1-view';
-export const HIDE_PAST_EVENTS_STORAGE_KEY = 'hidePastEvents';
-export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
-export const IGNORE_SMALL_CONFLICTS_STORAGE_KEY = 'ignoreSmallConflicts';
-export const BETA_FEATURES_STORAGE_KEY = 'defqon1-beta-features';
+const SITE_STORAGE_PREFIX = activeSite.slug;
+
+export const FAVORITES_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-favorites`;
+export const VIEW_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-view`;
+export const HIDE_PAST_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hidePastEvents`;
+export const HIDE_UNDATED_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hideUndatedEvents`;
+export const IGNORE_SMALL_CONFLICTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-ignoreSmallConflicts`;
+export const BETA_FEATURES_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-beta-features`;
 
 export const REVIEW_SECTION_MESSAGE =
   'Some saved favorites seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';

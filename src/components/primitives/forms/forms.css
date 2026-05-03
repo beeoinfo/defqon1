@@ -66,5 +66,5 @@
 .dq-ui-form-control:focus-within {
   border-color: var(--dq-ui-form-control-focus-border, var(--dq-ui-primary-muted));
   box-shadow:
-    0 0 0 3px var(--dq-ui-form-control-focus-ring, rgba(188, 155, 94, 0.18));
+    0 0 0 3px var(--dq-ui-form-control-focus-ring, var(--dq-ui-primary-surface));
 }

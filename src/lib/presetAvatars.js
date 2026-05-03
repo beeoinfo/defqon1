@@ -1,8 +1,3 @@
-// Dynamically import all preset avatar PNGs from the assets directory. The
-// import.meta.glob call returns a map of module paths to the default
-// export (the image URL). Using eager: true loads the files at build
-// time rather than lazily at runtime. The resulting array is sorted
-// numerically by the number in the filename (e.g. 1.png, 2.png, …).
 const avatarModules = import.meta.glob('../assets/avatars/*.png', {
   eager: true,
   import: 'default',
@@ -17,15 +12,28 @@ export const presetAvatarUrls = Object.entries(avatarModules)
   .sort((a, b) => extractAvatarNumber(a[0]) - extractAvatarNumber(b[0]))
   .map(([, url]) => url);
 
+export const presetAvatarCount = presetAvatarUrls.length;
+
+export const presetAvatarOptions = presetAvatarUrls.map((url, index) => ({
+  index: index + 1,
+  url,
+}));
+
 export function clampPresetAvatarIndex(index) {
-  const count = presetAvatarUrls.length;
-  if (count === 0) {
+  if (presetAvatarCount === 0) {
     return 1;
   }
+
   const numericIndex = Number(index);
-  if (!Number.isInteger(numericIndex) || numericIndex < 1 || numericIndex > count) {
+
+  if (
+    !Number.isInteger(numericIndex) ||
+    numericIndex < 1 ||
+    numericIndex > presetAvatarCount
+  ) {
     return 1;
   }
+
   return numericIndex;
 }
 
@@ -35,15 +43,17 @@ export function getPresetAvatarUrl(index) {
 }
 
 export function getRandomPresetAvatarIndex(excludeIndex = null) {
-  const count = presetAvatarUrls.length;
-  if (count <= 1) {
+  if (presetAvatarCount <= 1) {
     return 1;
   }
+
   const safeExcludeIndex = clampPresetAvatarIndex(excludeIndex);
   let nextIndex = safeExcludeIndex;
+
   while (nextIndex === safeExcludeIndex) {
-    nextIndex = Math.floor(Math.random() * count) + 1;
+    nextIndex = Math.floor(Math.random() * presetAvatarCount) + 1;
   }
+
   return nextIndex;
 }
 
@@ -51,5 +61,6 @@ export function resolveProfileAvatarUrl(profile) {
   if (profile?.avatar_kind === 'upload' && profile?.avatar_url) {
     return profile.avatar_url;
   }
+
   return getPresetAvatarUrl(profile?.avatar_preset ?? 1);
 }

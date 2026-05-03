@@ -230,7 +230,7 @@
 
   .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon > svg,
   .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-layout-navbar__icon-with-badge > svg {
-    animation: dq-layout-navbar-icon-bounce 0.28s cubic-bezier(0.22, 0.82, 0.3, 1.08) both;
+    animation: dq-layout-navbar-icon-bounce 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
   }
 
   .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__label {
@@ -259,12 +259,12 @@
     transform: scale(1);
   }
 
-  40% {
-    transform: scale(1.08);
+  36% {
+    transform: scale(0.88);
   }
 
-  72% {
-    transform: scale(0.97);
+  76% {
+    transform: scale(1.04);
   }
 
   100% {

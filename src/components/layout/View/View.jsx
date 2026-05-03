@@ -8,6 +8,7 @@ const View = ({
   component = 'div',
   navbar = true,
   brandTitle,
+  brandLogoSrc,
   profileName,
   profileSubtitle,
   profileImageSrc,
@@ -45,6 +46,7 @@ const View = ({
       <Header
         navbar={navbar}
         brandTitle={brandTitle}
+        brandLogoSrc={brandLogoSrc}
         profileName={profileName}
         profileSubtitle={profileSubtitle}
         profileImageSrc={profileImageSrc}

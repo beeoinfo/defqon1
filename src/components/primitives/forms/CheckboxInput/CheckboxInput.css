@@ -74,7 +74,7 @@
 .dq-ui-checkbox-input__input:focus-visible + .dq-ui-checkbox-input__indicator {
   border-color: var(--dq-ui-primary-muted);
   box-shadow:
-    0 0 0 3px rgba(188, 155, 94, 0.18),
+    0 0 0 3px var(--dq-ui-primary-surface),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 

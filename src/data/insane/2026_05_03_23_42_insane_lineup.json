@@ -1,0 +1,2381 @@
+{
+  "eventEditionName": "Insane Festival",
+  "sourceUrl": "https://insanefestival.com/line-up/",
+  "updatedAt": "2026-05-03T21:42:52.054Z",
+  "mapboxLayers": [],
+  "lineup": [
+    {
+      "daySlug": "thursday",
+      "dayOrder": 1,
+      "dayName": "Jeu 14 mai (ferie)",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "thursday_stage-mirage_2hot2play",
+              "artistName": "2HOT2PLAY",
+              "artistSlug": "2hot2play",
+              "artistId": "stage-mirage_2hot2play",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "2HOT2PLAY"
+              ],
+              "artistTokens": [
+                "2hot2play"
+              ],
+              "hash": "ff68f1a6b3d40dc3929cf33d152111c3e64ecdc7c53efad88beba0e9430130b9"
+            },
+            {
+              "id": "thursday_stage-mirage_byorn-b2b-vorteks",
+              "artistName": "BYORN B2B VORTEK'S",
+              "artistSlug": "byorn-b2b-vorteks",
+              "artistId": "stage-mirage_byorn-b2b-vorteks",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BYORN",
+                "VORTEK'S"
+              ],
+              "artistTokens": [
+                "byorn",
+                "vorteks"
+              ],
+              "hash": "e9c435eb42a9516dd49ec9614438ce02a6b63d2ba54a0021fcfd32ac1d8b0278"
+            },
+            {
+              "id": "thursday_stage-mirage_holy-priest",
+              "artistName": "HOLY PRIEST",
+              "artistSlug": "holy-priest",
+              "artistId": "stage-mirage_holy-priest",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "HOLY PRIEST"
+              ],
+              "artistTokens": [
+                "holy-priest"
+              ],
+              "hash": "ee057242056f75da506af8868fd7c0dde26c27a54160e40c20b5ab432b481fb5"
+            },
+            {
+              "id": "thursday_stage-mirage_kichta",
+              "artistName": "KICHTA",
+              "artistSlug": "kichta",
+              "artistId": "stage-mirage_kichta",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KICHTA"
+              ],
+              "artistTokens": [
+                "kichta"
+              ],
+              "hash": "3055150f312e4ace30723a476caca0a2ec5def8e3b8fbf0fe7afb7fa9049121f"
+            },
+            {
+              "id": "thursday_stage-mirage_lil-texas",
+              "artistName": "LIL TEXAS",
+              "artistSlug": "lil-texas",
+              "artistId": "stage-mirage_lil-texas",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LIL TEXAS"
+              ],
+              "artistTokens": [
+                "lil-texas"
+              ],
+              "hash": "beb0cadd8e9eec04a02a45ac3c38150c5e709825862f045d83ed3d88afc83933"
+            },
+            {
+              "id": "thursday_stage-mirage_majes",
+              "artistName": "MAJES",
+              "artistSlug": "majes",
+              "artistId": "stage-mirage_majes",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MAJES"
+              ],
+              "artistTokens": [
+                "majes"
+              ],
+              "hash": "1d07583673a313bc60aff1bc5e6d2733995738423444a4ad65f734eccf061f23"
+            },
+            {
+              "id": "thursday_stage-mirage_lekkerfaces-b2b",
+              "artistName": "LEKKERFACES B2B ******",
+              "artistSlug": "lekkerfaces-b2b",
+              "artistId": "stage-mirage_lekkerfaces-b2b",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LEKKERFACES",
+                "******"
+              ],
+              "artistTokens": [
+                "lekkerfaces"
+              ],
+              "hash": "599fed3146c7c555c13c8df7a153b8aa4b656b987ae65f48cc8c751c4f1e3bfa"
+            },
+            {
+              "id": "thursday_stage-mirage_toxic-machinery",
+              "artistName": "TOXIC MACHINERY",
+              "artistSlug": "toxic-machinery",
+              "artistId": "stage-mirage_toxic-machinery",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TOXIC MACHINERY"
+              ],
+              "artistTokens": [
+                "toxic-machinery"
+              ],
+              "hash": "0c24715cfb5f9212a814a3ced33d4776d58859dc4142f00ea5faac86f57eaf31"
+            },
+            {
+              "id": "thursday_stage-mirage_vieze-asback",
+              "artistName": "VIEZE ASBACK",
+              "artistSlug": "vieze-asback",
+              "artistId": "stage-mirage_vieze-asback",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VIEZE ASBACK"
+              ],
+              "artistTokens": [
+                "vieze-asback"
+              ],
+              "hash": "41849ae5d88b6df1f1108117a83bd69504b9d80d68d38fb167e50c76e8cf748a"
+            },
+            {
+              "id": "thursday_stage-mirage_vorteks-b2b-byorn",
+              "artistName": "VORTEK'S B2B BYORN",
+              "artistSlug": "vorteks-b2b-byorn",
+              "artistId": "stage-mirage_vorteks-b2b-byorn",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VORTEK'S",
+                "BYORN"
+              ],
+              "artistTokens": [
+                "vorteks",
+                "byorn"
+              ],
+              "hash": "473261a913ce744fd87b7774dac4ade23b1a927047f12de5f860377dc990dc06"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "thursday_stage-alt-f4_a5km-f2f-teksa",
+              "artistName": "A5KM F2F TEKSA",
+              "artistSlug": "a5km-f2f-teksa",
+              "artistId": "stage-alt-f4_a5km-f2f-teksa",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM",
+                "TEKSA"
+              ],
+              "artistTokens": [
+                "a5km",
+                "teksa"
+              ],
+              "hash": "7f2035b9fd937ca6e25bd6f03480f79d8a8c6b9f3af724db6e8417a66fde4b43"
+            },
+            {
+              "id": "thursday_stage-alt-f4_dvaid-f2f-relajadita",
+              "artistName": "DVAID F2F RELAJADITA",
+              "artistSlug": "dvaid-f2f-relajadita",
+              "artistId": "stage-alt-f4_dvaid-f2f-relajadita",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DVAID",
+                "RELAJADITA"
+              ],
+              "artistTokens": [
+                "dvaid",
+                "relajadita"
+              ],
+              "hash": "e4e1fbad6eaddc318eb7d9e83e2c18e97da13dd6543fd1f6c068eea46f20e1f3"
+            },
+            {
+              "id": "thursday_stage-alt-f4_eyes",
+              "artistName": "EYES",
+              "artistSlug": "eyes",
+              "artistId": "stage-alt-f4_eyes",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EYES"
+              ],
+              "artistTokens": [
+                "eyes"
+              ],
+              "hash": "0824579874b4484f8bfc73621ebea3108e58f541ee2a01a6e32b016d13bd2b17"
+            },
+            {
+              "id": "thursday_stage-alt-f4_hortense-de-beauharnais-f2f-gonzi",
+              "artistName": "HORTENSE DE BEAUHARNAIS F2F GONZI",
+              "artistSlug": "hortense-de-beauharnais-f2f-gonzi",
+              "artistId": "stage-alt-f4_hortense-de-beauharnais-f2f-gonzi",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "HORTENSE DE BEAUHARNAIS",
+                "GONZI"
+              ],
+              "artistTokens": [
+                "hortense-de-beauharnais",
+                "gonzi"
+              ],
+              "hash": "571493e54be5edaf3ba5e98985c12bd4b2003f36f4a202e723834d3d4e4f4d12"
+            },
+            {
+              "id": "thursday_stage-alt-f4_jayron-f2f-rubio",
+              "artistName": "JAYRON F2F RUBIØ",
+              "artistSlug": "jayron-f2f-rubio",
+              "artistId": "stage-alt-f4_jayron-f2f-rubio",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "JAYRON",
+                "RUBIØ"
+              ],
+              "artistTokens": [
+                "jayron",
+                "rubio"
+              ],
+              "hash": "df684c512b90b222be4bfa2ed16548a053eb2a3709a6cd2a2f414c7b88dd025a"
+            },
+            {
+              "id": "thursday_stage-alt-f4_jo3y3t-f2f-santos",
+              "artistName": "JO3Y3T F2F SANTØS",
+              "artistSlug": "jo3y3t-f2f-santos",
+              "artistId": "stage-alt-f4_jo3y3t-f2f-santos",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "JO3Y3T",
+                "SANTØS"
+              ],
+              "artistTokens": [
+                "jo3y3t",
+                "santos"
+              ],
+              "hash": "111bcfa312a16169eab7963bb4d78d3b8e095ce361f63b29664a53219e2d246f"
+            },
+            {
+              "id": "thursday_stage-alt-f4_medusa",
+              "artistName": "MEDUSA",
+              "artistSlug": "medusa",
+              "artistId": "stage-alt-f4_medusa",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MEDUSA"
+              ],
+              "artistTokens": [
+                "medusa"
+              ],
+              "hash": "e5f9dcff34b38e7971b79197025677f5a55355f4077c30e8cba24b82c0a74aa7"
+            },
+            {
+              "id": "thursday_stage-alt-f4_nure-f2f-vlb",
+              "artistName": "NURE F2F VLB",
+              "artistSlug": "nure-f2f-vlb",
+              "artistId": "stage-alt-f4_nure-f2f-vlb",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NURE",
+                "VLB"
+              ],
+              "artistTokens": [
+                "nure",
+                "vlb"
+              ],
+              "hash": "b99f2f102b0f49af09b8837881ea27eb77d7f87d503310155f3663250d3cbcc6"
+            },
+            {
+              "id": "thursday_stage-alt-f4_uphoria-f2f-c",
+              "artistName": "UPHORIA F2F C******",
+              "artistSlug": "uphoria-f2f-c",
+              "artistId": "stage-alt-f4_uphoria-f2f-c",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "UPHORIA",
+                "C******"
+              ],
+              "artistTokens": [
+                "uphoria",
+                "c"
+              ],
+              "hash": "7bf8335f51c29006eeb5603f11a05b5de316668930505779f1f808bea16d29dc"
+            }
+          ]
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "thursday_technobus_anduj-b2b-paulskye",
+              "artistName": "ANDUJ B2B PAULSKYE",
+              "artistSlug": "anduj-b2b-paulskye",
+              "artistId": "technobus_anduj-b2b-paulskye",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ANDUJ",
+                "PAULSKYE"
+              ],
+              "artistTokens": [
+                "anduj",
+                "paulskye"
+              ],
+              "hash": "05ea3f338ccc9caacb8f43d76f8ae8089d838d609bfcd9707a09cf04b5316f4a"
+            },
+            {
+              "id": "thursday_technobus_anthony-capaldi",
+              "artistName": "ANTHONY CAPALDI",
+              "artistSlug": "anthony-capaldi",
+              "artistId": "technobus_anthony-capaldi",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ANTHONY CAPALDI"
+              ],
+              "artistTokens": [
+                "anthony-capaldi"
+              ],
+              "hash": "1042adb73d807ecfc0db85ede319972f2b376732cebb23d651ba1186d2e19a23"
+            },
+            {
+              "id": "thursday_technobus_blakeys-b2b-blasty",
+              "artistName": "BLAKEYS B2B BLASTY",
+              "artistSlug": "blakeys-b2b-blasty",
+              "artistId": "technobus_blakeys-b2b-blasty",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BLAKEYS",
+                "BLASTY"
+              ],
+              "artistTokens": [
+                "blakeys",
+                "blasty"
+              ],
+              "hash": "b39f30504206ecdfbf9b8eea3ac52c280d1f944d703a761ad08c98776a81ccdd"
+            },
+            {
+              "id": "thursday_technobus_david-bouts",
+              "artistName": "DAVID BOUTS",
+              "artistSlug": "david-bouts",
+              "artistId": "technobus_david-bouts",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DAVID BOUTS"
+              ],
+              "artistTokens": [
+                "david-bouts"
+              ],
+              "hash": "28a894abd3fd1f1e04d36fb0592f08e12d4ca84b6335ec3c4095a6eb16c325fe"
+            },
+            {
+              "id": "thursday_technobus_evander-b2b-may-li",
+              "artistName": "EVÄNDER B2B MAY-LI",
+              "artistSlug": "evander-b2b-may-li",
+              "artistId": "technobus_evander-b2b-may-li",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EVÄNDER",
+                "MAY-LI"
+              ],
+              "artistTokens": [
+                "evander",
+                "may-li"
+              ],
+              "hash": "a873be9e943f4c415f9e8851ff0f2bad9156c9afbcc26aba01337bd674785088"
+            },
+            {
+              "id": "thursday_technobus_fraiche",
+              "artistName": "FRAÎCHE",
+              "artistSlug": "fraiche",
+              "artistId": "technobus_fraiche",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "FRAÎCHE"
+              ],
+              "artistTokens": [
+                "fraiche"
+              ],
+              "hash": "59834970cdec1de83a646597c043c80e67eb07223d725d6882ee8f1a221d945e"
+            },
+            {
+              "id": "thursday_technobus_heartreaver-b2b-mido",
+              "artistName": "HEARTREAVER B2B MIDO",
+              "artistSlug": "heartreaver-b2b-mido",
+              "artistId": "technobus_heartreaver-b2b-mido",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "HEARTREAVER",
+                "MIDO"
+              ],
+              "artistTokens": [
+                "heartreaver",
+                "mido"
+              ],
+              "hash": "9c21082307945d5a2c4755f5dde392e3e4dcf99ce46890532a2540bc58a33b97"
+            },
+            {
+              "id": "thursday_technobus_melina",
+              "artistName": "MELINA",
+              "artistSlug": "melina",
+              "artistId": "technobus_melina",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MELINA"
+              ],
+              "artistTokens": [
+                "melina"
+              ],
+              "hash": "3b5f164503313f3371b23461e0ea1b23ac95e0f0998fe56ac01e530ddf0c4aa3"
+            },
+            {
+              "id": "thursday_technobus_noyse",
+              "artistName": "NOYSE",
+              "artistSlug": "noyse",
+              "artistId": "technobus_noyse",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NOYSE"
+              ],
+              "artistTokens": [
+                "noyse"
+              ],
+              "hash": "cfc25aba8081c3c5b6cba987ad73226fa2a649e1ddd9faebb508a6470413a327"
+            },
+            {
+              "id": "thursday_technobus_octo-one",
+              "artistName": "OCTO ONE",
+              "artistSlug": "octo-one",
+              "artistId": "technobus_octo-one",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "OCTO ONE"
+              ],
+              "artistTokens": [
+                "octo-one"
+              ],
+              "hash": "2837eaecd8951b3f985cc341eab6afa8d3fe5e29481d0093eeff7606d83d1c9d"
+            },
+            {
+              "id": "thursday_technobus_prost-b2b-zep",
+              "artistName": "PROST B2B ZEP",
+              "artistSlug": "prost-b2b-zep",
+              "artistId": "technobus_prost-b2b-zep",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "PROST",
+                "ZEP"
+              ],
+              "artistTokens": [
+                "prost",
+                "zep"
+              ],
+              "hash": "f40375866bbc7237bcd847fc8c81595c146a5c652615a754c7058aeeccdf1eea"
+            },
+            {
+              "id": "thursday_technobus_twist",
+              "artistName": "TWIST",
+              "artistSlug": "twist",
+              "artistId": "technobus_twist",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TWIST"
+              ],
+              "artistTokens": [
+                "twist"
+              ],
+              "hash": "98757300c4ffe1b63b34467266b858bf916675e977f596b7a775c229ad7a10cd"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "thursday_stage-cloud_bennett",
+              "artistName": "BENNETT",
+              "artistSlug": "bennett",
+              "artistId": "stage-cloud_bennett",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BENNETT"
+              ],
+              "artistTokens": [
+                "bennett"
+              ],
+              "hash": "1349e2c022a9b0fe5c9cbe85c1e637f3bfaa7e9c3471e92c976a583e7f377921"
+            },
+            {
+              "id": "thursday_stage-cloud_mandragora",
+              "artistName": "MANDRAGORA",
+              "artistSlug": "mandragora",
+              "artistId": "stage-cloud_mandragora",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MANDRAGORA"
+              ],
+              "artistTokens": [
+                "mandragora"
+              ],
+              "hash": "d5e9959e74914455df115abea922d0cf623c90d60995cac119659e7e70123b56"
+            },
+            {
+              "id": "thursday_stage-cloud_petit-biscuit",
+              "artistName": "PETIT BISCUIT",
+              "artistSlug": "petit-biscuit",
+              "artistId": "stage-cloud_petit-biscuit",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "PETIT BISCUIT"
+              ],
+              "artistTokens": [
+                "petit-biscuit"
+              ],
+              "hash": "c56988d5b514fc48b5d7e3a03a57ee04ef9439daa7acf99e7ef308c049c7204d"
+            },
+            {
+              "id": "thursday_stage-cloud_solere",
+              "artistName": "SOLERE",
+              "artistSlug": "solere",
+              "artistId": "stage-cloud_solere",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SOLERE"
+              ],
+              "artistTokens": [
+                "solere"
+              ],
+              "hash": "af4b6589bfe8f2f15ee3f97650a7df7a2f91446938042f06af239857e725d287"
+            },
+            {
+              "id": "thursday_stage-cloud_synapson",
+              "artistName": "SYNAPSON",
+              "artistSlug": "synapson",
+              "artistId": "stage-cloud_synapson",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SYNAPSON"
+              ],
+              "artistTokens": [
+                "synapson"
+              ],
+              "hash": "12d897002b75122d5b6344420e260062a6f77235c3f0d317422ba0e0cbf80a95"
+            },
+            {
+              "id": "thursday_stage-cloud_upsilone",
+              "artistName": "UPSILONE",
+              "artistSlug": "upsilone",
+              "artistId": "stage-cloud_upsilone",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "UPSILONE"
+              ],
+              "artistTokens": [
+                "upsilone"
+              ],
+              "hash": "bb6630915403e944fb69be24ec5d1c8fb32aa20a9ac92ddeaffbae3cc1b3aaa9"
+            },
+            {
+              "id": "thursday_stage-cloud_yann-muller",
+              "artistName": "YANN MULLER",
+              "artistSlug": "yann-muller",
+              "artistId": "stage-cloud_yann-muller",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "YANN MULLER"
+              ],
+              "artistTokens": [
+                "yann-muller"
+              ],
+              "hash": "9e8d0b94d2144b68e63ca84005bd7c90287d1776584fa9ba36a10ac8c67d7f12"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "daySlug": "friday",
+      "dayOrder": 2,
+      "dayName": "Ven 15 mai",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "friday_stage-mirage_reinier-zonneveld-b2b-angerfist",
+              "artistName": "REINIER ZONNEVELD B2B ANGERFIST",
+              "artistSlug": "reinier-zonneveld-b2b-angerfist",
+              "artistId": "stage-mirage_reinier-zonneveld-b2b-angerfist",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "REINIER ZONNEVELD",
+                "ANGERFIST"
+              ],
+              "artistTokens": [
+                "reinier-zonneveld",
+                "angerfist"
+              ],
+              "hash": "ba8360cdd2c9b2554de73b26c60f8a62ea3b73eb242a85a3bf9e6a0c98442040"
+            },
+            {
+              "id": "friday_stage-mirage_eczodia",
+              "artistName": "ECZODIA",
+              "artistSlug": "eczodia",
+              "artistId": "stage-mirage_eczodia",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ECZODIA"
+              ],
+              "artistTokens": [
+                "eczodia"
+              ],
+              "hash": "cfa4e8d1d678263706515b96b523007d7a30730dae309d0d9ba3b73ffcd1801e"
+            },
+            {
+              "id": "friday_stage-mirage_karah",
+              "artistName": "KARAH",
+              "artistSlug": "karah",
+              "artistId": "stage-mirage_karah",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KARAH"
+              ],
+              "artistTokens": [
+                "karah"
+              ],
+              "hash": "9870c4fd0e5b3e3bbc947f47ffbbd85d18b24133f8c7f70d158c3b677b901c45"
+            },
+            {
+              "id": "friday_stage-mirage_kruelty",
+              "artistName": "KRUELTY",
+              "artistSlug": "kruelty",
+              "artistId": "stage-mirage_kruelty",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KRUELTY"
+              ],
+              "artistTokens": [
+                "kruelty"
+              ],
+              "hash": "d314d40d2f788d0b461184b70fb19ab5e809eed5298f7e8820edc40304ba82c9"
+            },
+            {
+              "id": "friday_stage-mirage_kx-chr",
+              "artistName": "KX CHR",
+              "artistSlug": "kx-chr",
+              "artistId": "stage-mirage_kx-chr",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KX CHR"
+              ],
+              "artistTokens": [
+                "kx-chr"
+              ],
+              "hash": "cc10270c21da7d96cbd710f133e6a2240fcb339abc40b5df520e28bf3981932b"
+            },
+            {
+              "id": "friday_stage-mirage_nicolas-julian",
+              "artistName": "NICOLAS JULIAN",
+              "artistSlug": "nicolas-julian",
+              "artistId": "stage-mirage_nicolas-julian",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NICOLAS JULIAN"
+              ],
+              "artistTokens": [
+                "nicolas-julian"
+              ],
+              "hash": "a371fa8edc4ad3646e132562626762e9c3030e52a8b3d6ce41d85b25f6cf3983"
+            },
+            {
+              "id": "friday_stage-mirage_not-my-type",
+              "artistName": "NOT MY TYPE",
+              "artistSlug": "not-my-type",
+              "artistId": "stage-mirage_not-my-type",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NOT MY TYPE"
+              ],
+              "artistTokens": [
+                "not-my-type"
+              ],
+              "hash": "269dcac4afb6eba66b54a24306ade76a197709f5ac1103bf1fc34653215151c5"
+            },
+            {
+              "id": "friday_stage-mirage_restricted",
+              "artistName": "RESTRICTED",
+              "artistSlug": "restricted",
+              "artistId": "stage-mirage_restricted",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "RESTRICTED"
+              ],
+              "artistTokens": [
+                "restricted"
+              ],
+              "hash": "5592f15b38b8c96652415c5e02ad019b9c128522fb53ef5b3ec4051074bfaca6"
+            },
+            {
+              "id": "friday_stage-mirage_rooler",
+              "artistName": "ROOLER",
+              "artistSlug": "rooler",
+              "artistId": "stage-mirage_rooler",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ROOLER"
+              ],
+              "artistTokens": [
+                "rooler"
+              ],
+              "hash": "dd1f0c02d3985f0b156b296fcc45f6da1de0ef207704acf3d4e91cf09932217a"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "friday_stage-alt-f4_acidpach-b2b-lart-cene",
+              "artistName": "ACIDPACH B2B L'ART CÈNE",
+              "artistSlug": "acidpach-b2b-lart-cene",
+              "artistId": "stage-alt-f4_acidpach-b2b-lart-cene",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ACIDPACH",
+                "L'ART CÈNE"
+              ],
+              "artistTokens": [
+                "acidpach",
+                "lart-cene"
+              ],
+              "hash": "572facaa97293676b33b4c4a6657771814bdabd2952c5ea8925e7b417020dd56"
+            },
+            {
+              "id": "friday_stage-alt-f4_dice-b2b-kolab",
+              "artistName": "DICE B2B KØ:LAB",
+              "artistSlug": "dice-b2b-kolab",
+              "artistId": "stage-alt-f4_dice-b2b-kolab",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DICE",
+                "KØ:LAB"
+              ],
+              "artistTokens": [
+                "dice",
+                "kolab"
+              ],
+              "hash": "e8ad1445169fe0e81d5c117650e759fe050ba7950ed4c24811a9a0ddeb0812b2"
+            },
+            {
+              "id": "friday_stage-alt-f4_imanu",
+              "artistName": "IMANU",
+              "artistSlug": "imanu",
+              "artistId": "stage-alt-f4_imanu",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "IMANU"
+              ],
+              "artistTokens": [
+                "imanu"
+              ],
+              "hash": "ae828df1fff98b2fa54a6041c45b60cad1b597d5c3f41eb613c6a852b8b5691e"
+            },
+            {
+              "id": "friday_stage-alt-f4_klinical",
+              "artistName": "KLINICAL",
+              "artistSlug": "klinical",
+              "artistId": "stage-alt-f4_klinical",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KLINICAL"
+              ],
+              "artistTokens": [
+                "klinical"
+              ],
+              "hash": "59b7ae1cd122e7abb1aa39ca9df07205e783bd13ea08015db5dd995d73ebf1c5"
+            },
+            {
+              "id": "friday_stage-alt-f4_obses",
+              "artistName": "OBSES",
+              "artistSlug": "obses",
+              "artistId": "stage-alt-f4_obses",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "OBSES"
+              ],
+              "artistTokens": [
+                "obses"
+              ],
+              "hash": "bcf74494db8ca6a7e07e67bb527c8570ee69b2279d1041e1468395ce0b8b000a"
+            },
+            {
+              "id": "friday_stage-alt-f4_skantia",
+              "artistName": "SKANTIA",
+              "artistSlug": "skantia",
+              "artistId": "stage-alt-f4_skantia",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SKANTIA"
+              ],
+              "artistTokens": [
+                "skantia"
+              ],
+              "hash": "e0554d42f4b262593a8c53d1c1bd8bbc91995b06434d25f4da177adb8a6ba37e"
+            },
+            {
+              "id": "friday_stage-alt-f4_the-caracal-project",
+              "artistName": "THE CARACAL PROJECT",
+              "artistSlug": "the-caracal-project",
+              "artistId": "stage-alt-f4_the-caracal-project",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "THE CARACAL PROJECT"
+              ],
+              "artistTokens": [
+                "the-caracal-project"
+              ],
+              "hash": "af92500990026b46095ec918c27ed15e4f1b3e9b85eb55bba3e71cfd9d5d3fa0"
+            },
+            {
+              "id": "friday_stage-alt-f4_theezer",
+              "artistName": "THEEZER",
+              "artistSlug": "theezer",
+              "artistId": "stage-alt-f4_theezer",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "THEEZER"
+              ],
+              "artistTokens": [
+                "theezer"
+              ],
+              "hash": "b3d10f493099fa1638b9c8dac90103a0582f80f371e9c5e6295f2cb1d9f0ce7f"
+            },
+            {
+              "id": "friday_stage-alt-f4_vernex-b2b-sandy-warez",
+              "artistName": "VERNEX B2B SANDY WAREZ",
+              "artistSlug": "vernex-b2b-sandy-warez",
+              "artistId": "stage-alt-f4_vernex-b2b-sandy-warez",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VERNEX",
+                "SANDY WAREZ"
+              ],
+              "artistTokens": [
+                "vernex",
+                "sandy-warez"
+              ],
+              "hash": "ad60f73072abd5b10ca846f588f2c153ea23dc70ee8f1cce2f8a7acc316f91d7"
+            },
+            {
+              "id": "friday_stage-alt-f4_vici",
+              "artistName": "VICI",
+              "artistSlug": "vici",
+              "artistId": "stage-alt-f4_vici",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VICI"
+              ],
+              "artistTokens": [
+                "vici"
+              ],
+              "hash": "493e14738fc1dd3e64cfb0a5c910cdaf9be2faa6d559a9a5d0502c7a12cc762f"
+            },
+            {
+              "id": "friday_stage-alt-f4_visages",
+              "artistName": "VISAGES",
+              "artistSlug": "visages",
+              "artistId": "stage-alt-f4_visages",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VISAGES"
+              ],
+              "artistTokens": [
+                "visages"
+              ],
+              "hash": "c63d955eed18f820a754e6f19ec4ca3bfe9c4ed89328aa3ae39444f4a7b1ad1d"
+            }
+          ]
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "friday_technobus_a5km",
+              "artistName": "A5KM",
+              "artistSlug": "a5km",
+              "artistId": "technobus_a5km",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM"
+              ],
+              "artistTokens": [
+                "a5km"
+              ],
+              "hash": "63c035213d661a6f02ec206bfb1c29ea756fd6b217e773eb3c687bfd046a48d8"
+            },
+            {
+              "id": "friday_technobus_afterdeath",
+              "artistName": "AFTERDEATH",
+              "artistSlug": "afterdeath",
+              "artistId": "technobus_afterdeath",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "AFTERDEATH"
+              ],
+              "artistTokens": [
+                "afterdeath"
+              ],
+              "hash": "5b0f2a731ee2b71da1da95d6b92fe58f09a106a72e80f9ee6eefb6261e10d953"
+            },
+            {
+              "id": "friday_technobus_dj-princesse-b2b-el-santu",
+              "artistName": "DJ PRINCESSE B2B EL SANTU",
+              "artistSlug": "dj-princesse-b2b-el-santu",
+              "artistId": "technobus_dj-princesse-b2b-el-santu",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DJ PRINCESSE",
+                "EL SANTU"
+              ],
+              "artistTokens": [
+                "dj-princesse",
+                "el-santu"
+              ],
+              "hash": "0a3eeade7525c66769c333c7aadb04028c335b35b8532f605e7f89df2045b569"
+            },
+            {
+              "id": "friday_technobus_dln",
+              "artistName": "DLN",
+              "artistSlug": "dln",
+              "artistId": "technobus_dln",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DLN"
+              ],
+              "artistTokens": [
+                "dln"
+              ],
+              "hash": "9b2b24d4a3d89c18fb9941e21d8c8d2979716d64da33210a5d3093f28e16e167"
+            },
+            {
+              "id": "friday_technobus_k-chivache",
+              "artistName": "K-CHIVACHE",
+              "artistSlug": "k-chivache",
+              "artistId": "technobus_k-chivache",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "K-CHIVACHE"
+              ],
+              "artistTokens": [
+                "k-chivache"
+              ],
+              "hash": "6dd836bdcb8cbb9acaa229decf87cf5939ce1f549216e31963c13c8597f26092"
+            },
+            {
+              "id": "friday_technobus_keuss",
+              "artistName": "KEUSS",
+              "artistSlug": "keuss",
+              "artistId": "technobus_keuss",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KEUSS"
+              ],
+              "artistTokens": [
+                "keuss"
+              ],
+              "hash": "69eeb82cab0ef11b6f34429e6dfab617f62ac7460dc02d5bbe495b5eefac2847"
+            },
+            {
+              "id": "friday_technobus_kloss",
+              "artistName": "KLÖSS",
+              "artistSlug": "kloss",
+              "artistId": "technobus_kloss",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KLÖSS"
+              ],
+              "artistTokens": [
+                "kloss"
+              ],
+              "hash": "8f6f4f2d897f1137e5aee101e168d7d035f1df4ed9440abc8bcd43d32b5c17d5"
+            },
+            {
+              "id": "friday_technobus_la-torgnole",
+              "artistName": "LA TORGNOLE",
+              "artistSlug": "la-torgnole",
+              "artistId": "technobus_la-torgnole",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LA TORGNOLE"
+              ],
+              "artistTokens": [
+                "la-torgnole"
+              ],
+              "hash": "db125a75361f02325aa6cce013c1406227d8ec4715c984f98a3cf21dae21a06a"
+            },
+            {
+              "id": "friday_technobus_noyse",
+              "artistName": "NOYSE",
+              "artistSlug": "noyse",
+              "artistId": "technobus_noyse",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NOYSE"
+              ],
+              "artistTokens": [
+                "noyse"
+              ],
+              "hash": "17b2e95f63ebeaf0d49d7566090e5dac8f264fde2deb56bf9080c6c10d91eb48"
+            },
+            {
+              "id": "friday_technobus_rv",
+              "artistName": "RV",
+              "artistSlug": "rv",
+              "artistId": "technobus_rv",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "RV"
+              ],
+              "artistTokens": [
+                "rv"
+              ],
+              "hash": "eaae0caa457725c5eeb36f0554a0dbf75f3e7805d1c2c8ccd434cffeaa4756e7"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "friday_stage-cloud_cara-elizabeth-b2b-arman-john",
+              "artistName": "CARA ELIZABETH B2B ARMAN JOHN",
+              "artistSlug": "cara-elizabeth-b2b-arman-john",
+              "artistId": "stage-cloud_cara-elizabeth-b2b-arman-john",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "CARA ELIZABETH",
+                "ARMAN JOHN"
+              ],
+              "artistTokens": [
+                "cara-elizabeth",
+                "arman-john"
+              ],
+              "hash": "c7e234111fe91ac6fe67231a8f9dd7fed5f03649b8359806d60075437f674ea3"
+            },
+            {
+              "id": "friday_stage-cloud_daria-kolosova",
+              "artistName": "DARIA KOLOSOVA",
+              "artistSlug": "daria-kolosova",
+              "artistId": "stage-cloud_daria-kolosova",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DARIA KOLOSOVA"
+              ],
+              "artistTokens": [
+                "daria-kolosova"
+              ],
+              "hash": "16bb12de15a8bf7bebe39c4bfdcb9572f99bad1f8dd1c456cbf6f5ffe62334e5"
+            },
+            {
+              "id": "friday_stage-cloud_djdave",
+              "artistName": "DJ_DAVE",
+              "artistSlug": "djdave",
+              "artistId": "stage-cloud_djdave",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DJ_DAVE"
+              ],
+              "artistTokens": [
+                "djdave"
+              ],
+              "hash": "d13315c77ee5925e4c8eae9456a0ad1d021b08c08628a96c18a1191cd2c7e1b9"
+            },
+            {
+              "id": "friday_stage-cloud_fjusha",
+              "artistName": "FJUSHA",
+              "artistSlug": "fjusha",
+              "artistId": "stage-cloud_fjusha",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "FJUSHA"
+              ],
+              "artistTokens": [
+                "fjusha"
+              ],
+              "hash": "0aafc6cfa2efeb24090b116440cd69166b2e0e355fb0a3252a2cdf6b758e393a"
+            },
+            {
+              "id": "friday_stage-cloud_hortense-de-beauharnais",
+              "artistName": "HORTENSE DE BEAUHARNAIS",
+              "artistSlug": "hortense-de-beauharnais",
+              "artistId": "stage-cloud_hortense-de-beauharnais",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "HORTENSE DE BEAUHARNAIS"
+              ],
+              "artistTokens": [
+                "hortense-de-beauharnais"
+              ],
+              "hash": "7933e332c0e9b34bc4bdc7faa0414a2c0dbb7f01808766d73b1dd9d9c7a9fc24"
+            },
+            {
+              "id": "friday_stage-cloud_luciid",
+              "artistName": "LUCIID",
+              "artistSlug": "luciid",
+              "artistId": "stage-cloud_luciid",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LUCIID"
+              ],
+              "artistTokens": [
+                "luciid"
+              ],
+              "hash": "61ada64ed74377d382e19a1284b6b5f67545f58f992ec4bc9c45463dd74b2ffd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "daySlug": "saturday",
+      "dayOrder": 3,
+      "dayName": "Sam 16 mai",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "saturday_stage-mirage_billx",
+              "artistName": "BILLX",
+              "artistSlug": "billx",
+              "artistId": "stage-mirage_billx",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BILLX"
+              ],
+              "artistTokens": [
+                "billx"
+              ],
+              "hash": "3d0695a2888fe66e904383397b331d5cfc0689c77a5c5b523319e60e5cb19fa7"
+            },
+            {
+              "id": "saturday_stage-mirage_emilija",
+              "artistName": "EMILIJA",
+              "artistSlug": "emilija",
+              "artistId": "stage-mirage_emilija",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EMILIJA"
+              ],
+              "artistTokens": [
+                "emilija"
+              ],
+              "hash": "1f0b1869989579b855d98226816f94c15ab5acec205a45a1f1a3e722d8bff989"
+            },
+            {
+              "id": "saturday_stage-mirage_gpf-b2b-unicorn-on-k",
+              "artistName": "GPF B2B UNICORN ON K",
+              "artistSlug": "gpf-b2b-unicorn-on-k",
+              "artistId": "stage-mirage_gpf-b2b-unicorn-on-k",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "GPF",
+                "UNICORN ON K"
+              ],
+              "artistTokens": [
+                "gpf",
+                "unicorn-on-k"
+              ],
+              "hash": "a6d17736b239f5b662fb01cf58440d6245a0a8e3163c88986711475da4923402"
+            },
+            {
+              "id": "saturday_stage-mirage_klofama",
+              "artistName": "KLOFAMA",
+              "artistSlug": "klofama",
+              "artistId": "stage-mirage_klofama",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KLOFAMA"
+              ],
+              "artistTokens": [
+                "klofama"
+              ],
+              "hash": "0f8a917a86053f8aa04e8c815796f9921b02a63cb0f8a27ca4a35bf233d5b9a3"
+            },
+            {
+              "id": "saturday_stage-mirage_krowdexx",
+              "artistName": "KROWDEXX",
+              "artistSlug": "krowdexx",
+              "artistId": "stage-mirage_krowdexx",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KROWDEXX"
+              ],
+              "artistTokens": [
+                "krowdexx"
+              ],
+              "hash": "4cf84f9a6826bedb6712289e3d63b233e49fcac1ea9e060c860f305bd39efeb1"
+            },
+            {
+              "id": "saturday_stage-mirage_le-wanski-b2b-skone",
+              "artistName": "LE WANSKI B2B SKÖNE",
+              "artistSlug": "le-wanski-b2b-skone",
+              "artistId": "stage-mirage_le-wanski-b2b-skone",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LE WANSKI",
+                "SKÖNE"
+              ],
+              "artistTokens": [
+                "le-wanski",
+                "skone"
+              ],
+              "hash": "6dae25f438af4d49af56f8b9702f097a793405796305d76dfe03e51e9297bb20"
+            },
+            {
+              "id": "saturday_stage-mirage_rdo",
+              "artistName": "RDØ",
+              "artistSlug": "rdo",
+              "artistId": "stage-mirage_rdo",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "RDØ"
+              ],
+              "artistTokens": [
+                "rdo"
+              ],
+              "hash": "f03edd10d7e49c94fab53b6dcb2964d2d2da722be5825822ff77433b672316a9"
+            },
+            {
+              "id": "saturday_stage-mirage_samuel-moriero",
+              "artistName": "SAMUEL MORIERO",
+              "artistSlug": "samuel-moriero",
+              "artistId": "stage-mirage_samuel-moriero",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SAMUEL MORIERO"
+              ],
+              "artistTokens": [
+                "samuel-moriero"
+              ],
+              "hash": "6293a353f9247707de46fef8ffb29b750429da32041337fa9823b5e39363f7e1"
+            },
+            {
+              "id": "saturday_stage-mirage_slvl-b2b-ush",
+              "artistName": "SLVL B2B USH",
+              "artistSlug": "slvl-b2b-ush",
+              "artistId": "stage-mirage_slvl-b2b-ush",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SLVL",
+                "USH"
+              ],
+              "artistTokens": [
+                "slvl",
+                "ush"
+              ],
+              "hash": "cbc9b82469c95f8fffda320b60cbf2f2b584acac66801f1b7279aa5d667adb8e"
+            },
+            {
+              "id": "saturday_stage-mirage_todiefor",
+              "artistName": "TODIEFOR",
+              "artistSlug": "todiefor",
+              "artistId": "stage-mirage_todiefor",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TODIEFOR"
+              ],
+              "artistTokens": [
+                "todiefor"
+              ],
+              "hash": "18d51a5cd6a4c125997f864d4d1fd375a3714ba5740956a52da89ea13dd07b60"
+            },
+            {
+              "id": "saturday_stage-mirage_zapravka",
+              "artistName": "ZAPRAVKA",
+              "artistSlug": "zapravka",
+              "artistId": "stage-mirage_zapravka",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ZAPRAVKA"
+              ],
+              "artistTokens": [
+                "zapravka"
+              ],
+              "hash": "790fbb2de7c68e68023355bcc92851fa454c6f0b114c4997f78b4fdc20d90ab0"
+            },
+            {
+              "id": "saturday_stage-mirage_zorza",
+              "artistName": "ZORZA",
+              "artistSlug": "zorza",
+              "artistId": "stage-mirage_zorza",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ZORZA"
+              ],
+              "artistTokens": [
+                "zorza"
+              ],
+              "hash": "63ebad95ba354fcc9d84ed0c41a37c9fcd68fd6e75d529c67daaaf6e78932928"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "saturday_stage-alt-f4_ivy",
+              "artistName": "[IVY]",
+              "artistSlug": "ivy",
+              "artistId": "stage-alt-f4_ivy",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "[IVY]"
+              ],
+              "artistTokens": [
+                "ivy"
+              ],
+              "hash": "838f91565aa674421f9d8792618e67f711c55fa2695add9d95a1d3010bccd483"
+            },
+            {
+              "id": "saturday_stage-alt-f4_basstripper",
+              "artistName": "BASSTRIPPER",
+              "artistSlug": "basstripper",
+              "artistId": "stage-alt-f4_basstripper",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BASSTRIPPER"
+              ],
+              "artistTokens": [
+                "basstripper"
+              ],
+              "hash": "e032aa4e343421fd578e5e65f2df94a0b00b773c8ef708b735fd98a9f4108568"
+            },
+            {
+              "id": "saturday_stage-alt-f4_c-joo-b2b-dna",
+              "artistName": "C-JOO B2B DNA",
+              "artistSlug": "c-joo-b2b-dna",
+              "artistId": "stage-alt-f4_c-joo-b2b-dna",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "C-JOO",
+                "DNA"
+              ],
+              "artistTokens": [
+                "c-joo",
+                "dna"
+              ],
+              "hash": "5a173a002891c8667f84371e6cb7655977da2cfd10c91fa530d1ddfd1a890421"
+            },
+            {
+              "id": "saturday_stage-alt-f4_evander-b2b-blasty",
+              "artistName": "EVÄNDER B2B BLASTY",
+              "artistSlug": "evander-b2b-blasty",
+              "artistId": "stage-alt-f4_evander-b2b-blasty",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EVÄNDER",
+                "BLASTY"
+              ],
+              "artistTokens": [
+                "evander",
+                "blasty"
+              ],
+              "hash": "939edc8ad1ba37243556e802eee7a7f6d22dd3928e46f09bba5e2e74342898e0"
+            },
+            {
+              "id": "saturday_stage-alt-f4_fiikra-b2b-otah",
+              "artistName": "FIIKRA B2B OTAH",
+              "artistSlug": "fiikra-b2b-otah",
+              "artistId": "stage-alt-f4_fiikra-b2b-otah",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "FIIKRA",
+                "OTAH"
+              ],
+              "artistTokens": [
+                "fiikra",
+                "otah"
+              ],
+              "hash": "0ce34d389817eee34ea6e58880f5836f5e71a2022134055fd2f17192fc5c6915"
+            },
+            {
+              "id": "saturday_stage-alt-f4_kara",
+              "artistName": "KARA",
+              "artistSlug": "kara",
+              "artistId": "stage-alt-f4_kara",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KARA"
+              ],
+              "artistTokens": [
+                "kara"
+              ],
+              "hash": "3db638612495a3bea610af9e159769840d085440c1ebe6129e7ff493575ec42a"
+            },
+            {
+              "id": "saturday_stage-alt-f4_pinotello",
+              "artistName": "PINOTELLO",
+              "artistSlug": "pinotello",
+              "artistId": "stage-alt-f4_pinotello",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "PINOTELLO"
+              ],
+              "artistTokens": [
+                "pinotello"
+              ],
+              "hash": "e08c08234e8618bdb823e31c1582232f7b1a68bfb6800995705fe388b367b1d0"
+            },
+            {
+              "id": "saturday_stage-alt-f4_soraa",
+              "artistName": "SORAÄ",
+              "artistSlug": "soraa",
+              "artistId": "stage-alt-f4_soraa",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SORAÄ"
+              ],
+              "artistTokens": [
+                "soraa"
+              ],
+              "hash": "f547727be8ee952e6e06c49682055a3c035b2caa760e2dad09de163aa61996b0"
+            },
+            {
+              "id": "saturday_stage-alt-f4_sota",
+              "artistName": "SOTA",
+              "artistSlug": "sota",
+              "artistId": "stage-alt-f4_sota",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SOTA"
+              ],
+              "artistTokens": [
+                "sota"
+              ],
+              "hash": "c93d7c7f236a5c20f30a1fc7f513743e0722493df7b0f90235275bb3447dfd9e"
+            },
+            {
+              "id": "saturday_stage-alt-f4_synergy",
+              "artistName": "SYNERGY",
+              "artistSlug": "synergy",
+              "artistId": "stage-alt-f4_synergy",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SYNERGY"
+              ],
+              "artistTokens": [
+                "synergy"
+              ],
+              "hash": "cb5a4b3674807b2816b7642e1a5f8a6f00067e088b9f6f4043c3dc096fc1c979"
+            },
+            {
+              "id": "saturday_stage-alt-f4_youphoria",
+              "artistName": "YOUPHORIA",
+              "artistSlug": "youphoria",
+              "artistId": "stage-alt-f4_youphoria",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "YOUPHORIA"
+              ],
+              "artistTokens": [
+                "youphoria"
+              ],
+              "hash": "d665c3bbf48df9188670043247627e41257d320ae57e4edd3766953393d75f17"
+            },
+            {
+              "id": "saturday_stage-alt-f4_zorel",
+              "artistName": "ZOREL",
+              "artistSlug": "zorel",
+              "artistId": "stage-alt-f4_zorel",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ZOREL"
+              ],
+              "artistTokens": [
+                "zorel"
+              ],
+              "hash": "40db1d06cf88b7d1102ef99ca301fe9e49621d60654c99539da8d4cf4ad1d8f0"
+            }
+          ]
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "saturday_technobus_bodru-b2b-furious",
+              "artistName": "BØDRU B2B FURIOUS",
+              "artistSlug": "bodru-b2b-furious",
+              "artistId": "technobus_bodru-b2b-furious",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BØDRU",
+                "FURIOUS"
+              ],
+              "artistTokens": [
+                "bodru",
+                "furious"
+              ],
+              "hash": "ed20b7014b2a2fbb045e9b42fb7236d385a37c8bea1be25a032525a57dc076e9"
+            },
+            {
+              "id": "saturday_technobus_disrupt-tchai-b2b-vinzz",
+              "artistName": "DISRUPT TCHAÏ B2B VINZZ",
+              "artistSlug": "disrupt-tchai-b2b-vinzz",
+              "artistId": "technobus_disrupt-tchai-b2b-vinzz",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DISRUPT TCHAÏ",
+                "VINZZ"
+              ],
+              "artistTokens": [
+                "disrupt-tchai",
+                "vinzz"
+              ],
+              "hash": "55871c21ca26b0999e1f56231278e437a63391e6e990578e0649d358da42f1d6"
+            },
+            {
+              "id": "saturday_technobus_isaline",
+              "artistName": "ISALINE",
+              "artistSlug": "isaline",
+              "artistId": "technobus_isaline",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ISALINE"
+              ],
+              "artistTokens": [
+                "isaline"
+              ],
+              "hash": "6467b93a5341314727dfb43cf0abf1ceca7d4398d7ef1ebfa803681b8461e37b"
+            },
+            {
+              "id": "saturday_technobus_ksltech",
+              "artistName": "KSLTECH",
+              "artistSlug": "ksltech",
+              "artistId": "technobus_ksltech",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KSLTECH"
+              ],
+              "artistTokens": [
+                "ksltech"
+              ],
+              "hash": "9d9d2887f439e3fea1967874be1678a144da4a2258132b64fe3fd0a53190ba78"
+            },
+            {
+              "id": "saturday_technobus_leardcore",
+              "artistName": "LEARDCORE",
+              "artistSlug": "leardcore",
+              "artistId": "technobus_leardcore",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LEARDCORE"
+              ],
+              "artistTokens": [
+                "leardcore"
+              ],
+              "hash": "fc02f18e365e9b9eacd987af2c8f639d0042fe12dbebfd01e5e933b50d291337"
+            },
+            {
+              "id": "saturday_technobus_nexos",
+              "artistName": "NEXØS",
+              "artistSlug": "nexos",
+              "artistId": "technobus_nexos",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NEXØS"
+              ],
+              "artistTokens": [
+                "nexos"
+              ],
+              "hash": "a6390a50179e6b1b7a176a2c9eab73cae346bf52217a00114f4511aeb520a806"
+            },
+            {
+              "id": "saturday_technobus_noyse",
+              "artistName": "NOYSE",
+              "artistSlug": "noyse",
+              "artistId": "technobus_noyse",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NOYSE"
+              ],
+              "artistTokens": [
+                "noyse"
+              ],
+              "hash": "4cf22b6dd176674531a174c1b35c03aed112ab6eecacd78ad562674c96286049"
+            },
+            {
+              "id": "saturday_technobus_sergastek",
+              "artistName": "SERGASTEK",
+              "artistSlug": "sergastek",
+              "artistId": "technobus_sergastek",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SERGASTEK"
+              ],
+              "artistTokens": [
+                "sergastek"
+              ],
+              "hash": "af43ddec6ff20183ba0ba9aafcc4a449c53dbd6d5d83316d8f96dc68630e2068"
+            },
+            {
+              "id": "saturday_technobus_slackreb",
+              "artistName": "SLACKREB",
+              "artistSlug": "slackreb",
+              "artistId": "technobus_slackreb",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SLACKREB"
+              ],
+              "artistTokens": [
+                "slackreb"
+              ],
+              "hash": "14e55435046a0c9a015d36ca2ef0d85b83bbd2ec783e3421397a6837ff9f9822"
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "saturday_stage-cloud_a5km-b2b-ia5km",
+              "artistName": "A5KM B2B IA5KM",
+              "artistSlug": "a5km-b2b-ia5km",
+              "artistId": "stage-cloud_a5km-b2b-ia5km",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM",
+                "IA5KM"
+              ],
+              "artistTokens": [
+                "a5km",
+                "ia5km"
+              ],
+              "hash": "a3c8248f4e1fee0751381c5c784c021a6a25886deffd3f39952e9aedeb5aba7c"
+            },
+            {
+              "id": "saturday_stage-cloud_amor",
+              "artistName": "AMOR",
+              "artistSlug": "amor",
+              "artistId": "stage-cloud_amor",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "AMOR"
+              ],
+              "artistTokens": [
+                "amor"
+              ],
+              "hash": "a79b05146de31c203e7b9fa4134ea11b6ec1b61cf47736c40f052bd902d0d025"
+            },
+            {
+              "id": "saturday_stage-cloud_ascendant-vierge",
+              "artistName": "ASCENDANT VIERGE",
+              "artistSlug": "ascendant-vierge",
+              "artistId": "stage-cloud_ascendant-vierge",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ASCENDANT VIERGE"
+              ],
+              "artistTokens": [
+                "ascendant-vierge"
+              ],
+              "hash": "c0e4655b21893b3340d18f44a78ee0c10a2757c7db2a0c4f24ce9264c5a23c9f"
+            },
+            {
+              "id": "saturday_stage-cloud_clement-matrat",
+              "artistName": "CLÉMENT MATRAT",
+              "artistSlug": "clement-matrat",
+              "artistId": "stage-cloud_clement-matrat",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "CLÉMENT MATRAT"
+              ],
+              "artistTokens": [
+                "clement-matrat"
+              ],
+              "hash": "dae4f1a100fe3e41e20337913a3e57da777e954585aaf200bedde408a62c1611"
+            },
+            {
+              "id": "saturday_stage-cloud_evil-grimace",
+              "artistName": "EVIL GRIMACE",
+              "artistSlug": "evil-grimace",
+              "artistId": "stage-cloud_evil-grimace",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EVIL GRIMACE"
+              ],
+              "artistTokens": [
+                "evil-grimace"
+              ],
+              "hash": "f881b77505fc4a3b6bff9e1efcdfaaab967b27aafd8aca9b7550ed4dbf303936"
+            },
+            {
+              "id": "saturday_stage-cloud_jack-ollins",
+              "artistName": "JACK OLLINS",
+              "artistSlug": "jack-ollins",
+              "artistId": "stage-cloud_jack-ollins",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "JACK OLLINS"
+              ],
+              "artistTokens": [
+                "jack-ollins"
+              ],
+              "hash": "956df37ccc111316e9da847452c66dda9b0eceaa46ec4e2383c1878a0dc7a097"
+            },
+            {
+              "id": "saturday_stage-cloud_tars",
+              "artistName": "TARS",
+              "artistSlug": "tars",
+              "artistId": "stage-cloud_tars",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TARS"
+              ],
+              "artistTokens": [
+                "tars"
+              ],
+              "hash": "b3290b45a988b5aace2fb159a5611d0bec1b58c5b53f37cfc5b16ea7dda01bbf"
+            },
+            {
+              "id": "saturday_stage-cloud_tigerhead",
+              "artistName": "TIGERHEAD",
+              "artistSlug": "tigerhead",
+              "artistId": "stage-cloud_tigerhead",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TIGERHEAD"
+              ],
+              "artistTokens": [
+                "tigerhead"
+              ],
+              "hash": "04715e2bcadccab0f4cf46fd83c3014d5e54da68776e8e7b44e698a34b63539a"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

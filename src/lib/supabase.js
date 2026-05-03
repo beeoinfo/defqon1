@@ -1,5 +1,6 @@
 import { processLock } from '@supabase/auth-js';
 import { createClient } from '@supabase/supabase-js';
+import { activeSite } from '@/sites/siteDefinitions';
 import { getRandomPresetAvatarIndex } from './presetAvatars';
 
 // Initialise the Supabase client if the URL and anon key are provided
@@ -22,6 +23,7 @@ const USERNAME_REGEX = /^[a-z0-9._-]{3,30}$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HIDDEN_AUTH_EMAIL_DOMAIN = 'auth.beeoinfo.local';
+const ACTIVE_SITE_SLUG = activeSite.slug;
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 const COMPACT_FAVORITE_SNAPSHOT_KEYS = new Set([
@@ -348,7 +350,8 @@ export async function loadAccountBundle(userId, authUser = null) {
   const favoritesPromise = client
     .from('user_favorites')
     .select('favorite_key, snapshot')
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('site_slug', ACTIVE_SITE_SLUG);
   const [profileResult, favoritesResult] = await Promise.all([profilePromise, favoritesPromise]);
   const profile = authUser ? profileResult : profileResult.data ?? null;
   const { data: favorites, error: favoritesError } = favoritesResult;
@@ -360,12 +363,13 @@ export async function loadAccountBundle(userId, authUser = null) {
   if (hasLegacySnapshots && favoriteItems.length > 0) {
     const rows = favoriteItems.map((item) => ({
       user_id: userId,
+      site_slug: ACTIVE_SITE_SLUG,
       favorite_key: item.favoriteKey,
       snapshot: compactFavoriteSnapshot(item),
     }));
     const { error: migrationError } = await client
       .from('user_favorites')
-      .upsert(rows, { onConflict: 'user_id,favorite_key' });
+      .upsert(rows, { onConflict: 'user_id,site_slug,favorite_key' });
 
     if (migrationError) {
       throw migrationError;
@@ -388,19 +392,21 @@ export async function syncFavoriteSnapshots(userId, favoriteItems) {
   const { data: existingRows, error: existingError } = await client
     .from('user_favorites')
     .select('favorite_key')
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('site_slug', ACTIVE_SITE_SLUG);
   if (existingError) {
     throw existingError;
   }
   if (cleanItems.length > 0) {
     const rows = cleanItems.map((item) => ({
       user_id: userId,
+      site_slug: ACTIVE_SITE_SLUG,
       favorite_key: getFavoriteItemKey(item),
       snapshot: compactFavoriteSnapshot(item),
     }));
     const { error: upsertError } = await client
       .from('user_favorites')
-      .upsert(rows, { onConflict: 'user_id,favorite_key' });
+      .upsert(rows, { onConflict: 'user_id,site_slug,favorite_key' });
     if (upsertError) {
       throw upsertError;
     }
@@ -414,6 +420,7 @@ export async function syncFavoriteSnapshots(userId, favoriteItems) {
       .from('user_favorites')
       .delete()
       .eq('user_id', userId)
+      .eq('site_slug', ACTIVE_SITE_SLUG)
       .in('favorite_key', deleteKeys);
     if (deleteError) {
       throw deleteError;
@@ -597,7 +604,8 @@ export async function loadTribeBundle(userId) {
         client
           .from('user_favorites')
           .select('user_id, favorite_key, snapshot')
-          .in('user_id', memberUserIds),
+          .in('user_id', memberUserIds)
+          .eq('site_slug', ACTIVE_SITE_SLUG),
       ]);
     if (profilesError) {
       throw profilesError;

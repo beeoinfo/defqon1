@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { UserIcon, XIcon } from '@phosphor-icons/react';
-import logoMark from '../../../assets/logo.svg';
-import tribeAvatarSample from '../../../assets/avatars/1.png';
+import { getPresetAvatarUrl } from '../../../lib/presetAvatars';
 import Button from '../../primitives/Button';
 import Title from '../../primitives/Title';
 import Box from '@/components/layout/Box';
@@ -29,11 +28,11 @@ const getPixelCustomProperty = (element, propertyName, fallbackValue = 0) => {
 
 const Header = ({
   component = 'header',
-  brandTitle = 'DEFQON',
-  brandLogoSrc = logoMark,
+  brandTitle = '',
+  brandLogoSrc = '',
   profileName = 'Usera Testa',
   profileSubtitle = '@test',
-  profileImageSrc = tribeAvatarSample,
+  profileImageSrc = getPresetAvatarUrl(1),
   navbar = null,
   activeView = null,
   onOpenView = null,
@@ -172,7 +171,9 @@ const Header = ({
                 </Title>
               ) : (
                 <>
-                  <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
+                  {brandLogoSrc ? (
+                    <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
+                  ) : null}
                   <Title component="span" variant="h2" className="dq-layout-header__brand-title">
                     {brandTitle}
                   </Title>

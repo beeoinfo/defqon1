@@ -27,7 +27,7 @@
 
 .dq-ui-switch:focus-visible {
   border-color: var(--dq-ui-primary-muted);
-  box-shadow: 0 0 0 3px rgba(188, 155, 94, 0.18);
+  box-shadow: 0 0 0 3px var(--dq-ui-primary-surface);
 }
 
 .dq-ui-switch:disabled {

@@ -10,6 +10,7 @@ import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
 import { compareLineupEntries, getEntryDayLabel, getEntryDisplayName, getEntryMetaLabel } from '@/lib/lineup';
 import { getCanonicalStageName, getStageTheme } from '@/lib/stageThemes';
+import { activeSite } from '@/sites/siteDefinitions';
 import './LineUpView.css';
 
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
@@ -56,8 +57,9 @@ const compareStageSections = (leftStage, rightStage) => {
 };
 
 const getEntryCardMetaProps = (entry) => ({
-  meta1: getEntryDayLabel(entry),
-  meta2: entry.timeLabel,
+  meta1: entry.stage,
+  meta2: getEntryDayLabel(entry),
+  meta3: entry.timeLabel,
 });
 
 const LineUpView = ({
@@ -125,7 +127,7 @@ const LineUpView = ({
         .map(([day, dayStages]) => ({
           id: day.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           label: day,
-          color: '#bc9b5e',
+          color: activeSite.theme.primary,
           day,
           stages: Object.entries(dayStages)
             .map(([stage, stageEntries]) => ({

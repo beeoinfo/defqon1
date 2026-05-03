@@ -7,6 +7,8 @@ import './Page.css';
 
 const Page = ({
   component = 'section',
+  brandTitle,
+  brandLogoSrc,
   title,
   onClose,
   onOpenPage = null,
@@ -45,6 +47,8 @@ const Page = ({
     >
       <Header
         isPageView
+        brandTitle={brandTitle}
+        brandLogoSrc={brandLogoSrc}
         pageTitle={title}
         centerContent={headerContent}
         wideCenterContent={wideHeaderContent}

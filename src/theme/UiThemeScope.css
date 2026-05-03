@@ -24,15 +24,7 @@
   --dq-ui-border-faint: rgba(255, 255, 255, 0.06);
   --dq-ui-text: rgba(255, 255, 255, 0.92);
   --dq-ui-text-soft: rgba(255, 255, 255, 0.65);
-  --dq-ui-primary: #bc9b5e;
-  --dq-ui-primary-soft: #f6ecd4;
-  --dq-ui-primary-muted: #ccb072;
-  --dq-ui-primary-surface: rgba(188, 155, 94, 0.18);
-  --dq-ui-primary-surface-strong: rgba(188, 155, 94, 0.22);
-  --dq-ui-accent: #f87171;
-  --dq-ui-accent-strong: #ef4444;
-  --dq-ui-accent-soft: #fecaca;
-  --dq-ui-badge-count-bg: var(--dq-ui-accent-strong);
+  --dq-ui-badge-count-bg: #ef4444;
   --dq-ui-yellow: #facc15;
   --dq-ui-favorite-surface: rgba(133, 77, 14, 0.3);
   --dq-ui-favorite-border: rgba(250, 204, 21, 0.26);

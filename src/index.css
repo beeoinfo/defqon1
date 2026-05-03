@@ -26,13 +26,8 @@
   --dq-ui-border-subtle: rgba(255, 255, 255, 0.08);
   --dq-ui-border-faint: rgba(255, 255, 255, 0.06);
   --text-soft: rgba(255, 255, 255, 0.65);
-  --dq-ui-primary: #bc9b5e;
-  --dq-ui-primary-soft: #f6ecd4;
-  --dq-ui-primary-muted: #ccb072;
-  --dq-ui-primary-surface: rgba(188, 155, 94, 0.18);
-  --dq-ui-primary-surface-strong: rgba(188, 155, 94, 0.22);
-  --accent: #ef4444;
-  --yellow: #facc15;
+  --accent: var(--dq-ui-accent-strong);
+  --yellow: var(--dq-ui-warning);
   --mobile-bottom-nav-offset: 92px;
   /* --app-background:
     radial-gradient(circle at 14% 18%, rgba(11, 219, 239, 0.12), transparent 26%),
@@ -304,9 +299,9 @@ select {
   position: absolute;
   top: -7px;
   right: -7px;
-  background: #ef4444;
+  background: var(--dq-ui-accent-strong);
   color: #ffffff;
-  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 1px var(--dq-ui-secondary-surface);
 }
 .ghost-button {
   padding: 10px 14px;
@@ -2006,7 +2001,7 @@ select {
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: #ef4444;
+  background: var(--dq-ui-accent-strong);
   color: #ffffff;
   font-size: 0.68rem;
   line-height: 1;
