@@ -148,6 +148,15 @@
   flex: 0 0 auto;
 }
 
+.dq-app-search-header {
+  min-width: 0;
+}
+
+.dq-app-search-header .dq-ui-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .dq-layout-header__nav-slot--desktop .dq-layout-navbar {
   width: max-content;
   padding-block: 0;
@@ -192,7 +201,19 @@
     flex-basis: auto;
   }
 
-  .dq-layout-header__profile .dq-ui-button__subtitle {
+  .dq-app-search-header__previous {
+    display: none;
+  }
+
+  .dq-layout-header__profile .dq-ui-button {
+    --dq-ui-button-padding-x: 2px;
+    --dq-ui-button-gap: 0;
+    width: var(--dq-ui-button-height);
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .dq-layout-header__profile .dq-ui-button__content {
     display: none;
   }
 
@@ -229,21 +250,21 @@
     --dq-layout-header-motion-delay: 176ms;
   }
 
-  .dq-layout-header[data-content-transition='covered'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
-  .dq-layout-header[data-content-transition='exiting'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+  .dq-layout-header:not([data-keep-mobile-navbar-visible='true'])[data-content-transition='covered'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
+  .dq-layout-header:not([data-keep-mobile-navbar-visible='true'])[data-content-transition='exiting'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
   }
 
-  .dq-layout-header[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
-  .dq-layout-header[data-content-transition='open'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+  .dq-layout-header:not([data-keep-mobile-navbar-visible='true'])[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell,
+  .dq-layout-header:not([data-keep-mobile-navbar-visible='true'])[data-content-transition='open'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
     opacity: 1;
     transform: none;
   }
 
   @starting-style {
-    .dq-layout-header[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
+    .dq-layout-header:not([data-keep-mobile-navbar-visible='true'])[data-content-transition='entering'] .dq-layout-header__mobile-navbar .dq-layout-navbar__item-shell {
       opacity: 0;
       transform: translateY(10px);
     }

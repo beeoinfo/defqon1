@@ -1,5 +1,5 @@
-import { CalendarDotsIcon, MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon, StarIcon } from '@phosphor-icons/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CalendarDotsIcon, HeartIcon, MagnifyingGlassIcon, MapTrifoldIcon, MusicNoteIcon } from '@phosphor-icons/react';
+import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from 'react';
 import ToggleButton from '../../primitives/ToggleButton';
 import Box from '@/components/layout/Box';
 import './Navbar.css';
@@ -23,7 +23,7 @@ const DEFAULT_NAVBAR_ITEMS = [
   {
     id: 'reviews',
     label: 'Reviews',
-    icon: StarIcon,
+    icon: HeartIcon,
   },
 ];
 
@@ -33,6 +33,20 @@ const getActiveItemKey = (items) => {
   const activeItem = items.find((item) => item.active);
 
   return activeItem ? getItemKey(activeItem) : null;
+};
+
+const renderIconBadge = (badge) => {
+  if (badge === null || badge === undefined || badge === false) {
+    return null;
+  }
+
+  if (isValidElement(badge)) {
+    return cloneElement(badge, {
+      className: [badge.props.className, 'dq-layout-navbar__icon-badge'].filter(Boolean).join(' '),
+    });
+  }
+
+  return <span className="dq-layout-navbar__icon-badge">{badge}</span>;
 };
 
 const Navbar = ({
@@ -133,6 +147,14 @@ const Navbar = ({
             const itemKey = getItemKey(item);
             const togglesActive = item.togglesActive !== false;
             const isActive = togglesActive && itemKey === resolvedActiveKey;
+            const NavbarIcon = item.badge
+              ? (iconProps) => (
+                <span className="dq-layout-navbar__icon-with-badge">
+                  <Icon {...iconProps} />
+                  {renderIconBadge(item.badge)}
+                </span>
+              )
+              : Icon;
 
             return (
               <Box
@@ -149,8 +171,7 @@ const Navbar = ({
                 <ToggleButton
                   className="dq-layout-navbar__item"
                   pressed={isActive}
-                  icon={Icon}
-                  badge={item.badge}
+                  icon={NavbarIcon}
                   fillOnPress
                   radius="rounded"
                   aria-current={isActive ? 'page' : undefined}

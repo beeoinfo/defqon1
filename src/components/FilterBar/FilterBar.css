@@ -228,6 +228,47 @@
   flex: 0 0 auto;
 }
 
+.dq-filter-bar__button-slot {
+  max-width: 22rem;
+  overflow: visible;
+  transition:
+    max-width var(--dq-ui-transition-ui),
+    opacity var(--dq-ui-transition-ui);
+}
+
+.dq-filter-bar__button-slot > * {
+  transform-origin: center;
+  transition:
+    opacity var(--dq-ui-transition-ui),
+    transform var(--dq-ui-transition-ui);
+}
+
+.dq-filter-bar__button-slot--entering {
+  max-width: 0;
+  overflow: clip;
+  opacity: 0;
+  animation: dq-filter-bar-button-slot-in var(--dq-ui-transition-ui) both;
+}
+
+.dq-filter-bar__button-slot--entering > * {
+  opacity: 0;
+  transform: scale(0.86);
+  animation: dq-filter-bar-button-content-in var(--dq-ui-transition-ui) ease 0.04s both;
+}
+
+.dq-filter-bar__button-slot--exiting {
+  max-width: 22rem;
+  overflow: clip;
+  pointer-events: none;
+  animation: dq-filter-bar-button-slot-out var(--dq-ui-transition-ui) both;
+}
+
+.dq-filter-bar__button-slot--exiting > * {
+  opacity: 1;
+  transform: scale(1);
+  animation: dq-filter-bar-button-content-out var(--dq-ui-transition-ui) both;
+}
+
 .dq-filter-bar__drawer-trigger[data-open='true'] .dq-ui-dropdown__chevron-icon--closed {
   opacity: 0;
   transform: translate(-50%, calc(-50% - 2px));
@@ -371,5 +412,53 @@
   to {
     opacity: 0;
     transform: scale(0.84);
+  }
+}
+
+@keyframes dq-filter-bar-button-slot-in {
+  from {
+    max-width: 0;
+    opacity: 0;
+  }
+
+  to {
+    max-width: 22rem;
+    opacity: 1;
+  }
+}
+
+@keyframes dq-filter-bar-button-content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dq-filter-bar-button-slot-out {
+  from {
+    max-width: 22rem;
+    opacity: 1;
+  }
+
+  to {
+    max-width: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes dq-filter-bar-button-content-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.86);
   }
 }

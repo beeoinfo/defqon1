@@ -8,7 +8,7 @@ import ChoiceButton from '@/components/primitives/ChoiceButton';
 import { Switch } from '@/components/primitives/forms';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
-import TribeView from '@/views/TribeView';
+import TribePanel from '@/components/TribePanel';
 import './SettingsPage.css';
 
 const SettingsPage = ({
@@ -19,13 +19,11 @@ const SettingsPage = ({
   isTribeHydrating = false,
   pendingTribeInviteCode = '',
   tribeInviteAlert = '',
-  betaFeaturesEnabled,
   hidePastEvents,
   hideUndatedEvents,
   lineups = [],
   selectedLineupKey,
   onSelectLineup,
-  onBetaFeaturesEnabledChange,
   onHidePastEventsChange,
   onHideUndatedEventsChange,
   onProfileUpdated,
@@ -134,7 +132,7 @@ const SettingsPage = ({
         onSave={handleProfileSave}
       />
 
-      <TribeView
+      <TribePanel
         user={user}
         tribe={tribe}
         isBusy={isTribeBusy}
@@ -183,13 +181,6 @@ const SettingsPage = ({
             description="Hide entries that still do not have a confirmed timeslot."
             checked={hideUndatedEvents}
             onCheckedChange={onHideUndatedEventsChange}
-          />
-
-          <Switch
-            label="Enable beta features"
-            description="Unlock map browsing and other in-progress extras."
-            checked={betaFeaturesEnabled}
-            onCheckedChange={onBetaFeaturesEnabledChange}
           />
 
           <Box direction="row" justify="flex-end">

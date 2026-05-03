@@ -1,7 +1,6 @@
 import AboutPage from './AboutPage';
 import LegalPage from './LegalPage';
 import RoadmapPage from './RoadmapPage';
-import SearchPage, { SearchPageHeaderContent } from './SearchPage';
 import SettingsPage from './SettingsPage';
 
 export const PAGE_DEFINITIONS = {
@@ -23,15 +22,5 @@ export const PAGE_DEFINITIONS = {
     title: 'Legal',
     Component: LegalPage,
     stackGroup: 'footer-links',
-  },
-  search: {
-    title: null,
-    Component: SearchPage,
-    showFooter: false,
-    wideHeaderContent: true,
-    hideHeaderBrand: true,
-    showCloseButton: true,
-    inlineCloseButton: true,
-    HeaderContentComponent: SearchPageHeaderContent,
   },
 };

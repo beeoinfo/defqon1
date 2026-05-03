@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { StarIcon } from '@phosphor-icons/react';
+import { HeartIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
 import FilterBar from '@/components/FilterBar';
@@ -36,6 +36,10 @@ const parseTimestamp = (value) => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
 };
+
+const labelsMatch = (leftValue, rightValue) => (
+  String(leftValue ?? '').trim().toLowerCase() === String(rightValue ?? '').trim().toLowerCase()
+);
 
 const floorToHour = (timestamp) => Math.floor(timestamp / MS_PER_HOUR) * MS_PER_HOUR;
 const ceilToHour = (timestamp) => Math.ceil(timestamp / MS_PER_HOUR) * MS_PER_HOUR;
@@ -165,7 +169,7 @@ const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
       };
     })
     .filter(Boolean)
-    .filter((entry) => getEntryDayLabel(entry) === selectedDay)
+    .filter((entry) => labelsMatch(getEntryDayLabel(entry), selectedDay))
     .sort(compareLineupEntries);
 
   if (scheduledEntries.length === 0) {
@@ -455,13 +459,13 @@ const TimetableView = ({
                         {canToggleFavorites ? (
                           <ToggleButton
                             className="dq-timetable-view__favorite"
-                            variant="favorite"
-                            icon={StarIcon}
+                            variant="likes"
+                            icon={HeartIcon}
                             size="sm"
                             radius="rounded"
                             pressed={isFavorite}
                             fillOnPress
-                            ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
+                            ariaLabel={isFavorite ? 'Remove like' : 'Add like'}
                           />
                         ) : null}
                       </Box>
@@ -582,13 +586,13 @@ const TimetableView = ({
                           {canToggleFavorites ? (
                             <ToggleButton
                               className="dq-timetable-view__favorite"
-                              variant="favorite"
-                              icon={StarIcon}
+                              variant="likes"
+                              icon={HeartIcon}
                               size="sm"
                               radius="rounded"
                               pressed={isFavorite}
                               fillOnPress
-                              ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
+                              ariaLabel={isFavorite ? 'Remove like' : 'Add like'}
                               onPressedChange={() => toggleFavorite?.(entry.id)}
                             />
                           ) : null}

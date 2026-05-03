@@ -56,9 +56,8 @@ const compareStageSections = (leftStage, rightStage) => {
 };
 
 const getEntryCardMetaProps = (entry) => ({
-  meta1: entry.stage,
-  meta2: getEntryDayLabel(entry),
-  meta3: entry.timeLabel,
+  meta1: getEntryDayLabel(entry),
+  meta2: entry.timeLabel,
 });
 
 const LineUpView = ({
@@ -184,9 +183,9 @@ const LineUpView = ({
                           color={entry.stageColor ?? stageColor}
                           title={getEntryDisplayName(entry)}
                           {...getEntryCardMetaProps(entry)}
-                          actionVariant={canToggleFavorites ? 'favorite' : null}
+                          actionVariant={canToggleFavorites ? 'likes' : null}
                           actionPressed={isFavorite}
-                          actionAriaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
+                          actionAriaLabel={isFavorite ? 'Remove like' : 'Add like'}
                           onAction={() => toggleFavorite?.(entry.id)}
                         >
                           {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
@@ -237,10 +236,10 @@ const LineUpView = ({
                                       color={suggestionColor}
                                       title={getEntryDisplayName(suggestion)}
                                       {...getEntryCardMetaProps(suggestion)}
-                                      actionVariant={canToggleFavorites ? 'favorite' : null}
+                                      actionVariant={canToggleFavorites ? 'likes' : null}
                                       actionPressed={isSuggestionFavorite}
                                       actionAriaLabel={
-                                        isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
+                                        isSuggestionFavorite ? 'Remove like' : 'Add like'
                                       }
                                       onAction={() => toggleFavorite?.(suggestion.id)}
                                     />

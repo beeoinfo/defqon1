@@ -6,7 +6,7 @@ import {
   resolveButtonVisualState,
 } from '../Button';
 import Badge from '../Badge';
-import { resolveIconProps } from '../ToggleButton';
+import { isToggleAccentVariant, resolveIconProps } from '../ToggleButton';
 import '../ToggleButton/ToggleButton.css';
 import './ChoiceButton.css';
 
@@ -71,7 +71,7 @@ const ChoiceButton = ({
       className={[
         'dq-ui-choice-button',
         `dq-ui-choice-button--${effectiveVariant}`,
-        effectiveVariant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
+        isToggleAccentVariant(effectiveVariant) ? `dq-ui-toggle-button--${effectiveVariant}` : '',
         className,
       ]
         .filter(Boolean)
@@ -92,7 +92,7 @@ const ChoiceButton = ({
       <span
         className={[
           getButtonClassName({
-            variant: effectiveVariant === 'favorite' ? 'ghost' : effectiveVariant,
+            variant: isToggleAccentVariant(effectiveVariant) ? 'ghost' : effectiveVariant,
             size,
             resolvedRadius: visualState.resolvedRadius,
             selected: type !== 'radio' && isChecked,
@@ -101,7 +101,7 @@ const ChoiceButton = ({
             isIconOnly: visualState.isIconOnly,
             hasBadge: hasTag,
           }),
-          effectiveVariant === 'favorite' ? 'dq-ui-toggle-button--favorite' : '',
+          isToggleAccentVariant(effectiveVariant) ? `dq-ui-toggle-button--${effectiveVariant}` : '',
           fillOnPress ? 'dq-ui-toggle-button--fill-on-press' : '',
           selectedIcon ? 'dq-ui-choice-button__control--selected-icon' : '',
           'dq-ui-choice-button__control',
@@ -109,7 +109,7 @@ const ChoiceButton = ({
           .filter(Boolean)
           .join(' ')}
         style={{
-          ...((effectiveVariant === 'ghost' || effectiveVariant === 'favorite') && !selectedIcon && color
+          ...((effectiveVariant === 'ghost' || isToggleAccentVariant(effectiveVariant)) && !selectedIcon && color
             ? buildGhostButtonColorVars(color)
             : {}),
           ...(selectedIcon ? {

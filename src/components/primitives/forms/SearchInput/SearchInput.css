@@ -4,7 +4,7 @@
 }
 
 .dq-ui-search-input__control {
-  min-height: 46px;
+  min-height: 48px;
   padding-inline: 14px;
   border-radius: var(--dq-ui-radius-rounded);
 }
@@ -17,7 +17,7 @@
 .dq-ui-search-input__input {
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  min-height: 46px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -36,6 +36,35 @@
 .dq-ui-search-input__input:focus,
 .dq-ui-search-input__input:focus-visible {
   outline: none;
+}
+
+.dq-ui-search-input__clear-button {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--dq-ui-radius-rounded);
+  background: transparent;
+  color: var(--dq-ui-text-soft);
+  cursor: pointer;
+  transition:
+    background var(--dq-ui-transition-fast),
+    color var(--dq-ui-transition-fast);
+}
+
+.dq-ui-search-input__clear-button:hover,
+.dq-ui-search-input__clear-button:focus-visible {
+  background: var(--dq-ui-panel-strong);
+  color: var(--dq-ui-text);
+}
+
+.dq-ui-search-input__clear-button:focus-visible {
+  outline: 2px solid var(--dq-ui-primary-muted);
+  outline-offset: 2px;
 }
 
 .dq-ui-search-input__input::-webkit-search-decoration,

@@ -161,6 +161,7 @@
 
 .dq-ui-button--icon-only {
   width: var(--dq-ui-button-height);
+  flex: 0 0 var(--dq-ui-button-height);
   padding: 0;
 }
 

@@ -42,6 +42,15 @@
   --dq-ui-favorite-border-strong: rgba(251, 191, 36, 0.54);
   --dq-ui-favorite-text-soft: #fde68a;
   --dq-ui-favorite-text-strong: #fef3c7;
+  --dq-ui-likes: #fb7185;
+  --dq-ui-likes-surface: rgba(136, 19, 55, 0.28);
+  --dq-ui-likes-border: rgba(244, 63, 94, 0.28);
+  --dq-ui-likes-surface-hover: rgba(190, 18, 60, 0.26);
+  --dq-ui-likes-surface-strong: rgba(190, 18, 60, 0.34);
+  --dq-ui-likes-border-hover: rgba(251, 113, 133, 0.5);
+  --dq-ui-likes-border-strong: rgba(251, 113, 133, 0.58);
+  --dq-ui-likes-text-soft: #fecdd3;
+  --dq-ui-likes-text-strong: #ffe4e6;
   --dq-ui-info: #60a5fa;
   --dq-ui-info-surface: rgba(37, 99, 235, 0.12);
   --dq-ui-info-border: rgba(96, 165, 250, 0.28);

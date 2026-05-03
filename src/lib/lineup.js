@@ -7,7 +7,7 @@ export const HIDE_UNDATED_EVENTS_STORAGE_KEY = 'hideUndatedEvents';
 export const BETA_FEATURES_STORAGE_KEY = 'defqon1-beta-features';
 
 export const REVIEW_SECTION_MESSAGE =
-  'Some saved favorites seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
+  'Some saved likes seem to have moved around. We kept your previous schedule below and checked the latest lineup for tag-based suggestions.';
 
 const DAY_LABELS = {
   thursday: 'Thursday',
@@ -38,6 +38,22 @@ function slugifyValue(value) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/-+/g, '-');
+}
+
+function normalizeComparableValue(value) {
+  return normalizeText(value).replace(/\s+/g, ' ');
+}
+
+function valuesMatch(leftValue, rightValue) {
+  return normalizeComparableValue(leftValue) === normalizeComparableValue(rightValue);
+}
+
+function slugsMatch(leftValue, rightValue) {
+  return slugifyValue(leftValue) === slugifyValue(rightValue);
+}
+
+function getComparableStageName(stage) {
+  return normalizeComparableValue(getCanonicalStageName(stage));
 }
 
 function uniqueStrings(values) {
@@ -247,9 +263,9 @@ function findEntryForLegacyId(legacyId, entries) {
       const entryStageSlug = buildLegacyStageSlug(entry.stage);
 
       return (
-        entry.daySlug === parsed.daySlug &&
-        entryStageSlug === parsed.stageSlug &&
-        entry.artistSlug === parsed.artistSlug
+        slugsMatch(entry.daySlug, parsed.daySlug) &&
+        slugsMatch(entryStageSlug, parsed.stageSlug) &&
+        slugsMatch(entry.artistSlug, parsed.artistSlug)
       );
     }) ?? null
   );
@@ -411,10 +427,10 @@ export function getReviewSuggestions(savedFavorite, entries) {
         tokenOverlap * 100 +
         tagOverlap * 25 +
         (savedFavorite.stageCanonical &&
-        entry.stageCanonical === savedFavorite.stageCanonical
+        getComparableStageName(entry.stageCanonical) === getComparableStageName(savedFavorite.stageCanonical)
           ? 5
           : 0) +
-        (savedFavorite.daySlug && entry.daySlug === savedFavorite.daySlug ? 2 : 0);
+        (savedFavorite.daySlug && slugsMatch(entry.daySlug, savedFavorite.daySlug) ? 2 : 0);
 
       return { entry, score };
     })
@@ -526,11 +542,21 @@ export function getStages(entries, dayFilter = 'All days') {
   const filtered =
     dayFilter === 'All days'
       ? entries
-      : entries.filter((entry) => getEntryDayLabel(entry) === dayFilter);
+      : entries.filter((entry) => valuesMatch(getEntryDayLabel(entry), dayFilter));
 
-  return Array.from(
-    new Set(filtered.slice().sort(compareLineupEntries).map((entry) => getCanonicalStageName(entry.stage)))
-  );
+  const stagesByKey = new Map();
+
+  filtered.slice().sort(compareLineupEntries).forEach((entry) => {
+    const stageName = entry.stageCanonical ?? entry.stage;
+    const canonicalStageName = getCanonicalStageName(stageName);
+    const stageKey = getComparableStageName(canonicalStageName);
+
+    if (stageKey && !stagesByKey.has(stageKey)) {
+      stagesByKey.set(stageKey, canonicalStageName);
+    }
+  });
+
+  return Array.from(stagesByKey.values());
 }
 
 export function matchesSelectedStage(entryStage, selectedStage) {
@@ -538,7 +564,7 @@ export function matchesSelectedStage(entryStage, selectedStage) {
     return true;
   }
 
-  return getCanonicalStageName(entryStage) === selectedStage;
+  return getComparableStageName(entryStage) === getComparableStageName(selectedStage);
 }
 
 function parseEntryDateTime(value) {
@@ -573,6 +599,17 @@ export function hasCompleteSchedule(item) {
   return parseEntryDateTime(item?.startAt) !== null && parseEntryDateTime(item?.endAt) !== null;
 }
 
+function hasScheduleChange(savedFavorite, currentEntry) {
+  if (!hasScheduledDate(savedFavorite)) {
+    return false;
+  }
+
+  return (
+    parseEntryDateTime(savedFavorite.startAt) !== parseEntryDateTime(currentEntry.startAt) ||
+    parseEntryDateTime(savedFavorite.endAt) !== parseEntryDateTime(currentEntry.endAt)
+  );
+}
+
 export function filterUndatedEntries(entries) {
   return entries.filter((entry) => hasScheduledDate(entry));
 }
@@ -581,21 +618,23 @@ export function filterEntries(entries, { query, day, stage }) {
   let result = entries;
 
   if (day !== 'All days') {
-    result = result.filter((entry) => getEntryDayLabel(entry) === day);
+    result = result.filter((entry) => valuesMatch(getEntryDayLabel(entry), day));
   }
 
   if (stage !== 'All stages') {
-    result = result.filter((entry) => matchesSelectedStage(entry.stage, stage));
+    result = result.filter((entry) =>
+      matchesSelectedStage(entry.stageCanonical ?? entry.stage, stage)
+    );
   }
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = normalizeText(query);
 
   if (normalizedQuery) {
     result = result.filter((entry) => {
       return (
-        getEntryDisplayName(entry).toLowerCase().includes(normalizedQuery) ||
-        entry.artistTags.some((tag) => tag.toLowerCase().includes(normalizedQuery)) ||
-        entry.artistTokens.some((token) => token.includes(normalizedQuery))
+        normalizeText(getEntryDisplayName(entry)).includes(normalizedQuery) ||
+        entry.artistTags.some((tag) => normalizeText(tag).includes(normalizedQuery)) ||
+        entry.artistTokens.some((token) => normalizeText(token).includes(normalizedQuery))
       );
     });
   }
@@ -607,24 +646,25 @@ export function filterReviewFavorites(reviewFavorites, { query, day, stage }) {
   let result = reviewFavorites;
 
   if (day !== 'All days') {
-    result = result.filter((favorite) => getDayLabel(favorite.daySlug) === day);
+    result = result.filter((favorite) => valuesMatch(getDayLabel(favorite.daySlug), day));
   }
 
   if (stage !== 'All stages') {
     result = result.filter(
       (favorite) =>
-        favorite.stageCanonical === selectedStageToCanonical(stage, favorite.stage)
+        getComparableStageName(favorite.stageCanonical ?? favorite.stage) ===
+        getComparableStageName(selectedStageToCanonical(stage, favorite.stage))
     );
   }
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = normalizeText(query);
 
   if (normalizedQuery) {
     result = result.filter((favorite) => {
       return (
-        getEntryDisplayName(favorite).toLowerCase().includes(normalizedQuery) ||
-        favorite.artistTags.some((tag) => tag.toLowerCase().includes(normalizedQuery)) ||
-        favorite.artistTokens.some((token) => token.includes(normalizedQuery))
+        normalizeText(getEntryDisplayName(favorite)).includes(normalizedQuery) ||
+        favorite.artistTags.some((tag) => normalizeText(tag).includes(normalizedQuery)) ||
+        favorite.artistTokens.some((token) => normalizeText(token).includes(normalizedQuery))
       );
     });
   }
@@ -649,16 +689,17 @@ function selectedStageToCanonical(selectedStage, fallbackStage) {
 export function groupEntriesByDayAndStage(entries) {
   return entries.slice().sort(compareLineupEntries).reduce((acc, entry) => {
     const dayLabel = getEntryDayLabel(entry);
+    const stageLabel = entry.stageCanonical ?? getCanonicalStageName(entry.stage);
 
     if (!acc[dayLabel]) {
       acc[dayLabel] = {};
     }
 
-    if (!acc[dayLabel][entry.stage]) {
-      acc[dayLabel][entry.stage] = [];
+    if (!acc[dayLabel][stageLabel]) {
+      acc[dayLabel][stageLabel] = [];
     }
 
-    acc[dayLabel][entry.stage].push(entry);
+    acc[dayLabel][stageLabel].push(entry);
     return acc;
   }, {});
 }
@@ -732,7 +773,6 @@ export function saveFavorites(favoriteItems) {
 
 export function resolveFavoriteItems(entries, favoriteItems) {
   const currentEntriesById = new Map(entries.map((entry) => [entry.id, entry]));
-  const currentEntriesByHash = new Map(entries.map((entry) => [entry.hash, entry]));
 
   const matchedEntries = [];
   const reviewItems = [];
@@ -743,12 +783,7 @@ export function resolveFavoriteItems(entries, favoriteItems) {
     if (favorite.id && currentEntriesById.has(favorite.id)) {
       matchedEntry = currentEntriesById.get(favorite.id);
 
-      if (
-        favorite.hash &&
-        matchedEntry.hash &&
-        favorite.hash !== matchedEntry.hash &&
-        hasScheduledDate(favorite)
-      ) {
+      if (hasScheduleChange(favorite, matchedEntry)) {
         reviewItems.push({
           ...favorite,
           suggestions: [matchedEntry, ...getReviewSuggestions(favorite, entries)]
@@ -757,8 +792,6 @@ export function resolveFavoriteItems(entries, favoriteItems) {
         });
         return;
       }
-    } else if (favorite.hash && currentEntriesByHash.has(favorite.hash)) {
-      matchedEntry = currentEntriesByHash.get(favorite.hash);
     }
 
     if (matchedEntry) {
@@ -794,8 +827,8 @@ export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
     const currentEntry = currentEntriesById.get(favorite.id);
 
     if (
-      favorite.hash !== currentEntry.hash &&
-      !hasScheduledDate(favorite)
+      !hasScheduledDate(favorite) &&
+      hasScheduledDate(currentEntry)
     ) {
       didChange = true;
       return buildSnapshotFromEntry(currentEntry, {

@@ -1,6 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { MinusIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react';
-import EmptyState from '@/components/EmptyState';
 import FilterBar from '@/components/FilterBar';
 import Box from '@/components/layout/Box';
 import Button from '@/components/primitives/Button';
@@ -446,7 +445,7 @@ const MapsView = ({ mapLayers = [] }) => {
   }, [activeLayer, syncActiveLayer]);
 
   if (!mapLayers.length) {
-    return <EmptyState text="No map layers detected." />;
+    return null;
   }
 
   const handleZoomIn = (event) => {

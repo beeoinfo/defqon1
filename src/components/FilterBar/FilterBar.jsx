@@ -8,9 +8,104 @@ import ToggleButton from '../primitives/ToggleButton';
 import './FilterBar.css';
 
 const FILTER_BAR_DRAWER_ANIMATION_MS = 160;
-const FILTER_BAR_RESET_ANIMATION_MS = 160;
+const FILTER_BAR_BUTTON_ANIMATION_MS = 160;
 const FILTER_BAR_SCROLL_HIDE_DELAY_MS = 140;
 const FILTER_BAR_SCROLL_THRESHOLD = 240;
+const FILTER_BAR_ITEM_STATE_OPEN = 'open';
+const FILTER_BAR_ITEM_STATE_ENTERING = 'entering';
+const FILTER_BAR_ITEM_STATE_EXITING = 'exiting';
+
+const getFilterBarItemKey = (item) => item.id;
+
+const createRenderedFilterBarItems = (items) => (
+  items.map((item) => ({
+    key: getFilterBarItemKey(item),
+    item,
+    state: FILTER_BAR_ITEM_STATE_OPEN,
+  }))
+);
+
+const reconcileRenderedFilterBarItems = (renderedItems, nextItems) => {
+  const nextItemsByKey = new Map(nextItems.map((item) => [getFilterBarItemKey(item), item]));
+  const renderedItemsByKey = new Map(renderedItems.map((renderedItem) => [renderedItem.key, renderedItem]));
+  let didChange = renderedItems.length !== nextItems.length;
+
+  const nextRenderedItems = renderedItems.map((renderedItem) => {
+    const nextItem = nextItemsByKey.get(renderedItem.key);
+
+    if (!nextItem) {
+      if (renderedItem.state === FILTER_BAR_ITEM_STATE_EXITING) {
+        return renderedItem;
+      }
+
+      didChange = true;
+      return {
+        ...renderedItem,
+        state: FILTER_BAR_ITEM_STATE_EXITING,
+      };
+    }
+
+    const nextState = renderedItem.state === FILTER_BAR_ITEM_STATE_EXITING
+      ? FILTER_BAR_ITEM_STATE_ENTERING
+      : renderedItem.state;
+
+    if (renderedItem.item === nextItem && renderedItem.state === nextState) {
+      return renderedItem;
+    }
+
+    didChange = true;
+    return {
+      ...renderedItem,
+      item: nextItem,
+      state: nextState,
+    };
+  });
+
+  nextItems.forEach((item) => {
+    const key = getFilterBarItemKey(item);
+
+    if (renderedItemsByKey.has(key)) {
+      return;
+    }
+
+    didChange = true;
+    nextRenderedItems.push({
+      key,
+      item,
+      state: FILTER_BAR_ITEM_STATE_ENTERING,
+    });
+  });
+
+  return didChange ? nextRenderedItems : renderedItems;
+};
+
+const settleRenderedFilterBarItems = (renderedItems) => {
+  let didChange = false;
+
+  const nextRenderedItems = renderedItems
+    .filter((renderedItem) => {
+      const shouldKeep = renderedItem.state !== FILTER_BAR_ITEM_STATE_EXITING;
+
+      if (!shouldKeep) {
+        didChange = true;
+      }
+
+      return shouldKeep;
+    })
+    .map((renderedItem) => {
+      if (renderedItem.state !== FILTER_BAR_ITEM_STATE_ENTERING) {
+        return renderedItem;
+      }
+
+      didChange = true;
+      return {
+        ...renderedItem,
+        state: FILTER_BAR_ITEM_STATE_OPEN,
+      };
+    });
+
+  return didChange ? nextRenderedItems : renderedItems;
+};
 
 const getInitialValue = ({ choices = [], drawers = [] }) => {
   const initialValue = {};
@@ -125,6 +220,8 @@ const FilterBar = ({
   const [renderedDrawerId, setRenderedDrawerId] = useState(null);
   const [drawerState, setDrawerState] = useState('closed');
   const [resetButtonState, setResetButtonState] = useState('closed');
+  const [renderedChoices, setRenderedChoices] = useState(() => createRenderedFilterBarItems(choices));
+  const [renderedDrawers, setRenderedDrawers] = useState(() => createRenderedFilterBarItems(drawers));
   const isScrollHiddenRef = useRef(false);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : internalValue;
@@ -136,7 +233,7 @@ const FilterBar = ({
   const shouldRenderResetButton = resetButtonState !== 'closed';
   const shouldControlTopStickyOffset = floating && resolvedPlacement === 'top';
 
-  const syncContentOffset = useCallback((isHidden = isScrollHiddenRef.current) => {
+  const syncContentOffset = useCallback(() => {
     const filterBarElement = filterBarRef.current;
     const layoutRoot = getLayoutRoot(filterBarElement);
     const shouldControlStickyOffset =
@@ -148,8 +245,9 @@ const FilterBar = ({
 
     layoutRoot.classList.toggle(TOP_FILTER_BAR_LAYOUT_CLASS, shouldControlStickyOffset);
 
-    if (!shouldControlStickyOffset || isHidden) {
+    if (!shouldControlStickyOffset) {
       layoutRoot.style.removeProperty('--dq-layout-filter-bar-content-offset');
+      layoutRoot.style.removeProperty('--dq-layout-filter-bar-sticky-offset');
       return;
     }
 
@@ -170,7 +268,16 @@ const FilterBar = ({
       filterBarPaddingBottom;
     const stickyGap = Math.max(filterBarElement.offsetTop - headerBottom, 0);
 
-    layoutRoot.style.setProperty('--dq-layout-filter-bar-content-offset', `${filterBarBottom + stickyGap}px`);
+    const nextOffset = `${filterBarBottom + stickyGap}px`;
+
+    layoutRoot.style.setProperty('--dq-layout-filter-bar-content-offset', nextOffset);
+
+    if (isScrollHiddenRef.current) {
+      layoutRoot.style.removeProperty('--dq-layout-filter-bar-sticky-offset');
+      return;
+    }
+
+    layoutRoot.style.setProperty('--dq-layout-filter-bar-sticky-offset', nextOffset);
   }, [shouldControlTopStickyOffset]);
 
   const syncScrollHiddenState = (nextHidden) => {
@@ -184,7 +291,7 @@ const FilterBar = ({
     filterBarElement.classList.toggle('dq-filter-bar--scroll-hidden', nextHidden);
 
     if (shouldControlTopStickyOffset) {
-      syncContentOffset(nextHidden);
+      syncContentOffset();
     }
   };
 
@@ -272,32 +379,57 @@ const FilterBar = ({
   }, [openDrawer]);
 
   useEffect(() => {
-    if (showsResetButton) {
-      if (resetButtonState === 'open' || resetButtonState === 'opening') {
-        return undefined;
-      }
+    setRenderedChoices((previousItems) => reconcileRenderedFilterBarItems(previousItems, choices));
+  }, [choices]);
 
-      setResetButtonState('opening');
+  useEffect(() => {
+    setRenderedDrawers((previousItems) => reconcileRenderedFilterBarItems(previousItems, drawers));
+  }, [drawers]);
 
-      const timeout = setTimeout(() => {
-        setResetButtonState('open');
-      }, FILTER_BAR_RESET_ANIMATION_MS);
+  useEffect(() => {
+    const hasAnimatingItems =
+      renderedChoices.some((renderedItem) => renderedItem.state !== FILTER_BAR_ITEM_STATE_OPEN) ||
+      renderedDrawers.some((renderedItem) => renderedItem.state !== FILTER_BAR_ITEM_STATE_OPEN);
 
-      return () => clearTimeout(timeout);
-    }
-
-    if (resetButtonState === 'closed' || resetButtonState === 'closing') {
+    if (!hasAnimatingItems) {
       return undefined;
     }
 
-    setResetButtonState('closing');
-
     const timeout = setTimeout(() => {
-      setResetButtonState('closed');
-    }, FILTER_BAR_RESET_ANIMATION_MS);
+      setRenderedChoices(settleRenderedFilterBarItems);
+      setRenderedDrawers(settleRenderedFilterBarItems);
+    }, FILTER_BAR_BUTTON_ANIMATION_MS);
 
     return () => clearTimeout(timeout);
-  }, [resetButtonState, showsResetButton]);
+  }, [renderedChoices, renderedDrawers]);
+
+  useEffect(() => {
+    setResetButtonState((currentState) => {
+      if (showsResetButton) {
+        return currentState === 'open' || currentState === 'opening' ? currentState : 'opening';
+      }
+
+      return currentState === 'closed' || currentState === 'closing' ? currentState : 'closing';
+    });
+  }, [showsResetButton]);
+
+  const handleResetAnimationEnd = useCallback((event) => {
+    if (event.currentTarget !== event.target) {
+      return;
+    }
+
+    setResetButtonState((currentState) => {
+      if (currentState === 'opening') {
+        return 'open';
+      }
+
+      if (currentState === 'closing') {
+        return 'closed';
+      }
+
+      return currentState;
+    });
+  }, []);
 
   useEffect(() => {
     if (openDrawer === renderedDrawerId) {
@@ -375,6 +507,7 @@ const FilterBar = ({
 
       window.removeEventListener('resize', handleResize);
       layoutRoot?.style.removeProperty('--dq-layout-filter-bar-content-offset');
+      layoutRoot?.style.removeProperty('--dq-layout-filter-bar-sticky-offset');
       layoutRoot?.classList.remove(TOP_FILTER_BAR_LAYOUT_CLASS);
     };
   }, [syncContentOffset]);
@@ -479,6 +612,7 @@ const FilterBar = ({
             ].filter(Boolean).join(' ')}
             align="center"
             justify="center"
+            onAnimationEnd={handleResetAnimationEnd}
           >
             <Button
               ariaLabel={resetButtonOptions.ariaLabel ?? 'Reset filters'}
@@ -503,54 +637,78 @@ const FilterBar = ({
             align="center"
             gap="var(--dq-ui-space-sm)"
           >
-            {choices.map((choice) => {
-              const choiceChecked = isChoiceChecked(choice, currentValue);
-
-              return (
-                <ChoiceButton
-                  key={choice.id}
-                  type={choice.type ?? 'checkbox'}
-                  name={choice.name}
-                  value={choice.value ?? choice.id}
-                  checked={choiceChecked}
-                  onCheckedChange={(checked, event) => {
-                    scrollFilterButtonIntoView(event.target.closest('.dq-ui-choice-button'));
-                    updateChoice(choice, checked);
-                  }}
-                  radius="rounded"
-                  color={choice.color}
-                  icon={choice.icon}
-                  fillOnPress={choice.fillOnPress}
-                  variant={choice.variant ?? 'ghost'}
-                >
-                  {choice.label}
-                </ChoiceButton>
-              );
-            })}
-
-            {drawers.map((drawer) => {
+            {renderedDrawers.map((renderedDrawerItem) => {
+              const drawer = renderedDrawerItem.item;
               const drawerSelection = getDrawerSelection(drawer, currentValue[drawer.id]);
               const isOpen = openDrawer === drawer.id;
 
               return (
-                <ToggleButton
-                  key={drawer.id}
-                  pressed={isOpen || drawerSelection.hasSelection}
-                  radius="rounded"
-                  color={drawerSelection.color}
-                  icon={DropdownChevron}
-                  iconPosition="end"
-                  aria-expanded={isOpen}
-                  aria-controls={renderedDrawer ? `dq-filter-bar-drawer-${renderedDrawer.id}` : undefined}
-                  data-open={isOpen ? 'true' : 'false'}
-                  className="dq-filter-bar__drawer-trigger"
-                  onPressedChange={(nextPressed, event) => {
-                    scrollFilterButtonIntoView(event.currentTarget);
-                    setOpenDrawer(isOpen ? null : drawer.id);
-                  }}
+                <Box
+                  key={renderedDrawerItem.key}
+                  component="span"
+                  className={[
+                    'dq-filter-bar__button-slot',
+                    `dq-filter-bar__button-slot--${renderedDrawerItem.state}`,
+                  ].filter(Boolean).join(' ')}
+                  direction="row"
+                  align="center"
+                  gap="0"
                 >
-                  {drawerSelection.label}
-                </ToggleButton>
+                  <ToggleButton
+                    pressed={isOpen || drawerSelection.hasSelection}
+                    radius="rounded"
+                    color={drawerSelection.color}
+                    icon={DropdownChevron}
+                    iconPosition="end"
+                    aria-expanded={isOpen}
+                    aria-controls={renderedDrawer ? `dq-filter-bar-drawer-${renderedDrawer.id}` : undefined}
+                    data-open={isOpen ? 'true' : 'false'}
+                    className="dq-filter-bar__drawer-trigger"
+                    onPressedChange={(nextPressed, event) => {
+                      scrollFilterButtonIntoView(event.currentTarget);
+                      setOpenDrawer(isOpen ? null : drawer.id);
+                    }}
+                  >
+                    {drawerSelection.label}
+                  </ToggleButton>
+                </Box>
+              );
+            })}
+
+            {renderedChoices.map((renderedChoice) => {
+              const choice = renderedChoice.item;
+              const choiceChecked = isChoiceChecked(choice, currentValue);
+
+              return (
+                <Box
+                  key={renderedChoice.key}
+                  component="span"
+                  className={[
+                    'dq-filter-bar__button-slot',
+                    `dq-filter-bar__button-slot--${renderedChoice.state}`,
+                  ].filter(Boolean).join(' ')}
+                  direction="row"
+                  align="center"
+                  gap="0"
+                >
+                  <ChoiceButton
+                    type={choice.type ?? 'checkbox'}
+                    name={choice.name}
+                    value={choice.value ?? choice.id}
+                    checked={choiceChecked}
+                    onCheckedChange={(checked, event) => {
+                      scrollFilterButtonIntoView(event.target.closest('.dq-ui-choice-button'));
+                      updateChoice(choice, checked);
+                    }}
+                    radius="rounded"
+                    color={choice.color}
+                    icon={choice.icon}
+                    fillOnPress={choice.fillOnPress}
+                    variant={choice.variant ?? 'ghost'}
+                  >
+                    {choice.label}
+                  </ChoiceButton>
+                </Box>
               );
             })}
           </Box>

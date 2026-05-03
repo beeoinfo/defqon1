@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
+import { CheckIcon, HeartIcon, SparkleIcon, StarIcon, UsersIcon } from '@phosphor-icons/react';
 import Alert from '../../components/Alert';
 import BackToTop from '../../components/BackToTop';
 import Box from '../../components/layout/Box';
@@ -1154,6 +1154,15 @@ const StorybookBody = memo(() => {
                     fillOnPress
                     ariaLabel="Favorite"
                   />
+                  <ToggleButton variant="likes" icon={HeartIcon} fillOnPress>
+                    Likes
+                  </ToggleButton>
+                  <ToggleButton
+                    variant="likes"
+                    icon={HeartIcon}
+                    fillOnPress
+                    ariaLabel="Likes"
+                  />
                 </Box>
               </Box>
             </Box>
@@ -1187,6 +1196,9 @@ const StorybookBody = memo(() => {
                   </ChoiceButton>
                   <ChoiceButton variant="favorite" icon={UsersIcon} fillOnPress>
                     My Tribe
+                  </ChoiceButton>
+                  <ChoiceButton variant="likes" icon={HeartIcon} fillOnPress>
+                    Likes
                   </ChoiceButton>
                 </Box>
               </Box>

@@ -1,5 +1,5 @@
-import { useId } from 'react';
-import { MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { useId, useRef, useState } from 'react';
+import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import Box from '../../../layout/Box';
 import { buildFieldId } from '../fieldUtils';
 import '../forms.css';
@@ -10,12 +10,45 @@ const SearchInput = ({
   label = 'Search',
   hideLabel = true,
   ariaLabel,
+  value,
+  defaultValue = '',
+  onChange,
+  onClear,
   className = '',
   inputClassName = '',
   ...props
 }) => {
   const generatedId = useId();
+  const inputRef = useRef(null);
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const inputId = buildFieldId({ id, generatedId, prefix: 'dq-ui-search-input' });
+  const isControlled = value !== undefined;
+  const currentValue = isControlled ? value : internalValue;
+  const hasValue = String(currentValue ?? '').length > 0;
+
+  const handleChange = (event) => {
+    if (!isControlled) {
+      setInternalValue(event.target.value);
+    }
+
+    onChange?.(event);
+  };
+
+  const handleClear = () => {
+    if (!isControlled) {
+      setInternalValue('');
+    }
+
+    if (onClear) {
+      onClear();
+    } else {
+      onChange?.({
+        target: { value: '' },
+        currentTarget: { value: '' },
+      });
+    }
+    inputRef.current?.focus();
+  };
 
   return (
     <Box
@@ -56,11 +89,25 @@ const SearchInput = ({
 
         <input
           {...props}
+          ref={inputRef}
           id={inputId}
           type="search"
+          value={currentValue}
           aria-label={!label ? ariaLabel : undefined}
+          onChange={handleChange}
           className={['dq-ui-search-input__input', inputClassName].filter(Boolean).join(' ')}
         />
+
+        {hasValue ? (
+          <button
+            type="button"
+            className="dq-ui-search-input__clear-button"
+            aria-label="Clear search"
+            onClick={handleClear}
+          >
+            <XIcon aria-hidden="true" size={16} />
+          </button>
+        ) : null}
       </Box>
     </Box>
   );

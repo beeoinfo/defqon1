@@ -62,10 +62,6 @@
 .dq-ui-toggle-button--favorite {
   --dq-ui-button-focus-ring-color: color-mix(in srgb, var(--dq-ui-yellow) 18%, transparent);
   --dq-ui-button-selected-focus-ring-color: color-mix(in srgb, var(--dq-ui-yellow) 18%, transparent);
-  --dq-ui-button-active-bg: var(--dq-ui-favorite-surface);
-  --dq-ui-button-active-border-color: var(--dq-ui-favorite-border);
-  --dq-ui-button-active-text-color: var(--dq-ui-favorite-text-soft);
-  --dq-ui-button-active-subtitle-color: rgba(253, 230, 138, 0.8);
   --dq-ui-button-selected-bg: var(--dq-ui-favorite-surface);
   --dq-ui-button-selected-border-color: var(--dq-ui-favorite-border);
   --dq-ui-button-selected-text-color: var(--dq-ui-yellow);
@@ -74,8 +70,17 @@
   --dq-ui-button-selected-hover-border-color: var(--dq-ui-favorite-border-hover);
   --dq-ui-button-selected-hover-text-color: var(--dq-ui-favorite-text-soft);
   --dq-ui-button-selected-hover-subtitle-color: rgba(253, 230, 138, 0.8);
-  --dq-ui-button-selected-active-bg: var(--dq-ui-favorite-surface-strong);
-  --dq-ui-button-selected-active-border-color: var(--dq-ui-favorite-border-strong);
-  --dq-ui-button-selected-active-text-color: var(--dq-ui-favorite-text-strong);
-  --dq-ui-button-selected-active-subtitle-color: rgba(254, 243, 199, 0.84);
+}
+
+.dq-ui-toggle-button--likes {
+  --dq-ui-button-focus-ring-color: color-mix(in srgb, var(--dq-ui-likes) 18%, transparent);
+  --dq-ui-button-selected-focus-ring-color: color-mix(in srgb, var(--dq-ui-likes) 18%, transparent);
+  --dq-ui-button-selected-bg: var(--dq-ui-likes-surface);
+  --dq-ui-button-selected-border-color: var(--dq-ui-likes-border);
+  --dq-ui-button-selected-text-color: var(--dq-ui-likes);
+  --dq-ui-button-selected-subtitle-color: rgba(253, 164, 175, 0.78);
+  --dq-ui-button-selected-hover-bg: var(--dq-ui-likes-surface-hover);
+  --dq-ui-button-selected-hover-border-color: var(--dq-ui-likes-border-hover);
+  --dq-ui-button-selected-hover-text-color: var(--dq-ui-likes-text-soft);
+  --dq-ui-button-selected-hover-subtitle-color: rgba(254, 205, 211, 0.8);
 }

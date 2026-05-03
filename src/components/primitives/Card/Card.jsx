@@ -1,5 +1,5 @@
 import { Children } from 'react';
-import { StarIcon, XIcon } from '@phosphor-icons/react';
+import { HeartIcon, StarIcon, XIcon } from '@phosphor-icons/react';
 import { mixColors, parseColor, rgbaString } from '../../../lib/colorStyles';
 import Button from '../../primitives/Button';
 import ToggleButton from '../../primitives/ToggleButton';
@@ -69,6 +69,17 @@ const Card = ({
           onPressedChange={onAction}
         />
       )
+      : actionVariant === 'likes'
+        ? (
+          <ToggleButton
+            variant="likes"
+            icon={HeartIcon}
+            pressed={actionPressed}
+            fillOnPress
+            ariaLabel={actionAriaLabel ?? 'Like'}
+            onPressedChange={onAction}
+          />
+        )
       : null;
 
   return (

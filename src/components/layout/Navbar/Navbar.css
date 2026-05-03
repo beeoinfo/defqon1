@@ -21,6 +21,19 @@
   --dq-ui-button-height: 40px;
 }
 
+.dq-layout-navbar__icon-with-badge {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.dq-layout-navbar__icon-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .dq-layout-navbar:not(.dq-layout-header__mobile-navbar) .dq-layout-navbar__item .dq-ui-button__icon {
   display: none;
 }
@@ -143,10 +156,15 @@
     height: 28px;
     justify-content: center;
     border-radius: var(--dq-ui-radius-rounded);
-    overflow: hidden;
+    overflow: visible;
     isolation: isolate;
     transition:
       color var(--dq-ui-transition-fast);
+  }
+
+  .dq-layout-navbar__item .dq-layout-navbar__icon-badge {
+    top: -5px;
+    right: -4px;
   }
 
   .dq-layout-navbar__item .dq-ui-button__icon::before {
@@ -167,7 +185,8 @@
     z-index: -1;
   }
 
-  .dq-layout-navbar__item .dq-ui-button__icon > * {
+  .dq-layout-navbar__item .dq-ui-button__icon > svg,
+  .dq-layout-navbar__item .dq-layout-navbar__icon-with-badge > svg {
     transform-origin: 50% 50%;
   }
 
@@ -200,7 +219,8 @@
     animation: dq-layout-navbar-pill-reveal 0.3s ease both;
   }
 
-  .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon > * {
+  .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-ui-button__icon > svg,
+  .dq-layout-navbar__item-shell--bouncing .dq-layout-navbar__item.dq-ui-button--selected .dq-layout-navbar__icon-with-badge > svg {
     animation: dq-layout-navbar-icon-bounce 0.28s cubic-bezier(0.22, 0.82, 0.3, 1.08) both;
   }
 

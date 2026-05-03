@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Button from '../Button';
 import './ToggleButton.css';
 
+export const isToggleAccentVariant = (variant) => variant === 'favorite' || variant === 'likes';
+
 export const resolveIconProps = ({ icon, pressed, fillOnPress = false }) => {
   if (!icon) {
     return { Icon: null, iconWeight: undefined };
@@ -47,7 +49,7 @@ const ToggleButton = ({
       iconWeight={iconProps.iconWeight}
       selected={isPressed}
       aria-pressed={isPressed}
-      variant={variant === 'favorite' ? 'ghost' : variant}
+      variant={isToggleAccentVariant(variant) ? 'ghost' : variant}
       className={[
         'dq-ui-toggle-button',
         `dq-ui-toggle-button--${variant}`,

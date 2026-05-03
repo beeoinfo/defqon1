@@ -1,1 +1,1 @@
-export { default, resolveIconProps } from './ToggleButton';
+export { default, isToggleAccentVariant, resolveIconProps } from './ToggleButton';

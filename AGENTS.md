@@ -23,6 +23,7 @@ It exists to preserve consistency, reduce regressions, and keep long-term decisi
 - Avoid hidden side effects.
 - When a change has structural impact, keep the implementation easy to understand and easy to extend.
 - If a rule here conflicts with a temporary shortcut, the rule wins.
+- Not allowed to write on `AGENTS.md` unles it's explicitely requested.
 
 ## Project stack
 

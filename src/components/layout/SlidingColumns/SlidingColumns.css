@@ -34,7 +34,7 @@
   position: sticky;
   top:
     var(
-      --dq-layout-filter-bar-content-offset,
+      --dq-layout-filter-bar-sticky-offset,
       var(
         --dq-layout-header-content-offset,
         calc(
@@ -92,7 +92,7 @@
   position: sticky;
   top:
     var(
-      --dq-layout-filter-bar-content-offset,
+      --dq-layout-filter-bar-sticky-offset,
       var(
         --dq-layout-header-content-offset,
         calc(

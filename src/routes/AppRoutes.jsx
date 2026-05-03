@@ -3,6 +3,7 @@ export const isStorybookViewEnabled = import.meta.env.DEV && Boolean(import.meta
 export const APP_ROUTES = [
   { path: '/', view: 'lineup' },
   { path: '/lineup', view: 'lineup' },
+  { path: '/search', view: 'search' },
   { path: '/timetable', view: 'timetable' },
   { path: '/maps', view: 'maps' },
   { path: '/reviews', view: 'reviews' },

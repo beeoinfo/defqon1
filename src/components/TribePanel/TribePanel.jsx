@@ -14,7 +14,7 @@ import Button from '@/components/primitives/Button';
 import { TextInput } from '@/components/primitives/forms';
 import { resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { normalizeTribeCode } from '@/lib/supabase';
-import './TribeView.css';
+import './TribePanel.css';
 
 const getInviteUrl = (code) => {
   if (!code || typeof window === 'undefined') {
@@ -36,7 +36,7 @@ const getTribeDisplayName = (tribe) => {
   return `Tribe ${tribe?.code ?? ''}`.trim();
 };
 
-const TribeView = ({
+const TribePanel = ({
   user,
   tribe,
   isBusy,
@@ -75,6 +75,8 @@ const TribeView = ({
   }, [tribe]);
 
   const inviteUrl = useMemo(() => getInviteUrl(tribe?.code), [tribe?.code]);
+  const savedTribeName = tribe ? getTribeDisplayName(tribe) : '';
+  const hasTribeNameChange = String(tribeName ?? '').trim() !== savedTribeName;
   const qrCodeUrl = useMemo(() => {
     if (!inviteUrl) {
       return '';
@@ -288,7 +290,16 @@ const TribeView = ({
             <Box direction="row" wrap="wrap" maxColumns={2} align="flex-start">
               <Box gap="var(--dq-ui-space-lg)">
                 {isEditingName ? (
-                  <Box gap="var(--dq-ui-space-md)">
+                  <Box
+                    component="form"
+                    background="surface"
+                    className="dq-tribe-view__name-editor"
+                    gap="var(--dq-ui-space-lg)"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleRename();
+                    }}
+                  >
                     <TextInput
                       label="Name"
                       value={tribeName}
@@ -297,10 +308,7 @@ const TribeView = ({
                       maxLength={48}
                       autoComplete="off"
                     />
-                    <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-                      <Button onClick={handleRename} disabled={isBusy}>
-                        Save
-                      </Button>
+                    <Box direction="row" justify="flex-end" wrap="wrap" gap="var(--dq-ui-space-sm)">
                       <Button
                         onClick={() => {
                           setTribeName(getTribeDisplayName(tribe));
@@ -311,11 +319,14 @@ const TribeView = ({
                       >
                         Cancel
                       </Button>
+                      <Button type="submit" disabled={isBusy || !hasTribeNameChange}>
+                        {isBusy ? 'Saving...' : 'Save'}
+                      </Button>
                     </Box>
                   </Box>
                 ) : (
-                  <Box gap="var(--dq-ui-space-lg)">
-                    <Box direction="row" justify="space-between" align="center" wrap="wrap">
+                  <Box gap="var(--dq-ui-space-lg)" className="dq-tribe-view__summary-actions">
+                    <Box direction="row" align="center" wrap="wrap">
                       <Box gap="var(--dq-ui-space-xs)">
                         <strong className="dq-tribe-view__name">{getTribeDisplayName(tribe)}</strong>
                       </Box>
@@ -325,20 +336,20 @@ const TribeView = ({
                         onClick={() => setIsEditingName(true)}
                       />
                     </Box>
+
+                    <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+                      <Button icon={QrCodeIcon} onClick={() => setIsQrModalOpen(true)}>
+                        Show QR code
+                      </Button>
+                      <Button icon={ShareNetworkIcon} onClick={handleShare}>
+                        Share invite
+                      </Button>
+                      <Button variant="danger" onClick={() => setIsLeaveModalOpen(true)} disabled={isBusy}>
+                        Leave tribe
+                      </Button>
+                    </Box>
                   </Box>
                 )}
-
-              <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-                <Button icon={QrCodeIcon} onClick={() => setIsQrModalOpen(true)}>
-                  Show QR code
-                </Button>
-                <Button icon={ShareNetworkIcon} onClick={handleShare}>
-                  Share invite
-                </Button>
-                <Button variant="danger" onClick={() => setIsLeaveModalOpen(true)} disabled={isBusy}>
-                  Leave tribe
-                </Button>
-              </Box>
 
               {shareFeedback ? (
                 <Alert variant="success" title="Sharing">
@@ -474,4 +485,4 @@ const TribeView = ({
   );
 };
 
-export default TribeView;
+export default TribePanel;

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { XIcon } from '@phosphor-icons/react';
+import { UserIcon, XIcon } from '@phosphor-icons/react';
 import logoMark from '../../../assets/logo.svg';
 import tribeAvatarSample from '../../../assets/avatars/1.png';
 import Button from '../../primitives/Button';
@@ -42,8 +42,12 @@ const Header = ({
   wideCenterContent = false,
   contentTransitionState = 'open',
   hideBrand = false,
+  hideDesktopNavbar = false,
+  hideProfile = false,
+  keepMobileNavbarVisible = false,
   showCloseButton = true,
   inlineCloseButton = false,
+  closeButtonAriaLabel = 'Close page',
   isPageView = false,
   pageTitle = null,
   onClosePage = null,
@@ -125,20 +129,23 @@ const Header = ({
   );
 
   const shouldShowPageTitle = isPageView && Boolean(pageTitle);
-  const shouldRenderDesktopNavbar = !isPageView && Boolean(navbar);
+  const shouldRenderDesktopNavbar = !isPageView && Boolean(navbar) && !hideDesktopNavbar;
   const shouldRenderCenterContent = Boolean(centerContent);
   const shouldRenderInlinePageControls =
-    isPageView && shouldRenderCenterContent && inlineCloseButton && showCloseButton;
+    shouldRenderCenterContent && inlineCloseButton && showCloseButton;
   const shouldRenderBrand = !hideBrand || shouldShowPageTitle;
-  const shouldRenderTrailingProfile = isPageView
-    ? showCloseButton && !shouldRenderInlinePageControls
-    : !shouldRenderInlinePageControls;
+  const shouldRenderTrailingProfile = !hideProfile && (
+    isPageView
+      ? showCloseButton && !shouldRenderInlinePageControls
+      : !shouldRenderInlinePageControls
+  );
 
   return (
     <Component
       {...props}
       className={['dq-layout-header', className].filter(Boolean).join(' ')}
       data-content-transition={contentTransitionState}
+      data-keep-mobile-navbar-visible={keepMobileNavbarVisible ? 'true' : undefined}
     >
       <Box ref={surfaceRef} className="dq-layout-header__surface" gap="var(--dq-ui-space-lg)">
         <Box
@@ -198,7 +205,7 @@ const Header = ({
                 <Button
                   className="dq-layout-header__inline-close-button"
                   icon={XIcon}
-                  ariaLabel="Close page"
+                  ariaLabel={closeButtonAriaLabel}
                   variant="ghost"
                   size="md"
                   radius="rounded"
@@ -216,7 +223,7 @@ const Header = ({
               {isPageView ? (
                 <Button
                   icon={XIcon}
-                  ariaLabel="Close page"
+                  ariaLabel={closeButtonAriaLabel}
                   variant="ghost"
                   size="md"
                   onClick={onClosePage}
@@ -225,6 +232,7 @@ const Header = ({
                 <Button
                   size="lg"
                   radius="rounded"
+                  icon={profileImageSrc ? null : UserIcon}
                   imageSrc={profileImageSrc}
                   imageAlt=""
                   subtitle={profileSubtitle}
