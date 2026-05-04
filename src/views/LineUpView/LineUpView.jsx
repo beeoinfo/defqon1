@@ -8,7 +8,13 @@ import Card from '@/components/primitives/Card';
 import Drawer from '@/components/layout/Drawer';
 import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
-import { compareLineupEntries, getEntryDayLabel, getEntryDisplayName, getEntryMetaLabel } from '@/lib/lineup';
+import {
+  compareLineupEntries,
+  getEntryDayLabel,
+  getEntryDisplayName,
+  getEntryMetaLabel,
+  getEntryTimeLabel,
+} from '@/lib/lineup';
 import { getCanonicalStageName, getStageTheme } from '@/lib/stageThemes';
 import { activeSite } from '@/sites/siteDefinitions';
 import './LineUpView.css';
@@ -59,7 +65,7 @@ const compareStageSections = (leftStage, rightStage) => {
 const getEntryCardMetaProps = (entry) => ({
   meta1: entry.stage,
   meta2: getEntryDayLabel(entry),
-  meta3: entry.timeLabel,
+  meta3: getEntryTimeLabel(entry),
 });
 
 const LineUpView = ({

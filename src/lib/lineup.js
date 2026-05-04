@@ -26,6 +26,11 @@ const DAY_ORDERS = {
   saturday: 3,
   sunday: 4,
 };
+const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
 
 function normalizeText(value) {
   return String(value ?? '')
@@ -525,9 +530,10 @@ export function getEntryDisplayName(entry) {
 
 export function getEntryMetaLabel(entry) {
   const parts = [entry.stage, getEntryDayLabel(entry)];
+  const timeLabel = getEntryTimeLabel(entry);
 
-  if (entry.timeLabel) {
-    parts.push(entry.timeLabel);
+  if (timeLabel) {
+    parts.push(timeLabel);
   }
 
   return parts.filter(Boolean).join(' • ');
@@ -594,6 +600,29 @@ function parseEntryDateTime(value) {
   }
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+export function getEntryTimeLabel(entry) {
+  if (entry?.timeLabel) {
+    return entry.timeLabel;
+  }
+
+  const startTimestamp = parseEntryDateTime(entry?.startAt);
+  const endTimestamp = parseEntryDateTime(entry?.endAt);
+
+  if (startTimestamp !== null && endTimestamp !== null) {
+    return `${TIME_FORMATTER.format(new Date(startTimestamp))} - ${TIME_FORMATTER.format(new Date(endTimestamp))}`;
+  }
+
+  if (startTimestamp !== null) {
+    return TIME_FORMATTER.format(new Date(startTimestamp));
+  }
+
+  if (endTimestamp !== null) {
+    return TIME_FORMATTER.format(new Date(endTimestamp));
+  }
+
+  return null;
 }
 
 export function isPastScheduledItem(item, referenceTime = Date.now()) {

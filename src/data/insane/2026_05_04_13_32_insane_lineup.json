@@ -1,0 +1,3581 @@
+{
+  "eventEditionName": "Insane Festival",
+  "updatedAt": "2026-05-04T11:32:47.307Z",
+  "sourcePriority": [
+    "chapi",
+    "site"
+  ],
+  "sources": {
+    "source1": {
+      "name": "site",
+      "url": "https://insanefestival.com/line-up/",
+      "priority": 1,
+      "stats": {
+        "dayCount": 3,
+        "stageCount": 4,
+        "artistCount": 115,
+        "sourceCounts": {
+          "site": 115
+        }
+      }
+    },
+    "source2": {
+      "name": "chapi",
+      "url": "https://insanefestival.chapi.to/api/versionData/43/9/2025?lang=fr",
+      "priority": 2,
+      "version": 48,
+      "published": true,
+      "responseDate": "2026-04-29T13:01:03.561Z",
+      "dataCounts": {
+        "genreCount": 26,
+        "infoPratiqueCount": 0,
+        "infoPratiqueSectionCount": 0,
+        "musicGroupCount": 69,
+        "programCount": 1,
+        "programEventCount": 59,
+        "sceneCount": 3,
+        "sponsorCount": 15,
+        "sponsorCategoryCount": 1,
+        "poiCount": 0,
+        "markerIconsCount": 0,
+        "zoiCount": 0,
+        "typeCounts": {
+          "67b33a78d812154f742943bb": 69
+        }
+      },
+      "stats": {
+        "dayCount": 3,
+        "stageCount": 3,
+        "artistCount": 59,
+        "sourceCounts": {
+          "chapi": 59
+        }
+      }
+    }
+  },
+  "reconciliation": {
+    "rule": "source2 wins on matching artist names; source1 only fills missing artists",
+    "stats": {
+      "dayCount": 3,
+      "stageCount": 4,
+      "artistCount": 113,
+      "sourceCounts": {
+        "chapi": 59,
+        "site": 54
+      }
+    }
+  },
+  "mapboxLayers": [],
+  "lineup": [
+    {
+      "daySlug": "thursday",
+      "dayOrder": 1,
+      "dayName": "Jeu 14 mai (ferie)",
+      "dayStartDate": "2026-05-14",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "thursday_stage-mirage_kichta_20260514140000000",
+              "artistName": "Kichta",
+              "artistSlug": "kichta",
+              "artistId": "stage-mirage_kichta",
+              "artistOrder": 1,
+              "startAt": "2026-05-14T14:00:00.000Z",
+              "endAt": "2026-05-14T15:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Kichta"
+              ],
+              "artistTokens": [
+                "kichta"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698346a7f6b71f6dde7da169",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91861ad2495f1d16d14a"
+                ]
+              },
+              "hash": "fbde1b8fe222e04ccf43184575f14bfea4d26d9bd8191114f0ab4c744f014508"
+            },
+            {
+              "id": "thursday_stage-mirage_2hot2play_20260514153000000",
+              "artistName": "2HOT2PLAY",
+              "artistSlug": "2hot2play",
+              "artistId": "stage-mirage_2hot2play",
+              "artistOrder": 2,
+              "startAt": "2026-05-14T15:30:00.000Z",
+              "endAt": "2026-05-14T17:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "2HOT2PLAY"
+              ],
+              "artistTokens": [
+                "2hot2play"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202d5d1ad2495f1d16d155.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a36073567e437c5a637d",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c8ebe1ad2495f1d16d134"
+                ]
+              },
+              "hash": "67c6b90ea3926136bc199f1d314b4e8882b214f0b839dabe863f31bfb3e530b5"
+            },
+            {
+              "id": "thursday_stage-mirage_odymel_20260514170000000",
+              "artistName": "Odymel",
+              "artistSlug": "odymel",
+              "artistId": "stage-mirage_odymel",
+              "artistOrder": 3,
+              "startAt": "2026-05-14T17:00:00.000Z",
+              "endAt": "2026-05-14T18:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Odymel"
+              ],
+              "artistTokens": [
+                "odymel"
+              ],
+              "genres": [
+                "Techno",
+                "Hard Techno",
+                "Belgique",
+                "Trance",
+                "Eurodance",
+                "House"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z680f9448a2becf6ea1d1fd0c.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a43f73567e437c5a6380",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "680690d8042b111b10fe3ec9"
+                ]
+              },
+              "hash": "00ac3d9601e4e674c70cfbe8a636f6be5082c719edb702166ff2cc0953967652"
+            },
+            {
+              "id": "thursday_stage-mirage_vorteks-b2b-byorn_20260514183000000",
+              "artistName": "Vortek's B2B Byorn ",
+              "artistSlug": "vorteks-b2b-byorn",
+              "artistId": "stage-mirage_vorteks-b2b-byorn",
+              "artistOrder": 4,
+              "startAt": "2026-05-14T18:30:00.000Z",
+              "endAt": "2026-05-14T20:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Vortek's",
+                "Byorn"
+              ],
+              "artistTokens": [
+                "vorteks",
+                "byorn"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698346eef6b71f6dde7da16a",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c8f301ad2495f1d16d136"
+                ]
+              },
+              "hash": "0414f0e18e6f484608de480fce328558aacd1e985ea3e21ece4f2756570d31ce"
+            },
+            {
+              "id": "thursday_stage-mirage_toxic-machinery_20260514200000000",
+              "artistName": "Toxic Machinery",
+              "artistSlug": "toxic-machinery",
+              "artistId": "stage-mirage_toxic-machinery",
+              "artistOrder": 5,
+              "startAt": "2026-05-14T20:00:00.000Z",
+              "endAt": "2026-05-14T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Toxic Machinery"
+              ],
+              "artistTokens": [
+                "toxic-machinery"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834716f6b71f6dde7da16b",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "69830a30f6b71f6dde7da14c"
+                ]
+              },
+              "hash": "6ff974a0cbab5240de232ccb71ca78ade6d8096c75a5b15105fa5a4e9514c873"
+            },
+            {
+              "id": "thursday_stage-mirage_vieze-asbak_20260514210000000",
+              "artistName": "Vieze Asbak",
+              "artistSlug": "vieze-asbak",
+              "artistId": "stage-mirage_vieze-asbak",
+              "artistOrder": 6,
+              "startAt": "2026-05-14T21:00:00.000Z",
+              "endAt": "2026-05-14T22:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Vieze Asbak"
+              ],
+              "artistTokens": [
+                "vieze-asbak"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203eee1db7d115dc6d7b60.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a52273567e437c5a6381",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c912b1ad2495f1d16d144"
+                ]
+              },
+              "hash": "fb8650f4f336dc7d336278bcfe9ec19e2e84b591a87271b11e3ec4189bf464fa"
+            },
+            {
+              "id": "thursday_stage-mirage_holy-priest_20260514223000000",
+              "artistName": "Holy Priest",
+              "artistSlug": "holy-priest",
+              "artistId": "stage-mirage_holy-priest",
+              "artistOrder": 7,
+              "startAt": "2026-05-14T22:30:00.000Z",
+              "endAt": "2026-05-15T00:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Holy Priest"
+              ],
+              "artistTokens": [
+                "holy-priest"
+              ],
+              "genres": [
+                "Hard Techno",
+                "Allemagne"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202fd81ad2495f1d16d167.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6824761ffdb13316888300ec",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "680690d8042b111b10fe3ee3"
+                ]
+              },
+              "hash": "eff532162d57849d80d58d82b130dc04ee3221ab159fc3cbd078ee04d4497ab6"
+            },
+            {
+              "id": "thursday_stage-mirage_lil-texas_20260515000000000",
+              "artistName": "Lil Texas",
+              "artistSlug": "lil-texas",
+              "artistId": "stage-mirage_lil-texas",
+              "artistOrder": 8,
+              "startAt": "2026-05-15T00:00:00.000Z",
+              "endAt": "2026-05-15T01:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Lil Texas"
+              ],
+              "artistTokens": [
+                "lil-texas"
+              ],
+              "genres": [
+                "États-Unis"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203c771db7d115dc6d7b53.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a3de73567e437c5a637f",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c904a1ad2495f1d16d13d"
+                ]
+              },
+              "hash": "d7328115da82cbe6cf2a004695a1e5d7503b3192b4a5f4a0532cc78cd2da4957"
+            },
+            {
+              "id": "thursday_stage-mirage_lekkerfaces-b2b_20260515010000000",
+              "artistName": " Lekkerfaces B2B ********",
+              "artistSlug": "lekkerfaces-b2b",
+              "artistId": "stage-mirage_lekkerfaces-b2b",
+              "artistOrder": 9,
+              "startAt": "2026-05-15T01:00:00.000Z",
+              "endAt": "2026-05-15T02:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Lekkerfaces",
+                "********"
+              ],
+              "artistTokens": [
+                "lekkerfaces"
+              ],
+              "genres": [
+                "Belgique",
+                "Pays-Bas"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834761f6b71f6dde7da16c",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "69830487f6b71f6dde7da147"
+                ]
+              },
+              "hash": "7b36fc5f6f49940a014c1ffbbefd6f6264282cb935b04d27e029fe228ba2f8ca"
+            },
+            {
+              "id": "thursday_stage-mirage_byorn-b2b-vorteks_source1_only",
+              "artistName": "BYORN B2B VORTEK'S",
+              "artistSlug": "byorn-b2b-vorteks",
+              "artistId": "stage-mirage_byorn-b2b-vorteks",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BYORN",
+                "VORTEK'S"
+              ],
+              "artistTokens": [
+                "byorn",
+                "vorteks"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "f8b50c52bfece44f728393a33fd3e4c32e2712e2e116a0171f6d85397fffede6",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-mirage_majes_source1_only",
+              "artistName": "MAJES",
+              "artistSlug": "majes",
+              "artistId": "stage-mirage_majes",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MAJES"
+              ],
+              "artistTokens": [
+                "majes"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "e01f7bfda480a20c11a4fcb3600c34f4b124c62e8630825af9ee5943780a6709",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-mirage_lekkerfaces-b2b_source1_only",
+              "artistName": "LEKKERFACES B2B ******",
+              "artistSlug": "lekkerfaces-b2b",
+              "artistId": "stage-mirage_lekkerfaces-b2b",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LEKKERFACES",
+                "******"
+              ],
+              "artistTokens": [
+                "lekkerfaces"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "fc924d3b54700142147e4755203fe80f3701ce0e008038aef0f6dbdb95b42037",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-mirage_vieze-asback_source1_only",
+              "artistName": "VIEZE ASBACK",
+              "artistSlug": "vieze-asback",
+              "artistId": "stage-mirage_vieze-asback",
+              "artistOrder": 13,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VIEZE ASBACK"
+              ],
+              "artistTokens": [
+                "vieze-asback"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "170da47fd58bc783e8da06945cd2ee2a189bb087935ec097e12c75e588c6a117",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1d73567e437c5a638c"
+          }
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "thursday_stage-alt-f4_hortense-de-beauharnais-f2f-gonzi_20260514141500000",
+              "artistName": "Hortense De Beauharnais F2F Gonzi",
+              "artistSlug": "hortense-de-beauharnais-f2f-gonzi",
+              "artistId": "stage-alt-f4_hortense-de-beauharnais-f2f-gonzi",
+              "artistOrder": 1,
+              "startAt": "2026-05-14T14:15:00.000Z",
+              "endAt": "2026-05-14T16:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Hortense De Beauharnais",
+                "Gonzi"
+              ],
+              "artistTokens": [
+                "hortense-de-beauharnais",
+                "gonzi"
+              ],
+              "genres": [
+                "Italie",
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834eb5f6b71f6dde7da173",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830a79f6b71f6dde7da14d"
+                ]
+              },
+              "hash": "377bf080a0dca16d254b9cf1bdda50cbb938ef71c86d266f0ea7c95dddb19039"
+            },
+            {
+              "id": "thursday_stage-alt-f4_dvaid-f2f-relajadita_20260514160000000",
+              "artistName": "DVAID F2F Relajadita",
+              "artistSlug": "dvaid-f2f-relajadita",
+              "artistId": "stage-alt-f4_dvaid-f2f-relajadita",
+              "artistOrder": 2,
+              "startAt": "2026-05-14T16:00:00.000Z",
+              "endAt": "2026-05-14T17:45:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DVAID",
+                "Relajadita"
+              ],
+              "artistTokens": [
+                "dvaid",
+                "relajadita"
+              ],
+              "genres": [
+                "Allemagne",
+                "États-Unis"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834ed7f6b71f6dde7da174",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830b87f6b71f6dde7da14e"
+                ]
+              },
+              "hash": "00d69e07ac2321d89f4c69916ac53c8121ed2057215b5fd94f0215ddfe4d2b9c"
+            },
+            {
+              "id": "thursday_stage-alt-f4_a5km-f2f-teksa_20260514174500000",
+              "artistName": "A5KM F2F Teksa",
+              "artistSlug": "a5km-f2f-teksa",
+              "artistId": "stage-alt-f4_a5km-f2f-teksa",
+              "artistOrder": 3,
+              "startAt": "2026-05-14T17:45:00.000Z",
+              "endAt": "2026-05-14T19:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM",
+                "Teksa"
+              ],
+              "artistTokens": [
+                "a5km",
+                "teksa"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834f05f6b71f6dde7da175",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830bbdf6b71f6dde7da14f"
+                ]
+              },
+              "hash": "e985dcc4adba66f1034339c6ee8bf64c02b0dac378ff86932ce686c3f7385edb"
+            },
+            {
+              "id": "thursday_stage-alt-f4_nure-f2f-vlb_20260514193000000",
+              "artistName": "Nure F2F VLB",
+              "artistSlug": "nure-f2f-vlb",
+              "artistId": "stage-alt-f4_nure-f2f-vlb",
+              "artistOrder": 4,
+              "startAt": "2026-05-14T19:30:00.000Z",
+              "endAt": "2026-05-14T20:45:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Nure",
+                "VLB"
+              ],
+              "artistTokens": [
+                "nure",
+                "vlb"
+              ],
+              "genres": [
+                "France",
+                "Portugal"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834f2cf6b71f6dde7da176",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830bfff6b71f6dde7da151"
+                ]
+              },
+              "hash": "d8908b16febe5d9c343ea6d650f0eaf39a4224aa7e605a6b0c359f7d2009719d"
+            },
+            {
+              "id": "thursday_stage-alt-f4_uphoria-f2f-caravel_20260514204500000",
+              "artistName": "Uphoria F2F Caravel",
+              "artistSlug": "uphoria-f2f-caravel",
+              "artistId": "stage-alt-f4_uphoria-f2f-caravel",
+              "artistOrder": 5,
+              "startAt": "2026-05-14T20:45:00.000Z",
+              "endAt": "2026-05-14T22:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Uphoria",
+                "Caravel"
+              ],
+              "artistTokens": [
+                "uphoria",
+                "caravel"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834f51f6b71f6dde7da177",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830c3af6b71f6dde7da152"
+                ]
+              },
+              "hash": "2897228da302075fe5bb0021aa0d5d8b81ae322fd15e9b096427460bc808b71b"
+            },
+            {
+              "id": "thursday_stage-alt-f4_jayron-f2f-rubio_20260514223000000",
+              "artistName": "Jayron F2F Rubiø",
+              "artistSlug": "jayron-f2f-rubio",
+              "artistId": "stage-alt-f4_jayron-f2f-rubio",
+              "artistOrder": 6,
+              "startAt": "2026-05-14T22:30:00.000Z",
+              "endAt": "2026-05-15T00:15:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Jayron",
+                "Rubiø"
+              ],
+              "artistTokens": [
+                "jayron",
+                "rubio"
+              ],
+              "genres": [
+                "France",
+                "Pays-Bas"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834f7af6b71f6dde7da178",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830c7af6b71f6dde7da153"
+                ]
+              },
+              "hash": "f11c2af32855e08d8797a950ce0159da789a2117838b8de7bdf97765e3eaaf4c"
+            },
+            {
+              "id": "thursday_stage-alt-f4_jo3y3t-f2f-santos_20260515001500000",
+              "artistName": "JO3Y3T F2F SANTØS",
+              "artistSlug": "jo3y3t-f2f-santos",
+              "artistId": "stage-alt-f4_jo3y3t-f2f-santos",
+              "artistOrder": 7,
+              "startAt": "2026-05-15T00:15:00.000Z",
+              "endAt": "2026-05-15T02:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "JO3Y3T",
+                "SANTØS"
+              ],
+              "artistTokens": [
+                "jo3y3t",
+                "santos"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834fa2f6b71f6dde7da179",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830d37f6b71f6dde7da154"
+                ]
+              },
+              "hash": "ded260734cbba30b146812ed9cfe203fdd48041c1982686474beb5eb31625121"
+            },
+            {
+              "id": "thursday_stage-alt-f4_medusa_source1_only",
+              "artistName": "MEDUSA",
+              "artistSlug": "medusa",
+              "artistId": "stage-alt-f4_medusa",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MEDUSA"
+              ],
+              "artistTokens": [
+                "medusa"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "1cdf47f367c90d90beefd96773b24adfd0f66044f213dc1fb76b8b091a96caae",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-alt-f4_uphoria-f2f-c_source1_only",
+              "artistName": "UPHORIA F2F C******",
+              "artistSlug": "uphoria-f2f-c",
+              "artistId": "stage-alt-f4_uphoria-f2f-c",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "UPHORIA",
+                "C******"
+              ],
+              "artistTokens": [
+                "uphoria",
+                "c"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "b066edfe2d73f40990ffab42cb81e76e24d2188b7ef677f57656c0ac80da1c02",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "69834b82f6b71f6dde7da172"
+          }
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "thursday_technobus_anduj-b2b-paulskye_source1_only",
+              "artistName": "ANDUJ B2B PAULSKYE",
+              "artistSlug": "anduj-b2b-paulskye",
+              "artistId": "technobus_anduj-b2b-paulskye",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ANDUJ",
+                "PAULSKYE"
+              ],
+              "artistTokens": [
+                "anduj",
+                "paulskye"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "bd0fbe711b3421c55376607286f6daffa3b62f1c39320ac41539f69ddd232ab4",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_blakeys-b2b-blasty_source1_only",
+              "artistName": "BLAKEYS B2B BLASTY",
+              "artistSlug": "blakeys-b2b-blasty",
+              "artistId": "technobus_blakeys-b2b-blasty",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BLAKEYS",
+                "BLASTY"
+              ],
+              "artistTokens": [
+                "blakeys",
+                "blasty"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "c8a7566283a3bb80586e7babc4bf94374451717a39d8157309923f4df3bd9aa0",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_david-bouts_source1_only",
+              "artistName": "DAVID BOUTS",
+              "artistSlug": "david-bouts",
+              "artistId": "technobus_david-bouts",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DAVID BOUTS"
+              ],
+              "artistTokens": [
+                "david-bouts"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "079dd1e5175818e3f00452ea31496624e8894c79fdb95d1530a6f7d3ce6abcad",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_evander-b2b-may-li_source1_only",
+              "artistName": "EVÄNDER B2B MAY-LI",
+              "artistSlug": "evander-b2b-may-li",
+              "artistId": "technobus_evander-b2b-may-li",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "EVÄNDER",
+                "MAY-LI"
+              ],
+              "artistTokens": [
+                "evander",
+                "may-li"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "b8f3513c9167b87b3c7d4ecfbaa464ea6b3e3f5d7b20d39ff9900824a6fc3065",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_fraiche_source1_only",
+              "artistName": "FRAÎCHE",
+              "artistSlug": "fraiche",
+              "artistId": "technobus_fraiche",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "FRAÎCHE"
+              ],
+              "artistTokens": [
+                "fraiche"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "d9a10fd42e7a6dea7bcd4bb32d12d2402e875f4a402de3d54887ae943f381d33",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_heartreaver-b2b-mido_source1_only",
+              "artistName": "HEARTREAVER B2B MIDO",
+              "artistSlug": "heartreaver-b2b-mido",
+              "artistId": "technobus_heartreaver-b2b-mido",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "HEARTREAVER",
+                "MIDO"
+              ],
+              "artistTokens": [
+                "heartreaver",
+                "mido"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "4d09e3e2ae6dd95e3c42c3c826c197d6729c98021b40c88a1f3886eeb0241f56",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_melina_source1_only",
+              "artistName": "MELINA",
+              "artistSlug": "melina",
+              "artistId": "technobus_melina",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "MELINA"
+              ],
+              "artistTokens": [
+                "melina"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "efcf176a434c496b31cc98ec51e90fa3d9fbdb34bd7ceac676e55194fd080dcc",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_octo-one_source1_only",
+              "artistName": "OCTO ONE",
+              "artistSlug": "octo-one",
+              "artistId": "technobus_octo-one",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "OCTO ONE"
+              ],
+              "artistTokens": [
+                "octo-one"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "34ddc676112cf60a05b8b984f6066cf976906c6b89034964beca41e05a882338",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_technobus_prost-b2b-zep_source1_only",
+              "artistName": "PROST B2B ZEP",
+              "artistSlug": "prost-b2b-zep",
+              "artistId": "technobus_prost-b2b-zep",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "PROST",
+                "ZEP"
+              ],
+              "artistTokens": [
+                "prost",
+                "zep"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "0b6742a6e6b5be08eaef42713d09688e946b0756c64e8e9b1459bafd0d668691",
+              "sourceOnly": true
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "thursday_stage-cloud_yann-muller_20260514170000000",
+              "artistName": "Yann Muller",
+              "artistSlug": "yann-muller",
+              "artistId": "stage-cloud_yann-muller",
+              "artistOrder": 1,
+              "startAt": "2026-05-14T17:00:00.000Z",
+              "endAt": "2026-05-14T18:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Yann Muller"
+              ],
+              "artistTokens": [
+                "yann-muller"
+              ],
+              "genres": [
+                "France",
+                "Deep House"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z680f9847a2becf6ea1d1fd33.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832e85f6b71f6dde7da15e",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "680690d8042b111b10fe3efe"
+                ]
+              },
+              "hash": "95b80408d008d90ce84e026699e39b64c43c49fd902b096da8df5141b85fac35"
+            },
+            {
+              "id": "thursday_stage-cloud_upsilone_20260514193000000",
+              "artistName": "Upsilone",
+              "artistSlug": "upsilone",
+              "artistId": "stage-cloud_upsilone",
+              "artistOrder": 2,
+              "startAt": "2026-05-14T19:30:00.000Z",
+              "endAt": "2026-05-14T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Upsilone"
+              ],
+              "artistTokens": [
+                "upsilone"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832f07f6b71f6dde7da160",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "6983118af6b71f6dde7da15c"
+                ]
+              },
+              "hash": "1fd0b0cd61450b9ea476918d238758e18c895dc9eca3b1397a2d7e1635cf1c99"
+            },
+            {
+              "id": "thursday_stage-cloud_mandragora_20260514223000000",
+              "artistName": "Mandragora",
+              "artistSlug": "mandragora",
+              "artistId": "stage-cloud_mandragora",
+              "artistOrder": 3,
+              "startAt": "2026-05-14T22:30:00.000Z",
+              "endAt": "2026-05-15T00:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Mandragora"
+              ],
+              "artistTokens": [
+                "mandragora"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832f3cf6b71f6dde7da161",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "69830749f6b71f6dde7da14a"
+                ]
+              },
+              "hash": "501bd966420c61343880bb47818d601d8e443ad1aa2fa165b4bcd5fb76eb22c7"
+            },
+            {
+              "id": "thursday_stage-cloud_bennett_20260515000000000",
+              "artistName": "Bennett",
+              "artistSlug": "bennett",
+              "artistId": "stage-cloud_bennett",
+              "artistOrder": 4,
+              "startAt": "2026-05-15T00:00:00.000Z",
+              "endAt": "2026-05-15T02:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Bennett"
+              ],
+              "artistTokens": [
+                "bennett"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832f64f6b71f6dde7da162",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "697c7b61a7fe527b2ae9694a"
+                ]
+              },
+              "hash": "dffaa38c4b0286d431cd481b580d0b47257da6dd875241ddeef3d79729294f67"
+            },
+            {
+              "id": "thursday_stage-cloud_petit-biscuit_source1_only",
+              "artistName": "PETIT BISCUIT",
+              "artistSlug": "petit-biscuit",
+              "artistId": "stage-cloud_petit-biscuit",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "PETIT BISCUIT"
+              ],
+              "artistTokens": [
+                "petit-biscuit"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "50975882b91a08dd7c4bdd2034b27185e81956ce548627d0b34f860ac72d8215",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-cloud_solere_source1_only",
+              "artistName": "SOLERE",
+              "artistSlug": "solere",
+              "artistId": "stage-cloud_solere",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SOLERE"
+              ],
+              "artistTokens": [
+                "solere"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "f16b89974d100c397b64263b4dfaafdb4a5cec2a62e0cdfb7e26516ac22a4edc",
+              "sourceOnly": true
+            },
+            {
+              "id": "thursday_stage-cloud_synapson_source1_only",
+              "artistName": "SYNAPSON",
+              "artistSlug": "synapson",
+              "artistId": "stage-cloud_synapson",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SYNAPSON"
+              ],
+              "artistTokens": [
+                "synapson"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "4e03e0e306fa5cad3a17f1ce80a5474dae38b02678c4dfbf910fc3777a46f667",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1673567e437c5a638b"
+          }
+        }
+      ]
+    },
+    {
+      "daySlug": "friday",
+      "dayOrder": 2,
+      "dayName": "Ven 15 mai",
+      "dayStartDate": "2026-05-15",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "friday_stage-mirage_kx-chr_20260515153000000",
+              "artistName": "KX CHR",
+              "artistSlug": "kx-chr",
+              "artistId": "stage-mirage_kx-chr",
+              "artistOrder": 1,
+              "startAt": "2026-05-15T15:30:00.000Z",
+              "endAt": "2026-05-15T16:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KX CHR"
+              ],
+              "artistTokens": [
+                "kx-chr"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203b131db7d115dc6d7b47.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a65a73567e437c5a6384",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91b71ad2495f1d16d14d"
+                ]
+              },
+              "hash": "901b9b403a7d4e19f5ad87d26ee328d9382aebd60aaf7e92938043adbe2135d1"
+            },
+            {
+              "id": "friday_stage-mirage_not-my-type_20260515163000000",
+              "artistName": "Not My Type",
+              "artistSlug": "not-my-type",
+              "artistId": "stage-mirage_not-my-type",
+              "artistOrder": 2,
+              "startAt": "2026-05-15T16:30:00.000Z",
+              "endAt": "2026-05-15T18:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Not My Type"
+              ],
+              "artistTokens": [
+                "not-my-type"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203b491db7d115dc6d7b4a.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a70273567e437c5a6386",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91d31ad2495f1d16d14e"
+                ]
+              },
+              "hash": "a03624d428a7072007e59be9fd79c01d0295c1a1b55ababa0338c5766119dd2a"
+            },
+            {
+              "id": "friday_stage-mirage_nicolas-julian_20260515180000000",
+              "artistName": "Nicolas Julian",
+              "artistSlug": "nicolas-julian",
+              "artistId": "stage-mirage_nicolas-julian",
+              "artistOrder": 3,
+              "startAt": "2026-05-15T18:00:00.000Z",
+              "endAt": "2026-05-15T19:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Nicolas Julian"
+              ],
+              "artistTokens": [
+                "nicolas-julian"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a68a73567e437c5a6385",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90611ad2495f1d16d13e"
+                ]
+              },
+              "hash": "297ad4ff979975a441ca379ed27bd63bf3e32dad3be648001324e56d07f94fda"
+            },
+            {
+              "id": "friday_stage-mirage_eczodia_20260515190000000",
+              "artistName": "Eczodia",
+              "artistSlug": "eczodia",
+              "artistId": "stage-mirage_eczodia",
+              "artistOrder": 4,
+              "startAt": "2026-05-15T19:00:00.000Z",
+              "endAt": "2026-05-15T20:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Eczodia"
+              ],
+              "artistTokens": [
+                "eczodia"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202e811ad2495f1d16d15e.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a5bd73567e437c5a6382",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91691ad2495f1d16d148"
+                ]
+              },
+              "hash": "c8223c143265177ab2f2e2b73b5cdfb27a01b7c9e631aa61ce769edd4d08e921"
+            },
+            {
+              "id": "friday_stage-mirage_karah_20260515200000000",
+              "artistName": "Karah",
+              "artistSlug": "karah",
+              "artistId": "stage-mirage_karah",
+              "artistOrder": 5,
+              "startAt": "2026-05-15T20:00:00.000Z",
+              "endAt": "2026-05-15T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Karah"
+              ],
+              "artistTokens": [
+                "karah"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z692031c01ad2495f1d16d16e.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932ef8873567e437c5a638d",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91771ad2495f1d16d149"
+                ]
+              },
+              "hash": "b694a34ebeed1537871f460ba9029650378bf0a941e2fa67f2949d04ce63e56f"
+            },
+            {
+              "id": "friday_stage-mirage_restricted_20260515210000000",
+              "artistName": "Restricted",
+              "artistSlug": "restricted",
+              "artistId": "stage-mirage_restricted",
+              "artistOrder": 6,
+              "startAt": "2026-05-15T21:00:00.000Z",
+              "endAt": "2026-05-15T22:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Restricted"
+              ],
+              "artistTokens": [
+                "restricted"
+              ],
+              "genres": [
+                "Australie"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203d7e1db7d115dc6d7b56.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a73273567e437c5a6387",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90801ad2495f1d16d13f"
+                ]
+              },
+              "hash": "054cfeebf09ee27861cd35ba9a853d3b092adeaf5bb5bc550333ae1283a2038b"
+            },
+            {
+              "id": "friday_stage-mirage_kruelty_20260515223000000",
+              "artistName": "Kruelty",
+              "artistSlug": "kruelty",
+              "artistId": "stage-mirage_kruelty",
+              "artistOrder": 7,
+              "startAt": "2026-05-15T22:30:00.000Z",
+              "endAt": "2026-05-16T00:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Kruelty"
+              ],
+              "artistTokens": [
+                "kruelty"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z692033051ad2495f1d16d17a.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a62d73567e437c5a6383",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c91a21ad2495f1d16d14c"
+                ]
+              },
+              "hash": "f18f9d96f0882dfe5d664892811fd654dfb57562edae2783ea17f91ab1fafbb4"
+            },
+            {
+              "id": "friday_stage-mirage_reinier-zonneveld-b2b-angerfist_20260516000000000",
+              "artistName": "Reinier Zonneveld B2B Angerfist",
+              "artistSlug": "reinier-zonneveld-b2b-angerfist",
+              "artistId": "stage-mirage_reinier-zonneveld-b2b-angerfist",
+              "artistOrder": 8,
+              "startAt": "2026-05-16T00:00:00.000Z",
+              "endAt": "2026-05-16T01:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Reinier Zonneveld",
+                "Angerfist"
+              ],
+              "artistTokens": [
+                "reinier-zonneveld",
+                "angerfist"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f01e73567e437c5a638e",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "69204ad71db7d115dc6d7b63"
+                ]
+              },
+              "hash": "8db2cbb903a07f5aa9e9729a0cf7c9d65bf1d20fc42fb32214e3690b6484383d"
+            },
+            {
+              "id": "friday_stage-mirage_rooler_20260516013000000",
+              "artistName": "Rooler",
+              "artistSlug": "rooler",
+              "artistId": "stage-mirage_rooler",
+              "artistOrder": 9,
+              "startAt": "2026-05-16T01:30:00.000Z",
+              "endAt": "2026-05-16T02:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Rooler"
+              ],
+              "artistTokens": [
+                "rooler"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203e4d1db7d115dc6d7b5a.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a7d573567e437c5a6388",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90b01ad2495f1d16d140"
+                ]
+              },
+              "hash": "6b44e89ed7d88ff8f3e9c6fe32ae6621b54cd6e8a8ad4a8a047c69a443f727ac"
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1d73567e437c5a638c"
+          }
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "friday_stage-alt-f4_acidpach-b2b-lart-cene_20260515120000000",
+              "artistName": "Acidpach B2B L'Art Cène",
+              "artistSlug": "acidpach-b2b-lart-cene",
+              "artistId": "stage-alt-f4_acidpach-b2b-lart-cene",
+              "artistOrder": 1,
+              "startAt": "2026-05-15T12:00:00.000Z",
+              "endAt": "2026-05-15T13:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Acidpach",
+                "L'Art Cène"
+              ],
+              "artistTokens": [
+                "acidpach",
+                "lart-cene"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834fcef6b71f6dde7da17a",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830323f6b71f6dde7da144"
+                ]
+              },
+              "hash": "739400cb9bb49cf318d22159eb046ae9c07194ef0bad117d76733f4c1755e957"
+            },
+            {
+              "id": "friday_stage-alt-f4_vernex-b2b-sandy-warez_20260515130000000",
+              "artistName": "Vernex B2B Sandy Warez",
+              "artistSlug": "vernex-b2b-sandy-warez",
+              "artistId": "stage-alt-f4_vernex-b2b-sandy-warez",
+              "artistOrder": 2,
+              "startAt": "2026-05-15T13:00:00.000Z",
+              "endAt": "2026-05-15T14:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Vernex",
+                "Sandy Warez"
+              ],
+              "artistTokens": [
+                "vernex",
+                "sandy-warez"
+              ],
+              "genres": [
+                "Belgique",
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834ff3f6b71f6dde7da17b",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "698312d9f6b71f6dde7da15d"
+                ]
+              },
+              "hash": "581d89ffe53944139011b7cc2ccff484e17bd227ca6f2a5190cac8dd98aeacd1"
+            },
+            {
+              "id": "friday_stage-alt-f4_klinical_20260515150000000",
+              "artistName": "Klinical",
+              "artistSlug": "klinical",
+              "artistId": "stage-alt-f4_klinical",
+              "artistOrder": 3,
+              "startAt": "2026-05-15T15:00:00.000Z",
+              "endAt": "2026-05-15T16:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Klinical"
+              ],
+              "artistTokens": [
+                "klinical"
+              ],
+              "genres": [
+                "Royaume-Uni"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z6920321f1ad2495f1d16d171.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69835030f6b71f6dde7da17c",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "691c91941ad2495f1d16d14b"
+                ]
+              },
+              "hash": "0b2d388d61c4407a23afcd2679e244759e879b8ebadde98527ba6d6f9323565f"
+            },
+            {
+              "id": "friday_stage-alt-f4_visages_20260515160000000",
+              "artistName": "Visages",
+              "artistSlug": "visages",
+              "artistId": "stage-alt-f4_visages",
+              "artistOrder": 4,
+              "startAt": "2026-05-15T16:00:00.000Z",
+              "endAt": "2026-05-15T17:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Visages"
+              ],
+              "artistTokens": [
+                "visages"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69835066f6b71f6dde7da17d",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "691c92331ad2495f1d16d152"
+                ]
+              },
+              "hash": "8a7d40c03bdc95a183f677f3643f647a381ccc5c0c524b8426f9a5fee034f01d"
+            },
+            {
+              "id": "friday_stage-alt-f4_imanu_20260515180000000",
+              "artistName": "Imanu",
+              "artistSlug": "imanu",
+              "artistId": "stage-alt-f4_imanu",
+              "artistOrder": 5,
+              "startAt": "2026-05-15T18:00:00.000Z",
+              "endAt": "2026-05-15T19:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Imanu"
+              ],
+              "artistTokens": [
+                "imanu"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69835090f6b71f6dde7da17e",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69204b511db7d115dc6d7b67"
+                ]
+              },
+              "hash": "538f5351c9ae03f18e58cd80fb6e5276fc065b7516f22a33826fd7ce9b8d986b"
+            },
+            {
+              "id": "friday_stage-alt-f4_simula_20260515190000000",
+              "artistName": "Simula",
+              "artistSlug": "simula",
+              "artistId": "stage-alt-f4_simula",
+              "artistOrder": 6,
+              "startAt": "2026-05-15T19:00:00.000Z",
+              "endAt": "2026-05-15T20:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Simula"
+              ],
+              "artistTokens": [
+                "simula"
+              ],
+              "genres": [
+                "Angleterre"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203c0d1db7d115dc6d7b50.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698350b4f6b71f6dde7da17f",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "691c92001ad2495f1d16d150"
+                ]
+              },
+              "hash": "67eecae5721c9faed1d3a3b584370eef9ecc7ff70ab375affafb029728c75877"
+            },
+            {
+              "id": "friday_stage-alt-f4_dice-b2b-kolab_source1_only",
+              "artistName": "DICE B2B KØ:LAB",
+              "artistSlug": "dice-b2b-kolab",
+              "artistId": "stage-alt-f4_dice-b2b-kolab",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DICE",
+                "KØ:LAB"
+              ],
+              "artistTokens": [
+                "dice",
+                "kolab"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "23b7c242942cb2e2efc2626a31c3e124fecb548b4e66ca105c71a09a4b9185bb",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_stage-alt-f4_obses_source1_only",
+              "artistName": "OBSES",
+              "artistSlug": "obses",
+              "artistId": "stage-alt-f4_obses",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "OBSES"
+              ],
+              "artistTokens": [
+                "obses"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "86844a3bfa9fbe1e92466a607fceb651813acb240f738708e03b4386c9a8a4ce",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_stage-alt-f4_skantia_source1_only",
+              "artistName": "SKANTIA",
+              "artistSlug": "skantia",
+              "artistId": "stage-alt-f4_skantia",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SKANTIA"
+              ],
+              "artistTokens": [
+                "skantia"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "253f4d296eed53e6b22947cb80157e750ad063e4f93f1727210b8f07f632ba0a",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_stage-alt-f4_the-caracal-project_source1_only",
+              "artistName": "THE CARACAL PROJECT",
+              "artistSlug": "the-caracal-project",
+              "artistId": "stage-alt-f4_the-caracal-project",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "THE CARACAL PROJECT"
+              ],
+              "artistTokens": [
+                "the-caracal-project"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "23de4771916407a3933fd2db790d67cf8be119bdcb7fb374b7ac1ecce8d66db0",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_stage-alt-f4_theezer_source1_only",
+              "artistName": "THEEZER",
+              "artistSlug": "theezer",
+              "artistId": "stage-alt-f4_theezer",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "THEEZER"
+              ],
+              "artistTokens": [
+                "theezer"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "842e13eb932d2502dd42b21b5f43b16ea82395c63173106aa0cdaac2969751ff",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_stage-alt-f4_vici_source1_only",
+              "artistName": "VICI",
+              "artistSlug": "vici",
+              "artistId": "stage-alt-f4_vici",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "VICI"
+              ],
+              "artistTokens": [
+                "vici"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "5965875c59e4e0839ad8b37963ef1310d9ec24d1db81a50979bf41094430dbb8",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "69834b82f6b71f6dde7da172"
+          }
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "friday_technobus_a5km_source1_only",
+              "artistName": "A5KM",
+              "artistSlug": "a5km",
+              "artistId": "technobus_a5km",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM"
+              ],
+              "artistTokens": [
+                "a5km"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "2f19c7f7e7662b62d57b66a1df1876a63a7fbacbafc21b63361c1cfd7cb0b1af",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_afterdeath_source1_only",
+              "artistName": "AFTERDEATH",
+              "artistSlug": "afterdeath",
+              "artistId": "technobus_afterdeath",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "AFTERDEATH"
+              ],
+              "artistTokens": [
+                "afterdeath"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "edbc8b06138b7a9c171e5d9e5482bf1f27a3e222339ce84c8b7b32e2bbc41949",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_dj-princesse-b2b-el-santu_source1_only",
+              "artistName": "DJ PRINCESSE B2B EL SANTU",
+              "artistSlug": "dj-princesse-b2b-el-santu",
+              "artistId": "technobus_dj-princesse-b2b-el-santu",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DJ PRINCESSE",
+                "EL SANTU"
+              ],
+              "artistTokens": [
+                "dj-princesse",
+                "el-santu"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "76bf55a2a81a57e089a97203c69ae238a50513d9733f8930186381f9c9cc3f38",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_dln_source1_only",
+              "artistName": "DLN",
+              "artistSlug": "dln",
+              "artistId": "technobus_dln",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DLN"
+              ],
+              "artistTokens": [
+                "dln"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "3717fc83e44e5b50e4121a4b9296ba8a5c4ad83d65a79f034aab20a848bdd86f",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_k-chivache_source1_only",
+              "artistName": "K-CHIVACHE",
+              "artistSlug": "k-chivache",
+              "artistId": "technobus_k-chivache",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "K-CHIVACHE"
+              ],
+              "artistTokens": [
+                "k-chivache"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "6cb0f23cf5a88e2194d8455b260ee1aafa870d37d95d72f1ee75557ab489c26f",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_keuss_source1_only",
+              "artistName": "KEUSS",
+              "artistSlug": "keuss",
+              "artistId": "technobus_keuss",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KEUSS"
+              ],
+              "artistTokens": [
+                "keuss"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "992025333efd2427232f124231f64316a18d080a500ceba4c80ce1d051f07001",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_kloss_source1_only",
+              "artistName": "KLÖSS",
+              "artistSlug": "kloss",
+              "artistId": "technobus_kloss",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KLÖSS"
+              ],
+              "artistTokens": [
+                "kloss"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "70cf85b9d95f98c662a8c471bc969cb20e39c3f7130d97f77c8cf0d4fa62afc9",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_la-torgnole_source1_only",
+              "artistName": "LA TORGNOLE",
+              "artistSlug": "la-torgnole",
+              "artistId": "technobus_la-torgnole",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LA TORGNOLE"
+              ],
+              "artistTokens": [
+                "la-torgnole"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "041b610c348711a9fd84b062527ec99c47b6a6062475f76ec40eefad3fe10466",
+              "sourceOnly": true
+            },
+            {
+              "id": "friday_technobus_rv_source1_only",
+              "artistName": "RV",
+              "artistSlug": "rv",
+              "artistId": "technobus_rv",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "RV"
+              ],
+              "artistTokens": [
+                "rv"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "a69eaac2821a4aabf454522f2848f0d6f70bf685a0492a82bad20041d62fb26b",
+              "sourceOnly": true
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "friday_stage-cloud_djdave_20260515171500000",
+              "artistName": "DJ_Dave",
+              "artistSlug": "djdave",
+              "artistId": "stage-cloud_djdave",
+              "artistOrder": 1,
+              "startAt": "2026-05-15T17:15:00.000Z",
+              "endAt": "2026-05-15T18:15:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DJ_Dave"
+              ],
+              "artistTokens": [
+                "djdave"
+              ],
+              "genres": [
+                "États-Unis"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832f9df6b71f6dde7da163",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "6983042ef6b71f6dde7da146"
+                ]
+              },
+              "hash": "6ae96e46c5ef21e92016eb1b107512c6811b2e6b7c98a04cf9eb0fd08640d5ee"
+            },
+            {
+              "id": "friday_stage-cloud_cara-elizabeth-b2b-arman-john_20260515183000000",
+              "artistName": "Cara Elizabeth B2B Arman John",
+              "artistSlug": "cara-elizabeth-b2b-arman-john",
+              "artistId": "stage-cloud_cara-elizabeth-b2b-arman-john",
+              "artistOrder": 2,
+              "startAt": "2026-05-15T18:30:00.000Z",
+              "endAt": "2026-05-15T19:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Cara Elizabeth",
+                "Arman John"
+              ],
+              "artistTokens": [
+                "cara-elizabeth",
+                "arman-john"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69832fd7f6b71f6dde7da164",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "69830dd4f6b71f6dde7da155"
+                ]
+              },
+              "hash": "c535a4847ae1aa7998e847dadccc9d3680adcaa2af428f1253e20104f4df0d4c"
+            },
+            {
+              "id": "friday_stage-cloud_fjusha_20260515193000000",
+              "artistName": "Fjusha",
+              "artistSlug": "fjusha",
+              "artistId": "stage-cloud_fjusha",
+              "artistOrder": 3,
+              "startAt": "2026-05-15T19:30:00.000Z",
+              "endAt": "2026-05-15T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Fjusha"
+              ],
+              "artistTokens": [
+                "fjusha"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202f6b1ad2495f1d16d164.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f07573567e437c5a638f",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "691c8fce1ad2495f1d16d139"
+                ]
+              },
+              "hash": "7edf13b4dd13d65eaf73964ac6d87e1d584409bd6403605693735f0489e48f68"
+            },
+            {
+              "id": "friday_stage-cloud_daria-kolosova_20260515210000000",
+              "artistName": "Daria Kolosova",
+              "artistSlug": "daria-kolosova",
+              "artistId": "stage-cloud_daria-kolosova",
+              "artistOrder": 4,
+              "startAt": "2026-05-15T21:00:00.000Z",
+              "endAt": "2026-05-15T22:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Daria Kolosova"
+              ],
+              "artistTokens": [
+                "daria-kolosova"
+              ],
+              "genres": [
+                "Ukraine"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202de41ad2495f1d16d158.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f09f73567e437c5a6390",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "691c8f881ad2495f1d16d137"
+                ]
+              },
+              "hash": "115874b0b227f23888c90766cf7e56f395915e8c1ecad4b0d3fb0c00dbdc9a4b"
+            },
+            {
+              "id": "friday_stage-cloud_hortense-de-beauharnais_20260515223000000",
+              "artistName": "Hortense de Beauharnais",
+              "artistSlug": "hortense-de-beauharnais",
+              "artistId": "stage-cloud_hortense-de-beauharnais",
+              "artistOrder": 5,
+              "startAt": "2026-05-15T22:30:00.000Z",
+              "endAt": "2026-05-16T00:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Hortense de Beauharnais"
+              ],
+              "artistTokens": [
+                "hortense-de-beauharnais"
+              ],
+              "genres": [
+                "Hard Techno",
+                "EBM",
+                "Psytrance",
+                "France",
+                "Fast techno",
+                "Industrial"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z680f9223a2becf6ea1d1fcf7.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f0d173567e437c5a6391",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "680690d8042b111b10fe3ed7"
+                ]
+              },
+              "hash": "9962cb053ce471579d22f1d3807843bebb592cce359295b1b73178f3227cb757"
+            },
+            {
+              "id": "friday_stage-cloud_luciid_source1_only",
+              "artistName": "LUCIID",
+              "artistSlug": "luciid",
+              "artistId": "stage-cloud_luciid",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LUCIID"
+              ],
+              "artistTokens": [
+                "luciid"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "c8e9178c1b7e1ed821e6564436a8c7cec78ae6541becb9c4a80a9a1020d39cac",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1673567e437c5a638b"
+          }
+        }
+      ]
+    },
+    {
+      "daySlug": "saturday",
+      "dayOrder": 3,
+      "dayName": "Sam 16 mai",
+      "dayStartDate": "2026-05-16",
+      "stages": [
+        {
+          "stageName": "STAGE MIRAGE",
+          "stageSlug": "stage-mirage",
+          "stageCanonical": "STAGE MIRAGE",
+          "stageOrder": 1,
+          "stageColor": "#7562ad",
+          "artists": [
+            {
+              "id": "saturday_stage-mirage_emilija_20260516140000000",
+              "artistName": "Emilija",
+              "artistSlug": "emilija",
+              "artistId": "stage-mirage_emilija",
+              "artistOrder": 1,
+              "startAt": "2026-05-16T14:00:00.000Z",
+              "endAt": "2026-05-16T15:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Emilija"
+              ],
+              "artistTokens": [
+                "emilija"
+              ],
+              "genres": [
+                "Belgique"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69202eb21ad2495f1d16d161.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f10973567e437c5a6392",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c8fab1ad2495f1d16d138"
+                ]
+              },
+              "hash": "d9062ba040893d4f185bc258ea5c6abfe93e59b0558d471ad15619d398e751c6"
+            },
+            {
+              "id": "saturday_stage-mirage_samuel-moriero_20260516160000000",
+              "artistName": "Samuel Moriero",
+              "artistSlug": "samuel-moriero",
+              "artistId": "stage-mirage_samuel-moriero",
+              "artistOrder": 2,
+              "startAt": "2026-05-16T16:00:00.000Z",
+              "endAt": "2026-05-16T17:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Samuel Moriero"
+              ],
+              "artistTokens": [
+                "samuel-moriero"
+              ],
+              "genres": [
+                "Italie"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6983482af6b71f6dde7da16d",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "698307fdf6b71f6dde7da14b"
+                ]
+              },
+              "hash": "b36d6bd163fa31393b85f68c55beeb0fdcdd84c780797f9902d7f0eaaf2b5f45"
+            },
+            {
+              "id": "saturday_stage-mirage_le-wanski-b2b-skone_20260516170000000",
+              "artistName": "Le Wanski B2B Sköne",
+              "artistSlug": "le-wanski-b2b-skone",
+              "artistId": "stage-mirage_le-wanski-b2b-skone",
+              "artistOrder": 3,
+              "startAt": "2026-05-16T17:00:00.000Z",
+              "endAt": "2026-05-16T18:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Le Wanski",
+                "Sköne"
+              ],
+              "artistTokens": [
+                "le-wanski",
+                "skone"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69834856f6b71f6dde7da16e",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "698304b5f6b71f6dde7da148"
+                ]
+              },
+              "hash": "ff8a76d7a23e7e458b813533df08f8156dfc1a5e7c5011367f2ae7f9cc9b4c37"
+            },
+            {
+              "id": "saturday_stage-mirage_todiefor_20260516190000000",
+              "artistName": "Todiefor",
+              "artistSlug": "todiefor",
+              "artistId": "stage-mirage_todiefor",
+              "artistOrder": 4,
+              "startAt": "2026-05-16T19:00:00.000Z",
+              "endAt": "2026-05-16T20:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Todiefor"
+              ],
+              "artistTokens": [
+                "todiefor"
+              ],
+              "genres": [
+                "Belgique"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6983488bf6b71f6dde7da16f",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "69831076f6b71f6dde7da15b"
+                ]
+              },
+              "hash": "d70eb75f22064ccf2172646186bfabbbfe21745a6cf7a4ff82672fdd8cff121a"
+            },
+            {
+              "id": "saturday_stage-mirage_slvl-b2b-ush_20260516200000000",
+              "artistName": "SLVL B2B USH",
+              "artistSlug": "slvl-b2b-ush",
+              "artistId": "stage-mirage_slvl-b2b-ush",
+              "artistOrder": 5,
+              "startAt": "2026-05-16T20:00:00.000Z",
+              "endAt": "2026-05-16T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SLVL",
+                "USH"
+              ],
+              "artistTokens": [
+                "slvl",
+                "ush"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932f15273567e437c5a6394",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90d11ad2495f1d16d141"
+                ]
+              },
+              "hash": "4dc204e899157cf461fd252310fcd357a1699123d6cc7d5df1cc1b2e8ca778b3"
+            },
+            {
+              "id": "saturday_stage-mirage_klofama_20260516220000000",
+              "artistName": "Klofama",
+              "artistSlug": "klofama",
+              "artistId": "stage-mirage_klofama",
+              "artistOrder": 6,
+              "startAt": "2026-05-16T22:00:00.000Z",
+              "endAt": "2026-05-16T23:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Klofama"
+              ],
+              "artistTokens": [
+                "klofama"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z692032601ad2495f1d16d174.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a81373567e437c5a6389",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90181ad2495f1d16d13b"
+                ]
+              },
+              "hash": "9b232ecb4ef76efacacbc2bdb03f74c395b0146dbd7451e8f0efa57d866ad67f"
+            },
+            {
+              "id": "saturday_stage-mirage_krowdexx_20260516230000000",
+              "artistName": "Krowdexx",
+              "artistSlug": "krowdexx",
+              "artistId": "stage-mirage_krowdexx",
+              "artistOrder": 7,
+              "startAt": "2026-05-16T23:00:00.000Z",
+              "endAt": "2026-05-17T00:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Krowdexx"
+              ],
+              "artistTokens": [
+                "krowdexx"
+              ],
+              "genres": [
+                "Italie"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z6920329b1ad2495f1d16d177.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6932a84073567e437c5a638a",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "691c90291ad2495f1d16d13c"
+                ]
+              },
+              "hash": "15a2f07b96baca910e86a25ac05aa7acb1e884241d707c4e94d483868e742c31"
+            },
+            {
+              "id": "saturday_stage-mirage_billx_20260517000000000",
+              "artistName": "Billx",
+              "artistSlug": "billx",
+              "artistId": "stage-mirage_billx",
+              "artistOrder": 8,
+              "startAt": "2026-05-17T00:00:00.000Z",
+              "endAt": "2026-05-17T01:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Billx"
+              ],
+              "artistTokens": [
+                "billx"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698348d2f6b71f6dde7da170",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "697c7bd8a7fe527b2ae9694b"
+                ]
+              },
+              "hash": "e2f0e864f6577400d46a53d3ce0c24b561a6c9d12882c5a4c770a9f542508573"
+            },
+            {
+              "id": "saturday_stage-mirage_gpf-b2b-unicorn-on-k_20260517010000000",
+              "artistName": "GPF B2B Unicorn on K",
+              "artistSlug": "gpf-b2b-unicorn-on-k",
+              "artistId": "stage-mirage_gpf-b2b-unicorn-on-k",
+              "artistOrder": 9,
+              "startAt": "2026-05-17T01:00:00.000Z",
+              "endAt": "2026-05-17T02:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "GPF",
+                "Unicorn on K"
+              ],
+              "artistTokens": [
+                "gpf",
+                "unicorn-on-k"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698348f2f6b71f6dde7da171",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1d73567e437c5a638c",
+                "chapiMusicGroupIds": [
+                  "69204af51db7d115dc6d7b65"
+                ]
+              },
+              "hash": "c920d0ec2e22fa095ca7c67b04285c715ab840f9ace3762faede1c7fb4ac8f73"
+            },
+            {
+              "id": "saturday_stage-mirage_rdo_source1_only",
+              "artistName": "RDØ",
+              "artistSlug": "rdo",
+              "artistId": "stage-mirage_rdo",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "RDØ"
+              ],
+              "artistTokens": [
+                "rdo"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "20a504ae34112d4a89d46929dde57f09f51eff7a46ec2558788c91133f286f6d",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-mirage_zorza_source1_only",
+              "artistName": "ZORZA",
+              "artistSlug": "zorza",
+              "artistId": "stage-mirage_zorza",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ZORZA"
+              ],
+              "artistTokens": [
+                "zorza"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "8d941cb5d6ca31bd701be87bda7e2cc4f8044d9b432edf458606f3350f9ce054",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1d73567e437c5a638c"
+          }
+        },
+        {
+          "stageName": "STAGE ALT F4",
+          "stageSlug": "stage-alt-f4",
+          "stageCanonical": "STAGE ALT F4",
+          "stageOrder": 2,
+          "stageColor": "#e99b8b",
+          "artists": [
+            {
+              "id": "saturday_stage-alt-f4_otah-b2b-fiikra_20260516100000000",
+              "artistName": "Otah B2B FIIKRA",
+              "artistSlug": "otah-b2b-fiikra",
+              "artistId": "stage-alt-f4_otah-b2b-fiikra",
+              "artistOrder": 1,
+              "startAt": "2026-05-16T10:00:00.000Z",
+              "endAt": "2026-05-16T11:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Otah",
+                "FIIKRA"
+              ],
+              "artistTokens": [
+                "otah",
+                "fiikra"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698350e3f6b71f6dde7da180",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830f62f6b71f6dde7da159"
+                ]
+              },
+              "hash": "eae96b49660262a6c99e00a74c1f53606f05c91f3473da439fa068b30deecdd6"
+            },
+            {
+              "id": "saturday_stage-alt-f4_evander-b2b-blasty_20260516110000000",
+              "artistName": "Evänder B2B BLASTY",
+              "artistSlug": "evander-b2b-blasty",
+              "artistId": "stage-alt-f4_evander-b2b-blasty",
+              "artistOrder": 2,
+              "startAt": "2026-05-16T11:00:00.000Z",
+              "endAt": "2026-05-16T12:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Evänder",
+                "BLASTY"
+              ],
+              "artistTokens": [
+                "evander",
+                "blasty"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6983510cf6b71f6dde7da181",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830e4bf6b71f6dde7da156"
+                ]
+              },
+              "hash": "de53471700527f93b2e7097ec2b4aad3ae32686373b74414f299cb38a4fce97a"
+            },
+            {
+              "id": "saturday_stage-alt-f4_pinotello_20260516130000000",
+              "artistName": "Pinotello",
+              "artistSlug": "pinotello",
+              "artistId": "stage-alt-f4_pinotello",
+              "artistOrder": 3,
+              "startAt": "2026-05-16T13:00:00.000Z",
+              "endAt": "2026-05-16T14:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Pinotello"
+              ],
+              "artistTokens": [
+                "pinotello"
+              ],
+              "genres": [
+                "Pays-Bas"
+              ],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69835131f6b71f6dde7da182",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69830f25f6b71f6dde7da158"
+                ]
+              },
+              "hash": "cf483854a0eca43f3b76ec7844456af2a07aa8de79f94ac7945387956937e081"
+            },
+            {
+              "id": "saturday_stage-alt-f4_ivy_20260516170000000",
+              "artistName": "[IVY]",
+              "artistSlug": "ivy",
+              "artistId": "stage-alt-f4_ivy",
+              "artistOrder": 4,
+              "startAt": "2026-05-16T17:00:00.000Z",
+              "endAt": "2026-05-16T18:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "[IVY]"
+              ],
+              "artistTokens": [
+                "ivy"
+              ],
+              "genres": [
+                "Angleterre"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z6920315d1ad2495f1d16d16a.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69835174f6b71f6dde7da183",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "6920317e1ad2495f1d16d16d"
+                ]
+              },
+              "hash": "e115f8c47199e1e07a12e26a8ae3f1b15f60bc961d68ca6cf9346f1d8f4226d1"
+            },
+            {
+              "id": "saturday_stage-alt-f4_sota_20260516190000000",
+              "artistName": "Sota",
+              "artistSlug": "sota",
+              "artistId": "stage-alt-f4_sota",
+              "artistOrder": 5,
+              "startAt": "2026-05-16T19:00:00.000Z",
+              "endAt": "2026-05-16T20:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Sota"
+              ],
+              "artistTokens": [
+                "sota"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6983519cf6b71f6dde7da184",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "69204b8c1db7d115dc6d7b68"
+                ]
+              },
+              "hash": "948de5649b35cec01eda1540d82c3ada5cea4ca42ec82d45937b65a8a1196102"
+            },
+            {
+              "id": "saturday_stage-alt-f4_youphoria_20260516200000000",
+              "artistName": "Youphoria",
+              "artistSlug": "youphoria",
+              "artistId": "stage-alt-f4_youphoria",
+              "artistOrder": 6,
+              "startAt": "2026-05-16T20:00:00.000Z",
+              "endAt": "2026-05-16T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Youphoria"
+              ],
+              "artistTokens": [
+                "youphoria"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698351bef6b71f6dde7da185",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "69834b82f6b71f6dde7da172",
+                "chapiMusicGroupIds": [
+                  "691c926d1ad2495f1d16d153"
+                ]
+              },
+              "hash": "d09523385d2e7428bbb5710ad0dcdead4c08a991c1a1b159384608ff2487f832"
+            },
+            {
+              "id": "saturday_stage-alt-f4_basstripper_source1_only",
+              "artistName": "BASSTRIPPER",
+              "artistSlug": "basstripper",
+              "artistId": "stage-alt-f4_basstripper",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BASSTRIPPER"
+              ],
+              "artistTokens": [
+                "basstripper"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "edfb0faaff16d67c6727491fa36b32c2fe2b5a06111dbc48ddf12652e986f3a2",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_c-joo-b2b-dna_source1_only",
+              "artistName": "C-JOO B2B DNA",
+              "artistSlug": "c-joo-b2b-dna",
+              "artistId": "stage-alt-f4_c-joo-b2b-dna",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "C-JOO",
+                "DNA"
+              ],
+              "artistTokens": [
+                "c-joo",
+                "dna"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "f2213de3c6bd2d33b27abbcb933f87f2ceb03a2eac3204b7181aa5f7cbfa018f",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_fiikra-b2b-otah_source1_only",
+              "artistName": "FIIKRA B2B OTAH",
+              "artistSlug": "fiikra-b2b-otah",
+              "artistId": "stage-alt-f4_fiikra-b2b-otah",
+              "artistOrder": 9,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "FIIKRA",
+                "OTAH"
+              ],
+              "artistTokens": [
+                "fiikra",
+                "otah"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "3c19d68ae3f65e88edfb1c61120e8975bfcdba5eb2d77e3316ff214054772674",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_kara_source1_only",
+              "artistName": "KARA",
+              "artistSlug": "kara",
+              "artistId": "stage-alt-f4_kara",
+              "artistOrder": 10,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KARA"
+              ],
+              "artistTokens": [
+                "kara"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "1f117e67e9473f481f10feb0a64e51e4f52f50e21fc8b92564eb81724d1a663e",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_soraa_source1_only",
+              "artistName": "SORAÄ",
+              "artistSlug": "soraa",
+              "artistId": "stage-alt-f4_soraa",
+              "artistOrder": 11,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SORAÄ"
+              ],
+              "artistTokens": [
+                "soraa"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "147b99f61bca414c1b3ddebf592fdb1fa85617cff6f4a038ad70d400956b4712",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_synergy_source1_only",
+              "artistName": "SYNERGY",
+              "artistSlug": "synergy",
+              "artistId": "stage-alt-f4_synergy",
+              "artistOrder": 12,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SYNERGY"
+              ],
+              "artistTokens": [
+                "synergy"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "fc12298fca7d2c5364afb7a1054fe7d27372db6b7f7d2fc4e90d4b26249ed607",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-alt-f4_zorel_source1_only",
+              "artistName": "ZOREL",
+              "artistSlug": "zorel",
+              "artistId": "stage-alt-f4_zorel",
+              "artistOrder": 13,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ZOREL"
+              ],
+              "artistTokens": [
+                "zorel"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "c070d0fd35a3867f1ba5f5bd0fe5c3181666b2996b8623cd1d1c2077f189e1dc",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "69834b82f6b71f6dde7da172"
+          }
+        },
+        {
+          "stageName": "TECHNOBUS",
+          "stageSlug": "technobus",
+          "stageCanonical": "TECHNOBUS",
+          "stageOrder": 3,
+          "stageColor": "#c0c0c0",
+          "artists": [
+            {
+              "id": "saturday_technobus_bodru-b2b-furious_source1_only",
+              "artistName": "BØDRU B2B FURIOUS",
+              "artistSlug": "bodru-b2b-furious",
+              "artistId": "technobus_bodru-b2b-furious",
+              "artistOrder": 1,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "BØDRU",
+                "FURIOUS"
+              ],
+              "artistTokens": [
+                "bodru",
+                "furious"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "c068aa7e15aed32282c26a818ed631cdfff9f7e54c9c6c501a27509d6da880fa",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_disrupt-tchai-b2b-vinzz_source1_only",
+              "artistName": "DISRUPT TCHAÏ B2B VINZZ",
+              "artistSlug": "disrupt-tchai-b2b-vinzz",
+              "artistId": "technobus_disrupt-tchai-b2b-vinzz",
+              "artistOrder": 2,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "DISRUPT TCHAÏ",
+                "VINZZ"
+              ],
+              "artistTokens": [
+                "disrupt-tchai",
+                "vinzz"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "77f09ff62250ed76cf8fc6d91b16ccfbde7eed6a6a4ae202673f086c343cf45a",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_isaline_source1_only",
+              "artistName": "ISALINE",
+              "artistSlug": "isaline",
+              "artistId": "technobus_isaline",
+              "artistOrder": 3,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ISALINE"
+              ],
+              "artistTokens": [
+                "isaline"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "33c35f7cfbdea2be96f0eaf75915595220d761d89f4ef72080990b10565f0008",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_ksltech_source1_only",
+              "artistName": "KSLTECH",
+              "artistSlug": "ksltech",
+              "artistId": "technobus_ksltech",
+              "artistOrder": 4,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "KSLTECH"
+              ],
+              "artistTokens": [
+                "ksltech"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "51b9a907539e0d5358d72106a24a6e6d774373dccbbd4b37c7975a7adcd02c73",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_leardcore_source1_only",
+              "artistName": "LEARDCORE",
+              "artistSlug": "leardcore",
+              "artistId": "technobus_leardcore",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "LEARDCORE"
+              ],
+              "artistTokens": [
+                "leardcore"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "a4a41e22e3cfcdfc3cb8a5076654d1dba1c27f8c4b454100c114d628de6e6a4f",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_nexos_source1_only",
+              "artistName": "NEXØS",
+              "artistSlug": "nexos",
+              "artistId": "technobus_nexos",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NEXØS"
+              ],
+              "artistTokens": [
+                "nexos"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "a72c1355f5602665e3ba3bd6db28c232651953fff12e9111c56915ba152f0c61",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_sergastek_source1_only",
+              "artistName": "SERGASTEK",
+              "artistSlug": "sergastek",
+              "artistId": "technobus_sergastek",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SERGASTEK"
+              ],
+              "artistTokens": [
+                "sergastek"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "4314cdbf18f2fb373b1e559ca569c3fc4b6cbda4d5fc72abc041af5a2ce13dfb",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_technobus_slackreb_source1_only",
+              "artistName": "SLACKREB",
+              "artistSlug": "slackreb",
+              "artistId": "technobus_slackreb",
+              "artistOrder": 8,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "SLACKREB"
+              ],
+              "artistTokens": [
+                "slackreb"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "b25834fee5e5bd0e64ec8c6750274149e0ea1ea5b86b84b2507b335ac2e2d419",
+              "sourceOnly": true
+            }
+          ]
+        },
+        {
+          "stageName": "STAGE CLOUD",
+          "stageSlug": "stage-cloud",
+          "stageCanonical": "STAGE CLOUD",
+          "stageOrder": 4,
+          "stageColor": "#93c5fd",
+          "artists": [
+            {
+              "id": "saturday_stage-cloud_amor_20260516183000000",
+              "artistName": "Amor",
+              "artistSlug": "amor",
+              "artistId": "stage-cloud_amor",
+              "artistOrder": 1,
+              "startAt": "2026-05-16T18:30:00.000Z",
+              "endAt": "2026-05-16T19:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Amor"
+              ],
+              "artistTokens": [
+                "amor"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69833041f6b71f6dde7da165",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "698303a4f6b71f6dde7da145"
+                ]
+              },
+              "hash": "a646296e85e9ec27d1f22acfcc19ac19e42f8a66a7e28f805344ae56869adfd4"
+            },
+            {
+              "id": "saturday_stage-cloud_nto_20260516193000000",
+              "artistName": "NTO",
+              "artistSlug": "nto",
+              "artistId": "stage-cloud_nto",
+              "artistOrder": 2,
+              "startAt": "2026-05-16T19:30:00.000Z",
+              "endAt": "2026-05-16T21:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "NTO"
+              ],
+              "artistTokens": [
+                "nto"
+              ],
+              "genres": [
+                "France"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203bb21db7d115dc6d7b4d.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "69833066f6b71f6dde7da166",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "691c91ec1ad2495f1d16d14f"
+                ]
+              },
+              "hash": "b98f5656a4b1220b59cbf399141c33596c8beb8c26899e71767daabccc1ea581"
+            },
+            {
+              "id": "saturday_stage-cloud_tigerhead_20260516210000000",
+              "artistName": "Tigerhead",
+              "artistSlug": "tigerhead",
+              "artistId": "stage-cloud_tigerhead",
+              "artistOrder": 3,
+              "startAt": "2026-05-16T21:00:00.000Z",
+              "endAt": "2026-05-16T22:30:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "Tigerhead"
+              ],
+              "artistTokens": [
+                "tigerhead"
+              ],
+              "genres": [
+                "Allemagne"
+              ],
+              "image": "https://static.insanefestival.chapi.to/images/z69203eab1db7d115dc6d7b5d.jpg",
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "698330a6f6b71f6dde7da167",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "691c90f61ad2495f1d16d142"
+                ]
+              },
+              "hash": "5dd89ee068513c3f0bf6d615a879a13dbc33477aded859591ac8086f95082ce3"
+            },
+            {
+              "id": "saturday_stage-cloud_a5km-b2b-ia5km_20260517010000000",
+              "artistName": "A5KM B2B IA5KM",
+              "artistSlug": "a5km-b2b-ia5km",
+              "artistId": "stage-cloud_a5km-b2b-ia5km",
+              "artistOrder": 4,
+              "startAt": "2026-05-17T01:00:00.000Z",
+              "endAt": "2026-05-17T02:00:00.000Z",
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "A5KM",
+                "IA5KM"
+              ],
+              "artistTokens": [
+                "a5km",
+                "ia5km"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "chapi",
+              "sourcePriority": 2,
+              "sourceIds": {
+                "chapiEventId": "6983465bf6b71f6dde7da168",
+                "chapiProgramId": "67b33a79d812154f742943ec",
+                "chapiSceneId": "6932ee1673567e437c5a638b",
+                "chapiMusicGroupIds": [
+                  "691c91501ad2495f1d16d146"
+                ]
+              },
+              "hash": "727556c5dac716a003563870b2064cef4644e1b184059fa2c4462bdcfc96db3c"
+            },
+            {
+              "id": "saturday_stage-cloud_ascendant-vierge_source1_only",
+              "artistName": "ASCENDANT VIERGE",
+              "artistSlug": "ascendant-vierge",
+              "artistId": "stage-cloud_ascendant-vierge",
+              "artistOrder": 5,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "ASCENDANT VIERGE"
+              ],
+              "artistTokens": [
+                "ascendant-vierge"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "77aa06f1d3762a0f29931989104d03b9981208d48f056df2f5a082530abc1bd8",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-cloud_clement-matrat_source1_only",
+              "artistName": "CLÉMENT MATRAT",
+              "artistSlug": "clement-matrat",
+              "artistId": "stage-cloud_clement-matrat",
+              "artistOrder": 6,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "CLÉMENT MATRAT"
+              ],
+              "artistTokens": [
+                "clement-matrat"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "649021177798ba030dc12140e82621b703d50998a573fad36e163de4384d76e3",
+              "sourceOnly": true
+            },
+            {
+              "id": "saturday_stage-cloud_tars_source1_only",
+              "artistName": "TARS",
+              "artistSlug": "tars",
+              "artistId": "stage-cloud_tars",
+              "artistOrder": 7,
+              "startAt": null,
+              "endAt": null,
+              "host": false,
+              "live": false,
+              "featured": false,
+              "artistTags": [
+                "TARS"
+              ],
+              "artistTokens": [
+                "tars"
+              ],
+              "genres": [],
+              "image": null,
+              "source": "site",
+              "sourcePriority": 1,
+              "sourceIds": {},
+              "hash": "7443dfafdd854b0789973fcdb8b4d90cd4c1a6c443998f2dd921a4136f992fac",
+              "sourceOnly": true
+            }
+          ],
+          "sourceIds": {
+            "chapiSceneId": "6932ee1673567e437c5a638b"
+          }
+        }
+      ]
+    }
+  ]
+}
