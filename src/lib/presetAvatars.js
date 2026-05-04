@@ -47,7 +47,8 @@ export function getRandomPresetAvatarIndex(excludeIndex = null) {
     return 1;
   }
 
-  const safeExcludeIndex = clampPresetAvatarIndex(excludeIndex);
+  const hasExcludeIndex = excludeIndex !== null && excludeIndex !== undefined;
+  const safeExcludeIndex = hasExcludeIndex ? clampPresetAvatarIndex(excludeIndex) : null;
   let nextIndex = safeExcludeIndex;
 
   while (nextIndex === safeExcludeIndex) {

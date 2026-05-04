@@ -188,6 +188,7 @@ export async function signUpWithUsername({ firstName, lastName, username, passwo
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
   const hiddenAuthEmail = buildHiddenAuthEmail(normalizedUsername);
+  const avatarPreset = getRandomPresetAvatarIndex();
   if (!validateUsername(normalizedUsername)) {
     throw new Error(
       'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
@@ -211,6 +212,8 @@ export async function signUpWithUsername({ firstName, lastName, username, passwo
         last_name: String(lastName ?? '').trim(),
         auth_email: hiddenAuthEmail,
         username: normalizedUsername,
+        avatar_kind: 'preset',
+        avatar_preset: avatarPreset,
       },
     },
   });
@@ -309,7 +312,7 @@ function buildProfilePayloadFromUser(user) {
       metadata.username ?? `user-${user.id.slice(0, 8)}`
     ),
     avatar_kind: 'preset',
-    avatar_preset: getRandomPresetAvatarIndex(),
+    avatar_preset: Number(metadata.avatar_preset) || getRandomPresetAvatarIndex(),
   };
 }
 
