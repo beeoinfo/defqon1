@@ -9,7 +9,9 @@ import {
   useState,
 } from 'react';
 import {
+  ArrowClockwiseIcon,
   ArrowLeftIcon,
+  CircleNotchIcon,
   HeartBreakIcon,
   HeartIcon,
   LightningIcon,
@@ -29,6 +31,7 @@ import Button from '@/components/primitives/Button';
 import { SearchInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
+import usePullToRefresh from '@/hooks/usePullToRefresh';
 import {
   filterExpiredEntries,
   filterExpiredReviewFavorites,
@@ -97,6 +100,7 @@ import MapsView from './views/MapsView';
 import ReviewsView from './views/ReviewsView';
 import StorybookView from './views/StorybookView';
 import TimetableView from './views/TimetableView';
+import './App.css';
 
 const VIEW_COMPONENTS = {
   lineup: LineUpView,
@@ -583,6 +587,28 @@ const App = () => {
   const attemptedInviteJoinKeyRef = useRef('');
 
   useDocumentScrollLock(hasRenderedPages);
+
+  const handlePullRefresh = useCallback(async () => {
+    startTransition(() => {
+      setCurrentTime(Date.now());
+      setViewRefreshKey((currentKey) => currentKey + 1);
+    });
+
+    if (isSupabaseConfigured()) {
+      await hydrateAccountRef.current?.(authUser ?? null, { hasUserOverride: Boolean(authUser) });
+    }
+  }, [authUser]);
+
+  const {
+    pullDistance,
+    pullProgress,
+    refreshState,
+    isDragging,
+    isPullVisible,
+  } = usePullToRefresh({
+    disabled: hasRenderedPages,
+    onRefresh: handlePullRefresh,
+  });
 
   useEffect(() => {
     const topPage = pageStack.at(-1);
@@ -2163,6 +2189,40 @@ const App = () => {
 
   return (
     <UiThemeScope>
+      <Box
+        className="dq-pull-refresh"
+        component="div"
+        align="center"
+        justify="center"
+        aria-hidden={!isPullVisible}
+        data-state={refreshState}
+        data-dragging={isDragging ? 'true' : undefined}
+        style={{
+          '--dq-pull-refresh-distance': `${pullDistance}px`,
+          '--dq-pull-refresh-progress': pullProgress,
+        }}
+      >
+        <Box
+          className="dq-pull-refresh__pill"
+          component="span"
+          align="center"
+          justify="center"
+        >
+          <ArrowClockwiseIcon
+            className="dq-pull-refresh__icon dq-pull-refresh__icon--arrow"
+            aria-hidden="true"
+            focusable="false"
+            weight="bold"
+          />
+          <CircleNotchIcon
+            className="dq-pull-refresh__icon dq-pull-refresh__icon--loader"
+            aria-hidden="true"
+            focusable="false"
+            weight="bold"
+          />
+        </Box>
+      </Box>
+
       {baseView}
 
       {renderedPageStack.map((page, index) => (
