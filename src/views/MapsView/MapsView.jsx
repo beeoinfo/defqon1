@@ -75,6 +75,37 @@ const parseMapboxStyleUrl = (styleUrl) => {
   return { owner: match[1], styleId: match[2] };
 };
 
+const normalizeMapLayerDay = (value) => (
+  String(value ?? '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+);
+
+const getDefaultMapLayerId = (mapLayers, selectedDay) => {
+  const normalizedSelectedDay = normalizeMapLayerDay(selectedDay);
+
+  if (!normalizedSelectedDay) {
+    return mapLayers[0]?.id ?? '';
+  }
+
+  return mapLayers.find((layer) => {
+    const candidates = [
+      layer.id,
+      layer.day,
+      layer.daySlug,
+      layer.label,
+      layer.name,
+    ];
+
+    return candidates.some((candidate) => (
+      normalizeMapLayerDay(candidate) === normalizedSelectedDay
+    ));
+  })?.id ?? mapLayers[0]?.id ?? '';
+};
+
 const ensureMapboxCss = () => {
   if (typeof document === 'undefined') {
     return;
@@ -232,8 +263,10 @@ const focusMapOnLayer = (map, layer, animate = true) => {
   });
 };
 
-const MapsView = ({ mapLayers = [] }) => {
-  const [selectedLayerId, setSelectedLayerId] = useState(() => mapLayers[0]?.id ?? '');
+const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
+  const [selectedLayerId, setSelectedLayerId] = useState(
+    () => getDefaultMapLayerId(mapLayers, selectedDay)
+  );
   const [viewerState, setViewerState] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const mapContainerRef = useRef(null);
@@ -306,6 +339,17 @@ const MapsView = ({ mapLayers = [] }) => {
         setViewerState('error');
       });
   });
+
+  useEffect(() => {
+    if (!mapLayers.length) {
+      setSelectedLayerId('');
+      return;
+    }
+
+    if (!mapLayers.some((layer) => layer.id === selectedLayerId)) {
+      setSelectedLayerId(getDefaultMapLayerId(mapLayers, selectedDay));
+    }
+  }, [mapLayers, selectedDay, selectedLayerId]);
 
   useEffect(() => {
     if (!activeLayer || !mapContainerRef.current || mapRef.current) {

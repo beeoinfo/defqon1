@@ -7,3 +7,14 @@
   margin: 0;
   color: var(--dq-ui-text-soft);
 }
+
+.dq-lineup-view__style-tags {
+  margin-top: 2px;
+}
+
+.dq-lineup-view__style-tags .dq-ui-badge {
+  min-height: 18px;
+  padding-inline: 6px;
+  font-size: 0.625rem;
+  line-height: 1;
+}

@@ -338,6 +338,17 @@
   white-space: nowrap;
 }
 
+.dq-timetable-view__style-tags {
+  margin-top: 1px;
+}
+
+.dq-timetable-view__style-tags .dq-ui-badge {
+  min-height: 18px;
+  padding-inline: 6px;
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
 .dq-timetable-view__people-stack {
   margin-top: 0.125rem;
   min-height: 24px;

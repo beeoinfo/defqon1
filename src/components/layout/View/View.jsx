@@ -12,6 +12,7 @@ const View = ({
   profileName,
   profileSubtitle,
   profileImageSrc,
+  profileBadge = null,
   activeView = null,
   onOpenView = null,
   onOpenSearch = null,
@@ -50,6 +51,7 @@ const View = ({
         profileName={profileName}
         profileSubtitle={profileSubtitle}
         profileImageSrc={profileImageSrc}
+        profileBadge={profileBadge}
         activeView={activeView}
         onOpenView={onOpenView}
         onOpenSearch={onOpenSearch}

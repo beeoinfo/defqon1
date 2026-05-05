@@ -20,6 +20,14 @@
   font-weight: 400;
 }
 
+.dq-admin-page__fetch-button {
+  align-self: flex-start;
+}
+
+.dq-admin-page__fetch-button--running .dq-ui-button__icon {
+  animation: dq-admin-page-spin 780ms linear infinite;
+}
+
 .dq-admin-page__changes-preview {
   max-height: 280px;
   margin: 0;
@@ -29,4 +37,10 @@
   border-radius: var(--dq-ui-radius-md);
   color: var(--dq-ui-text);
   background: var(--dq-ui-panel);
+}
+
+@keyframes dq-admin-page-spin {
+  to {
+    transform: rotate(1turn);
+  }
 }

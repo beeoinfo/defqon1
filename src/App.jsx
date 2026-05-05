@@ -39,12 +39,14 @@ import {
   filterUndatedEntries,
   filterUndatedReviewFavorites,
   getDays,
+  getDefaultFestivalDay,
   getStages,
   groupEntriesByDayAndStage,
   hasCompleteSchedule,
   loadHidePastEventsPreference,
   loadHideUndatedEventsPreference,
   loadIgnoreSmallConflictsPreference,
+  loadShowStyleTagsPreference,
   loadViewPreferences,
   reconcileFavoriteItemsWithEntries,
   removeFavoriteByEntryId,
@@ -53,6 +55,7 @@ import {
   saveHidePastEventsPreference,
   saveHideUndatedEventsPreference,
   saveIgnoreSmallConflictsPreference,
+  saveShowStyleTagsPreference,
   saveViewPreferences,
   upsertFavoriteEntry,
   validateLineupPayload,
@@ -76,6 +79,7 @@ import {
   joinCurrentUserTribeByCode,
   leaveCurrentUserTribe,
   loadAccountBundle,
+  loadAdminLineupVersions,
   loadPublishedLineupVersions,
   loadTribeBundle,
   normalizeTribeCode,
@@ -120,10 +124,19 @@ const getEntryTimestamp = (value) => {
   return Number.isNaN(timestamp) ? null : timestamp;
 };
 
-const getStyleTagsFromRecord = (record) => [
-  ...(Array.isArray(record?.mainTags) ? record.mainTags : []),
-  record?.additionalTag,
-].map(getCleanStyleTag).filter(Boolean);
+const getStyleTagItemsFromRecord = (record) => [
+  ...(Array.isArray(record?.mainTags)
+    ? record.mainTags.map((tag) => ({ label: tag, kind: 'main' }))
+    : []),
+  ...(record?.additionalTag ? [{ label: record.additionalTag, kind: 'additional' }] : []),
+].map((item) => ({
+  ...item,
+  label: getCleanStyleTag(item.label),
+})).filter((item) => item.label);
+
+const getStyleTagsFromRecord = (record) => (
+  getStyleTagItemsFromRecord(record).map((item) => item.label)
+);
 
 const addUniqueStyleTag = (styleTags, tag) => {
   const cleanTag = getCleanStyleTag(tag);
@@ -134,6 +147,20 @@ const addUniqueStyleTag = (styleTags, tag) => {
   }
 
   styleTags.set(comparableTag, cleanTag);
+};
+
+const addUniqueStyleTagItem = (styleTagItems, item) => {
+  const cleanLabel = getCleanStyleTag(item?.label);
+  const comparableTag = getComparableLabel(cleanLabel);
+
+  if (!cleanLabel || styleTagItems.has(comparableTag)) {
+    return;
+  }
+
+  styleTagItems.set(comparableTag, {
+    label: cleanLabel,
+    kind: item?.kind === 'additional' ? 'additional' : 'main',
+  });
 };
 
 const getStyleOptionsFromEntries = (entries, styleTagsByArtistToken, styleTagsByArtistName) => {
@@ -156,9 +183,14 @@ const getStyleOptionsFromEntries = (entries, styleTagsByArtistToken, styleTagsBy
 };
 
 const getEntryStyleTags = (entry, styleTagsByArtistToken, styleTagsByArtistName) => {
-  const styleTags = new Map();
+  return getEntryStyleTagItems(entry, styleTagsByArtistToken, styleTagsByArtistName)
+    .map((item) => item.label);
+};
+
+const getEntryStyleTagItems = (entry, styleTagsByArtistToken, styleTagsByArtistName) => {
+  const styleTagItems = new Map();
   const addRecordTags = (recordTags) => {
-    recordTags?.forEach((tag) => addUniqueStyleTag(styleTags, tag));
+    recordTags?.forEach((item) => addUniqueStyleTagItem(styleTagItems, item));
   };
 
   entry.artistTokens?.forEach((token) => {
@@ -172,7 +204,7 @@ const getEntryStyleTags = (entry, styleTagsByArtistToken, styleTagsByArtistName)
   addRecordTags(styleTagsByArtistName.get(getComparableLabel(entry.artistName)));
   addRecordTags(styleTagsByArtistName.get(getComparableLabel(entry.artistRaw)));
 
-  return Array.from(styleTags.values());
+  return Array.from(styleTagItems.values());
 };
 
 const entryMatchesSelectedStyles = (
@@ -468,6 +500,7 @@ const AppBaseView = memo(({
   profileName,
   profileSubtitle,
   profileImageSrc,
+  profileBadge,
   brandLogoSrc,
 }) => {
   const ActiveViewComponent = VIEW_COMPONENTS[activeView];
@@ -484,6 +517,7 @@ const AppBaseView = memo(({
       profileName={profileName}
       profileSubtitle={profileSubtitle}
       profileImageSrc={profileImageSrc}
+      profileBadge={profileBadge}
       activeView={activeView}
       onOpenView={onOpenView}
       onOpenSearch={onOpenSearch}
@@ -615,6 +649,7 @@ const App = () => {
   const [ignoreSmallConflicts, setIgnoreSmallConflicts] = useState(() =>
     loadIgnoreSmallConflictsPreference()
   );
+  const [showStyleTags, setShowStyleTags] = useState(() => loadShowStyleTagsPreference());
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [favoriteItems, setFavoriteItems] = useState(() => bootAccount?.favorites ?? []);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -630,6 +665,7 @@ const App = () => {
   const [authUser, setAuthUser] = useState(() => (bootUserId ? { id: bootUserId } : null));
   const [profile, setProfile] = useState(() => bootAccount?.profile ?? null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingLineupCount, setPendingLineupCount] = useState(0);
   const [tribe, setTribe] = useState(() => bootAccount?.tribe ?? null);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
@@ -672,6 +708,20 @@ const App = () => {
     return resolvedSources;
   }, []);
 
+  const refreshPendingLineupCount = useCallback(async () => {
+    if (!isSupabaseConfigured() || !isAdmin) {
+      setPendingLineupCount(0);
+      return 0;
+    }
+
+    const versions = await loadAdminLineupVersions(activeSite.slug);
+    const nextPendingLineupCount = versions.filter((lineup) => lineup.status === 'pending').length;
+
+    setPendingLineupCount(nextPendingLineupCount);
+
+    return nextPendingLineupCount;
+  }, [isAdmin]);
+
   const handlePullRefresh = useCallback(async () => {
     startTransition(() => {
       setCurrentTime(Date.now());
@@ -679,11 +729,12 @@ const App = () => {
     });
 
     await refreshLineupSources();
+    await refreshPendingLineupCount();
 
     if (isSupabaseConfigured()) {
       await hydrateAccountRef.current?.(authUser ?? null, { hasUserOverride: Boolean(authUser) });
     }
-  }, [authUser, refreshLineupSources]);
+  }, [authUser, refreshLineupSources, refreshPendingLineupCount]);
 
   const {
     pullDistance,
@@ -729,6 +780,7 @@ const App = () => {
   useEffect(() => {
     if (!authUser || !isSupabaseConfigured()) {
       setIsAdmin(false);
+      setPendingLineupCount(0);
       return;
     }
 
@@ -752,6 +804,12 @@ const App = () => {
       isActive = false;
     };
   }, [authUser]);
+
+  useEffect(() => {
+    refreshPendingLineupCount().catch((error) => {
+      console.error(error);
+    });
+  }, [refreshPendingLineupCount]);
 
   useEffect(() => () => {
     if (headerModeTransitionTimeoutRef.current) {
@@ -895,7 +953,7 @@ const App = () => {
     const styleTagsByArtistName = new Map();
 
     ELECTRONIC_FESTIVAL_STYLES_DB.forEach((record) => {
-      const recordTags = getStyleTagsFromRecord(record);
+      const recordTags = getStyleTagItemsFromRecord(record);
 
       if (recordTags.length === 0) {
         return;
@@ -922,12 +980,37 @@ const App = () => {
     () => new Set(selectedStyles.map(getComparableLabel).filter(Boolean)),
     [selectedStyles]
   );
+  const styleTagsByEntryId = useMemo(
+    () => new Map(
+      selectedEntries.map((entry) => [
+        entry.id,
+        getEntryStyleTagItems(
+          entry,
+          styleLookups.styleTagsByArtistToken,
+          styleLookups.styleTagsByArtistName
+        ),
+      ])
+    ),
+    [selectedEntries, styleLookups]
+  );
   const days = useMemo(() => getDays(browseableEntries), [browseableEntries]);
+  const defaultBrowseDay = useMemo(
+    () => getDefaultFestivalDay(browseableEntries, currentTime),
+    [browseableEntries, currentTime]
+  );
   const timetableDays = useMemo(
     () => getDays(browseableEntries.filter((entry) => hasCompleteSchedule(entry))),
     [browseableEntries]
   );
-  const defaultTimetableDay = timetableDays[0] ?? '';
+  const defaultTimetableDay = useMemo(() => {
+    if (!timetableDays.length) {
+      return '';
+    }
+
+    return timetableDays.some((day) => getComparableLabel(day) === getComparableLabel(defaultBrowseDay))
+      ? defaultBrowseDay
+      : timetableDays[0];
+  }, [defaultBrowseDay, timetableDays]);
   useEffect(() => {
     if (timetableDays.length === 0) {
       if (selectedTimetableDay) {
@@ -938,9 +1021,9 @@ const App = () => {
     }
 
     if (!timetableDays.some((day) => getComparableLabel(day) === getComparableLabel(selectedTimetableDay))) {
-      setSelectedTimetableDay(timetableDays[0]);
+      setSelectedTimetableDay(defaultTimetableDay);
     }
-  }, [selectedTimetableDay, timetableDays]);
+  }, [defaultTimetableDay, selectedTimetableDay, timetableDays]);
   const stages = useMemo(
     () => getStages(browseableEntries, selectedDay),
     [browseableEntries, selectedDay]
@@ -1306,12 +1389,12 @@ const App = () => {
     setSearchHeaderQuery('');
     setSelectedDay('All days');
     setSelectedStage('All stages');
-    setSelectedTimetableDay('');
+    setSelectedTimetableDay(defaultTimetableDay);
     setSelectedStyles([]);
     setShowFavoritesOnly(false);
     setShowTribeOnly(false);
     setShowConflictsOnly(false);
-  }, []);
+  }, [defaultTimetableDay]);
 
   const openHomeView = useCallback(() => {
     startTransition(() => {
@@ -1422,6 +1505,10 @@ const App = () => {
   useEffect(() => {
     saveIgnoreSmallConflictsPreference(ignoreSmallConflicts);
   }, [ignoreSmallConflicts]);
+
+  useEffect(() => {
+    saveShowStyleTagsPreference(showStyleTags);
+  }, [showStyleTags]);
 
   useEffect(() => {
     const shouldReplaceLineup = activeView === 'lineup' && hasTimetableView;
@@ -1956,9 +2043,9 @@ const App = () => {
       timetableDays.map((day, index) => ({
         value: day,
         label: day,
-        defaultChecked: index === 0,
+        defaultChecked: getComparableLabel(day) === getComparableLabel(defaultTimetableDay) || (!defaultTimetableDay && index === 0),
       })),
-    [timetableDays]
+    [defaultTimetableDay, timetableDays]
   );
 
   const hasFavoriteEntries = favoriteIdSet.size > 0;
@@ -2099,6 +2186,13 @@ const App = () => {
   ], [timetableDrawers, timetableStyleOptions]);
 
   const timetableFilterBar = useMemo(() => (timetableChoices.length > 0 || timetableDrawersWithStyles.length > 0 ? {
+    defaultValue: {
+      day: defaultTimetableDay || null,
+      styles: [],
+      favorites: false,
+      conflicts: false,
+      tribe: false,
+    },
     value: {
       day: selectedTimetableDayLabel || null,
       styles: selectedStyles,
@@ -2132,7 +2226,6 @@ const App = () => {
       setShowConflictsOnly(false);
       setShowTribeOnly(false);
     },
-    resetButton: false,
     choices: timetableChoices,
     drawers: timetableDrawersWithStyles,
   } : null), [
@@ -2234,6 +2327,8 @@ const App = () => {
     return resolveProfileAvatarUrl(activeProfile);
   }, [activeProfile, authUser]);
 
+  const profileBadge = isAdmin && pendingLineupCount > 0 ? pendingLineupCount : null;
+
   const searchHeaderContent = useMemo(() => (
     <Box
       className="dq-app-search-header"
@@ -2259,6 +2354,11 @@ const App = () => {
     </Box>
   ), [handleReturnFromSearch, searchHeaderQuery]);
 
+  const handleLineupsChanged = useCallback(async () => {
+    await refreshLineupSources();
+    await refreshPendingLineupCount();
+  }, [refreshLineupSources, refreshPendingLineupCount]);
+
   const viewPropsByView = useMemo(() => ({
     lineup: {
       hasLineup,
@@ -2271,6 +2371,8 @@ const App = () => {
       tribeLikesByEntryId,
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       filterBar: lineupFilterBar,
+      showStyleTags,
+      styleTagsByEntryId,
     },
     search: {
       hasLineup,
@@ -2284,6 +2386,8 @@ const App = () => {
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       filterBar: lineupFilterBar,
       stackDays: Boolean(searchHeaderQuery.trim()),
+      showStyleTags,
+      styleTagsByEntryId,
     },
     timetable: {
       hasLineup,
@@ -2295,9 +2399,12 @@ const App = () => {
       tribeLikesByEntryId,
       archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
       filterBar: timetableFilterBar,
+      showStyleTags,
+      styleTagsByEntryId,
     },
     maps: {
       mapLayers: selectedMapLayers,
+      selectedDay: defaultBrowseDay,
     },
     reviews: {
       hasLineup,
@@ -2327,17 +2434,20 @@ const App = () => {
     isLatestLineupSelected,
     lineupFilterBar,
     removeReviewFavorite,
+    defaultBrowseDay,
     selectedMapLayers,
     selectedTimetableDayLabel,
     showTribeOnly,
     searchHeaderQuery,
     searchVisibleEntries,
+    showStyleTags,
     timetableFilterBar,
     toggleFavorite,
     tribeLikesByEntryId,
     visibleTimetableEntries,
     visibleReviewFavorites,
     visibleEntries,
+    styleTagsByEntryId,
   ]);
 
   const pagePropsByType = useMemo(() => ({
@@ -2352,14 +2462,17 @@ const App = () => {
       hidePastEvents,
       hideUndatedEvents,
       ignoreSmallConflicts,
+      showStyleTags,
       favoriteCount: favoriteItems.length,
       lineups: lineupSources,
       selectedLineupKey,
       isAdmin,
+      pendingLineupCount,
       onSelectLineup: handleSelectLineup,
       onHidePastEventsChange: setHidePastEvents,
       onHideUndatedEventsChange: setHideUndatedEvents,
       onIgnoreSmallConflictsChange: setIgnoreSmallConflicts,
+      onShowStyleTagsChange: setShowStyleTags,
       onResetFavorites: resetFavorites,
       onProfileUpdated: handleProfileUpdated,
       onSignedOut: handleSignedOut,
@@ -2370,7 +2483,7 @@ const App = () => {
     },
     admin: {
       isAdmin,
-      onLineupsChanged: refreshLineupSources,
+      onLineupsChanged: handleLineupsChanged,
     },
     about: {},
     roadmap: {},
@@ -2385,20 +2498,22 @@ const App = () => {
     handleRenameTribe,
     handleSelectLineup,
     handleSignedOut,
+    handleLineupsChanged,
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,
+    showStyleTags,
     isAdmin,
     favoriteItems.length,
     isTribeBusy,
     isTribeReady,
     lineupSources,
+    pendingLineupCount,
     pendingTribeInviteCode,
     resetFavorites,
     selectedLineupKey,
     tribe,
     tribeInviteAlert,
-    refreshLineupSources,
   ]);
 
   const baseViewHeaderTransitionState = useMemo(() => {
@@ -2441,6 +2556,7 @@ const App = () => {
       profileName={profileName}
       profileSubtitle={profileSubtitle}
       profileImageSrc={profileImageSrc}
+      profileBadge={profileBadge}
       brandLogoSrc={activeSiteAssets.logoSrc}
     />
   ), [
@@ -2453,6 +2569,7 @@ const App = () => {
     openSearch,
     openView,
     profileImageSrc,
+    profileBadge,
     profileName,
     profileSubtitle,
     searchHeaderContent,

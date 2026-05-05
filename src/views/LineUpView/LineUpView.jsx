@@ -8,6 +8,7 @@ import Card from '@/components/primitives/Card';
 import Drawer from '@/components/layout/Drawer';
 import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
+import Badge from '@/components/primitives/Badge';
 import {
   compareLineupEntries,
   getEntryDayLabel,
@@ -20,6 +21,12 @@ import { activeSite } from '@/sites/siteDefinitions';
 import './LineUpView.css';
 
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
+const STYLE_TAG_BADGE_BACKGROUND = 'rgba(56, 189, 248, 0.12)';
+const STYLE_TAG_BADGE_BORDER = 'rgba(56, 189, 248, 0.36)';
+const STYLE_TAG_BADGE_TEXT = '#7dd3fc';
+const ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND = 'rgba(251, 191, 36, 0.13)';
+const ADDITIONAL_STYLE_TAG_BADGE_BORDER = 'rgba(251, 191, 36, 0.4)';
+const ADDITIONAL_STYLE_TAG_BADGE_TEXT = '#fcd34d';
 const STAGE_PRIORITY_ORDER = ['BLUE', 'BLACK', 'RED', 'U.V.', 'GREEN', 'YELLOW'];
 const STAGE_PRIORITY_INDEX = new Map(
   STAGE_PRIORITY_ORDER.map((stageName, index) => [stageName, index])
@@ -68,6 +75,39 @@ const getEntryCardMetaProps = (entry) => ({
   meta3: getEntryTimeLabel(entry),
 });
 
+const renderStyleBadges = (styleTags) => {
+  if (!styleTags?.length) {
+    return null;
+  }
+
+  return (
+    <Box
+      className="dq-lineup-view__style-tags"
+      direction="row"
+      wrap="wrap"
+      gap="4px"
+    >
+      {styleTags.map((styleTag) => {
+        const label = typeof styleTag === 'string' ? styleTag : styleTag.label;
+        const isAdditional = typeof styleTag === 'object' && styleTag.kind === 'additional';
+
+        return (
+          <Badge
+            key={`${isAdditional ? 'additional' : 'main'}-${label}`}
+            size="sm"
+            variant="ghost"
+            backgroundColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND : STYLE_TAG_BADGE_BACKGROUND}
+            borderColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BORDER : STYLE_TAG_BADGE_BORDER}
+            textColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_TEXT : STYLE_TAG_BADGE_TEXT}
+          >
+            {label}
+          </Badge>
+        );
+      })}
+    </Box>
+  );
+};
+
 const LineUpView = ({
   hasLineup = true,
   groupedEntries = {},
@@ -80,6 +120,8 @@ const LineUpView = ({
   archiveNotice = null,
   stackDays = false,
   filterBar = null,
+  showStyleTags = false,
+  styleTagsByEntryId = new Map(),
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
 
@@ -134,7 +176,6 @@ const LineUpView = ({
         .map(([day, dayStages]) => ({
           id: day.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           label: day,
-          color: activeSite.theme.primary,
           day,
           stages: Object.entries(dayStages)
             .map(([stage, stageEntries]) => ({
@@ -191,6 +232,7 @@ const LineUpView = ({
                           key={entry.id}
                           color={entry.stageColor ?? stageColor}
                           title={getEntryDisplayName(entry)}
+                          underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
                           {...getEntryCardMetaProps(entry)}
                           actionVariant={canToggleFavorites ? 'likes' : null}
                           actionPressed={isFavorite}
@@ -244,6 +286,7 @@ const LineUpView = ({
                                       component="div"
                                       color={suggestionColor}
                                       title={getEntryDisplayName(suggestion)}
+                                      underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(suggestion.id)) : null}
                                       {...getEntryCardMetaProps(suggestion)}
                                       actionVariant={canToggleFavorites ? 'likes' : null}
                                       actionPressed={isSuggestionFavorite}
@@ -273,6 +316,8 @@ const LineUpView = ({
       daySections,
       favoriteIdSet,
       showTribeOnly,
+      showStyleTags,
+      styleTagsByEntryId,
       toggleFavorite,
       tribeLikesByEntryId,
     ]

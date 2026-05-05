@@ -1,0 +1,24 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobs.runDefqon1Timer.Disabled": "true",
+    "AzureWebJobs.runInsaneTimer.Disabled": "true",
+
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+
+    "SUPABASE_URL": "https://xxx.supabase.co",
+    "SUPABASE_SERVICE_ROLE_KEY": "xxx",
+
+    "DEFQON1_LINEUP_CRON": "0 */30 * * * *",
+    "INSANE_LINEUP_CRON": "0 */30 * * * *",
+
+    "DEFQON1_LINEUP_ENABLED": "true",
+    "INSANE_LINEUP_ENABLED": "true",
+
+    "DEFQON1_LINEUP_ACTIVE_FROM": "",
+    "DEFQON1_LINEUP_ACTIVE_TO": "",
+    "INSANE_LINEUP_ACTIVE_FROM": "",
+    "INSANE_LINEUP_ACTIVE_TO": ""
+  }
+}

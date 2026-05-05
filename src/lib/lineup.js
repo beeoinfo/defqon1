@@ -6,6 +6,7 @@ export const VIEW_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-view`;
 export const HIDE_PAST_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hidePastEvents`;
 export const HIDE_UNDATED_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hideUndatedEvents`;
 export const IGNORE_SMALL_CONFLICTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-ignoreSmallConflicts`;
+export const SHOW_STYLE_TAGS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-showStyleTags`;
 export const BETA_FEATURES_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-beta-features`;
 
 export const REVIEW_SECTION_MESSAGE =
@@ -316,6 +317,59 @@ export function getDays(entries) {
 export function getDefaultDay(entries) {
   const days = getDays(entries);
   return days[0] || 'Thursday';
+}
+
+export function getCurrentFestivalDay(entries, referenceTime = Date.now()) {
+  const dayRangesBySlug = new Map();
+
+  entries.forEach((entry) => {
+    const daySlug = entry?.daySlug;
+
+    if (!daySlug) {
+      return;
+    }
+
+    const startTimestamp = parseEntryDateTime(entry.startAt);
+    const endTimestamp = parseEntryDateTime(entry.endAt);
+
+    if (startTimestamp === null && endTimestamp === null) {
+      return;
+    }
+
+    const currentRange = dayRangesBySlug.get(daySlug) ?? {
+      dayOrder: entry.dayOrder ?? 999,
+      daySlug,
+      start: null,
+      end: null,
+    };
+
+    if (startTimestamp !== null) {
+      currentRange.start =
+        currentRange.start === null ? startTimestamp : Math.min(currentRange.start, startTimestamp);
+    }
+
+    if (endTimestamp !== null) {
+      currentRange.end =
+        currentRange.end === null ? endTimestamp : Math.max(currentRange.end, endTimestamp);
+    }
+
+    dayRangesBySlug.set(daySlug, currentRange);
+  });
+
+  const activeRange = Array.from(dayRangesBySlug.values())
+    .sort((leftRange, rightRange) => leftRange.dayOrder - rightRange.dayOrder)
+    .find((range) => {
+      const start = range.start ?? range.end;
+      const end = range.end ?? range.start;
+
+      return start !== null && end !== null && start <= referenceTime && referenceTime <= end;
+    });
+
+  return activeRange ? getDayLabel(activeRange.daySlug) : '';
+}
+
+export function getDefaultFestivalDay(entries, referenceTime = Date.now()) {
+  return getCurrentFestivalDay(entries, referenceTime) || getDays(entries)[0] || '';
 }
 
 export function getStages(entries, dayFilter = 'All days') {
@@ -713,6 +767,34 @@ export function saveIgnoreSmallConflictsPreference(value) {
       return;
     }
     window.localStorage.setItem(IGNORE_SMALL_CONFLICTS_STORAGE_KEY, JSON.stringify(false));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function loadShowStyleTagsPreference() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    return JSON.parse(window.localStorage.getItem(SHOW_STYLE_TAGS_STORAGE_KEY) ?? 'false');
+  } catch {
+    return false;
+  }
+}
+
+export function saveShowStyleTagsPreference(value) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (!value) {
+      window.localStorage.removeItem(SHOW_STYLE_TAGS_STORAGE_KEY);
+      return;
+    }
+    window.localStorage.setItem(SHOW_STYLE_TAGS_STORAGE_KEY, JSON.stringify(true));
   } catch {
     // Ignore storage errors
   }

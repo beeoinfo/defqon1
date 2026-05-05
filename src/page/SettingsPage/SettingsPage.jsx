@@ -23,6 +23,7 @@ const SettingsPage = ({
   hidePastEvents,
   hideUndatedEvents,
   ignoreSmallConflicts,
+  showStyleTags,
   favoriteCount = 0,
   lineups = [],
   selectedLineupKey,
@@ -30,6 +31,7 @@ const SettingsPage = ({
   onHidePastEventsChange,
   onHideUndatedEventsChange,
   onIgnoreSmallConflictsChange,
+  onShowStyleTagsChange,
   onResetFavorites,
   onProfileUpdated,
   onSignedOut,
@@ -38,6 +40,7 @@ const SettingsPage = ({
   onLeaveTribe,
   onRenameTribe,
   isAdmin = false,
+  pendingLineupCount = 0,
   onOpenPage = null,
 }) => {
   const [isBusy, setIsBusy] = useState(false);
@@ -154,7 +157,11 @@ const SettingsPage = ({
         }}
         onSave={handleProfileSave}
         actionContent={isAdmin ? (
-          <Button onClick={() => onOpenPage?.('admin')} disabled={isBusy}>
+          <Button
+            onClick={() => onOpenPage?.('admin')}
+            disabled={isBusy}
+            badge={pendingLineupCount > 0 ? pendingLineupCount : null}
+          >
             Admin panel
           </Button>
         ) : null}
@@ -218,6 +225,13 @@ const SettingsPage = ({
             description="Ignore overlaps that are 25% or less of the shorter favorite set."
             checked={ignoreSmallConflicts}
             onCheckedChange={onIgnoreSmallConflictsChange}
+          />
+
+          <Switch
+            label="Show style tags"
+            description="Display compact style badges on artist cards."
+            checked={showStyleTags}
+            onCheckedChange={onShowStyleTagsChange}
           />
 
           <Box gap="var(--dq-ui-space-sm)">

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ArrowClockwiseIcon,
   CheckIcon,
+  CircleNotchIcon,
   DownloadSimpleIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
@@ -17,6 +19,7 @@ import {
   isSupabaseConfigured,
   loadAdminLineupVersions,
   loadLineupVersion,
+  runManualLineupFetch,
 } from '@/lib/supabase';
 import { activeSite } from '@/sites/siteDefinitions';
 import './AdminPage.css';
@@ -68,6 +71,42 @@ const getLineupTitle = (lineup) => (
 
 const getLineupHashLabel = (lineup) => lineup.payloadHash.slice(0, 12);
 
+const getFetchResultVariant = (result) => {
+  if (result?.status === 'success') {
+    return 'success';
+  }
+
+  if (result?.status === 'nothing') {
+    return 'info';
+  }
+
+  return 'error';
+};
+
+const getFetchResultTitle = (result) => {
+  if (result?.action === 'loaded_pending') {
+    return 'Pending lineup loaded';
+  }
+
+  if (result?.action === 'no_change') {
+    return 'No lineup changes';
+  }
+
+  return 'Lineup fetch failed';
+};
+
+const getFetchResultMessage = (result) => {
+  if (result?.action === 'loaded_pending') {
+    return 'Azure Functions loaded a new pending lineup in Supabase.';
+  }
+
+  if (result?.action === 'no_change') {
+    return 'Azure Functions did not find a new lineup version.';
+  }
+
+  return result?.message || 'Azure Functions returned a failed lineup fetch response.';
+};
+
 const downloadJson = ({ fileName, payload }) => {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -82,7 +121,9 @@ const downloadJson = ({ fileName, payload }) => {
 const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
   const [lineups, setLineups] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
+  const [isFetchBusy, setIsFetchBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [fetchResult, setFetchResult] = useState(null);
   const [pendingLineup, setPendingLineup] = useState(null);
   const [lineupToDelete, setLineupToDelete] = useState(null);
 
@@ -180,6 +221,27 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
       setErrorMessage(error.message || 'Could not publish this lineup.');
     } finally {
       setIsBusy(false);
+    }
+  };
+
+  const handleRunManualFetch = async () => {
+    setIsFetchBusy(true);
+    setErrorMessage('');
+    setFetchResult(null);
+
+    try {
+      const result = await runManualLineupFetch(activeSite.slug);
+      setFetchResult(result);
+      await refreshAdminData();
+      await onLineupsChanged?.();
+    } catch (error) {
+      setFetchResult({
+        status: 'error',
+        action: 'failed',
+        message: error.message || 'Could not run the manual lineup fetch.',
+      });
+    } finally {
+      setIsFetchBusy(false);
     }
   };
 
@@ -296,6 +358,28 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
               </Box>
             </Box>
           ))}
+        </Box>
+      </Box>
+
+      <Box background="surface" title="Manual lineup fetch">
+        <Box gap="var(--dq-ui-space-lg)">
+          {fetchResult ? (
+            <Alert variant={getFetchResultVariant(fetchResult)} title={getFetchResultTitle(fetchResult)}>
+              {getFetchResultMessage(fetchResult)}
+            </Alert>
+          ) : null}
+          <Button
+            className={[
+              'dq-admin-page__fetch-button',
+              isFetchBusy ? 'dq-admin-page__fetch-button--running' : '',
+            ].filter(Boolean).join(' ')}
+            icon={isFetchBusy ? CircleNotchIcon : ArrowClockwiseIcon}
+            iconWeight="bold"
+            onClick={handleRunManualFetch}
+            disabled={isBusy || isFetchBusy}
+          >
+            {isFetchBusy ? 'Running lineup fetch...' : 'Run lineup fetch'}
+          </Button>
         </Box>
       </Box>
 

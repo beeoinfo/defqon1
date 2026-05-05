@@ -1,0 +1,21 @@
+{
+  "name": "lineup-functions",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start",
+    "generate:defqon1": "node src/local/generateLineup.js defqon1",
+    "generate:insane": "node src/local/generateLineup.js insane",
+    "lineup:defqon1": "node src/local/runLineup.js defqon1",
+    "lineup:insane": "node src/local/runLineup.js insane"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.3",
+    "@supabase/supabase-js": "^2.49.8"
+  }
+}

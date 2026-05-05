@@ -33,6 +33,7 @@ const Header = ({
   profileName = 'Usera Testa',
   profileSubtitle = '@test',
   profileImageSrc = getPresetAvatarUrl(1),
+  profileBadge = null,
   navbar = null,
   activeView = null,
   onOpenView = null,
@@ -241,6 +242,7 @@ const Header = ({
                   imageSrc={profileImageSrc}
                   imageAlt=""
                   subtitle={profileSubtitle}
+                  badge={profileBadge}
                   onClick={onUserClick}
                 >
                   {profileName}

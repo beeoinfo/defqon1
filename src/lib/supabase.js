@@ -6,6 +6,10 @@ import { getRandomPresetAvatarIndex } from './presetAvatars';
 // Initialise the Supabase client if the URL and anon key are provided
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const LINEUP_FUNCTION_BASE_URL = (
+  import.meta.env.VITE_LINEUP_FUNCTION_BASE_URL ||
+  'https://func-beeoinfo-lineup-prod-dzevggcvbpatf4h5.francecentral-01.azurewebsites.net'
+).replace(/\/+$/, '');
 
 export const supabase =
   supabaseUrl && supabaseAnonKey
@@ -501,6 +505,47 @@ export async function deleteLineupVersion(lineupId) {
   }
 
   return data;
+}
+
+export async function runManualLineupFetch(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data: sessionData, error: sessionError } = await client.auth.getSession();
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  const accessToken = sessionData?.session?.access_token;
+
+  if (!accessToken) {
+    throw new Error('Authentication required.');
+  }
+
+  const url = `${LINEUP_FUNCTION_BASE_URL}/api/lineup/${siteSlug}/run`;
+  let response;
+
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
+    });
+  } catch {
+    throw new Error(
+      `Could not reach the Azure lineup function. Check the Function App CORS allowed origins for ${window.location.origin}.`
+    );
+  }
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(payload?.message || payload?.error || 'Could not run the lineup fetch.');
+  }
+
+  return payload;
 }
 
 export function mergeFavoriteItems(localItems, remoteItems) {

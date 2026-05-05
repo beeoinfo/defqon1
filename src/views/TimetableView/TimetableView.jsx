@@ -7,6 +7,7 @@ import Box from '@/components/layout/Box';
 import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import PeopleStack from '@/components/PeopleStack';
+import Badge from '@/components/primitives/Badge';
 import ToggleButton from '@/components/primitives/ToggleButton';
 import {
   compareLineupEntries,
@@ -31,6 +32,12 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hourCycle: 'h23',
 });
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
+const STYLE_TAG_BADGE_BACKGROUND = 'rgba(56, 189, 248, 0.12)';
+const STYLE_TAG_BADGE_BORDER = 'rgba(56, 189, 248, 0.36)';
+const STYLE_TAG_BADGE_TEXT = '#7dd3fc';
+const ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND = 'rgba(251, 191, 36, 0.13)';
+const ADDITIONAL_STYLE_TAG_BADGE_BORDER = 'rgba(251, 191, 36, 0.4)';
+const ADDITIONAL_STYLE_TAG_BADGE_TEXT = '#fcd34d';
 
 const parseTimestamp = (value) => {
   if (!value) {
@@ -156,6 +163,39 @@ const getMemberDisplayName = (member) => (
   [member.firstName, member.lastName].filter(Boolean).join(' ').trim() || 'Tribe member'
 );
 
+const renderStyleBadges = (styleTags) => {
+  if (!styleTags?.length) {
+    return null;
+  }
+
+  return (
+    <Box
+      className="dq-timetable-view__style-tags"
+      direction="row"
+      wrap="wrap"
+      gap="4px"
+    >
+      {styleTags.map((styleTag) => {
+        const label = typeof styleTag === 'string' ? styleTag : styleTag.label;
+        const isAdditional = typeof styleTag === 'object' && styleTag.kind === 'additional';
+
+        return (
+          <Badge
+            key={`${isAdditional ? 'additional' : 'main'}-${label}`}
+            size="sm"
+            variant="ghost"
+            backgroundColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND : STYLE_TAG_BADGE_BACKGROUND}
+            borderColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BORDER : STYLE_TAG_BADGE_BORDER}
+            textColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_TEXT : STYLE_TAG_BADGE_TEXT}
+          >
+            {label}
+          </Badge>
+        );
+      })}
+    </Box>
+  );
+};
+
 const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
   const scheduledEntries = entries
     .map((entry) => {
@@ -263,6 +303,8 @@ const TimetableView = ({
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
   filterBar = null,
+  showStyleTags = false,
+  styleTagsByEntryId = new Map(),
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
   const shellRef = useRef(null);
@@ -279,12 +321,15 @@ const TimetableView = ({
           entry.startAt,
           entry.endAt,
           entry.timeLabel,
+          showStyleTags
+            ? (styleTagsByEntryId.get(entry.id) ?? []).map((styleTag) => styleTag.label).join(',')
+            : '',
           (tribeLikesByEntryId.get(entry.id) ?? []).length,
           getEntryDisplayName(entry),
         ].join(':'))
         .join('|'),
     ].join('::'),
-    [entries, selectedDay, tribeLikesByEntryId]
+    [entries, selectedDay, showStyleTags, styleTagsByEntryId, tribeLikesByEntryId]
   );
   const [hourHeightState, setHourHeightState] = useState(null);
   const hasMeasuredHourHeight = hourHeightState?.key === measurementKey;
@@ -481,6 +526,7 @@ const TimetableView = ({
                           <span className="dq-timetable-view__entry-name">
                             {entry.displayName}
                           </span>
+                          {showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
                           <span className="dq-timetable-view__entry-time">
                             {entry.displayTime}{' '}
                             <span className="dq-timetable-view__entry-duration">
@@ -609,6 +655,7 @@ const TimetableView = ({
                             <span className="dq-timetable-view__entry-name">
                               {entry.displayName}
                             </span>
+                            {showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
                             <span className="dq-timetable-view__entry-time">
                               {entry.displayTime}{' '}
                               <span className="dq-timetable-view__entry-duration">

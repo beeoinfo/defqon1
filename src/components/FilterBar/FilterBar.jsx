@@ -144,8 +144,23 @@ const getInitialValue = ({ choices = [], drawers = [] }) => {
   return initialValue;
 };
 
-const hasFilterValue = (value) => (
-  Object.values(value).some((entry) => (Array.isArray(entry) ? entry.length > 0 : Boolean(entry)))
+const normalizeFilterValue = (value) => {
+  if (Array.isArray(value)) {
+    const normalizedValues = value.filter(Boolean).sort();
+    return normalizedValues.length > 0 ? normalizedValues.join('__') : null;
+  }
+
+  if (value === false) {
+    return null;
+  }
+
+  return value ?? null;
+};
+
+const hasFilterValue = (value, defaultValue) => (
+  Object.entries(value).some(([key, entry]) => (
+    normalizeFilterValue(entry) !== normalizeFilterValue(defaultValue?.[key])
+  ))
 );
 
 const isChoiceChecked = (choice, currentValue) => {
@@ -225,7 +240,8 @@ const FilterBar = ({
   const isScrollHiddenRef = useRef(false);
   const isControlled = value !== undefined;
   const currentValue = isControlled ? value : internalValue;
-  const hasSelection = hasFilterValue(currentValue);
+  const initialValue = defaultValue ?? getInitialValue({ choices, drawers });
+  const hasSelection = hasFilterValue(currentValue, initialValue);
   const renderedDrawer = drawers.find((drawer) => drawer.id === renderedDrawerId);
   const leadingRenderedDrawers = renderedDrawers.filter(
     (renderedDrawerItem) => renderedDrawerItem.item.placement !== 'end'
@@ -337,7 +353,7 @@ const FilterBar = ({
   };
 
   const resetFilters = () => {
-    const nextValue = getInitialValue({ choices, drawers });
+    const nextValue = initialValue;
 
     updateValue(nextValue);
     setOpenDrawer(null);

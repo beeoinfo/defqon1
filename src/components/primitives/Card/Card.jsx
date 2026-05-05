@@ -19,6 +19,7 @@ const Card = ({
   meta2,
   meta3,
   metaVariant,
+  underTitle = null,
   description,
   error,
   actionVariant = 'favorite',
@@ -53,6 +54,7 @@ const Card = ({
 
   const metaParts = [meta1, meta2, meta3].filter(Boolean);
   const hasMeta = metaParts.length > 0;
+  const hasUnderTitle = underTitle !== null && underTitle !== undefined && underTitle !== false;
   const bodyChildren = Children.toArray(children);
   const hasBody = Boolean(description) || bodyChildren.length > 0;
 
@@ -110,6 +112,7 @@ const Card = ({
               {title}
             </Title>
           ) : null}
+          {hasUnderTitle ? underTitle : null}
           {hasMeta ? (
             <Box
               slot="content"
