@@ -288,6 +288,7 @@ const getConflictSections = (entries, ignoreSmallConflicts) => {
 };
 
 const ReviewsView = ({
+  hasLineup = true,
   reviewFavorites = [],
   conflictEntries = [],
   favoriteIdSet = new Set(),
@@ -369,9 +370,15 @@ const ReviewsView = ({
 
   if (archiveNotice) {
     return (
-      <Alert variant="warning" title="Snapshot">
+      <Alert variant="warning" title="Archived line-up snapshot">
         {archiveNotice}
       </Alert>
+    );
+  }
+
+  if (!hasLineup) {
+    return (
+      <EmptyState text="No lineup has been loaded yet." />
     );
   }
 

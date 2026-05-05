@@ -2,8 +2,6 @@ import { activeSite } from '@/sites/siteDefinitions';
 import { getCanonicalStageName } from './stageThemes';
 
 const SITE_STORAGE_PREFIX = activeSite.slug;
-
-export const FAVORITES_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-favorites`;
 export const VIEW_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-view`;
 export const HIDE_PAST_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hidePastEvents`;
 export const HIDE_UNDATED_EVENTS_STORAGE_KEY = `${SITE_STORAGE_PREFIX}-hideUndatedEvents`;
@@ -95,28 +93,10 @@ export function compareLineupEntries(leftEntry, rightEntry) {
   );
 }
 
-function buildLegacyStageSlug(stage) {
-  return slugifyValue(stage).replace(/^u-v$/, 'uv');
-}
-
-function prettifySlug(slug) {
-  return String(slug ?? '')
-    .split('-')
-    .filter(Boolean)
-    .map((part) => {
-      if (part.length <= 3) {
-        return part.toUpperCase();
-      }
-
-      return part.charAt(0).toUpperCase() + part.slice(1);
-    })
-    .join(' ');
-}
-
 function buildFavoriteKeyFromSnapshot(snapshot) {
   return (
     snapshot.favoriteKey ??
-    `fav:${snapshot.hash ?? snapshot.id ?? `${snapshot.daySlug}-${snapshot.stageSlug}-${snapshot.artistSlug}`}`
+    `fav:${snapshot.id ?? `${snapshot.daySlug}-${snapshot.stageSlug}-${snapshot.artistSlug}`}`
   );
 }
 
@@ -157,13 +137,11 @@ function buildSnapshotFromEntry(entry, overrides = {}) {
   const artistTokens = sanitizeArtistTokens(entry, artistTags);
   const snapshot = {
     favoriteKey: overrides.favoriteKey,
-    legacyId: overrides.legacyId ?? null,
     id: entry.id ?? null,
-    hash: entry.hash ?? null,
     daySlug: entry.daySlug ?? slugifyValue(entry.day),
     dayOrder: entry.dayOrder ?? DAY_ORDERS[entry.daySlug] ?? null,
     stage: entry.stage ?? 'Unknown stage',
-    stageSlug: entry.stageSlug ?? buildLegacyStageSlug(entry.stage),
+    stageSlug: entry.stageSlug ?? slugifyValue(entry.stage),
     stageOrder: entry.stageOrder ?? null,
     stageCanonical:
       entry.stageCanonical ??
@@ -200,227 +178,6 @@ function buildCompactFavoriteSnapshot(item, overrides = {}) {
     endAt: overrides.endAt ?? item.endAt ?? null,
     savedAt: overrides.savedAt ?? item.savedAt ?? new Date().toISOString(),
   };
-}
-
-function buildStageMetaIndex(entries) {
-  const index = new Map();
-
-  entries.forEach((entry) => {
-    const stageSlug = buildLegacyStageSlug(entry.stage);
-
-    if (!index.has(stageSlug)) {
-      index.set(stageSlug, {
-        stage: entry.stage,
-        stageCanonical:
-          entry.stageCanonical ?? getCanonicalStageName(entry.stage),
-      });
-    }
-  });
-
-  return index;
-}
-
-function parseLegacyFavoriteId(legacyId, entries) {
-  if (typeof legacyId !== 'string') {
-    return null;
-  }
-
-  const firstDashIndex = legacyId.indexOf('-');
-
-  if (firstDashIndex === -1) {
-    return null;
-  }
-
-  const daySlug = legacyId.slice(0, firstDashIndex);
-  const rest = legacyId.slice(firstDashIndex + 1);
-
-  if (!DAY_LABELS[daySlug] || !rest) {
-    return null;
-  }
-
-  const stageIndex = buildStageMetaIndex(entries);
-  const stageSlugs = Array.from(stageIndex.keys()).sort((a, b) => b.length - a.length);
-
-  const matchedStageSlug = stageSlugs.find(
-    (stageSlug) => rest === stageSlug || rest.startsWith(`${stageSlug}-`)
-  );
-
-  if (!matchedStageSlug) {
-    return {
-      legacyId,
-      daySlug,
-      stageSlug: null,
-      stage: 'Unknown stage',
-      stageCanonical: null,
-      artistSlug: rest,
-      artistRaw: prettifySlug(rest),
-      artistTags: [prettifySlug(rest)],
-      artistTokens: uniqueStrings(rest.split('-').filter(Boolean)),
-      timeLabel: null,
-    };
-  }
-
-  const stageMeta = stageIndex.get(matchedStageSlug);
-  const artistSlug = rest.slice(matchedStageSlug.length + 1);
-
-  return {
-    legacyId,
-    daySlug,
-    stageSlug: matchedStageSlug,
-    stage: stageMeta.stage,
-    stageCanonical: stageMeta.stageCanonical,
-    artistSlug,
-    artistRaw: prettifySlug(artistSlug),
-    artistTags: [prettifySlug(artistSlug)],
-    artistTokens: uniqueStrings(artistSlug.split('-').filter(Boolean)),
-    timeLabel: null,
-  };
-}
-
-function findEntryForLegacyId(legacyId, entries) {
-  const parsed = parseLegacyFavoriteId(legacyId, entries);
-
-  if (!parsed) {
-    return null;
-  }
-
-  return (
-    entries.find((entry) => {
-      const entryStageSlug = buildLegacyStageSlug(entry.stage);
-
-      return (
-        slugsMatch(entry.daySlug, parsed.daySlug) &&
-        slugsMatch(entryStageSlug, parsed.stageSlug) &&
-        slugsMatch(entry.artistSlug, parsed.artistSlug)
-      );
-    }) ?? null
-  );
-}
-
-function buildLegacySnapshot(legacyId, previousEntries, currentEntries) {
-  const previousMatch = findEntryForLegacyId(legacyId, previousEntries);
-
-  if (previousMatch) {
-    return buildSnapshotFromEntry(previousMatch, {
-      favoriteKey: `legacy:${legacyId}`,
-      legacyId,
-    });
-  }
-
-  const currentMatch = findEntryForLegacyId(legacyId, currentEntries);
-
-  if (currentMatch) {
-    return buildSnapshotFromEntry(currentMatch, {
-      favoriteKey: `legacy:${legacyId}`,
-      legacyId,
-    });
-  }
-
-  const parsed = parseLegacyFavoriteId(legacyId, [...previousEntries, ...currentEntries]);
-
-  if (!parsed) {
-    return null;
-  }
-
-  return buildSnapshotFromEntry(
-    {
-      id: null,
-      hash: null,
-      daySlug: parsed.daySlug,
-      dayOrder: DAY_ORDERS[parsed.daySlug] ?? null,
-      stage: parsed.stage,
-      stageSlug: parsed.stageSlug ?? slugifyValue(parsed.stage),
-      stageCanonical: parsed.stageCanonical,
-      artistRaw: parsed.artistRaw,
-      artistSlug: parsed.artistSlug,
-      artistTags: parsed.artistTags,
-      artistTokens: parsed.artistTokens,
-      startAt: null,
-      endAt: null,
-      timeLabel: parsed.timeLabel,
-    },
-    {
-      favoriteKey: `legacy:${legacyId}`,
-      legacyId,
-    }
-  );
-}
-
-function normalizeStoredSnapshot(item) {
-  if (!item || typeof item !== 'object') {
-    return null;
-  }
-
-  const artistTags = sanitizeArtistTags(item);
-  const artistTokens = sanitizeArtistTokens(item, artistTags);
-
-  const snapshot = {
-    favoriteKey: item.favoriteKey,
-    legacyId: item.legacyId ?? null,
-    id: item.id ?? null,
-    hash: item.hash ?? null,
-    daySlug: item.daySlug ?? slugifyValue(item.day),
-    dayOrder:
-      item.dayOrder ??
-      DAY_ORDERS[item.daySlug ?? slugifyValue(item.day)] ??
-      null,
-    stage: item.stage ?? 'Unknown stage',
-    stageSlug: item.stageSlug ?? buildLegacyStageSlug(item.stage),
-    stageOrder: item.stageOrder ?? null,
-    stageCanonical:
-      item.stageCanonical ??
-      (item.stage ? getCanonicalStageName(item.stage) : null),
-    stageColor: item.stageColor ?? null,
-    artistName: item.artistName ?? item.artistRaw ?? item.rawName ?? '',
-    artistRaw: item.artistRaw ?? item.artistName ?? item.rawName ?? '',
-    artistSlug: item.artistSlug ?? slugifyValue(item.artistName ?? item.artistRaw ?? item.rawName),
-    artistOrder: item.artistOrder ?? null,
-    artistTags,
-    artistTokens,
-    startAt: item.startAt ?? null,
-    endAt: item.endAt ?? null,
-    timeLabel: item.timeLabel ?? null,
-    savedAt: item.savedAt ?? new Date().toISOString(),
-  };
-
-  snapshot.favoriteKey = buildFavoriteKeyFromSnapshot(snapshot);
-  return snapshot;
-}
-
-function extractRawFavoriteItems(payload) {
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  if (Array.isArray(payload?.items)) {
-    return payload.items;
-  }
-
-  if (Array.isArray(payload?.ids) || Array.isArray(payload?.legacy)) {
-    return [...(payload.ids ?? []), ...(payload.legacy ?? [])];
-  }
-
-  return [];
-}
-
-function normalizeFavoriteItems(rawItems, currentEntries, previousEntries) {
-  const normalized = rawItems
-    .map((item) => {
-      if (typeof item === 'string') {
-        const currentExactMatch = currentEntries.find((entry) => entry.id === item);
-
-        if (currentExactMatch) {
-          return buildSnapshotFromEntry(currentExactMatch);
-        }
-
-        return buildLegacySnapshot(item, previousEntries, currentEntries);
-      }
-
-      return normalizeStoredSnapshot(item);
-    })
-    .filter(Boolean);
-
-  return dedupeBy(normalized, (item) => item.favoriteKey);
 }
 
 function buildSavedTokenSet(snapshot) {
@@ -478,10 +235,6 @@ export function validateLineupPayload(payload) {
   payload.forEach((entry, index) => {
     if (!entry.id || typeof entry.id !== 'string') {
       throw new Error(`Invalid entry id at index ${index}.`);
-    }
-
-    if (!entry.hash || typeof entry.hash !== 'string') {
-      throw new Error(`Invalid entry hash for ${entry.id}.`);
     }
 
     if (!entry.daySlug || typeof entry.daySlug !== 'string') {
@@ -758,69 +511,6 @@ export function groupFavoritesByDayAndStage(favoriteEntries) {
   return groupEntriesByDayAndStage(favoriteEntries);
 }
 
-export function loadFavorites(currentEntries, previousEntries = []) {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-
-  try {
-    const raw = window.localStorage.getItem(FAVORITES_STORAGE_KEY);
-
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw);
-    const rawItems = extractRawFavoriteItems(parsed);
-
-    return normalizeFavoriteItems(rawItems, currentEntries, previousEntries);
-  } catch {
-    return [];
-  }
-}
-
-export function saveFavorites(favoriteItems) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  try {
-    const serializedItems = favoriteItems.map((item) => ({
-      favoriteKey: item.favoriteKey,
-      legacyId: item.legacyId ?? null,
-      id: item.id ?? null,
-      hash: item.hash ?? null,
-      daySlug: item.daySlug ?? null,
-      dayOrder: item.dayOrder ?? null,
-      stage: item.stage ?? '',
-      stageSlug: item.stageSlug ?? null,
-      stageOrder: item.stageOrder ?? null,
-      stageCanonical: item.stageCanonical ?? null,
-      stageColor: item.stageColor ?? null,
-      artistName: item.artistName ?? item.artistRaw ?? '',
-      artistRaw: item.artistRaw ?? '',
-      artistSlug: item.artistSlug ?? null,
-      artistOrder: item.artistOrder ?? null,
-      artistTags: item.artistTags ?? [],
-      artistTokens: item.artistTokens ?? [],
-      startAt: item.startAt ?? null,
-      endAt: item.endAt ?? null,
-      timeLabel: item.timeLabel ?? null,
-      savedAt: item.savedAt ?? null,
-    }));
-
-    window.localStorage.setItem(
-      FAVORITES_STORAGE_KEY,
-      JSON.stringify({
-        version: 3,
-        items: serializedItems,
-      })
-    );
-  } catch {
-    // Ignore storage errors
-  }
-}
-
 export function resolveFavoriteItems(entries, favoriteItems) {
   const currentEntriesById = new Map(entries.map((entry) => [entry.id, entry]));
 
@@ -911,23 +601,15 @@ export function upsertFavoriteEntry(favoriteItems, entry) {
       return false;
     }
 
-    if (item.hash && nextSnapshot.hash && item.hash === nextSnapshot.hash) {
-      return false;
-    }
-
     return true;
   });
 
   return [...filteredItems, nextSnapshot];
 }
 
-export function removeFavoriteByEntryId(favoriteItems, entryId, entryHash = null) {
+export function removeFavoriteByEntryId(favoriteItems, entryId) {
   return favoriteItems.filter((item) => {
     if (item.id && item.id === entryId) {
-      return false;
-    }
-
-    if (entryHash && item.hash && item.hash === entryHash) {
       return false;
     }
 

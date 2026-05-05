@@ -22,7 +22,6 @@ import {
 } from '@phosphor-icons/react';
 import AuthModal from '@/components/AuthModal';
 import BackToTop from '@/components/BackToTop';
-import EmptyState from '@/components/EmptyState';
 import Box from '@/components/layout/Box';
 import Page from '@/components/layout/Page';
 import View from '@/components/layout/View';
@@ -32,6 +31,7 @@ import { SearchInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import usePullToRefresh from '@/hooks/usePullToRefresh';
+import { ELECTRONIC_FESTIVAL_STYLES_DB } from './data/electronicFestivalStylesDb';
 import {
   filterExpiredEntries,
   filterExpiredReviewFavorites,
@@ -42,7 +42,6 @@ import {
   getStages,
   groupEntriesByDayAndStage,
   hasCompleteSchedule,
-  hasScheduledDate,
   loadHidePastEventsPreference,
   loadHideUndatedEventsPreference,
   loadIgnoreSmallConflictsPreference,
@@ -72,10 +71,12 @@ import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars
 import {
   createCurrentUserTribe,
   getCurrentUser,
+  isCurrentUserAdmin,
   isSupabaseConfigured,
   joinCurrentUserTribeByCode,
   leaveCurrentUserTribe,
   loadAccountBundle,
+  loadPublishedLineupVersions,
   loadTribeBundle,
   normalizeTribeCode,
   supabase,
@@ -93,7 +94,6 @@ import {
 } from './routes/AppRoutes';
 import { activeSiteAssets } from './sites/siteAssets';
 import { activeSite } from './sites/siteDefinitions';
-import { getSiteLineupModuleEntries } from './sites/siteLineupData';
 import UiThemeScope from './theme/UiThemeScope';
 import LineUpView from './views/LineUpView';
 import MapsView from './views/MapsView';
@@ -114,9 +114,79 @@ const getHeaderModeForView = (view) => (view === 'search' ? 'search' : 'default'
 const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favicon}?site=${activeSite.slug}`;
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
+const getCleanStyleTag = (value) => String(value ?? '').trim();
 const getEntryTimestamp = (value) => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
+};
+
+const getStyleTagsFromRecord = (record) => [
+  ...(Array.isArray(record?.mainTags) ? record.mainTags : []),
+  record?.additionalTag,
+].map(getCleanStyleTag).filter(Boolean);
+
+const addUniqueStyleTag = (styleTags, tag) => {
+  const cleanTag = getCleanStyleTag(tag);
+  const comparableTag = getComparableLabel(cleanTag);
+
+  if (!cleanTag || styleTags.has(comparableTag)) {
+    return;
+  }
+
+  styleTags.set(comparableTag, cleanTag);
+};
+
+const getStyleOptionsFromEntries = (entries, styleTagsByArtistToken, styleTagsByArtistName) => {
+  const stylesByKey = new Map();
+
+  entries.forEach((entry) => {
+    getEntryStyleTags(
+      entry,
+      styleTagsByArtistToken,
+      styleTagsByArtistName
+    ).forEach((tag) => addUniqueStyleTag(stylesByKey, tag));
+  });
+
+  return Array.from(stylesByKey.values())
+    .sort((leftTag, rightTag) => leftTag.localeCompare(rightTag))
+    .map((tag) => ({
+      value: tag,
+      label: tag,
+    }));
+};
+
+const getEntryStyleTags = (entry, styleTagsByArtistToken, styleTagsByArtistName) => {
+  const styleTags = new Map();
+  const addRecordTags = (recordTags) => {
+    recordTags?.forEach((tag) => addUniqueStyleTag(styleTags, tag));
+  };
+
+  entry.artistTokens?.forEach((token) => {
+    addRecordTags(styleTagsByArtistToken.get(getComparableLabel(token)));
+  });
+
+  entry.artistTags?.forEach((artistTag) => {
+    addRecordTags(styleTagsByArtistName.get(getComparableLabel(artistTag)));
+  });
+
+  addRecordTags(styleTagsByArtistName.get(getComparableLabel(entry.artistName)));
+  addRecordTags(styleTagsByArtistName.get(getComparableLabel(entry.artistRaw)));
+
+  return Array.from(styleTags.values());
+};
+
+const entryMatchesSelectedStyles = (
+  entry,
+  selectedStyleSet,
+  styleTagsByArtistToken,
+  styleTagsByArtistName
+) => {
+  if (selectedStyleSet.size === 0) {
+    return true;
+  }
+
+  return getEntryStyleTags(entry, styleTagsByArtistToken, styleTagsByArtistName)
+    .some((tag) => selectedStyleSet.has(getComparableLabel(tag)));
 };
 
 const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConflicts) => {
@@ -364,35 +434,17 @@ const extractLineupMapLayers = (moduleValue) => {
   return Array.isArray(payload?.mapboxLayers) ? payload.mapboxLayers : [];
 };
 
-const formatLineupLabel = (path) => {
-  const fileName = path.split('/').pop() ?? path;
-  const match = fileName.match(/^(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})_(?:.+_)?lineup\.json$/);
-
-  if (!match) {
-    return fileName;
-  }
-
-  const [, year, month, day, hour, minute] = match;
-  return `${day}/${month}/${year} - ${hour}:${minute}`;
-};
-
-const lineupModuleEntries = getSiteLineupModuleEntries(activeSite);
-const latestKey = lineupModuleEntries.at(-1)?.[0] ?? null;
-const lineupSources = [...lineupModuleEntries]
-  .reverse()
-  .map(([key, moduleValue]) => ({
-    key,
-    label: formatLineupLabel(key),
-    entries: extractLineupEntries(moduleValue),
-    mapLayers: extractLineupMapLayers(moduleValue),
-    isLatest: key === latestKey,
-  }));
-
-for (const lineupSource of lineupSources) {
-  if (lineupSource.entries.length > 0) {
-    validateLineupPayload(lineupSource.entries);
-  }
-}
+const buildLineupSourcesFromVersions = (versions) => (
+  versions.map((version) => ({
+    key: version.id,
+    label: version.versionLabel || `${version.status === 'active' ? 'Active' : 'Archived'} lineup`,
+    entries: extractLineupEntries(version.payload),
+    mapLayers: extractLineupMapLayers(version.payload),
+    isLatest: version.status === 'active',
+    source: 'supabase',
+    payloadHash: version.payloadHash,
+  }))
+);
 
 const AppBaseView = memo(({
   activeView,
@@ -529,6 +581,7 @@ const App = () => {
   const pageStackRef = useRef(initialPageStack);
   const [activeView, setActiveView] = useState(initialRoute.view);
   const [viewRefreshKey, setViewRefreshKey] = useState(0);
+  const [lineupSources, setLineupSources] = useState([]);
   const previousSearchViewRef = useRef(initialRoute.view === 'search' ? null : initialRoute.view);
   const [searchHeaderQuery, setSearchHeaderQuery] = useState('');
   const [headerMode, setHeaderMode] = useState(() => getHeaderModeForView(initialRoute.view));
@@ -544,7 +597,7 @@ const App = () => {
     topPageTransitionState,
     getIsPageHidden,
   } = useAnimatedPageStack(pageStack);
-  const [selectedLineupKey, setSelectedLineupKey] = useState(latestKey);
+  const [selectedLineupKey, setSelectedLineupKey] = useState(null);
   const [selectedDay, setSelectedDay] = useState(
     () => loadViewPreferences()?.selectedDay || 'All days'
   );
@@ -553,6 +606,9 @@ const App = () => {
   );
   const [selectedTimetableDay, setSelectedTimetableDay] = useState(
     () => loadViewPreferences()?.selectedTimetableDay || ''
+  );
+  const [selectedStyles, setSelectedStyles] = useState(
+    () => loadViewPreferences()?.selectedStyles ?? []
   );
   const [hidePastEvents, setHidePastEvents] = useState(() => loadHidePastEventsPreference());
   const [hideUndatedEvents, setHideUndatedEvents] = useState(() => loadHideUndatedEventsPreference());
@@ -573,6 +629,7 @@ const App = () => {
   const hydrateAccountRef = useRef(null);
   const [authUser, setAuthUser] = useState(() => (bootUserId ? { id: bootUserId } : null));
   const [profile, setProfile] = useState(() => bootAccount?.profile ?? null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [tribe, setTribe] = useState(() => bootAccount?.tribe ?? null);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
@@ -588,16 +645,45 @@ const App = () => {
 
   useDocumentScrollLock(hasRenderedPages);
 
+  const refreshLineupSources = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setLineupSources([]);
+      setSelectedLineupKey(null);
+      return [];
+    }
+
+    const versions = await loadPublishedLineupVersions(activeSite.slug);
+    const nextSources = buildLineupSourcesFromVersions(versions);
+    const resolvedSources = nextSources;
+
+    for (const lineupSource of resolvedSources) {
+      if (lineupSource.entries.length > 0) {
+        validateLineupPayload(lineupSource.entries);
+      }
+    }
+
+    setLineupSources(resolvedSources);
+    setSelectedLineupKey((currentKey) => (
+      resolvedSources.some((lineup) => lineup.key === currentKey)
+        ? currentKey
+        : resolvedSources[0]?.key ?? null
+    ));
+
+    return resolvedSources;
+  }, []);
+
   const handlePullRefresh = useCallback(async () => {
     startTransition(() => {
       setCurrentTime(Date.now());
       setViewRefreshKey((currentKey) => currentKey + 1);
     });
 
+    await refreshLineupSources();
+
     if (isSupabaseConfigured()) {
       await hydrateAccountRef.current?.(authUser ?? null, { hasUserOverride: Boolean(authUser) });
     }
-  }, [authUser]);
+  }, [authUser, refreshLineupSources]);
 
   const {
     pullDistance,
@@ -634,6 +720,39 @@ const App = () => {
     existingIcons.slice(1).forEach((iconLink) => iconLink.remove());
   }, []);
 
+  useEffect(() => {
+    refreshLineupSources().catch((error) => {
+      console.error(error);
+    });
+  }, [refreshLineupSources]);
+
+  useEffect(() => {
+    if (!authUser || !isSupabaseConfigured()) {
+      setIsAdmin(false);
+      return;
+    }
+
+    let isActive = true;
+
+    isCurrentUserAdmin()
+      .then((nextIsAdmin) => {
+        if (isActive) {
+          setIsAdmin(nextIsAdmin);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+
+        if (isActive) {
+          setIsAdmin(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [authUser]);
+
   useEffect(() => () => {
     if (headerModeTransitionTimeoutRef.current) {
       window.clearTimeout(headerModeTransitionTimeoutRef.current);
@@ -646,7 +765,7 @@ const App = () => {
 
   const selectedLineup = useMemo(
     () => lineupSources.find((lineup) => lineup.key === selectedLineupKey) ?? lineupSources[0] ?? null,
-    [selectedLineupKey]
+    [lineupSources, selectedLineupKey]
   );
   const selectedEntries = useMemo(() => selectedLineup?.entries ?? [], [selectedLineup]);
   const hasTimetableView = useMemo(
@@ -659,9 +778,10 @@ const App = () => {
     () => selectedMapLayers.length > 0,
     [selectedMapLayers]
   );
+  const hasLineup = Boolean(selectedLineup);
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
   const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
-  const favoritesReadOnly = !isLatestLineupSelected;
+  const favoritesReadOnly = hasLineup && !isLatestLineupSelected;
   const archiveLineupNotice =
     'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
   const entriesById = useMemo(
@@ -718,7 +838,6 @@ const App = () => {
       return new Map();
     }
 
-    const entriesByHash = new Map(selectedEntries.map((entry) => [entry.hash, entry]));
     const likesByEntryId = new Map();
 
     tribe.members.forEach((member) => {
@@ -736,8 +855,6 @@ const App = () => {
 
         if (favorite.id && entriesById.has(favorite.id)) {
           matchedEntry = entriesById.get(favorite.id);
-        } else if (favorite.hash && entriesByHash.has(favorite.hash)) {
-          matchedEntry = entriesByHash.get(favorite.hash);
         }
 
         if (!matchedEntry || seenEntryIds.has(matchedEntry.id)) {
@@ -772,6 +889,38 @@ const App = () => {
   const tribeFilterEntryIds = useMemo(
     () => new Set([...tribeLikedEntryIds, ...favoriteIdSet]),
     [favoriteIdSet, tribeLikedEntryIds]
+  );
+  const styleLookups = useMemo(() => {
+    const styleTagsByArtistToken = new Map();
+    const styleTagsByArtistName = new Map();
+
+    ELECTRONIC_FESTIVAL_STYLES_DB.forEach((record) => {
+      const recordTags = getStyleTagsFromRecord(record);
+
+      if (recordTags.length === 0) {
+        return;
+      }
+
+      const artistToken = getComparableLabel(record.artistToken);
+      const artistName = getComparableLabel(record.artistName);
+
+      if (artistToken) {
+        styleTagsByArtistToken.set(artistToken, recordTags);
+      }
+
+      if (artistName) {
+        styleTagsByArtistName.set(artistName, recordTags);
+      }
+    });
+
+    return {
+      styleTagsByArtistName,
+      styleTagsByArtistToken,
+    };
+  }, []);
+  const selectedStyleSet = useMemo(
+    () => new Set(selectedStyles.map(getComparableLabel).filter(Boolean)),
+    [selectedStyles]
   );
   const days = useMemo(() => getDays(browseableEntries), [browseableEntries]);
   const timetableDays = useMemo(
@@ -810,7 +959,7 @@ const App = () => {
 
     return colorsByName;
   }, [browseableEntries]);
-  const baseFilteredEntries = useMemo(
+  const baseFilteredEntriesBeforeStyles = useMemo(
     () =>
       filterEntries(browseableEntries, {
         query: '',
@@ -819,6 +968,37 @@ const App = () => {
       }),
     [browseableEntries, selectedDay, selectedStage]
   );
+  const baseFilteredEntries = useMemo(
+    () =>
+      baseFilteredEntriesBeforeStyles.filter((entry) =>
+        entryMatchesSelectedStyles(
+          entry,
+          selectedStyleSet,
+          styleLookups.styleTagsByArtistToken,
+          styleLookups.styleTagsByArtistName
+        )
+      ),
+    [baseFilteredEntriesBeforeStyles, selectedStyleSet, styleLookups]
+  );
+  const lineupStyleOptionEntries = useMemo(() => {
+    let nextEntries = baseFilteredEntriesBeforeStyles;
+
+    if (showTribeOnly) {
+      nextEntries = nextEntries.filter((entry) => tribeFilterEntryIds.has(entry.id));
+    }
+
+    if (showFavoritesOnly) {
+      nextEntries = nextEntries.filter((entry) => favoriteIdSet.has(entry.id));
+    }
+
+    return nextEntries;
+  }, [
+    baseFilteredEntriesBeforeStyles,
+    favoriteIdSet,
+    showFavoritesOnly,
+    showTribeOnly,
+    tribeFilterEntryIds,
+  ]);
   const visibleEntries = useMemo(() => {
     let nextEntries = baseFilteredEntries;
 
@@ -838,6 +1018,14 @@ const App = () => {
     showTribeOnly,
     tribeFilterEntryIds,
   ]);
+  const lineupStyleOptions = useMemo(
+    () => getStyleOptionsFromEntries(
+      lineupStyleOptionEntries,
+      styleLookups.styleTagsByArtistToken,
+      styleLookups.styleTagsByArtistName
+    ),
+    [lineupStyleOptionEntries, styleLookups]
+  );
   const groupedVisibleEntries = useMemo(
     () => groupEntriesByDayAndStage(visibleEntries),
     [visibleEntries]
@@ -871,7 +1059,7 @@ const App = () => {
   const reviewCount = isLatestLineupSelected
     ? visibleReviewFavorites.length + favoriteTimetableConflictEntries.length
     : 0;
-  const baseTimetableEntries = useMemo(
+  const baseTimetableEntriesBeforeStyles = useMemo(
     () =>
       selectedTimetableDayLabel
         ? filterEntries(browseableEntries.filter((entry) => hasCompleteSchedule(entry)), {
@@ -882,11 +1070,56 @@ const App = () => {
         : [],
     [browseableEntries, selectedTimetableDayLabel]
   );
+  const baseTimetableEntries = useMemo(
+    () =>
+      baseTimetableEntriesBeforeStyles.filter((entry) =>
+        entryMatchesSelectedStyles(
+          entry,
+          selectedStyleSet,
+          styleLookups.styleTagsByArtistToken,
+          styleLookups.styleTagsByArtistName
+        )
+      ),
+    [baseTimetableEntriesBeforeStyles, selectedStyleSet, styleLookups]
+  );
   const conflictingFavoriteEntryIds = useMemo(
     () => getConflictingFavoriteEntryIds(baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts),
     [baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts]
   );
   const conflictCount = conflictingFavoriteEntryIds.size;
+  const conflictingFavoriteEntryIdsBeforeStyles = useMemo(
+    () => getConflictingFavoriteEntryIds(
+      baseTimetableEntriesBeforeStyles,
+      favoriteIdSet,
+      ignoreSmallConflicts
+    ),
+    [baseTimetableEntriesBeforeStyles, favoriteIdSet, ignoreSmallConflicts]
+  );
+  const timetableStyleOptionEntries = useMemo(() => {
+    let nextEntries = baseTimetableEntriesBeforeStyles;
+
+    if (showConflictsOnly) {
+      return nextEntries.filter((entry) => conflictingFavoriteEntryIdsBeforeStyles.has(entry.id));
+    }
+
+    if (showTribeOnly) {
+      nextEntries = nextEntries.filter((entry) => tribeFilterEntryIds.has(entry.id));
+    }
+
+    if (showFavoritesOnly) {
+      nextEntries = nextEntries.filter((entry) => favoriteIdSet.has(entry.id));
+    }
+
+    return nextEntries;
+  }, [
+    baseTimetableEntriesBeforeStyles,
+    conflictingFavoriteEntryIdsBeforeStyles,
+    favoriteIdSet,
+    showConflictsOnly,
+    showFavoritesOnly,
+    showTribeOnly,
+    tribeFilterEntryIds,
+  ]);
   const visibleTimetableEntries = useMemo(() => {
     let nextEntries = baseTimetableEntries;
 
@@ -913,6 +1146,17 @@ const App = () => {
     showTribeOnly,
     tribeFilterEntryIds,
   ]);
+  const timetableStyleOptions = useMemo(
+    () => getStyleOptionsFromEntries(
+      timetableStyleOptionEntries,
+      styleLookups.styleTagsByArtistToken,
+      styleLookups.styleTagsByArtistName
+    ),
+    [styleLookups, timetableStyleOptionEntries]
+  );
+  const activeStyleOptions = activeView === 'timetable'
+    ? timetableStyleOptions
+    : lineupStyleOptions;
   useEffect(() => {
     pageStackRef.current = pageStack;
     syncPageStackIdRef({
@@ -1063,6 +1307,7 @@ const App = () => {
     setSelectedDay('All days');
     setSelectedStage('All stages');
     setSelectedTimetableDay('');
+    setSelectedStyles([]);
     setShowFavoritesOnly(false);
     setShowTribeOnly(false);
     setShowConflictsOnly(false);
@@ -1163,8 +1408,8 @@ const App = () => {
   }, [authUser, openView, requestAuth, resetBrowseState]);
 
   useEffect(() => {
-    saveViewPreferences({ selectedDay, selectedStage, selectedTimetableDay });
-  }, [selectedDay, selectedStage, selectedTimetableDay]);
+    saveViewPreferences({ selectedDay, selectedStage, selectedStyles, selectedTimetableDay });
+  }, [selectedDay, selectedStage, selectedStyles, selectedTimetableDay]);
 
   useEffect(() => {
     saveHidePastEventsPreference(hidePastEvents);
@@ -1220,6 +1465,20 @@ const App = () => {
       setSelectedStage('All stages');
     }
   }, [selectedStage, stages]);
+  useEffect(() => {
+    if (selectedStyles.length === 0) {
+      return;
+    }
+
+    const availableStyleSet = new Set(activeStyleOptions.map((option) => getComparableLabel(option.value)));
+    const nextSelectedStyles = selectedStyles.filter((style) =>
+      availableStyleSet.has(getComparableLabel(style))
+    );
+
+    if (nextSelectedStyles.length !== selectedStyles.length) {
+      setSelectedStyles(nextSelectedStyles);
+    }
+  }, [activeStyleOptions, selectedStyles]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -1498,16 +1757,11 @@ const App = () => {
       if (entry) {
         setFavoriteItems((previousItems) => {
           const isAlreadyFavorite = previousItems.some(
-            (item) =>
-              (item.hash && entry.hash && item.hash === entry.hash) ||
-              (
-                item.id === entry.id &&
-                (!item.hash || !entry.hash || item.hash === entry.hash || !hasScheduledDate(item))
-              )
+            (item) => item.id === entry.id
           );
 
           if (isAlreadyFavorite) {
-            return removeFavoriteByEntryId(previousItems, entry.id, entry.hash);
+            return removeFavoriteByEntryId(previousItems, entry.id);
           }
 
           return upsertFavoriteEntry(previousItems, entry);
@@ -1541,16 +1795,11 @@ const App = () => {
 
     setFavoriteItems((previousItems) => {
       const isAlreadyFavorite = previousItems.some(
-        (item) =>
-          (item.hash && entry.hash && item.hash === entry.hash) ||
-          (
-            item.id === entry.id &&
-            (!item.hash || !entry.hash || item.hash === entry.hash || !hasScheduledDate(item))
-          )
+        (item) => item.id === entry.id
       );
 
       if (isAlreadyFavorite) {
-        return removeFavoriteByEntryId(previousItems, entry.id, entry.hash);
+        return removeFavoriteByEntryId(previousItems, entry.id);
       }
 
       return upsertFavoriteEntry(previousItems, entry);
@@ -1651,7 +1900,7 @@ const App = () => {
     }
 
     setSelectedLineupKey(nextKey);
-  }, []);
+  }, [lineupSources]);
 
   const handleProfileUpdated = useCallback((nextProfile) => {
     setProfile(nextProfile);
@@ -1756,18 +2005,27 @@ const App = () => {
       label: 'All stages',
       options: stageDrawerOptions,
     }] : []),
-  ], [dayDrawerOptions, days.length, stageDrawerOptions, stages.length]);
+    ...(lineupStyleOptions.length > 0 ? [{
+      id: 'styles',
+      label: 'Styles',
+      placement: 'end',
+      type: 'checkbox',
+      options: lineupStyleOptions,
+    }] : []),
+  ], [dayDrawerOptions, days.length, lineupStyleOptions, stageDrawerOptions, stages.length]);
 
   const lineupFilterBar = useMemo(() => (lineupChoices.length > 0 || lineupDrawers.length > 0 ? {
     value: {
       day: selectedDay === 'All days' ? null : selectedDay,
       stage: selectedStage === 'All stages' ? null : selectedStage,
+      styles: selectedStyles,
       favorites: showFavoritesOnly,
       tribe: showTribeOnly,
     },
     onChange: (nextValue) => {
       const nextDay = nextValue.day ?? 'All days';
       const nextStage = nextValue.stage ?? 'All stages';
+      const nextStyles = Array.isArray(nextValue.styles) ? nextValue.styles : [];
       const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
       const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
       const nextFavoritesOnly = didEnableTribe ? false : Boolean(nextValue.favorites);
@@ -1775,6 +2033,7 @@ const App = () => {
 
       setSelectedDay(nextDay);
       setSelectedStage(nextStage);
+      setSelectedStyles(nextStyles);
       setShowFavoritesOnly(nextFavoritesOnly);
       setShowTribeOnly(nextTribeOnly);
     },
@@ -1790,6 +2049,7 @@ const App = () => {
     resetBrowseState,
     selectedDay,
     selectedStage,
+    selectedStyles,
     showFavoritesOnly,
     showTribeOnly,
   ]);
@@ -1827,16 +2087,28 @@ const App = () => {
         options: timetableDayDrawerOptions,
       }]
     : []), [timetableDayDrawerOptions]);
+  const timetableDrawersWithStyles = useMemo(() => [
+    ...timetableDrawers,
+    ...(timetableStyleOptions.length > 0 ? [{
+      id: 'styles',
+      label: 'Styles',
+      placement: 'end',
+      type: 'checkbox',
+      options: timetableStyleOptions,
+    }] : []),
+  ], [timetableDrawers, timetableStyleOptions]);
 
-  const timetableFilterBar = useMemo(() => (timetableChoices.length > 0 || timetableDrawers.length > 0 ? {
+  const timetableFilterBar = useMemo(() => (timetableChoices.length > 0 || timetableDrawersWithStyles.length > 0 ? {
     value: {
       day: selectedTimetableDayLabel || null,
+      styles: selectedStyles,
       favorites: showFavoritesOnly,
       conflicts: showConflictsOnly,
       tribe: showTribeOnly,
     },
     onChange: (nextValue) => {
       const nextDay = nextValue.day ?? defaultTimetableDay;
+      const nextStyles = Array.isArray(nextValue.styles) ? nextValue.styles : [];
       const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
       const didEnableConflicts = Boolean(nextValue.conflicts) && !showConflictsOnly;
       const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
@@ -1848,27 +2120,30 @@ const App = () => {
         didEnableConflicts || didEnableFavorites ? false : Boolean(nextValue.tribe);
 
       setSelectedTimetableDay(nextDay);
+      setSelectedStyles(nextStyles);
       setShowFavoritesOnly(nextFavoritesOnly);
       setShowConflictsOnly(nextConflictsOnly);
       setShowTribeOnly(nextTribeOnly);
     },
     onReset: () => {
       setSelectedTimetableDay(defaultTimetableDay);
+      setSelectedStyles([]);
       setShowFavoritesOnly(false);
       setShowConflictsOnly(false);
       setShowTribeOnly(false);
     },
     resetButton: false,
     choices: timetableChoices,
-    drawers: timetableDrawers,
+    drawers: timetableDrawersWithStyles,
   } : null), [
     defaultTimetableDay,
+    selectedStyles,
     selectedTimetableDayLabel,
     showConflictsOnly,
     showFavoritesOnly,
     showTribeOnly,
     timetableChoices,
-    timetableDrawers,
+    timetableDrawersWithStyles,
   ]);
 
   const navbarItems = useMemo(
@@ -1986,6 +2261,7 @@ const App = () => {
 
   const viewPropsByView = useMemo(() => ({
     lineup: {
+      hasLineup,
       groupedEntries: groupedVisibleEntries,
       entries: visibleEntries,
       favoriteIdSet,
@@ -1997,6 +2273,7 @@ const App = () => {
       filterBar: lineupFilterBar,
     },
     search: {
+      hasLineup,
       groupedEntries: groupedSearchVisibleEntries,
       entries: searchVisibleEntries,
       favoriteIdSet,
@@ -2009,6 +2286,7 @@ const App = () => {
       stackDays: Boolean(searchHeaderQuery.trim()),
     },
     timetable: {
+      hasLineup,
       entries: visibleTimetableEntries,
       selectedDay: selectedTimetableDayLabel,
       favoriteIdSet,
@@ -2022,6 +2300,7 @@ const App = () => {
       mapLayers: selectedMapLayers,
     },
     reviews: {
+      hasLineup,
       reviewFavorites: isLatestLineupSelected ? visibleReviewFavorites : [],
       conflictEntries: isLatestLineupSelected ? favoriteTimetableConflictEntries : [],
       favoriteIdSet,
@@ -2040,6 +2319,7 @@ const App = () => {
     favoriteIdSet,
     favoriteTimetableConflictEntries,
     favoritesReadOnly,
+    hasLineup,
     groupedVisibleEntries,
     groupedSearchVisibleEntries,
     handleOpenTimetableConflicts,
@@ -2075,6 +2355,7 @@ const App = () => {
       favoriteCount: favoriteItems.length,
       lineups: lineupSources,
       selectedLineupKey,
+      isAdmin,
       onSelectLineup: handleSelectLineup,
       onHidePastEventsChange: setHidePastEvents,
       onHideUndatedEventsChange: setHideUndatedEvents,
@@ -2087,12 +2368,15 @@ const App = () => {
       onLeaveTribe: handleLeaveTribe,
       onRenameTribe: handleRenameTribe,
     },
+    admin: {
+      isAdmin,
+      onLineupsChanged: refreshLineupSources,
+    },
     about: {},
     roadmap: {},
     legal: {},
   }), [
     activeProfile,
-    archiveLineupNotice,
     authUser,
     handleProfileUpdated,
     handleCreateTribe,
@@ -2104,14 +2388,17 @@ const App = () => {
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,
+    isAdmin,
     favoriteItems.length,
     isTribeBusy,
     isTribeReady,
+    lineupSources,
     pendingTribeInviteCode,
     resetFavorites,
     selectedLineupKey,
     tribe,
     tribeInviteAlert,
+    refreshLineupSources,
   ]);
 
   const baseViewHeaderTransitionState = useMemo(() => {
@@ -2177,14 +2464,6 @@ const App = () => {
 
   if (activeView === 'storybook') {
     return <StorybookView onOpenView={openView} />;
-  }
-
-  if (!selectedLineup) {
-    return (
-      <UiThemeScope>
-        <EmptyState text="No lineup detected." />
-      </UiThemeScope>
-    );
   }
 
   return (

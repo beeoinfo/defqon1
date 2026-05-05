@@ -1,5 +1,4 @@
-import crypto from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,6 +13,7 @@ const DEFAULT_SOURCE1_URL = 'https://insanefestival.com/line-up/';
 const DEFAULT_SOURCE2_URL = 'https://insanefestival.chapi.to/api/versionData/43/9/2025?lang=fr';
 const SOURCE1_NAME = 'site';
 const SOURCE2_NAME = 'chapi';
+const LINEUP_FILE_SUFFIX = `_${SITE_SLUG}_lineup.json`;
 const SILVER = '#c0c0c0';
 const PASTEL_BLUE = '#93c5fd';
 const FESTIVAL_DAY_START_HOUR = 6;
@@ -157,13 +157,6 @@ function getArtistTags(artistName) {
   );
 }
 
-function getPerformanceHash({ daySlug, stageSlug, artistSlug, startAt }) {
-  return crypto
-    .createHash('sha256')
-    .update(JSON.stringify([daySlug, stageSlug, artistSlug, startAt ?? null]))
-    .digest('hex');
-}
-
 function getLineupHeadings(html) {
   const headingPattern = /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
   const headings = [];
@@ -190,12 +183,13 @@ function getStageName(value) {
   return STAGE_ORDER.find((stageName) => normalizedValue === stageName) ?? null;
 }
 
-function createStage(stageName, stageOrder) {
+function createStage(stageName, stageOrder, stageId = null) {
   return {
+    stageId,
     stageName,
     stageSlug: slugify(stageName),
     stageCanonical: stageName,
-    stageOrder,
+    stageOrder: Number.isFinite(stageOrder) ? stageOrder : null,
     stageColor: STAGE_COLORS[stageName] ?? null,
     artists: [],
   };
@@ -206,11 +200,10 @@ function createArtist({
   daySlug,
   stageSlug,
   artistOrder,
+  artistId = null,
   startAt = null,
   endAt = null,
   source,
-  sourcePriority,
-  sourceIds = {},
   genres = [],
   image = null,
 }) {
@@ -222,7 +215,7 @@ function createArtist({
     id: `${daySlug}_${stageSlug}_${artistSlug}${startAt ? `_${startAt.replace(/[^0-9]/g, '')}` : ''}`,
     artistName,
     artistSlug,
-    artistId: `${stageSlug}_${artistSlug}`,
+    artistId,
     artistOrder,
     startAt,
     endAt,
@@ -234,9 +227,6 @@ function createArtist({
     genres,
     image,
     source,
-    sourcePriority,
-    sourceIds,
-    hash: getPerformanceHash({ daySlug, stageSlug, artistSlug, startAt }),
   };
 }
 
@@ -289,7 +279,6 @@ function parseSiteLineupHtml(html) {
         stageSlug: currentStage.stageSlug,
         artistOrder: currentStage.artists.length + 1,
         source: SOURCE1_NAME,
-        sourcePriority: 1,
       })
     );
   });
@@ -396,6 +385,41 @@ function getIsoDate(timestamp) {
   return new Date(timestamp).toISOString();
 }
 
+function compareStages(leftStage, rightStage) {
+  if (leftStage.stageOrder !== null || rightStage.stageOrder !== null) {
+    return (leftStage.stageOrder ?? 999) - (rightStage.stageOrder ?? 999);
+  }
+
+  return String(leftStage.stageName ?? '').localeCompare(String(rightStage.stageName ?? ''));
+}
+
+function getDayDateRange(stages) {
+  const timestamps = stages.reduce(
+    (range, stage) => {
+      stage.artists.forEach((artist) => {
+        const startTimestamp = artist.startAt ? new Date(artist.startAt).getTime() : Number.NaN;
+        const endTimestamp = artist.endAt ? new Date(artist.endAt).getTime() : Number.NaN;
+
+        if (!Number.isNaN(startTimestamp)) {
+          range.start = Math.min(range.start, startTimestamp);
+        }
+
+        if (!Number.isNaN(endTimestamp)) {
+          range.end = Math.max(range.end, endTimestamp);
+        }
+      });
+
+      return range;
+    },
+    { start: Number.POSITIVE_INFINITY, end: Number.NEGATIVE_INFINITY }
+  );
+
+  return {
+    dayStart: Number.isFinite(timestamps.start) ? new Date(timestamps.start).toISOString() : null,
+    dayEnd: Number.isFinite(timestamps.end) ? new Date(timestamps.end).toISOString() : null,
+  };
+}
+
 function normalizeChapiStageName(stageName) {
   return String(stageName ?? '').trim().toUpperCase();
 }
@@ -434,8 +458,11 @@ function buildChapiLineup(payload) {
     let stage = day.stages.find((item) => item.stageSlug === stageSlug);
 
     if (!stage) {
-      stage = createStage(stageName, stageOrderIndex >= 0 ? stageOrderIndex + 1 : day.stages.length + 1);
-      stage.sourceIds = { chapiSceneId: event.sceneId };
+      stage = createStage(
+        stageName,
+        stageOrderIndex >= 0 ? stageOrderIndex + 1 : null,
+        event.sceneId ?? null
+      );
       day.stages.push(stage);
     }
 
@@ -445,16 +472,10 @@ function buildChapiLineup(payload) {
         daySlug: day.daySlug,
         stageSlug,
         artistOrder: stage.artists.length + 1,
+        artistId: event.id ?? null,
         startAt: getIsoDate(event.showStartDate),
         endAt: getIsoDate(event.showEndDate),
         source: SOURCE2_NAME,
-        sourcePriority: 2,
-        sourceIds: {
-          chapiEventId: event.id,
-          chapiProgramId: event.programId,
-          chapiSceneId: event.sceneId,
-          chapiMusicGroupIds: event.musicGroupsIds ?? [],
-        },
         genres: uniqueValues((event.genres ?? []).map((genreId) => genresById.get(genreId)?.name)),
         image: event.image ? `https://static.insanefestival.chapi.to/images/${event.image}` : null,
       })
@@ -465,7 +486,7 @@ function buildChapiLineup(payload) {
     .map((day) => ({
       ...day,
       stages: day.stages
-        .sort((left, right) => left.stageOrder - right.stageOrder)
+        .sort(compareStages)
         .map((stage) => ({
           ...stage,
           artists: stage.artists.sort((left, right) => {
@@ -547,8 +568,6 @@ function mergeLineups({ source1Lineup, source2Lineup, source2KnownArtistKeys }) 
       ...artist,
       id: `${artist.id}_source1_only`,
       source: SOURCE1_NAME,
-      sourcePriority: 1,
-      sourceOnly: true,
       artistOrder: mergedStage.artists.length + 1,
     });
   });
@@ -558,7 +577,7 @@ function mergeLineups({ source1Lineup, source2Lineup, source2KnownArtistKeys }) 
     .map((day) => ({
       ...day,
       stages: day.stages
-        .sort((left, right) => left.stageOrder - right.stageOrder)
+        .sort(compareStages)
         .map((stage) => ({
           ...stage,
           artists: stage.artists.map((artist, index) => ({
@@ -567,6 +586,42 @@ function mergeLineups({ source1Lineup, source2Lineup, source2KnownArtistKeys }) 
           })),
         })),
     }));
+}
+
+function normalizeLineupForOutput(lineup) {
+  return lineup.map((day) => {
+    const stages = day.stages.map((stage) => ({
+      stageId: stage.stageId ?? null,
+      stageName: stage.stageName,
+      stageSlug: stage.stageSlug,
+      stageCanonical: stage.stageCanonical,
+      stageOrder: stage.stageOrder ?? null,
+      stageColor: stage.stageColor ?? null,
+      artists: stage.artists.map((artist) => ({
+        id: artist.id,
+        artistName: artist.artistName,
+        artistSlug: artist.artistSlug,
+        artistId: artist.artistId ?? null,
+        startAt: artist.startAt ?? null,
+        endAt: artist.endAt ?? null,
+        host: Boolean(artist.host),
+        live: Boolean(artist.live),
+        featured: Boolean(artist.featured),
+        artistTags: artist.artistTags,
+        artistTokens: artist.artistTokens,
+      })),
+    }));
+    const { dayStart, dayEnd } = getDayDateRange(stages);
+
+    return {
+      daySlug: day.daySlug,
+      dayOrder: day.dayOrder,
+      dayName: day.dayName,
+      dayStart,
+      dayEnd,
+      stages,
+    };
+  });
 }
 
 function getLineupStats(lineup) {
@@ -596,7 +651,38 @@ function formatLineupFilename(date) {
   });
   const normalizedDate = formatter.format(date).replace(' ', '_').replace(/[-:]/g, '_');
 
-  return `${normalizedDate}_${SITE_SLUG}_lineup.json`;
+  return `${normalizedDate}${LINEUP_FILE_SUFFIX}`;
+}
+
+async function findLatestLineupFile() {
+  const filenames = await readdir(__dirname);
+  const lineupFilenames = filenames
+    .filter((filename) => filename.endsWith(LINEUP_FILE_SUFFIX))
+    .sort((left, right) => right.localeCompare(left));
+
+  return lineupFilenames[0] ? path.join(__dirname, lineupFilenames[0]) : null;
+}
+
+function getComparableLineupData(data) {
+  return {
+    eventEditionName: data.eventEditionName ?? null,
+    mapboxLayers: data.mapboxLayers ?? [],
+    lineup: data.lineup ?? [],
+  };
+}
+
+async function hasLineupChanged(outObj) {
+  const latestLineupFile = await findLatestLineupFile();
+
+  if (!latestLineupFile) {
+    return true;
+  }
+
+  const latestLineup = await readJsonFile(latestLineupFile);
+  return (
+    JSON.stringify(getComparableLineupData(latestLineup)) !==
+    JSON.stringify(getComparableLineupData(outObj))
+  );
 }
 
 async function main() {
@@ -630,51 +716,29 @@ async function main() {
     return;
   }
 
+  const outObj = {
+    eventEditionName: EVENT_EDITION_NAME,
+    updatedAt: updatedAt.toISOString(),
+    mapboxLayers: [],
+    lineup: normalizeLineupForOutput(lineup),
+  };
+  const shouldWrite = args.force || (await hasLineupChanged(outObj));
+
+  if (!shouldWrite) {
+    console.log('No lineup changes found. Skipped write.');
+    console.log('Merged stats:', JSON.stringify(stats));
+    return;
+  }
+
   const out = path.resolve(args.out ?? path.join(__dirname, formatLineupFilename(updatedAt)));
 
-  await writeFile(
-    out,
-    JSON.stringify(
-      {
-        eventEditionName: EVENT_EDITION_NAME,
-        updatedAt: updatedAt.toISOString(),
-        sourcePriority: [SOURCE2_NAME, SOURCE1_NAME],
-        sources: {
-          source1: {
-            name: SOURCE1_NAME,
-            url: source1.url,
-            priority: 1,
-            stats: getLineupStats(source1Lineup),
-          },
-          source2: {
-            name: SOURCE2_NAME,
-            url: source2.url,
-            priority: 2,
-            version: source2.payload.version,
-            published: source2.payload.published,
-            responseDate: getIsoDate(source2.payload.date),
-            dataCounts: source2.payload.dataCounts,
-            stats: getLineupStats(source2Lineup),
-          },
-        },
-        reconciliation: {
-          rule: 'source2 wins on matching artist names; source1 only fills missing artists',
-          stats,
-        },
-        mapboxLayers: [],
-        lineup,
-      },
-      null,
-      2
-    ),
-    'utf8'
-  );
+  await writeFile(out, JSON.stringify(outObj, null, 2), 'utf8');
 
   console.log('Wrote', out);
   console.log('Merged stats:', JSON.stringify(stats));
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('reconcile_insane_lineup.mjs')) {
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('generate_insane_lineup.mjs')) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);

@@ -227,6 +227,12 @@ const FilterBar = ({
   const currentValue = isControlled ? value : internalValue;
   const hasSelection = hasFilterValue(currentValue);
   const renderedDrawer = drawers.find((drawer) => drawer.id === renderedDrawerId);
+  const leadingRenderedDrawers = renderedDrawers.filter(
+    (renderedDrawerItem) => renderedDrawerItem.item.placement !== 'end'
+  );
+  const trailingRenderedDrawers = renderedDrawers.filter(
+    (renderedDrawerItem) => renderedDrawerItem.item.placement === 'end'
+  );
   const resolvedPlacement = placement === 'bottom' ? 'bottom' : 'top';
   const resetButtonOptions = typeof resetButton === 'object' ? resetButton : {};
   const showsResetButton = resetButton !== false && hasSelection;
@@ -372,6 +378,44 @@ const FilterBar = ({
     }
 
     updateValue(nextValue);
+  };
+
+  const renderDrawerTrigger = (renderedDrawerItem) => {
+    const drawer = renderedDrawerItem.item;
+    const drawerSelection = getDrawerSelection(drawer, currentValue[drawer.id]);
+    const isOpen = openDrawer === drawer.id;
+
+    return (
+      <Box
+        key={renderedDrawerItem.key}
+        component="span"
+        className={[
+          'dq-filter-bar__button-slot',
+          `dq-filter-bar__button-slot--${renderedDrawerItem.state}`,
+        ].filter(Boolean).join(' ')}
+        direction="row"
+        align="center"
+        gap="0"
+      >
+        <ToggleButton
+          pressed={isOpen || drawerSelection.hasSelection}
+          radius="rounded"
+          color={drawerSelection.color}
+          icon={DropdownChevron}
+          iconPosition="end"
+          aria-expanded={isOpen}
+          aria-controls={renderedDrawer ? `dq-filter-bar-drawer-${renderedDrawer.id}` : undefined}
+          data-open={isOpen ? 'true' : 'false'}
+          className="dq-filter-bar__drawer-trigger"
+          onPressedChange={(nextPressed, event) => {
+            scrollFilterButtonIntoView(event.currentTarget);
+            setOpenDrawer(isOpen ? null : drawer.id);
+          }}
+        >
+          {drawerSelection.label}
+        </ToggleButton>
+      </Box>
+    );
   };
 
   useEffect(() => {
@@ -637,43 +681,7 @@ const FilterBar = ({
             align="center"
             gap="var(--dq-ui-space-sm)"
           >
-            {renderedDrawers.map((renderedDrawerItem) => {
-              const drawer = renderedDrawerItem.item;
-              const drawerSelection = getDrawerSelection(drawer, currentValue[drawer.id]);
-              const isOpen = openDrawer === drawer.id;
-
-              return (
-                <Box
-                  key={renderedDrawerItem.key}
-                  component="span"
-                  className={[
-                    'dq-filter-bar__button-slot',
-                    `dq-filter-bar__button-slot--${renderedDrawerItem.state}`,
-                  ].filter(Boolean).join(' ')}
-                  direction="row"
-                  align="center"
-                  gap="0"
-                >
-                  <ToggleButton
-                    pressed={isOpen || drawerSelection.hasSelection}
-                    radius="rounded"
-                    color={drawerSelection.color}
-                    icon={DropdownChevron}
-                    iconPosition="end"
-                    aria-expanded={isOpen}
-                    aria-controls={renderedDrawer ? `dq-filter-bar-drawer-${renderedDrawer.id}` : undefined}
-                    data-open={isOpen ? 'true' : 'false'}
-                    className="dq-filter-bar__drawer-trigger"
-                    onPressedChange={(nextPressed, event) => {
-                      scrollFilterButtonIntoView(event.currentTarget);
-                      setOpenDrawer(isOpen ? null : drawer.id);
-                    }}
-                  >
-                    {drawerSelection.label}
-                  </ToggleButton>
-                </Box>
-              );
-            })}
+            {leadingRenderedDrawers.map(renderDrawerTrigger)}
 
             {renderedChoices.map((renderedChoice) => {
               const choice = renderedChoice.item;
@@ -714,6 +722,8 @@ const FilterBar = ({
                 </Box>
               );
             })}
+
+            {trailingRenderedDrawers.map(renderDrawerTrigger)}
           </Box>
         </Box>
       </Box>

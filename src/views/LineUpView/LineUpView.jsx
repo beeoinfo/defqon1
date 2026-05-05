@@ -69,6 +69,7 @@ const getEntryCardMetaProps = (entry) => ({
 });
 
 const LineUpView = ({
+  hasLineup = true,
   groupedEntries = {},
   entries = [],
   favoriteIdSet = new Set(),
@@ -289,7 +290,9 @@ const LineUpView = ({
         ) : null}
 
         {sections.length === 0 ? (
-          <EmptyState text="No shows match the current filters." />
+          <EmptyState
+            text={hasLineup ? 'No shows match the current filters.' : 'No lineup has been loaded yet.'}
+          />
         ) : (
           <SlidingColumns sections={sections} variant={stackDays ? 'stacked' : 'responsive'} />
         )}

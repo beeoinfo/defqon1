@@ -26,15 +26,29 @@ const HIDDEN_AUTH_EMAIL_DOMAIN = 'auth.beeoinfo.local';
 const ACTIVE_SITE_SLUG = activeSite.slug;
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
-const COMPACT_FAVORITE_SNAPSHOT_KEYS = new Set([
-  'id',
-  'artistName',
-  'artistTokens',
-  'stageColor',
-  'startAt',
-  'endAt',
-  'savedAt',
-]);
+const stableStringify = (value) => {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
+};
+
+async function sha256(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 function ensureSupabase() {
   if (!supabase) {
@@ -56,54 +70,32 @@ function dedupeFavoriteItems(items) {
 }
 
 function getFavoriteItemKey(item) {
-  if (item?.favoriteKey || item?.hash || item?.id) {
-    return item.favoriteKey ?? item.hash ?? item.id;
-  }
-
-  if (item?.daySlug || item?.stageSlug || item?.artistSlug) {
-    return `${item.daySlug}-${item.stageSlug}-${item.artistSlug}`;
-  }
-
-  return null;
+  return item?.favoriteKey ?? item?.id ?? null;
 }
 
-function compactFavoriteSnapshot(item, { resetSchedule = false } = {}) {
+function compactFavoriteSnapshot(item) {
   return {
     id: item?.id ?? null,
     artistName: item?.artistName ?? item?.artistRaw ?? null,
     artistTokens: Array.isArray(item?.artistTokens) ? item.artistTokens : [],
     stageColor: item?.stageColor ?? null,
-    startAt: resetSchedule ? null : item?.startAt ?? null,
-    endAt: resetSchedule ? null : item?.endAt ?? null,
+    startAt: item?.startAt ?? null,
+    endAt: item?.endAt ?? null,
     savedAt: item?.savedAt ?? new Date().toISOString(),
   };
 }
 
-function isLegacyFavoriteSnapshot(snapshot) {
-  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
-    return true;
-  }
-
-  return Object.keys(snapshot).some((key) => !COMPACT_FAVORITE_SNAPSHOT_KEYS.has(key));
-}
-
 function normalizeRemoteFavoriteRows(rows) {
-  let hasLegacySnapshots = false;
   const items = (rows ?? []).map((row) => {
     const snapshot = row.snapshot ?? {};
-    const shouldResetSchedule = isLegacyFavoriteSnapshot(snapshot);
-
-    if (shouldResetSchedule) {
-      hasLegacySnapshots = true;
-    }
 
     return {
-      ...compactFavoriteSnapshot(snapshot, { resetSchedule: shouldResetSchedule }),
+      ...compactFavoriteSnapshot(snapshot),
       favoriteKey: row.favorite_key,
     };
   });
 
-  return { items, hasLegacySnapshots };
+  return items;
 }
 
 function fileToImage(file) {
@@ -142,6 +134,10 @@ async function convertImageToWebp(file) {
 
 export function isSupabaseConfigured() {
   return Boolean(supabase);
+}
+
+export async function getStablePayloadHash(payload) {
+  return sha256(stableStringify(payload));
 }
 
 export function normalizeUsername(value) {
@@ -361,28 +357,150 @@ export async function loadAccountBundle(userId, authUser = null) {
   if (favoritesError) {
     throw favoritesError;
   }
-  const { items: favoriteItems, hasLegacySnapshots } = normalizeRemoteFavoriteRows(favorites);
-
-  if (hasLegacySnapshots && favoriteItems.length > 0) {
-    const rows = favoriteItems.map((item) => ({
-      user_id: userId,
-      site_slug: ACTIVE_SITE_SLUG,
-      favorite_key: item.favoriteKey,
-      snapshot: compactFavoriteSnapshot(item),
-    }));
-    const { error: migrationError } = await client
-      .from('user_favorites')
-      .upsert(rows, { onConflict: 'user_id,site_slug,favorite_key' });
-
-    if (migrationError) {
-      throw migrationError;
-    }
-  }
+  const favoriteItems = normalizeRemoteFavoriteRows(favorites);
 
   return {
     profile,
     favorites: favoriteItems,
   };
+}
+
+export async function isCurrentUserAdmin() {
+  const client = ensureSupabase();
+  const { data, error } = await client.rpc('is_current_user_admin');
+
+  if (error) {
+    throw error;
+  }
+
+  return Boolean(data);
+}
+
+function normalizeLineupVersion(row) {
+  return {
+    id: row.id,
+    key: row.id,
+    siteSlug: row.site_slug,
+    status: row.status,
+    versionLabel: row.version_label ?? null,
+    payload: row.payload,
+    payloadHash: row.payload_hash,
+    sourceKind: row.source_kind,
+    sourceUrl: row.source_url ?? null,
+    sourceHash: row.source_hash ?? null,
+    sourceUpdatedAt: row.source_updated_at ?? null,
+    detectedChanges: row.detected_changes ?? {},
+    importedAt: row.imported_at,
+    activatedAt: row.activated_at ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function loadPublishedLineupVersions(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client
+    .from('lineup_versions')
+    .select('*')
+    .eq('site_slug', siteSlug)
+    .in('status', ['active', 'archived'])
+    .order('activated_at', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map(normalizeLineupVersion);
+}
+
+export async function loadAdminLineupVersions(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client
+    .from('lineup_versions')
+    .select('*')
+    .eq('site_slug', siteSlug)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map(normalizeLineupVersion);
+}
+
+export async function loadLineupImportRuns(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client
+    .from('lineup_import_runs')
+    .select('*')
+    .eq('site_slug', siteSlug)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function loadLineupVersion({
+  siteSlug = ACTIVE_SITE_SLUG,
+  payload,
+  payloadHash,
+  sourceKind = 'manual',
+  sourceUrl = null,
+  sourceUpdatedAt = null,
+  sourceHash = null,
+  detectedChanges = {},
+  versionLabel = null,
+}) {
+  const client = ensureSupabase();
+  const resolvedHash = payloadHash || await getStablePayloadHash(payload);
+  const { data, error } = await client.rpc('load_lineup_version', {
+    site_slug_input: siteSlug,
+    payload_input: payload,
+    payload_hash_input: resolvedHash,
+    source_kind_input: sourceKind,
+    source_url_input: sourceUrl,
+    source_updated_at_input: sourceUpdatedAt,
+    source_hash_input: sourceHash,
+    detected_changes_input: detectedChanges,
+    version_label_input: versionLabel,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function activateLineupVersion(lineupId) {
+  const client = ensureSupabase();
+  const { data, error } = await client.rpc('activate_lineup_version', {
+    lineup_id_input: lineupId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteLineupVersion(lineupId) {
+  const client = ensureSupabase();
+  const { data, error } = await client.rpc('delete_lineup_version', {
+    lineup_id_input: lineupId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
 }
 
 export function mergeFavoriteItems(localItems, remoteItems) {

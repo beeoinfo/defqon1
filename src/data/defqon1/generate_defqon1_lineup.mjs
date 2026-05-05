@@ -1,12 +1,47 @@
-import { writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import crypto from 'node:crypto';
 import path from 'node:path';
-
-import { fetchQdanceDefqonLineup } from './qdance_defqon_lineup_fetch.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const LINEUP_FILE_SUFFIX = '_defqon_lineup.json';
+
+const requestBody = {
+  operationName: 'AppConfig',
+  variables: {},
+  query: "query AppConfig($slug: String = \"defqon1\" , $w: FloatType = \"500\" , $h: FloatType = null ) { appConfig(filter: { appSlug: { eq: $slug }  } , orderBy: _createdAt_DESC) { __typename ...AppConfigFragment } }  fragment ImageFileFragment on FileField { __typename id height mimeType url(imgixParams: { crop: [faces,focalpoint] fit: crop h: $h w: $w q: 100 dpr: 2 } ) width }  fragment ColorFragment on ColorField { __typename alpha red green blue }  fragment StageCompactFragment on EventEditionStageRecord { __typename _modelApiKey id name image { __typename ...ImageFileFragment } position stageColor { __typename ...ColorFragment } titleColor { __typename ...ColorFragment } }  fragment ActCompactFragment on ActRecord { __typename _modelApiKey id name heroAsset { __typename ...ImageFileFragment } }  fragment PerformanceFragment on PerformanceBlockRecord { __typename _modelApiKey id name image { __typename ...ImageFileFragment } startTime endTime host live featured acts { __typename ...ActCompactFragment } }  fragment StageDayCompactFragment on EventEditionStageDayRecord { __typename _modelApiKey id cmsName stage { __typename ...StageCompactFragment } performances { __typename ...PerformanceFragment } }  fragment DayFullFragment on EventEditionDayRecord { __typename _modelApiKey id name date startTime endTime _allReferencingEventEditionStageDays(orderBy: _status_ASC) { __typename ...StageDayCompactFragment } }  fragment EventEditionFragment on EventEditionRecord { __typename _modelApiKey id name slug artwork { __typename ...ImageFileFragment } location kind _allReferencingEventEditionDays { __typename ...DayFullFragment } }  fragment AppCurrencyFragment on AppCurrencyRecord { __typename id isoCode }  fragment LatLonFragment on LatLonField { __typename latitude longitude }  fragment AppMapboxLayerFragment on AppMapboxLayerRecord { __typename _modelApiKey _updatedAt id key label url appMapboxNortheasternCorner { __typename ...LatLonFragment } appMapboxSouthwesternCorner { __typename ...LatLonFragment } appMapboxCenter { __typename ...LatLonFragment } }  fragment AppConfigFragment on AppConfigRecord { __typename _modelApiKey _updatedAt id appSlug appTicketStatus appMembershipEventId appExperiencesVisibleTo appTicketsaleReleaseDate appTravelsaleReleaseDate appMembersaleReleaseDate ticketUrl waitlistUrl resaleShopUrl appTimezone appBaseLocale enabledOptions appEvent { __typename id } eventEdition { __typename ...EventEditionFragment } appHomePage { __typename id } appCurrency { __typename ...AppCurrencyFragment } privacyPolicyPage { __typename ... on AppOnlyPageRecord { id } ... on PageRecord { id } } appMapboxLayers { __typename ...AppMapboxLayerFragment } }",
+  extensions: {
+    clientLibrary: {
+      name: 'apollo-kotlin',
+      version: '4.4.2',
+    },
+  },
+};
+
+async function fetchQdanceDefqonLineup() {
+  const response = await fetch('https://www.q-dance.com/graphql/', {
+    method: 'POST',
+    headers: {
+      accept: 'multipart/mixed;deferSpec=20220824, application/graphql-response+json, application/json',
+      'x-environment': 'dq26-prod',
+      'x-apollo-expire-timeout': '2000',
+      'content-type': 'application/json',
+      'user-agent': 'okhttp/5.3.2',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`Q-dance GraphQL request failed: ${response.status} ${response.statusText}\n${text}`);
+  }
+
+  return {
+    data: JSON.parse(text),
+    raw: text,
+  };
+}
 
 const DAY_ORDER_BY_SLUG = {
   thursday: 1,
@@ -101,6 +136,10 @@ function getStageSortName(stage) {
 }
 
 function compareStages(leftStage, rightStage) {
+  if (leftStage.stageOrder !== null || rightStage.stageOrder !== null) {
+    return (leftStage.stageOrder ?? 999) - (rightStage.stageOrder ?? 999);
+  }
+
   const leftSortName = getStageSortName(leftStage);
   const rightSortName = getStageSortName(rightStage);
   const leftPriority = STAGE_PRIORITY_INDEX.get(leftSortName);
@@ -113,11 +152,36 @@ function compareStages(leftStage, rightStage) {
   return String(leftStage.stageName || '').localeCompare(String(rightStage.stageName || ''));
 }
 
-function getPerformanceHash({ daySlug, stageSlug, artistSlug, startAt, endAt }) {
-  return crypto
-    .createHash('sha256')
-    .update(JSON.stringify([daySlug, stageSlug, artistSlug, startAt, endAt]))
-    .digest('hex');
+function getStageOrder(stage) {
+  const order = Number(stage.position);
+  return Number.isFinite(order) ? order : null;
+}
+
+function getDayDateRange(stages) {
+  const timestamps = stages.reduce(
+    (range, stage) => {
+      stage.artists.forEach((artist) => {
+        const startTimestamp = artist.startAt ? new Date(artist.startAt).getTime() : Number.NaN;
+        const endTimestamp = artist.endAt ? new Date(artist.endAt).getTime() : Number.NaN;
+
+        if (!Number.isNaN(startTimestamp)) {
+          range.start = Math.min(range.start, startTimestamp);
+        }
+
+        if (!Number.isNaN(endTimestamp)) {
+          range.end = Math.max(range.end, endTimestamp);
+        }
+      });
+
+      return range;
+    },
+    { start: Number.POSITIVE_INFINITY, end: Number.NEGATIVE_INFINITY }
+  );
+
+  return {
+    dayStart: Number.isFinite(timestamps.start) ? new Date(timestamps.start).toISOString() : null,
+    dayEnd: Number.isFinite(timestamps.end) ? new Date(timestamps.end).toISOString() : null,
+  };
 }
 
 function collectUpdatedDates(value, dates = []) {
@@ -160,7 +224,42 @@ function formatLineupFilename(date) {
   });
   const normalizedDate = formatter.format(date).replace(' ', '_').replace(/[-:]/g, '_');
 
-  return `${normalizedDate}_defqon_lineup.json`;
+  return `${normalizedDate}${LINEUP_FILE_SUFFIX}`;
+}
+
+async function readJsonFile(filePath) {
+  return JSON.parse(await readFile(filePath, 'utf8'));
+}
+
+async function findLatestLineupFile() {
+  const filenames = await readdir(__dirname);
+  const lineupFilenames = filenames
+    .filter((filename) => filename.endsWith(LINEUP_FILE_SUFFIX))
+    .sort((left, right) => right.localeCompare(left));
+
+  return lineupFilenames[0] ? path.join(__dirname, lineupFilenames[0]) : null;
+}
+
+function getComparableLineupData(data) {
+  return {
+    eventEditionName: data.eventEditionName ?? null,
+    mapboxLayers: data.mapboxLayers ?? [],
+    lineup: data.lineup ?? [],
+  };
+}
+
+async function hasLineupChanged(outObj) {
+  const latestLineupFile = await findLatestLineupFile();
+
+  if (!latestLineupFile) {
+    return true;
+  }
+
+  const latestLineup = await readJsonFile(latestLineupFile);
+  return (
+    JSON.stringify(getComparableLineupData(latestLineup)) !==
+    JSON.stringify(getComparableLineupData(outObj))
+  );
 }
 
 function getDaySortValue(day) {
@@ -180,7 +279,7 @@ function getOrderedDays(days) {
 
 async function main() {
   const { data } = await fetchQdanceDefqonLineup();
-  const out = path.join(__dirname, '..', 'data', formatLineupFilename(getLatestUpdatedDate(data)));
+  const out = path.join(__dirname, formatLineupFilename(getLatestUpdatedDate(data)));
 
   const app = data?.data?.appConfig;
   if (!app) throw new Error('appConfig not found in JSON');
@@ -213,6 +312,7 @@ async function main() {
       const stageSlug = slugify(stageName);
       const stageCanonical = getStageCanonical(sourceStageName, stageNames);
       const stageId = stage.id || null;
+      const stageOrder = getStageOrder(stage);
       const stageColor = colorToCss(stage.stageColor);
 
       if (!stageMap.has(stageSlug)) {
@@ -221,6 +321,7 @@ async function main() {
           stageName,
           stageSlug,
           stageCanonical,
+          stageOrder,
           stageColor,
           artists: [],
         });
@@ -252,16 +353,20 @@ async function main() {
           featured: !!perf.featured,
           artistTags,
           artistTokens,
-          hash: getPerformanceHash({ daySlug, stageSlug, artistSlug, startAt, endAt }),
         });
       });
     });
+
+    const stages = Array.from(stageMap.values()).sort(compareStages);
+    const { dayStart, dayEnd } = getDayDateRange(stages);
 
     daysOut.push({
       daySlug,
       dayOrder,
       dayName,
-      stages: Array.from(stageMap.values()).sort(compareStages),
+      dayStart,
+      dayEnd,
+      stages,
     });
   });
 
@@ -285,12 +390,19 @@ async function main() {
     lineup: daysOut,
   };
 
-  await writeFile(out, JSON.stringify(outObj, null, 2), 'utf8');
   const artistCount = daysOut.reduce((s, d) => s + d.stages.reduce((ss, st) => ss + (st.artists?.length || 0), 0), 0);
+
+  if (!(await hasLineupChanged(outObj))) {
+    console.log('No lineup changes found. Skipped write.');
+    console.log('Current stats:', JSON.stringify({ dayCount: daysOut.length, artistCount }));
+    return;
+  }
+
+  await writeFile(out, JSON.stringify(outObj, null, 2), 'utf8');
   console.log('Wrote', out, 'with', daysOut.length, 'days and', artistCount, 'artists');
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('generate_defqon_lineup.mjs')) {
+if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('generate_defqon1_lineup.mjs')) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);

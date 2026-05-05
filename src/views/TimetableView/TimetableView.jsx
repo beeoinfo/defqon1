@@ -254,6 +254,7 @@ const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
 };
 
 const TimetableView = ({
+  hasLineup = true,
   entries = [],
   selectedDay = '',
   favoriteIdSet = new Set(),
@@ -428,7 +429,9 @@ const TimetableView = ({
         ) : null}
 
         {timetableData.stages.length === 0 ? (
-          <EmptyState text="No scheduled artists match the current filters." />
+          <EmptyState
+            text={hasLineup ? 'No scheduled artists match the current filters.' : 'No lineup has been loaded yet.'}
+          />
         ) : (
           <Box
             ref={shellRef}

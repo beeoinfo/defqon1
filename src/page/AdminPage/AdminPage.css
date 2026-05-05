@@ -1,0 +1,32 @@
+.dq-admin-page__muted {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+}
+
+.dq-admin-page__lineup-row {
+  padding: var(--dq-ui-space-md);
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-md);
+  background: var(--dq-ui-panel);
+}
+
+.dq-admin-page__lineup-title {
+  color: var(--dq-ui-text);
+  font-weight: 500;
+}
+
+.dq-admin-page__lineup-hash {
+  color: var(--dq-ui-text-soft);
+  font-weight: 400;
+}
+
+.dq-admin-page__changes-preview {
+  max-height: 280px;
+  margin: 0;
+  padding: var(--dq-ui-space-md);
+  overflow: auto;
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-md);
+  color: var(--dq-ui-text);
+  background: var(--dq-ui-panel);
+}

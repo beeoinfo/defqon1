@@ -19,6 +19,7 @@ const Profile = ({
   avatarAlt = '',
   isBusy = false,
   errorMessage = '',
+  actionContent = null,
   onChangePreset,
   onSave,
   onCancel,
@@ -189,10 +190,11 @@ const Profile = ({
 
       <Box className="dq-profile__form-zone" align="center">
         {!isEditing && !hasPresetChange ? (
-          <Box className="dq-profile__actions" align="center">
+          <Box className="dq-profile__actions" direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)" justify="center">
             <Button onClick={() => setIsEditing(true)}>
               Edit profile
             </Button>
+            {actionContent}
           </Box>
         ) : null}
 

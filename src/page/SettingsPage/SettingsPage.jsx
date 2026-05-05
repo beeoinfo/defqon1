@@ -37,6 +37,8 @@ const SettingsPage = ({
   onJoinTribe,
   onLeaveTribe,
   onRenameTribe,
+  isAdmin = false,
+  onOpenPage = null,
 }) => {
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -151,6 +153,11 @@ const SettingsPage = ({
           };
         }}
         onSave={handleProfileSave}
+        actionContent={isAdmin ? (
+          <Button onClick={() => onOpenPage?.('admin')} disabled={isBusy}>
+            Admin panel
+          </Button>
+        ) : null}
       />
 
       <TribePanel
@@ -168,27 +175,29 @@ const SettingsPage = ({
 
       <Box background="surface" title="App settings">
         <Box gap="var(--dq-ui-space-lg)">
-          <Box gap="var(--dq-ui-space-sm)">
-            <strong>Line-up backup</strong>
-            <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-              Switch temporarily between available snapshots.
-            </p>
-            <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-              {lineups.map((lineup) => (
-                <ChoiceButton
-                  key={lineup.key}
-                  type="radio"
-                  name="lineup-backup"
-                  checked={lineup.key === selectedLineupKey}
-                  onCheckedChange={() => onSelectLineup?.(lineup.key)}
-                  selectedIcon={CheckIcon}
-                  tag={lineup.isLatest ? 'Latest' : null}
-                >
-                  {lineup.label}
-                </ChoiceButton>
-              ))}
+          {lineups.length > 0 ? (
+            <Box gap="var(--dq-ui-space-sm)">
+              <strong>Line-up backup</strong>
+              <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
+                Switch temporarily between available snapshots.
+              </p>
+              <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+                {lineups.map((lineup) => (
+                  <ChoiceButton
+                    key={lineup.key}
+                    type="radio"
+                    name="lineup-backup"
+                    checked={lineup.key === selectedLineupKey}
+                    onCheckedChange={() => onSelectLineup?.(lineup.key)}
+                    selectedIcon={CheckIcon}
+                    tag={lineup.isLatest ? 'Latest' : null}
+                  >
+                    {lineup.label}
+                  </ChoiceButton>
+                ))}
+              </Box>
             </Box>
-          </Box>
+          ) : null}
 
           <Switch
             label="Hide past events"

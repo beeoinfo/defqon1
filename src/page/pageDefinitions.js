@@ -1,4 +1,5 @@
 import AboutPage from './AboutPage';
+import AdminPage from './AdminPage';
 import LegalPage from './LegalPage';
 import RoadmapPage from './RoadmapPage';
 import SettingsPage from './SettingsPage';
@@ -7,6 +8,10 @@ export const PAGE_DEFINITIONS = {
   settings: {
     title: 'Settings',
     Component: SettingsPage,
+  },
+  admin: {
+    title: 'Admin',
+    Component: AdminPage,
   },
   about: {
     title: 'About',
