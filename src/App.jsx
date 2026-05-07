@@ -2058,6 +2058,36 @@ const App = () => {
     setSelectedLineupKey(nextKey);
   }, [lineupSources]);
 
+  const handlePreviewLineup = useCallback((lineup) => {
+    if (!lineup?.payload) {
+      return;
+    }
+
+    const previewSource = buildLineupSourcesFromVersions([{
+      ...lineup,
+      id: `preview:${lineup.id ?? lineup.payloadHash ?? Date.now()}`,
+      status: 'preview',
+      versionLabel: `Preview - ${
+        lineup.versionLabel
+        || lineup.payload?.updatedAt
+        || lineup.sourceUpdatedAt
+        || lineup.importedAt
+        || 'Pending lineup'
+      }`,
+    }])[0];
+
+    if (previewSource.entries.length > 0) {
+      validateLineupPayload(previewSource.entries);
+    }
+
+    setLineupSources((currentSources) => [
+      previewSource,
+      ...currentSources.filter((source) => source.key !== previewSource.key),
+    ]);
+    setSelectedLineupKey(previewSource.key);
+    openView(previewSource.entries.some((entry) => hasCompleteSchedule(entry)) ? 'timetable' : 'lineup');
+  }, [openView]);
+
   const handleProfileUpdated = useCallback((nextProfile) => {
     setProfile(nextProfile);
   }, []);
@@ -2433,8 +2463,8 @@ const App = () => {
     </Box>
   ), [handleReturnFromSearch, searchHeaderQuery]);
 
-  const handleLineupsChanged = useCallback(async () => {
-    await refreshLineupSources();
+  const handleLineupsChanged = useCallback(async ({ selectLatest = false } = {}) => {
+    await refreshLineupSources({ selectLatest });
     await refreshPendingLineupCount();
   }, [refreshLineupSources, refreshPendingLineupCount]);
 
@@ -2563,6 +2593,7 @@ const App = () => {
     admin: {
       isAdmin,
       onLineupsChanged: handleLineupsChanged,
+      onPreviewLineup: handlePreviewLineup,
     },
     about: {},
     roadmap: {},
@@ -2578,6 +2609,7 @@ const App = () => {
     handleSelectLineup,
     handleSignedOut,
     handleLineupsChanged,
+    handlePreviewLineup,
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,

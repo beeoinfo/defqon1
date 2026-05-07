@@ -4,6 +4,7 @@ import {
   CheckIcon,
   CircleNotchIcon,
   DownloadSimpleIcon,
+  EyeIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
@@ -118,7 +119,7 @@ const downloadJson = ({ fileName, payload }) => {
   URL.revokeObjectURL(url);
 };
 
-const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
+const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup = null }) => {
   const [lineups, setLineups] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
   const [isFetchBusy, setIsFetchBusy] = useState(false);
@@ -209,6 +210,10 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
     }
   };
 
+  const handlePreviewLineup = (lineup) => {
+    onPreviewLineup?.(lineup);
+  };
+
   const handlePublishLineup = async (lineupId) => {
     setIsBusy(true);
     setErrorMessage('');
@@ -216,7 +221,7 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
     try {
       await activateLineupVersion(lineupId);
       await refreshAdminData();
-      await onLineupsChanged?.();
+      await onLineupsChanged?.({ selectLatest: true });
     } catch (error) {
       setErrorMessage(error.message || 'Could not publish this lineup.');
     } finally {
@@ -327,14 +332,24 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
               </Box>
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
                 {lineup.status === 'pending' ? (
-                  <Button
-                    icon={CheckIcon}
-                    variant="ghost"
-                    onClick={() => handlePublishLineup(lineup.id)}
-                    disabled={isBusy}
-                  >
-                    Publish
-                  </Button>
+                  <>
+                    <Button
+                      icon={EyeIcon}
+                      variant="ghost"
+                      onClick={() => handlePreviewLineup(lineup)}
+                      disabled={isBusy}
+                    >
+                      Preview
+                    </Button>
+                    <Button
+                      icon={CheckIcon}
+                      variant="ghost"
+                      onClick={() => handlePublishLineup(lineup.id)}
+                      disabled={isBusy}
+                    >
+                      Publish
+                    </Button>
+                  </>
                 ) : null}
                 <Button
                   icon={DownloadSimpleIcon}
@@ -403,6 +418,18 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null }) => {
           <>
             <Button variant="ghost" onClick={() => setPendingLineup(null)} disabled={isBusy}>
               Cancel
+            </Button>
+            <Button
+              variant="ghost"
+              icon={EyeIcon}
+              onClick={() => handlePreviewLineup({
+                id: `manual-${pendingLineup?.payloadHash ?? 'preview'}`,
+                status: 'pending',
+                ...pendingLineup,
+              })}
+              disabled={isBusy || !pendingLineup}
+            >
+              Preview
             </Button>
             <Button onClick={handleLoadPendingLineup} disabled={isBusy}>
               Add pending lineup
