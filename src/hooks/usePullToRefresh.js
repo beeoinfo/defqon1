@@ -100,6 +100,11 @@ const usePullToRefresh = ({ disabled = false, onRefresh }) => {
 
   useEffect(() => {
     if (disabled) {
+      gestureRef.current.isTracking = false;
+      setPullDistance(0);
+      setRefreshState('idle');
+      setIsDragging(false);
+
       return undefined;
     }
 

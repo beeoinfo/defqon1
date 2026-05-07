@@ -25,6 +25,7 @@ const DAY_ORDERS = {
   saturday: 3,
   sunday: 4,
 };
+const INSANE_SCHEDULE_ID_SUFFIX_PATTERN = /_\d{14,17}$/;
 const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
@@ -83,6 +84,36 @@ function dedupeBy(items, getKey) {
   });
 }
 
+function getStableEntryId(entryId) {
+  const value = String(entryId ?? '');
+
+  if (activeSite.slug !== 'insane') {
+    return value;
+  }
+
+  return value.replace(INSANE_SCHEDULE_ID_SUFFIX_PATTERN, '');
+}
+
+function getFavoriteKeyFromEntryId(entryId) {
+  const stableEntryId = getStableEntryId(entryId);
+  return stableEntryId ? `fav:${stableEntryId}` : null;
+}
+
+function buildCurrentEntriesById(entries) {
+  const currentEntriesById = new Map();
+
+  entries.forEach((entry) => {
+    if (!entry?.id) {
+      return;
+    }
+
+    currentEntriesById.set(entry.id, entry);
+    currentEntriesById.set(getStableEntryId(entry.id), entry);
+  });
+
+  return currentEntriesById;
+}
+
 export function compareLineupEntries(leftEntry, rightEntry) {
   return (
     (leftEntry.dayOrder ?? 999) - (rightEntry.dayOrder ?? 999) ||
@@ -97,7 +128,8 @@ export function compareLineupEntries(leftEntry, rightEntry) {
 function buildFavoriteKeyFromSnapshot(snapshot) {
   return (
     snapshot.favoriteKey ??
-    `fav:${snapshot.id ?? `${snapshot.daySlug}-${snapshot.stageSlug}-${snapshot.artistSlug}`}`
+    getFavoriteKeyFromEntryId(snapshot.id) ??
+    `fav:${snapshot.daySlug}-${snapshot.stageSlug}-${snapshot.artistSlug}`
   );
 }
 
@@ -566,7 +598,7 @@ export function groupFavoritesByDayAndStage(favoriteEntries) {
 }
 
 export function resolveFavoriteItems(entries, favoriteItems) {
-  const currentEntriesById = new Map(entries.map((entry) => [entry.id, entry]));
+  const currentEntriesById = buildCurrentEntriesById(entries);
 
   const matchedEntries = [];
   const reviewItems = [];
@@ -574,8 +606,10 @@ export function resolveFavoriteItems(entries, favoriteItems) {
   favoriteItems.forEach((favorite) => {
     let matchedEntry = null;
 
-    if (favorite.id && currentEntriesById.has(favorite.id)) {
-      matchedEntry = currentEntriesById.get(favorite.id);
+    const favoriteEntryId = favorite.id ? getStableEntryId(favorite.id) : null;
+
+    if (favoriteEntryId && currentEntriesById.has(favoriteEntryId)) {
+      matchedEntry = currentEntriesById.get(favoriteEntryId);
 
       if (hasScheduleChange(favorite, matchedEntry)) {
         reviewItems.push({
@@ -610,17 +644,28 @@ export function resolveFavoriteItems(entries, favoriteItems) {
 }
 
 export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
-  const currentEntriesById = new Map(entries.map((entry) => [entry.id, entry]));
+  const currentEntriesById = buildCurrentEntriesById(entries);
   let didChange = false;
 
   const nextItems = favoriteItems.map((favorite) => {
-    if (!favorite.id || !currentEntriesById.has(favorite.id)) {
+    const favoriteEntryId = favorite.id ? getStableEntryId(favorite.id) : null;
+
+    if (!favoriteEntryId || !currentEntriesById.has(favoriteEntryId)) {
       return favorite;
     }
 
-    const currentEntry = currentEntriesById.get(favorite.id);
+    const currentEntry = currentEntriesById.get(favoriteEntryId);
+    const hasMigratedEntryId = favorite.id !== currentEntry.id;
+    const hasMigratedFavoriteKey = favorite.favoriteKey !== getFavoriteKeyFromEntryId(currentEntry.id);
     const missingStageColor = !favorite.stageColor && currentEntry.stageColor;
     const missingArtistTokens = !Array.isArray(favorite.artistTokens) || favorite.artistTokens.length === 0;
+
+    if (hasMigratedEntryId || hasMigratedFavoriteKey) {
+      didChange = true;
+      return buildSnapshotFromEntry(currentEntry, {
+        savedAt: favorite.savedAt,
+      });
+    }
 
     if (
       !hasScheduledDate(favorite) &&

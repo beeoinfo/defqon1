@@ -61,13 +61,12 @@ import {
   validateLineupPayload,
 } from './lib/lineup';
 import {
+  commitPageHistoryState,
   getHistoryPageStack,
-  pushHistoryPageStackState,
   replaceHistoryPageStackState,
   syncPageStackIdRef,
 } from './lib/pageHistory';
 import {
-  getNextPageStackOnClose,
   getNextPageStackOnOpen,
 } from './lib/pageStack';
 import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
@@ -114,14 +113,57 @@ const VIEW_COMPONENTS = {
   timetable: TimetableView,
 };
 
+const SITE_MAP_IMAGE_MODULES = import.meta.glob('./data/*/maps/*.{avif,gif,jpeg,jpg,png,webp}', {
+  eager: true,
+  import: 'default',
+});
+
 const getHeaderModeForView = (view) => (view === 'search' ? 'search' : 'default');
 const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favicon}?site=${activeSite.slug}`;
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const getCleanStyleTag = (value) => String(value ?? '').trim();
+const getMapLayerLabelFromFileName = (fileName) => (
+  String(fileName ?? '')
+    .replace(/\.[^.]+$/u, '')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+);
+const getFallbackMapImageLayers = (siteSlug) => (
+  Object.entries(SITE_MAP_IMAGE_MODULES)
+    .map(([path, imageUrl]) => {
+      const match = path.match(/^\.\/data\/([^/]+)\/maps\/([^/]+)$/u);
+
+      if (!match || match[1] !== siteSlug) {
+        return null;
+      }
+
+      const fileName = match[2];
+      const fileSlug = fileName
+        .replace(/\.[^.]+$/u, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      const label = getMapLayerLabelFromFileName(fileName);
+
+      return {
+        id: `${siteSlug}-image-map-${fileSlug}`,
+        type: 'image',
+        label,
+        name: label,
+        imageUrl,
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.label.localeCompare(right.label))
+);
 const getEntryTimestamp = (value) => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
+};
+const scrollViewportToTop = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 };
 
 const getStyleTagItemsFromRecord = (record) => [
@@ -613,6 +655,7 @@ const App = () => {
     []
   );
   const pageStackRef = useRef(initialPageStack);
+  const shouldIgnoreClosedPageHistoryRef = useRef(false);
   const [activeView, setActiveView] = useState(initialRoute.view);
   const [viewRefreshKey, setViewRefreshKey] = useState(0);
   const [lineupSources, setLineupSources] = useState([]);
@@ -681,7 +724,7 @@ const App = () => {
 
   useDocumentScrollLock(hasRenderedPages);
 
-  const refreshLineupSources = useCallback(async () => {
+  const refreshLineupSources = useCallback(async ({ selectLatest = false } = {}) => {
     if (!isSupabaseConfigured()) {
       setLineupSources([]);
       setSelectedLineupKey(null);
@@ -700,7 +743,7 @@ const App = () => {
 
     setLineupSources(resolvedSources);
     setSelectedLineupKey((currentKey) => (
-      resolvedSources.some((lineup) => lineup.key === currentKey)
+      !selectLatest && resolvedSources.some((lineup) => lineup.key === currentKey)
         ? currentKey
         : resolvedSources[0]?.key ?? null
     ));
@@ -728,7 +771,7 @@ const App = () => {
       setViewRefreshKey((currentKey) => currentKey + 1);
     });
 
-    await refreshLineupSources();
+    await refreshLineupSources({ selectLatest: true });
     await refreshPendingLineupCount();
 
     if (isSupabaseConfigured()) {
@@ -743,7 +786,7 @@ const App = () => {
     isDragging,
     isPullVisible,
   } = usePullToRefresh({
-    disabled: hasRenderedPages,
+    disabled: hasRenderedPages || activeView === 'maps',
     onRefresh: handlePullRefresh,
   });
 
@@ -831,7 +874,15 @@ const App = () => {
     [selectedEntries]
   );
   const defaultScheduleView = hasTimetableView ? 'timetable' : 'lineup';
-  const selectedMapLayers = useMemo(() => selectedLineup?.mapLayers ?? [], [selectedLineup]);
+  const fallbackMapLayers = useMemo(
+    () => getFallbackMapImageLayers(activeSite.slug),
+    []
+  );
+  const selectedMapLayers = useMemo(() => {
+    const lineupMapLayers = selectedLineup?.mapLayers ?? [];
+
+    return lineupMapLayers.length > 0 ? lineupMapLayers : fallbackMapLayers;
+  }, [fallbackMapLayers, selectedLineup]);
   const hasMapsView = useMemo(
     () => selectedMapLayers.length > 0,
     [selectedMapLayers]
@@ -1258,10 +1309,18 @@ const App = () => {
   useEffect(() => {
     const handlePopState = (event) => {
       const nextRoute = resolveRoute(window.location.pathname, window.location.search);
-      const nextPageStack = getHistoryPageStack({
+      let nextPageStack = getHistoryPageStack({
         historyState: event.state,
         pageDefinitions: PAGE_DEFINITIONS,
       });
+
+      if (shouldIgnoreClosedPageHistoryRef.current && nextPageStack.length > 0) {
+        nextPageStack = [];
+        replaceHistoryPageStackState({
+          url: `${window.location.pathname}${window.location.search}`,
+          pageStack: [],
+        });
+      }
 
       pageStackRef.current = nextPageStack;
       setActiveView(nextRoute.view);
@@ -1332,9 +1391,12 @@ const App = () => {
       return;
     }
 
-    pushHistoryPageStackState({
+    shouldIgnoreClosedPageHistoryRef.current = false;
+
+    commitPageHistoryState({
       url: getUrlForView(activeView),
       pageStack: nextStack,
+      mode: 'auto',
     });
 
     pageStackRef.current = nextStack;
@@ -1342,22 +1404,22 @@ const App = () => {
   }, [activeView]);
 
   const closePage = useCallback((pageId) => {
-    const nextStack = getNextPageStackOnClose({
-      currentStack: pageStackRef.current,
-      pageId,
-    });
+    const hasMatchingPage = pageStackRef.current.some((page) => page.id === pageId);
 
-    if (nextStack === pageStackRef.current) {
+    if (!hasMatchingPage) {
       return;
     }
 
-    pushHistoryPageStackState({
+    shouldIgnoreClosedPageHistoryRef.current = true;
+
+    commitPageHistoryState({
       url: getUrlForView(activeView),
-      pageStack: nextStack,
+      pageStack: [],
+      mode: 'replace',
     });
 
-    pageStackRef.current = nextStack;
-    setPageStack(nextStack);
+    pageStackRef.current = [];
+    setPageStack([]);
   }, [activeView]);
 
   const openView = useCallback((view) => {
@@ -1365,9 +1427,12 @@ const App = () => {
       return;
     }
 
-    pushHistoryPageStackState({
+    shouldIgnoreClosedPageHistoryRef.current = true;
+
+    commitPageHistoryState({
       url: getUrlForView(view),
       pageStack: [],
+      mode: 'push',
     });
 
     pageStackRef.current = [];
@@ -1402,20 +1467,24 @@ const App = () => {
       setViewRefreshKey((currentKey) => currentKey + 1);
     });
 
-    const syncHistoryState = activeView === defaultScheduleView && pageStackRef.current.length === 0
-      ? replaceHistoryPageStackState
-      : pushHistoryPageStackState;
-
-    syncHistoryState({
-      url: getUrlForView(defaultScheduleView),
-      pageStack: [],
+    refreshLineupSources({ selectLatest: true }).catch((error) => {
+      console.error(error);
     });
 
+    commitPageHistoryState({
+      url: getUrlForView(defaultScheduleView),
+      pageStack: [],
+      mode: activeView === defaultScheduleView && pageStackRef.current.length === 0
+        ? 'replace'
+        : 'push',
+    });
+
+    shouldIgnoreClosedPageHistoryRef.current = true;
     pageStackRef.current = [];
     setPageStack([]);
     setActiveView(defaultScheduleView);
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [activeView, defaultScheduleView, resetBrowseState]);
+  }, [activeView, defaultScheduleView, refreshLineupSources, resetBrowseState]);
 
   const openSearch = useCallback(() => {
     if (activeView !== 'search') {
@@ -2113,10 +2182,15 @@ const App = () => {
       const nextDay = nextValue.day ?? 'All days';
       const nextStage = nextValue.stage ?? 'All stages';
       const nextStyles = Array.isArray(nextValue.styles) ? nextValue.styles : [];
+      const didChangeDay = nextDay !== selectedDay;
       const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
       const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
       const nextFavoritesOnly = didEnableTribe ? false : Boolean(nextValue.favorites);
       const nextTribeOnly = didEnableFavorites ? false : Boolean(nextValue.tribe);
+
+      if (didChangeDay) {
+        scrollViewportToTop();
+      }
 
       setSelectedDay(nextDay);
       setSelectedStage(nextStage);
@@ -2203,6 +2277,7 @@ const App = () => {
     onChange: (nextValue) => {
       const nextDay = nextValue.day ?? defaultTimetableDay;
       const nextStyles = Array.isArray(nextValue.styles) ? nextValue.styles : [];
+      const didChangeDay = nextDay !== selectedTimetableDayLabel;
       const didEnableFavorites = Boolean(nextValue.favorites) && !showFavoritesOnly;
       const didEnableConflicts = Boolean(nextValue.conflicts) && !showConflictsOnly;
       const didEnableTribe = Boolean(nextValue.tribe) && !showTribeOnly;
@@ -2212,6 +2287,10 @@ const App = () => {
         didEnableFavorites || didEnableTribe ? false : Boolean(nextValue.conflicts);
       const nextTribeOnly =
         didEnableConflicts || didEnableFavorites ? false : Boolean(nextValue.tribe);
+
+      if (didChangeDay) {
+        scrollViewportToTop();
+      }
 
       setSelectedTimetableDay(nextDay);
       setSelectedStyles(nextStyles);

@@ -84,6 +84,10 @@ function slugify(input) {
     .replace(/\s+/g, '-');
 }
 
+function normalizeArtistToken(input) {
+  return slugify(input).replace(/-+/g, '-');
+}
+
 function normalizeArtistName(input) {
   return String(input ?? '')
     .normalize('NFD')
@@ -91,6 +95,7 @@ function normalizeArtistName(input) {
     .replace(/[’‘]/g, "'")
     .replace(/[øØ]/g, 'o')
     .replace(/[æÆ]/g, 'ae')
+    .replace(/\*+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -149,8 +154,24 @@ function getArtistTags(artistName) {
   return uniqueValues(
     String(artistName ?? '')
       .split(/\s+(?:b2b|f2f|pres\.?)\s+/gi)
-      .map((part) => part.trim())
+      .map((part) => part.replace(/\*+/g, '').trim())
   );
+}
+
+function getArtistIdentityTokens(artistName) {
+  return getArtistTags(artistName)
+    .map((tag) => normalizeArtistToken(tag))
+    .filter((token) => token.length > 1);
+}
+
+function getArtistIdentityKeys(artistName) {
+  const fullNameKey = normalizeArtistName(artistName);
+  const artistTokens = getArtistIdentityTokens(artistName);
+  const tokenKey = artistTokens
+    .sort()
+    .join('|');
+
+  return uniqueValues([fullNameKey, tokenKey, ...artistTokens]).filter(Boolean);
 }
 
 function getLineupHeadings(html) {
@@ -208,7 +229,7 @@ function createArtist({
   const artistTokens = uniqueValues(artistTags.map((artistTag) => slugify(artistTag)));
 
   return {
-    id: `${daySlug}_${stageSlug}_${artistSlug}${startAt ? `_${startAt.replace(/[^0-9]/g, '')}` : ''}`,
+    id: `${daySlug}_${stageSlug}_${artistSlug}`,
     artistName,
     artistSlug,
     artistId,
@@ -511,29 +532,46 @@ function flattenLineup(lineup) {
   return rows;
 }
 
-function getChapiKnownArtistKeys(payload) {
-  const artistTypeId = payload.data?.guestTypes?.find((type) => type.name === 'Artistes')?._id;
-  const groups = payload.data?.groups ?? [];
+function scheduleValuesMatch(leftValue, rightValue) {
+  if (!leftValue || !rightValue) {
+    return true;
+  }
 
-  return new Set(
-    groups
-      .filter((group) => !artistTypeId || group.typeId === artistTypeId)
-      .map((group) => normalizeArtistName(group.name))
-      .filter(Boolean)
+  return new Date(leftValue).getTime() === new Date(rightValue).getTime();
+}
+
+function canSource2ArtistReplaceSource1(source1Row, source2Row) {
+  if (source1Row.day.daySlug !== source2Row.day.daySlug) {
+    return false;
+  }
+
+  if (source1Row.stage.stageSlug !== source2Row.stage.stageSlug) {
+    return false;
+  }
+
+  return (
+    scheduleValuesMatch(source1Row.artist.startAt, source2Row.artist.startAt) &&
+    scheduleValuesMatch(source1Row.artist.endAt, source2Row.artist.endAt)
   );
 }
 
-function mergeLineups({ source1Lineup, source2Lineup, source2KnownArtistKeys }) {
+function hasSource2ArtistMatch(source1Row, source2Rows) {
+  const artistKeys = getArtistIdentityKeys(source1Row.artist.artistName);
+
+  return source2Rows.some((source2Row) => {
+    const source2Keys = getArtistIdentityKeys(source2Row.artist.artistName);
+    const hasArtistMatch = artistKeys.some((artistKey) => source2Keys.includes(artistKey));
+
+    return hasArtistMatch && canSource2ArtistReplaceSource1(source1Row, source2Row);
+  });
+}
+
+function mergeLineups({ source1Lineup, source2Lineup }) {
   const mergedLineup = structuredClone(source2Lineup);
-  const source2ArtistKeys = new Set(
-    flattenLineup(source2Lineup).map(({ artist }) => normalizeArtistName(artist.artistName))
-  );
-  const source2BlockingKeys = new Set([...source2ArtistKeys, ...source2KnownArtistKeys]);
+  const source2Rows = flattenLineup(source2Lineup);
 
   flattenLineup(source1Lineup).forEach(({ day, stage, artist }) => {
-    const artistKey = normalizeArtistName(artist.artistName);
-
-    if (source2BlockingKeys.has(artistKey)) {
+    if (hasSource2ArtistMatch({ day, stage, artist }, source2Rows)) {
       return;
     }
 
@@ -664,8 +702,7 @@ export async function generateInsaneLineup(options = {}) {
 
   const source1Lineup = parseSiteLineupHtml(source1.html);
   const source2Lineup = buildChapiLineup(source2.payload);
-  const source2KnownArtistKeys = getChapiKnownArtistKeys(source2.payload);
-  const lineup = mergeLineups({ source1Lineup, source2Lineup, source2KnownArtistKeys });
+  const lineup = mergeLineups({ source1Lineup, source2Lineup });
   const stats = getLineupStats(lineup);
 
   if (stats.artistCount === 0) {
