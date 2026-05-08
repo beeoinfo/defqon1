@@ -46,6 +46,9 @@ const SettingsPage = ({
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isResetFavoritesModalOpen, setIsResetFavoritesModalOpen] = useState(false);
+  const selectableLineups = lineups.filter((lineup) => (
+    lineup.status !== 'preview' && lineup.status !== 'temp'
+  ));
 
   useEffect(() => {
     setErrorMessage('');
@@ -182,14 +185,14 @@ const SettingsPage = ({
 
       <Box background="surface" title="App settings">
         <Box gap="var(--dq-ui-space-lg)">
-          {lineups.length > 0 ? (
+          {selectableLineups.length > 0 ? (
             <Box gap="var(--dq-ui-space-sm)">
               <strong>Line-up backup</strong>
               <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
                 Switch temporarily between available snapshots.
               </p>
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-                {lineups.map((lineup) => (
+                {selectableLineups.map((lineup) => (
                   <ChoiceButton
                     key={lineup.key}
                     type="radio"

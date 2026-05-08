@@ -115,15 +115,34 @@ const LineUpView = ({
   favoriteIdSet = new Set(),
   toggleFavorite,
   canToggleFavorites = true,
+  canEditLineup = false,
+  onEditEntry = null,
   showTribeOnly = false,
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
+  archiveNoticeTitle = 'Archived line-up snapshot',
   stackDays = false,
   filterBar = null,
   showStyleTags = false,
   styleTagsByEntryId = new Map(),
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
+  const getFavoriteActionVariant = (isFavorite) => (
+    canEditLineup ? 'edit' : canToggleFavorites ? 'likes' : isFavorite ? 'liked' : null
+  );
+  const getActionAriaLabel = (entry, isFavorite) => (
+    canEditLineup
+      ? `Edit ${getEntryDisplayName(entry)}`
+      : isFavorite ? 'Remove favorite' : 'Add favorite'
+  );
+  const handleEntryAction = (entry) => {
+    if (canEditLineup) {
+      onEditEntry?.(entry.id);
+      return;
+    }
+
+    toggleFavorite?.(entry.id);
+  };
 
   const alternativeEntriesById = useMemo(() => {
     if (showTribeOnly) {
@@ -234,10 +253,10 @@ const LineUpView = ({
                           title={getEntryDisplayName(entry)}
                           underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
                           {...getEntryCardMetaProps(entry)}
-                          actionVariant={canToggleFavorites ? 'likes' : null}
+                          actionVariant={getFavoriteActionVariant(isFavorite)}
                           actionPressed={isFavorite}
-                          actionAriaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
-                          onAction={() => toggleFavorite?.(entry.id)}
+                          actionAriaLabel={getActionAriaLabel(entry, isFavorite)}
+                          onAction={() => handleEntryAction(entry)}
                         >
                           {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
                             <Box gap="var(--dq-ui-space-sm)">
@@ -288,12 +307,10 @@ const LineUpView = ({
                                       title={getEntryDisplayName(suggestion)}
                                       underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(suggestion.id)) : null}
                                       {...getEntryCardMetaProps(suggestion)}
-                                      actionVariant={canToggleFavorites ? 'likes' : null}
+                                      actionVariant={getFavoriteActionVariant(isSuggestionFavorite)}
                                       actionPressed={isSuggestionFavorite}
-                                      actionAriaLabel={
-                                        isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
-                                      }
-                                      onAction={() => toggleFavorite?.(suggestion.id)}
+                                      actionAriaLabel={getActionAriaLabel(suggestion, isSuggestionFavorite)}
+                                      onAction={() => handleEntryAction(suggestion)}
                                     />
                                   );
                                 })}
@@ -313,12 +330,14 @@ const LineUpView = ({
     [
       alternativeEntriesById,
       canToggleFavorites,
+      canEditLineup,
       daySections,
       favoriteIdSet,
       showTribeOnly,
       showStyleTags,
       styleTagsByEntryId,
       toggleFavorite,
+      onEditEntry,
       tribeLikesByEntryId,
     ]
   );
@@ -329,7 +348,7 @@ const LineUpView = ({
 
       <Box gap="var(--dq-ui-space-xl)">
         {archiveNotice ? (
-          <Alert variant="warning" title="Archived line-up snapshot">
+          <Alert variant="warning" title={archiveNoticeTitle}>
             {archiveNotice}
           </Alert>
         ) : null}

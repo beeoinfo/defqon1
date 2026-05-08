@@ -494,6 +494,32 @@ export async function activateLineupVersion(lineupId) {
   return data;
 }
 
+export async function ignoreLineupVersion(lineupId) {
+  const client = ensureSupabase();
+  const { data, error } = await client.rpc('ignore_lineup_version', {
+    lineup_id_input: lineupId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function promoteLatestArchivedLineup(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client.rpc('promote_latest_archived_lineup', {
+    site_slug_input: siteSlug,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function deleteLineupVersion(lineupId) {
   const client = ensureSupabase();
   const { data, error } = await client.rpc('delete_lineup_version', {

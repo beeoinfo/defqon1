@@ -512,7 +512,7 @@ alter table public.lineup_versions
 
 alter table public.lineup_versions
   add constraint lineup_versions_status_check
-  check (status in ('pending', 'active', 'archived'));
+  check (status in ('pending', 'active', 'archived', 'ignored'));
 
 alter table public.lineup_versions
   drop constraint if exists lineup_versions_source_kind_check;
@@ -1321,6 +1321,93 @@ begin
 end;
 $$;
 
+create or replace function public.ignore_lineup_version(lineup_id_input uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_lineup public.lineup_versions%rowtype;
+begin
+  if auth.role() <> 'service_role' and not public.is_current_user_admin() then
+    raise exception 'Admin access required.';
+  end if;
+
+  select *
+  into target_lineup
+  from public.lineup_versions
+  where id = lineup_id_input
+  for update;
+
+  if target_lineup.id is null then
+    raise exception 'Lineup version not found.';
+  end if;
+
+  if target_lineup.status <> 'pending' then
+    raise exception 'Only pending lineup versions can be ignored.';
+  end if;
+
+  update public.lineup_versions
+  set
+    status = 'ignored',
+    updated_at = now()
+  where id = target_lineup.id;
+
+  return target_lineup.id;
+end;
+$$;
+
+create or replace function public.promote_latest_archived_lineup(site_slug_input text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  active_lineup_id uuid;
+  replacement_lineup_id uuid;
+begin
+  if auth.role() <> 'service_role' and not public.is_current_user_admin() then
+    raise exception 'Admin access required.';
+  end if;
+
+  select id
+  into active_lineup_id
+  from public.lineup_versions
+  where site_slug = site_slug_input
+    and status = 'active'
+  limit 1;
+
+  if active_lineup_id is not null then
+    return active_lineup_id;
+  end if;
+
+  select id
+  into replacement_lineup_id
+  from public.lineup_versions
+  where site_slug = site_slug_input
+    and status = 'archived'
+  order by updated_at desc, activated_at desc nulls last, created_at desc
+  limit 1
+  for update;
+
+  if replacement_lineup_id is null then
+    return null;
+  end if;
+
+  update public.lineup_versions
+  set
+    status = 'active',
+    activated_at = now(),
+    activated_by = auth.uid(),
+    updated_at = now()
+  where id = replacement_lineup_id;
+
+  return replacement_lineup_id;
+end;
+$$;
+
 create or replace function public.delete_lineup_version(lineup_id_input uuid)
 returns uuid
 language plpgsql
@@ -1346,6 +1433,10 @@ begin
 
   delete from public.lineup_versions
   where id = target_lineup.id;
+
+  if target_lineup.status = 'active' then
+    perform public.promote_latest_archived_lineup(target_lineup.site_slug);
+  end if;
 
   return target_lineup.id;
 end;
@@ -1431,6 +1522,14 @@ grant execute on function public.load_lineup_version(text, jsonb, text, text, te
 revoke all on function public.activate_lineup_version(uuid) from public, anon, authenticated;
 grant execute on function public.activate_lineup_version(uuid) to authenticated;
 grant execute on function public.activate_lineup_version(uuid) to service_role;
+
+revoke all on function public.ignore_lineup_version(uuid) from public, anon, authenticated;
+grant execute on function public.ignore_lineup_version(uuid) to authenticated;
+grant execute on function public.ignore_lineup_version(uuid) to service_role;
+
+revoke all on function public.promote_latest_archived_lineup(text) from public, anon, authenticated;
+grant execute on function public.promote_latest_archived_lineup(text) to authenticated;
+grant execute on function public.promote_latest_archived_lineup(text) to service_role;
 
 revoke all on function public.delete_lineup_version(uuid) from public, anon, authenticated;
 grant execute on function public.delete_lineup_version(uuid) to authenticated;

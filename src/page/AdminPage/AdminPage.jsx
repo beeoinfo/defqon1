@@ -5,6 +5,8 @@ import {
   CircleNotchIcon,
   DownloadSimpleIcon,
   EyeIcon,
+  PlusIcon,
+  ProhibitIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
@@ -12,14 +14,16 @@ import Box from '@/components/layout/Box';
 import Modal from '@/components/layout/Modal';
 import Badge from '@/components/primitives/Badge';
 import Button from '@/components/primitives/Button';
-import { FileInput } from '@/components/primitives/forms';
+import { FileInput, Switch } from '@/components/primitives/forms';
 import {
   activateLineupVersion,
   deleteLineupVersion,
   getStablePayloadHash,
+  ignoreLineupVersion,
   isSupabaseConfigured,
   loadAdminLineupVersions,
   loadLineupVersion,
+  promoteLatestArchivedLineup,
   runManualLineupFetch,
 } from '@/lib/supabase';
 import { activeSite } from '@/sites/siteDefinitions';
@@ -57,6 +61,14 @@ const formatLineupStatus = (status) => {
 
   if (status === 'pending') {
     return 'Pending';
+  }
+
+  if (status === 'ignored') {
+    return 'Ignored';
+  }
+
+  if (status === 'temp') {
+    return 'Temp';
   }
 
   return 'Archived';
@@ -119,7 +131,17 @@ const downloadJson = ({ fileName, payload }) => {
   URL.revokeObjectURL(url);
 };
 
-const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup = null }) => {
+const AdminPage = ({
+  isAdmin = false,
+  onLineupsChanged = null,
+  onPreviewLineup = null,
+  allowManualLineupEdit = false,
+  onAllowManualLineupEditChange = null,
+  hasPublishedLineup = false,
+  onAddPerformance = null,
+  tempLineup = null,
+  onDeleteTempLineup = null,
+}) => {
   const [lineups, setLineups] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
   const [isFetchBusy, setIsFetchBusy] = useState(false);
@@ -131,6 +153,10 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
   const lineupsByHash = useMemo(
     () => new Map(lineups.map((lineup) => [lineup.payloadHash, lineup])),
     [lineups]
+  );
+  const displayedLineups = useMemo(
+    () => (tempLineup ? [tempLineup, ...lineups] : lineups),
+    [lineups, tempLineup]
   );
 
   const refreshAdminData = useCallback(async () => {
@@ -229,6 +255,51 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
     }
   };
 
+  const handlePublishTempLineup = async () => {
+    if (!tempLineup?.payload) {
+      return;
+    }
+
+    setIsBusy(true);
+    setErrorMessage('');
+
+    try {
+      const lineupId = await loadLineupVersion({
+        siteSlug: activeSite.slug,
+        payload: tempLineup.payload,
+        payloadHash: tempLineup.payloadHash,
+        sourceKind: 'manual',
+        versionLabel: tempLineup.versionLabel ?? activeSite.name ?? null,
+        detectedChanges: {
+          mode: 'manual-edit',
+        },
+      });
+      await activateLineupVersion(lineupId);
+      onDeleteTempLineup?.();
+      await refreshAdminData();
+      await onLineupsChanged?.({ selectLatest: true });
+    } catch (error) {
+      setErrorMessage(error.message || 'Could not publish this temporary lineup.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const handleIgnoreLineup = async (lineupId) => {
+    setIsBusy(true);
+    setErrorMessage('');
+
+    try {
+      await ignoreLineupVersion(lineupId);
+      await refreshAdminData();
+      await onLineupsChanged?.();
+    } catch (error) {
+      setErrorMessage(error.message || 'Could not ignore this lineup.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   const handleRunManualFetch = async () => {
     setIsFetchBusy(true);
     setErrorMessage('');
@@ -260,9 +331,13 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
 
     try {
       await deleteLineupVersion(lineupToDelete.id);
+      const shouldSelectLatest = lineupToDelete.status === 'active';
+      if (shouldSelectLatest) {
+        await promoteLatestArchivedLineup(activeSite.slug);
+      }
       setLineupToDelete(null);
       await refreshAdminData();
-      await onLineupsChanged?.();
+      await onLineupsChanged?.({ selectLatest: shouldSelectLatest });
     } catch (error) {
       setErrorMessage(error.message || 'Could not delete this lineup.');
     } finally {
@@ -286,11 +361,39 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
         </Alert>
       ) : null}
 
+      <Box background="surface" title="Manual lineup editing">
+        <Box gap="var(--dq-ui-space-md)">
+          <Switch
+            label="Allow manual lineup edit"
+            description={
+              hasPublishedLineup
+                ? 'Replace favorite actions with edit buttons on the line-up and timetable. Edits create a local temp lineup preview until you publish or delete it.'
+                : 'Manual edits require a published lineup to use as the source.'
+            }
+            checked={hasPublishedLineup && allowManualLineupEdit}
+            onCheckedChange={onAllowManualLineupEditChange}
+            disabled={isBusy || !hasPublishedLineup}
+          />
+          {allowManualLineupEdit && hasPublishedLineup ? (
+            <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+              <Button
+                icon={PlusIcon}
+                variant="ghost"
+                onClick={onAddPerformance}
+                disabled={isBusy}
+              >
+                Add performance
+              </Button>
+            </Box>
+          ) : null}
+        </Box>
+      </Box>
+
       <Box background="surface" title="Available lineups">
         <Box gap="var(--dq-ui-space-sm)">
-          {lineups.length === 0 ? (
+          {displayedLineups.length === 0 ? (
             <p className="dq-admin-page__muted">No Supabase lineup has been loaded yet.</p>
-          ) : lineups.map((lineup) => (
+          ) : displayedLineups.map((lineup) => (
             <Box
               key={lineup.id}
               className="dq-admin-page__lineup-row"
@@ -313,6 +416,10 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
                         ? 'var(--dq-ui-color-black)'
                         : lineup.status === 'pending'
                           ? 'var(--dq-ui-color-black)'
+                          : lineup.status === 'temp'
+                            ? 'var(--dq-ui-color-white)'
+                          : lineup.status === 'ignored'
+                            ? '#cbd5e1'
                           : undefined
                     }
                     backgroundColor={
@@ -320,6 +427,10 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
                         ? 'var(--dq-ui-success)'
                         : lineup.status === 'pending'
                           ? 'var(--dq-ui-warning)'
+                          : lineup.status === 'temp'
+                            ? 'var(--dq-ui-primary)'
+                          : lineup.status === 'ignored'
+                            ? 'rgba(148, 163, 184, 0.18)'
                           : undefined
                     }
                   >
@@ -331,7 +442,7 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
                 </span>
               </Box>
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
-                {lineup.status === 'pending' ? (
+                {lineup.status === 'temp' ? (
                   <>
                     <Button
                       icon={EyeIcon}
@@ -344,6 +455,34 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
                     <Button
                       icon={CheckIcon}
                       variant="ghost"
+                      onClick={handlePublishTempLineup}
+                      disabled={isBusy}
+                    >
+                      Publish
+                    </Button>
+                  </>
+                ) : null}
+                {lineup.status === 'pending' ? (
+                  <>
+                    <Button
+                      icon={EyeIcon}
+                      variant="ghost"
+                      onClick={() => handlePreviewLineup(lineup)}
+                      disabled={isBusy}
+                    >
+                      Preview
+                    </Button>
+                    <Button
+                      icon={ProhibitIcon}
+                      variant="ghost"
+                      onClick={() => handleIgnoreLineup(lineup.id)}
+                      disabled={isBusy}
+                    >
+                      Ignore
+                    </Button>
+                    <Button
+                      icon={CheckIcon}
+                      variant="ghost"
                       onClick={() => handlePublishLineup(lineup.id)}
                       disabled={isBusy}
                     >
@@ -351,21 +490,27 @@ const AdminPage = ({ isAdmin = false, onLineupsChanged = null, onPreviewLineup =
                     </Button>
                   </>
                 ) : null}
-                <Button
-                  icon={DownloadSimpleIcon}
-                  variant="ghost"
-                  onClick={() => downloadJson({
-                  fileName: `${activeSite.slug}-${getLineupHashLabel(lineup)}.json`,
-                    payload: lineup.payload,
-                  })}
-                  disabled={isBusy}
-                >
-                  Export
-                </Button>
+                {lineup.status !== 'ignored' ? (
+                  <Button
+                    icon={DownloadSimpleIcon}
+                    variant="ghost"
+                    onClick={() => downloadJson({
+                    fileName: `${activeSite.slug}-${getLineupHashLabel(lineup)}.json`,
+                      payload: lineup.payload,
+                    })}
+                    disabled={isBusy}
+                  >
+                    Export
+                  </Button>
+                ) : null}
                 <Button
                   icon={TrashIcon}
                   variant="danger"
-                  onClick={() => setLineupToDelete(lineup)}
+                  onClick={() => (
+                    lineup.status === 'temp'
+                      ? onDeleteTempLineup?.()
+                      : setLineupToDelete(lineup)
+                  )}
                   disabled={isBusy}
                 >
                   Delete

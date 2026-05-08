@@ -1,0 +1,16 @@
+.dq-ui-date-time-input {
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+
+.dq-ui-date-time-input__fields > .dq-ui-text-input {
+  flex: 1 1 11rem;
+}
+
+.dq-ui-text-input__input[type="date"]::-webkit-calendar-picker-indicator,
+.dq-ui-text-input__input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.72;
+  filter: invert(1);
+}

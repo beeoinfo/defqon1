@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { HeartIcon } from '@phosphor-icons/react';
+import { HeartIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
 import FilterBar from '@/components/FilterBar';
@@ -8,6 +8,7 @@ import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import PeopleStack from '@/components/PeopleStack';
 import Badge from '@/components/primitives/Badge';
+import Button from '@/components/primitives/Button';
 import ToggleButton from '@/components/primitives/ToggleButton';
 import {
   compareLineupEntries,
@@ -300,8 +301,11 @@ const TimetableView = ({
   favoriteIdSet = new Set(),
   toggleFavorite,
   canToggleFavorites = true,
+  canEditLineup = false,
+  onEditEntry = null,
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
+  archiveNoticeTitle = 'Archived line-up snapshot',
   filterBar = null,
   showStyleTags = false,
   styleTagsByEntryId = new Map(),
@@ -468,7 +472,7 @@ const TimetableView = ({
 
       <Box gap="var(--dq-ui-space-xl)">
         {archiveNotice ? (
-          <Alert variant="warning" title="Archived line-up snapshot">
+          <Alert variant="warning" title={archiveNoticeTitle}>
             {archiveNotice}
           </Alert>
         ) : null}
@@ -536,7 +540,16 @@ const TimetableView = ({
                           {renderTribeStack(entry)}
                         </Box>
 
-                        {canToggleFavorites ? (
+                        {canEditLineup ? (
+                          <Button
+                            className="dq-timetable-view__favorite"
+                            variant="ghost"
+                            icon={PencilSimpleIcon}
+                            size="sm"
+                            radius="rounded"
+                            ariaLabel={`Edit ${entry.displayName}`}
+                          />
+                        ) : canToggleFavorites ? (
                           <ToggleButton
                             className="dq-timetable-view__favorite"
                             variant="likes"
@@ -547,6 +560,10 @@ const TimetableView = ({
                             fillOnPress
                             ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
                           />
+                        ) : isFavorite ? (
+                          <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label="Liked">
+                            <HeartIcon weight="fill" />
+                          </span>
                         ) : null}
                       </Box>
                     );
@@ -665,7 +682,17 @@ const TimetableView = ({
                             {renderTribeStack(entry)}
                           </Box>
 
-                          {canToggleFavorites ? (
+                          {canEditLineup ? (
+                            <Button
+                              className="dq-timetable-view__favorite"
+                              variant="ghost"
+                              icon={PencilSimpleIcon}
+                              size="sm"
+                              radius="rounded"
+                              ariaLabel={`Edit ${entry.displayName}`}
+                              onClick={() => onEditEntry?.(entry.id)}
+                            />
+                          ) : canToggleFavorites ? (
                             <ToggleButton
                               className="dq-timetable-view__favorite"
                               variant="likes"
@@ -677,6 +704,10 @@ const TimetableView = ({
                               ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
                               onPressedChange={() => toggleFavorite?.(entry.id)}
                             />
+                          ) : isFavorite ? (
+                            <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label="Liked">
+                              <HeartIcon weight="fill" />
+                            </span>
                           ) : null}
                         </Box>
                       );

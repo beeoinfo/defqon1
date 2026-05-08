@@ -1,5 +1,5 @@
 import { Children } from 'react';
-import { HeartIcon, StarIcon, XIcon } from '@phosphor-icons/react';
+import { HeartIcon, PencilSimpleIcon, StarIcon, XIcon } from '@phosphor-icons/react';
 import { mixColors, parseColor, rgbaString } from '../../../lib/colorStyles';
 import Button from '../../primitives/Button';
 import ToggleButton from '../../primitives/ToggleButton';
@@ -60,7 +60,7 @@ const Card = ({
 
   const actionElement = actionVariant === 'close'
     ? <Button icon={XIcon} ariaLabel={actionAriaLabel ?? 'Close'} size="sm" radius="rounded" onClick={onAction} />
-    : actionVariant === 'favorite'
+      : actionVariant === 'favorite'
       ? (
         <ToggleButton
           variant="favorite"
@@ -82,6 +82,22 @@ const Card = ({
             onPressedChange={onAction}
           />
         )
+        : actionVariant === 'liked'
+          ? (
+            <span className="dq-layout-card__readonly-like" aria-label={actionAriaLabel ?? 'Liked'}>
+              <HeartIcon weight="fill" />
+            </span>
+          )
+          : actionVariant === 'edit'
+            ? (
+              <Button
+                icon={PencilSimpleIcon}
+                ariaLabel={actionAriaLabel ?? 'Edit'}
+                size="sm"
+                radius="rounded"
+                onClick={onAction}
+              />
+            )
       : null;
 
   return (

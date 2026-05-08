@@ -20,14 +20,16 @@ import {
   MusicNoteIcon,
   UsersIcon,
 } from '@phosphor-icons/react';
+import Alert from '@/components/Alert';
 import AuthModal from '@/components/AuthModal';
 import BackToTop from '@/components/BackToTop';
 import Box from '@/components/layout/Box';
+import Modal from '@/components/layout/Modal';
 import Page from '@/components/layout/Page';
 import View from '@/components/layout/View';
 import Badge from '@/components/primitives/Badge';
 import Button from '@/components/primitives/Button';
-import { SearchInput } from '@/components/primitives/forms';
+import { DateTimeInput, SearchInput, SelectInput, TextInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
 import usePullToRefresh from '@/hooks/usePullToRefresh';
@@ -40,6 +42,7 @@ import {
   filterUndatedReviewFavorites,
   getDays,
   getDefaultFestivalDay,
+  getEntryMetaLabel,
   getStages,
   groupEntriesByDayAndStage,
   hasCompleteSchedule,
@@ -68,10 +71,12 @@ import {
 } from './lib/pageHistory';
 import {
   getNextPageStackOnOpen,
+  getNextPageStackOnClose,
 } from './lib/pageStack';
 import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
 import {
   createCurrentUserTribe,
+  getStablePayloadHash,
   getCurrentUser,
   isCurrentUserAdmin,
   isSupabaseConfigured,
@@ -123,6 +128,161 @@ const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favico
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const getCleanStyleTag = (value) => String(value ?? '').trim();
+const TEMP_LINEUP_SOURCE_KEY = 'temp:manual-lineup-edit';
+const normalizeLineupText = (value) => String(value ?? '')
+  .normalize('NFKD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[øØ]/g, 'o')
+  .toLowerCase()
+  .trim();
+const slugifyLineupValue = (value) => normalizeLineupText(value)
+  .replace(/['".,()!:+/\\]/g, ' ')
+  .replace(/&/g, ' ')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .replace(/-+/g, '-');
+const getArtistTagsFromName = (artistName) => (
+  String(artistName ?? '')
+    .split(/\s+(?:B2B|F2F)\s+/i)
+    .map((part) => part.trim())
+    .filter(Boolean)
+);
+const getDateInputValue = (value) => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+const getTimeInputValue = (value) => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+};
+const getIsoFromDateAndTime = ({ date, time }) => {
+  const timestamp = new Date(`${date}T${time}`).getTime();
+
+  return Number.isNaN(timestamp) ? null : new Date(timestamp).toISOString();
+};
+const getScheduleTokenFromDateTime = ({ startDate, startTime, endTime }) => (
+  `${startDate.replace(/-/g, '')}-${startTime.replace(':', '')}-${endTime.replace(':', '')}`
+);
+const areSameEntryEditValues = ({ entry, artistName, startAt, endAt }) => (
+  normalizeLineupText(entry?.artistName) === normalizeLineupText(artistName) &&
+  String(entry?.startAt ?? '') === String(startAt ?? '') &&
+  String(entry?.endAt ?? '') === String(endAt ?? '')
+);
+const getPerformanceEditFieldErrors = (editState) => {
+  if (!editState) {
+    return {};
+  }
+
+  const values = editState.values ?? {};
+  const fieldErrors = {};
+
+  if (!String(values.artistName ?? '').trim()) {
+    fieldErrors.artistName = 'Required.';
+  }
+
+  if (editState.mode === 'create') {
+    if (!String(values.daySlug ?? '').trim()) {
+      fieldErrors.daySlug = 'Required.';
+    }
+
+    if (!String(values.stageSlug ?? '').trim()) {
+      fieldErrors.stageSlug = 'Required.';
+    }
+  }
+
+  if (!values.startDate) {
+    fieldErrors.startDate = 'Required.';
+  }
+
+  if (!values.startTime) {
+    fieldErrors.startTime = 'Required.';
+  }
+
+  if (!values.endDate) {
+    fieldErrors.endDate = 'Required.';
+  }
+
+  if (!values.endTime) {
+    fieldErrors.endTime = 'Required.';
+  }
+
+  return fieldErrors;
+};
+const hasPerformanceEditChanges = (editState) => {
+  if (!editState) {
+    return false;
+  }
+
+  if (editState.mode === 'create') {
+    return Object.values(editState.values ?? {}).some((value) => String(value ?? '').trim());
+  }
+
+  const values = editState.values ?? {};
+
+  return (
+    normalizeLineupText(values.artistName) !== normalizeLineupText(editState.entry?.artistName) ||
+    values.startDate !== getDateInputValue(editState.entry?.startAt) ||
+    values.startTime !== getTimeInputValue(editState.entry?.startAt) ||
+    values.endDate !== getDateInputValue(editState.entry?.endAt) ||
+    values.endTime !== getTimeInputValue(editState.entry?.endAt)
+  );
+};
+const sortArtistsBySchedule = (artists) => {
+  if (!Array.isArray(artists)) {
+    return;
+  }
+
+  artists.sort((firstArtist, secondArtist) => {
+    const firstTime = new Date(firstArtist?.startAt ?? 0).getTime();
+    const secondTime = new Date(secondArtist?.startAt ?? 0).getTime();
+    const safeFirstTime = Number.isNaN(firstTime) ? Number.MAX_SAFE_INTEGER : firstTime;
+    const safeSecondTime = Number.isNaN(secondTime) ? Number.MAX_SAFE_INTEGER : secondTime;
+
+    return safeFirstTime - safeSecondTime;
+  });
+
+  artists.forEach((artist, index) => {
+    artist.artistOrder = index + 1;
+  });
+};
+const getLineupDayOptionsFromPayload = (payload) => (
+  Array.isArray(payload?.lineup)
+    ? payload.lineup
+        .map((day) => ({
+          value: String(day.daySlug ?? '').trim(),
+          label: day.dayName || day.daySlug || 'Untitled day',
+          dayStart: day.dayStart ?? null,
+          stages: Array.isArray(day.stages) ? day.stages : [],
+        }))
+        .filter((day) => day.value && day.stages.length > 0)
+    : []
+);
+const getLineupStageOptionsForDay = (payload, daySlug) => {
+  const day = Array.isArray(payload?.lineup)
+    ? payload.lineup.find((lineupDay) => String(lineupDay.daySlug ?? '') === String(daySlug ?? ''))
+    : null;
+
+  return (day?.stages ?? [])
+    .map((stage) => ({
+      value: String(stage.stageSlug ?? '').trim(),
+      label: stage.stageName || stage.stageSlug || 'Untitled stage',
+    }))
+    .filter((stage) => stage.value);
+};
 const getMapLayerLabelFromFileName = (fileName) => (
   String(fileName ?? '')
     .replace(/\.[^.]+$/u, '')
@@ -515,10 +675,158 @@ const buildLineupSourcesFromVersions = (versions) => (
     entries: extractLineupEntries(version.payload),
     mapLayers: extractLineupMapLayers(version.payload),
     isLatest: version.status === 'active',
+    status: version.status,
+    payload: version.payload,
+    versionLabel: version.versionLabel ?? null,
     source: 'supabase',
     payloadHash: version.payloadHash,
   }))
 );
+
+const updateLineupPayloadEntry = ({ payload, entry, editValues }) => {
+  const nextPayload = JSON.parse(JSON.stringify(payload));
+  const artistName = editValues.artistName.trim();
+  const startAt = getIsoFromDateAndTime({
+    date: editValues.startDate,
+    time: editValues.startTime,
+  });
+  const endAt = getIsoFromDateAndTime({
+    date: editValues.endDate,
+    time: editValues.endTime,
+  });
+
+  if (!artistName || !startAt || !endAt) {
+    throw new Error('Artist name, start and end are required.');
+  }
+
+  if (new Date(endAt).getTime() <= new Date(startAt).getTime()) {
+    throw new Error('End time must be after start time.');
+  }
+
+  const artistTags = getArtistTagsFromName(artistName);
+  const artistTokens = artistTags.map((tag) => slugifyLineupValue(tag)).filter(Boolean);
+  const artistSlug = slugifyLineupValue(artistName);
+  const shouldKeepId = areSameEntryEditValues({ entry, artistName, startAt, endAt });
+  const nextId = shouldKeepId
+    ? entry.id
+    : `${entry.daySlug}_${entry.stageSlug}_${artistSlug}_${getScheduleTokenFromDateTime(editValues)}`;
+
+  const applyArtistEdit = (artist) => {
+    artist.id = nextId;
+    artist.artistName = artistName;
+    artist.artistSlug = artistSlug;
+    artist.artistTags = artistTags.length > 0 ? artistTags : [artistName];
+    artist.artistTokens = artistTokens.length > 0 ? artistTokens : [artistSlug];
+    artist.startAt = startAt;
+    artist.endAt = endAt;
+    artist.timeLabel = `${editValues.startTime} - ${editValues.endTime}`;
+
+    if (!shouldKeepId) {
+      artist.artistId = null;
+    }
+  };
+
+  let didUpdate = false;
+
+  const visitArtists = (artists) => {
+    if (!Array.isArray(artists)) {
+      return;
+    }
+
+    artists.forEach((artist) => {
+      if (!didUpdate && artist?.id === entry.id) {
+        applyArtistEdit(artist);
+        didUpdate = true;
+      }
+    });
+  };
+
+  if (Array.isArray(nextPayload.lineup)) {
+    nextPayload.lineup.forEach((day) => {
+      day.stages?.forEach((stage) => {
+        const wasAlreadyUpdated = didUpdate;
+        visitArtists(stage.artists);
+
+        if (!wasAlreadyUpdated && didUpdate) {
+          sortArtistsBySchedule(stage.artists);
+        }
+      });
+    });
+  }
+
+  visitArtists(nextPayload.entries);
+
+  if (Array.isArray(nextPayload)) {
+    visitArtists(nextPayload);
+  }
+
+  if (!didUpdate) {
+    throw new Error('Could not find this performance in the source lineup payload.');
+  }
+
+  nextPayload.updatedAt = new Date().toISOString();
+
+  return nextPayload;
+};
+
+const addLineupPayloadEntry = ({ payload, editValues }) => {
+  const nextPayload = JSON.parse(JSON.stringify(payload));
+  const artistName = editValues.artistName.trim();
+  const daySlug = String(editValues.daySlug ?? '').trim();
+  const stageSlug = String(editValues.stageSlug ?? '').trim();
+  const startAt = getIsoFromDateAndTime({
+    date: editValues.startDate,
+    time: editValues.startTime,
+  });
+  const endAt = getIsoFromDateAndTime({
+    date: editValues.endDate,
+    time: editValues.endTime,
+  });
+
+  if (!artistName || !daySlug || !stageSlug || !startAt || !endAt) {
+    throw new Error('Artist name, day, stage, start and end are required.');
+  }
+
+  if (new Date(endAt).getTime() <= new Date(startAt).getTime()) {
+    throw new Error('End time must be after start time.');
+  }
+
+  const day = Array.isArray(nextPayload.lineup)
+    ? nextPayload.lineup.find((lineupDay) => String(lineupDay.daySlug ?? '') === daySlug)
+    : null;
+  const stage = day?.stages?.find((lineupStage) => String(lineupStage.stageSlug ?? '') === stageSlug);
+
+  if (!day || !stage) {
+    throw new Error('Could not find the selected day and stage in the source lineup payload.');
+  }
+
+  const artistTags = getArtistTagsFromName(artistName);
+  const artistTokens = artistTags.map((tag) => slugifyLineupValue(tag)).filter(Boolean);
+  const artistSlug = slugifyLineupValue(artistName);
+  const nextEntry = {
+    id: `${daySlug}_${stageSlug}_${artistSlug}_${getScheduleTokenFromDateTime(editValues)}`,
+    artistName,
+    artistSlug,
+    artistId: null,
+    startAt,
+    endAt,
+    host: false,
+    live: false,
+    featured: false,
+    artistTags: artistTags.length > 0 ? artistTags : [artistName],
+    artistTokens: artistTokens.length > 0 ? artistTokens : [artistSlug],
+    artistOrder: (stage.artists?.length ?? 0) + 1,
+    timeLabel: `${editValues.startTime} - ${editValues.endTime}`,
+  };
+
+  stage.artists = Array.isArray(stage.artists) ? stage.artists : [];
+  stage.artists.push(nextEntry);
+  sortArtistsBySchedule(stage.artists);
+
+  nextPayload.updatedAt = new Date().toISOString();
+
+  return nextPayload;
+};
 
 const AppBaseView = memo(({
   activeView,
@@ -655,10 +963,14 @@ const App = () => {
     []
   );
   const pageStackRef = useRef(initialPageStack);
-  const shouldIgnoreClosedPageHistoryRef = useRef(false);
+  const closedPageTypesRef = useRef(new Set());
   const [activeView, setActiveView] = useState(initialRoute.view);
   const [viewRefreshKey, setViewRefreshKey] = useState(0);
   const [lineupSources, setLineupSources] = useState([]);
+  const [tempLineupSource, setTempLineupSource] = useState(null);
+  const [isManualLineupEditAllowed, setIsManualLineupEditAllowed] = useState(false);
+  const [editingPerformance, setEditingPerformance] = useState(null);
+  const [hasTriedPerformanceEditSubmit, setHasTriedPerformanceEditSubmit] = useState(false);
   const previousSearchViewRef = useRef(initialRoute.view === 'search' ? null : initialRoute.view);
   const [searchHeaderQuery, setSearchHeaderQuery] = useState('');
   const [headerMode, setHeaderMode] = useState(() => getHeaderModeForView(initialRoute.view));
@@ -743,13 +1055,16 @@ const App = () => {
 
     setLineupSources(resolvedSources);
     setSelectedLineupKey((currentKey) => (
+      !selectLatest && tempLineupSource && currentKey === tempLineupSource.key
+        ? currentKey
+        :
       !selectLatest && resolvedSources.some((lineup) => lineup.key === currentKey)
         ? currentKey
         : resolvedSources[0]?.key ?? null
     ));
 
     return resolvedSources;
-  }, []);
+  }, [tempLineupSource]);
 
   const refreshPendingLineupCount = useCallback(async () => {
     if (!isSupabaseConfigured() || !isAdmin) {
@@ -864,10 +1179,31 @@ const App = () => {
     }
   }, []);
 
+  const availableLineupSources = useMemo(() => (
+    tempLineupSource
+      ? [
+          tempLineupSource,
+          ...lineupSources.filter((lineup) => lineup.key !== tempLineupSource.key),
+        ]
+      : lineupSources
+  ), [lineupSources, tempLineupSource]);
   const selectedLineup = useMemo(
-    () => lineupSources.find((lineup) => lineup.key === selectedLineupKey) ?? lineupSources[0] ?? null,
-    [lineupSources, selectedLineupKey]
+    () => availableLineupSources.find((lineup) => lineup.key === selectedLineupKey) ?? availableLineupSources[0] ?? null,
+    [availableLineupSources, selectedLineupKey]
   );
+  const activePublishedLineup = useMemo(
+    () => lineupSources.find((lineup) => lineup.status === 'active') ?? null,
+    [lineupSources]
+  );
+  const hasPublishedLineup = Boolean(activePublishedLineup);
+  const canEditSelectedLineup = (
+    isAdmin &&
+    isManualLineupEditAllowed &&
+    hasPublishedLineup &&
+    Boolean(selectedLineup?.payload) &&
+    (selectedLineup?.status === 'active' || selectedLineup?.status === 'temp')
+  );
+  const manualLineupEditSource = tempLineupSource ?? activePublishedLineup;
   const selectedEntries = useMemo(() => selectedLineup?.entries ?? [], [selectedLineup]);
   const hasTimetableView = useMemo(
     () => selectedEntries.some((entry) => hasCompleteSchedule(entry)),
@@ -889,14 +1225,26 @@ const App = () => {
   );
   const hasLineup = Boolean(selectedLineup);
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
+  const isPreviewLineupSelected = selectedLineup?.status === 'preview' || selectedLineup?.status === 'temp';
   const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
   const favoritesReadOnly = hasLineup && !isLatestLineupSelected;
-  const archiveLineupNotice =
-    'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
+  const readOnlyLineupNotice = isPreviewLineupSelected
+    ? 'You are previewing a pending line-up in read-only mode. Favorites and reviews are shown for checking only, and nothing is saved.'
+    : 'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
+  const readOnlyLineupNoticeTitle = isPreviewLineupSelected
+    ? 'Lineup preview'
+    : 'Archived line-up snapshot';
   const entriesById = useMemo(
     () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
     [selectedEntries]
   );
+
+  useEffect(() => {
+    if (!hasPublishedLineup && isManualLineupEditAllowed) {
+      setIsManualLineupEditAllowed(false);
+    }
+  }, [hasPublishedLineup, isManualLineupEditAllowed]);
+
   const deferredFavoriteItems = useDeferredValue(favoriteItems);
   const favoriteResolution = useMemo(
     () => resolveFavoriteItems(selectedEntries, deferredFavoriteItems),
@@ -1314,11 +1662,11 @@ const App = () => {
         pageDefinitions: PAGE_DEFINITIONS,
       });
 
-      if (shouldIgnoreClosedPageHistoryRef.current && nextPageStack.length > 0) {
-        nextPageStack = [];
+      if (closedPageTypesRef.current.size > 0) {
+        nextPageStack = nextPageStack.filter((page) => !closedPageTypesRef.current.has(page.type));
         replaceHistoryPageStackState({
           url: `${window.location.pathname}${window.location.search}`,
-          pageStack: [],
+          pageStack: nextPageStack,
         });
       }
 
@@ -1391,7 +1739,7 @@ const App = () => {
       return;
     }
 
-    shouldIgnoreClosedPageHistoryRef.current = false;
+    closedPageTypesRef.current.delete(type);
 
     commitPageHistoryState({
       url: getUrlForView(activeView),
@@ -1404,30 +1752,32 @@ const App = () => {
   }, [activeView]);
 
   const closePage = useCallback((pageId) => {
-    const hasMatchingPage = pageStackRef.current.some((page) => page.id === pageId);
+    const closedPage = pageStackRef.current.find((page) => page.id === pageId);
 
-    if (!hasMatchingPage) {
+    if (!closedPage) {
       return;
     }
 
-    shouldIgnoreClosedPageHistoryRef.current = true;
+    const nextStack = getNextPageStackOnClose({
+      currentStack: pageStackRef.current,
+      pageId,
+    });
+    closedPageTypesRef.current.add(closedPage.type);
 
     commitPageHistoryState({
       url: getUrlForView(activeView),
-      pageStack: [],
+      pageStack: nextStack,
       mode: 'replace',
     });
 
-    pageStackRef.current = [];
-    setPageStack([]);
+    pageStackRef.current = nextStack;
+    setPageStack(nextStack);
   }, [activeView]);
 
   const openView = useCallback((view) => {
     if (view === activeView && pageStack.length === 0) {
       return;
     }
-
-    shouldIgnoreClosedPageHistoryRef.current = true;
 
     commitPageHistoryState({
       url: getUrlForView(view),
@@ -1479,7 +1829,6 @@ const App = () => {
         : 'push',
     });
 
-    shouldIgnoreClosedPageHistoryRef.current = true;
     pageStackRef.current = [];
     setPageStack([]);
     setActiveView(defaultScheduleView);
@@ -2049,17 +2398,23 @@ const App = () => {
   }, [authUser, tribe]);
 
   const handleSelectLineup = useCallback((nextKey) => {
-    const nextLineupExists = lineupSources.some((lineup) => lineup.key === nextKey);
+    const nextLineupExists = availableLineupSources.some((lineup) => lineup.key === nextKey);
 
     if (!nextLineupExists) {
       return;
     }
 
     setSelectedLineupKey(nextKey);
-  }, [lineupSources]);
+  }, [availableLineupSources]);
 
   const handlePreviewLineup = useCallback((lineup) => {
     if (!lineup?.payload) {
+      return;
+    }
+
+    if (lineup.status === 'temp') {
+      setSelectedLineupKey(lineup.key);
+      openView(lineup.entries?.some((entry) => hasCompleteSchedule(entry)) ? 'timetable' : 'lineup');
       return;
     }
 
@@ -2087,6 +2442,187 @@ const App = () => {
     setSelectedLineupKey(previewSource.key);
     openView(previewSource.entries.some((entry) => hasCompleteSchedule(entry)) ? 'timetable' : 'lineup');
   }, [openView]);
+
+  const buildTempLineupPreviewSource = useCallback(async (nextPayload) => {
+    const payloadHash = await getStablePayloadHash(nextPayload);
+    const previewSource = buildLineupSourcesFromVersions([{
+      id: TEMP_LINEUP_SOURCE_KEY,
+      status: 'temp',
+      versionLabel: 'Temp manual edit',
+      payload: nextPayload,
+      payloadHash,
+    }])[0];
+
+    previewSource.key = TEMP_LINEUP_SOURCE_KEY;
+    previewSource.label = 'Temp manual edit';
+    previewSource.status = 'temp';
+    previewSource.source = 'local';
+    previewSource.isLatest = false;
+
+    if (previewSource.entries.length > 0) {
+      validateLineupPayload(previewSource.entries);
+    }
+
+    return previewSource;
+  }, []);
+
+  const handleOpenPerformanceCreate = useCallback(() => {
+    if (!isAdmin || !isManualLineupEditAllowed || !hasPublishedLineup || !manualLineupEditSource?.payload) {
+      return;
+    }
+
+    const dayOptions = getLineupDayOptionsFromPayload(manualLineupEditSource.payload);
+    const firstDay = dayOptions[0] ?? null;
+    const firstStage = firstDay?.stages?.[0] ?? null;
+
+    if (!firstDay || !firstStage) {
+      return;
+    }
+
+    setSelectedLineupKey(manualLineupEditSource.key);
+    setHasTriedPerformanceEditSubmit(false);
+    setEditingPerformance({
+      mode: 'create',
+      entry: null,
+      values: {
+        artistName: '',
+        daySlug: firstDay.value,
+        stageSlug: firstStage.stageSlug ?? '',
+        startDate: getDateInputValue(firstDay.dayStart),
+        startTime: '',
+        endDate: getDateInputValue(firstDay.dayStart),
+        endTime: '',
+      },
+      errorMessage: '',
+    });
+  }, [hasPublishedLineup, isAdmin, isManualLineupEditAllowed, manualLineupEditSource]);
+
+  const handleOpenPerformanceEdit = useCallback((entryId) => {
+    if (!canEditSelectedLineup) {
+      return;
+    }
+
+    const entry = entriesById.get(entryId);
+
+    if (!entry) {
+      return;
+    }
+
+    setHasTriedPerformanceEditSubmit(false);
+    setEditingPerformance({
+      entry,
+      values: {
+        artistName: entry.artistName ?? '',
+        daySlug: entry.daySlug ?? '',
+        stageSlug: entry.stageSlug ?? '',
+        startDate: getDateInputValue(entry.startAt),
+        startTime: getTimeInputValue(entry.startAt),
+        endDate: getDateInputValue(entry.endAt),
+        endTime: getTimeInputValue(entry.endAt),
+      },
+      errorMessage: '',
+    });
+  }, [canEditSelectedLineup, entriesById]);
+
+  const handleEditingPerformanceChange = useCallback((nextValues) => {
+    setEditingPerformance((currentEdit) => (
+      currentEdit
+        ? {
+            ...currentEdit,
+            values: {
+              ...currentEdit.values,
+              ...nextValues,
+              ...(currentEdit.mode === 'create' && nextValues.daySlug
+                ? {
+                    stageSlug: getLineupStageOptionsForDay(
+                      selectedLineup?.payload,
+                      nextValues.daySlug
+                    )[0]?.value ?? '',
+                    startDate: getDateInputValue(
+                      getLineupDayOptionsFromPayload(selectedLineup?.payload)
+                        .find((day) => day.value === nextValues.daySlug)?.dayStart
+                    ),
+                    endDate: getDateInputValue(
+                      getLineupDayOptionsFromPayload(selectedLineup?.payload)
+                        .find((day) => day.value === nextValues.daySlug)?.dayStart
+                    ),
+                  }
+                : {}),
+            },
+            errorMessage: '',
+          }
+        : currentEdit
+    ));
+  }, [selectedLineup]);
+
+  const handleClosePerformanceEdit = useCallback(() => {
+    setHasTriedPerformanceEditSubmit(false);
+    setEditingPerformance(null);
+  }, []);
+
+  const handleSavePerformanceEdit = useCallback(async () => {
+    if (!editingPerformance || !selectedLineup?.payload) {
+      return;
+    }
+
+    setHasTriedPerformanceEditSubmit(true);
+
+    const fieldErrors = getPerformanceEditFieldErrors(editingPerformance);
+
+    if (Object.keys(fieldErrors).length > 0 || !hasPerformanceEditChanges(editingPerformance)) {
+      return;
+    }
+
+    try {
+      const nextPayload = editingPerformance.mode === 'create'
+        ? addLineupPayloadEntry({
+            payload: selectedLineup.payload,
+            editValues: editingPerformance.values,
+          })
+        : updateLineupPayloadEntry({
+            payload: selectedLineup.payload,
+            entry: editingPerformance.entry,
+            editValues: editingPerformance.values,
+          });
+      const previewSource = await buildTempLineupPreviewSource(nextPayload);
+
+      setTempLineupSource(previewSource);
+      setSelectedLineupKey(previewSource.key);
+      setHasTriedPerformanceEditSubmit(false);
+      setEditingPerformance(null);
+    } catch (error) {
+      setEditingPerformance((currentEdit) => (
+        currentEdit
+          ? {
+              ...currentEdit,
+              errorMessage: error.message || 'Could not update this performance.',
+            }
+          : currentEdit
+      ));
+    }
+  }, [buildTempLineupPreviewSource, editingPerformance, selectedLineup]);
+
+  const handleDeleteTempLineup = useCallback(() => {
+    setTempLineupSource(null);
+    setSelectedLineupKey((currentKey) => (
+      currentKey === TEMP_LINEUP_SOURCE_KEY
+        ? lineupSources[0]?.key ?? null
+        : currentKey
+    ));
+  }, [lineupSources]);
+
+  const handleManualLineupEditAllowedChange = useCallback((nextValue) => {
+    if (nextValue && !hasPublishedLineup) {
+      setIsManualLineupEditAllowed(false);
+      return;
+    }
+
+    setIsManualLineupEditAllowed(nextValue);
+
+    if (nextValue && manualLineupEditSource?.key) {
+      setSelectedLineupKey(manualLineupEditSource.key);
+    }
+  }, [hasPublishedLineup, manualLineupEditSource]);
 
   const handleProfileUpdated = useCallback((nextProfile) => {
     setProfile(nextProfile);
@@ -2476,9 +3012,12 @@ const App = () => {
       favoriteIdSet,
       toggleFavorite,
       canToggleFavorites: !favoritesReadOnly,
+      canEditLineup: canEditSelectedLineup,
+      onEditEntry: handleOpenPerformanceEdit,
       showTribeOnly,
       tribeLikesByEntryId,
-      archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
+      archiveNotice: favoritesReadOnly ? readOnlyLineupNotice : null,
+      archiveNoticeTitle: readOnlyLineupNoticeTitle,
       filterBar: lineupFilterBar,
       showStyleTags,
       styleTagsByEntryId,
@@ -2490,9 +3029,12 @@ const App = () => {
       favoriteIdSet,
       toggleFavorite,
       canToggleFavorites: !favoritesReadOnly,
+      canEditLineup: canEditSelectedLineup,
+      onEditEntry: handleOpenPerformanceEdit,
       showTribeOnly,
       tribeLikesByEntryId,
-      archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
+      archiveNotice: favoritesReadOnly ? readOnlyLineupNotice : null,
+      archiveNoticeTitle: readOnlyLineupNoticeTitle,
       filterBar: lineupFilterBar,
       stackDays: Boolean(searchHeaderQuery.trim()),
       showStyleTags,
@@ -2505,8 +3047,11 @@ const App = () => {
       favoriteIdSet,
       toggleFavorite,
       canToggleFavorites: !favoritesReadOnly,
+      canEditLineup: canEditSelectedLineup,
+      onEditEntry: handleOpenPerformanceEdit,
       tribeLikesByEntryId,
-      archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
+      archiveNotice: favoritesReadOnly ? readOnlyLineupNotice : null,
+      archiveNoticeTitle: readOnlyLineupNoticeTitle,
       filterBar: timetableFilterBar,
       showStyleTags,
       styleTagsByEntryId,
@@ -2517,8 +3062,8 @@ const App = () => {
     },
     reviews: {
       hasLineup,
-      reviewFavorites: isLatestLineupSelected ? visibleReviewFavorites : [],
-      conflictEntries: isLatestLineupSelected ? favoriteTimetableConflictEntries : [],
+      reviewFavorites: visibleReviewFavorites,
+      conflictEntries: favoriteTimetableConflictEntries,
       favoriteIdSet,
       toggleFavorite,
       removeReviewFavorite,
@@ -2526,11 +3071,12 @@ const App = () => {
       tribeLikesByEntryId,
       ignoreSmallConflicts,
       canManageFavorites: !favoritesReadOnly,
-      archiveNotice: favoritesReadOnly ? archiveLineupNotice : null,
+      archiveNotice: favoritesReadOnly ? readOnlyLineupNotice : null,
       isAuthenticated: Boolean(authUser),
     },
   }), [
-    archiveLineupNotice,
+    readOnlyLineupNotice,
+    readOnlyLineupNoticeTitle,
     authUser,
     favoriteIdSet,
     favoriteTimetableConflictEntries,
@@ -2538,13 +3084,17 @@ const App = () => {
     hasLineup,
     groupedVisibleEntries,
     groupedSearchVisibleEntries,
+    handleOpenPerformanceEdit,
     handleOpenTimetableConflicts,
     ignoreSmallConflicts,
     isLatestLineupSelected,
+    isAdmin,
+    isManualLineupEditAllowed,
     lineupFilterBar,
     removeReviewFavorite,
     defaultBrowseDay,
     selectedMapLayers,
+    selectedLineup?.payload,
     selectedTimetableDayLabel,
     showTribeOnly,
     searchHeaderQuery,
@@ -2573,7 +3123,7 @@ const App = () => {
       ignoreSmallConflicts,
       showStyleTags,
       favoriteCount: favoriteItems.length,
-      lineups: lineupSources,
+      lineups: availableLineupSources,
       selectedLineupKey,
       isAdmin,
       pendingLineupCount,
@@ -2594,6 +3144,12 @@ const App = () => {
       isAdmin,
       onLineupsChanged: handleLineupsChanged,
       onPreviewLineup: handlePreviewLineup,
+      allowManualLineupEdit: isManualLineupEditAllowed,
+      onAllowManualLineupEditChange: handleManualLineupEditAllowedChange,
+      hasPublishedLineup,
+      onAddPerformance: handleOpenPerformanceCreate,
+      tempLineup: tempLineupSource,
+      onDeleteTempLineup: handleDeleteTempLineup,
     },
     about: {},
     roadmap: {},
@@ -2610,19 +3166,25 @@ const App = () => {
     handleSignedOut,
     handleLineupsChanged,
     handlePreviewLineup,
+    handleOpenPerformanceCreate,
+    handleDeleteTempLineup,
+    handleManualLineupEditAllowedChange,
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,
     showStyleTags,
     isAdmin,
+    isManualLineupEditAllowed,
+    hasPublishedLineup,
     favoriteItems.length,
     isTribeBusy,
     isTribeReady,
-    lineupSources,
+    availableLineupSources,
     pendingLineupCount,
     pendingTribeInviteCode,
     resetFavorites,
     selectedLineupKey,
+    tempLineupSource,
     tribe,
     tribeInviteAlert,
   ]);
@@ -2645,7 +3207,30 @@ const App = () => {
 
   const isSearchHeaderMode = headerMode === 'search';
   const shouldKeepMobileNavbarVisible = activeView === 'search' || isSearchHeaderMode;
+  const performanceEditDayOptions = useMemo(
+    () => getLineupDayOptionsFromPayload(selectedLineup?.payload),
+    [selectedLineup]
+  );
+  const performanceEditStageOptions = useMemo(
+    () => getLineupStageOptionsForDay(
+      selectedLineup?.payload,
+      editingPerformance?.values.daySlug
+    ),
+    [editingPerformance?.values.daySlug, selectedLineup]
+  );
+  const performanceEditValidationErrors = useMemo(
+    () => getPerformanceEditFieldErrors(editingPerformance),
+    [editingPerformance]
+  );
 
+  const performanceEditFieldErrors = hasTriedPerformanceEditSubmit
+    ? performanceEditValidationErrors
+    : {};
+
+  const isPerformanceEditSaveDisabled = (
+    !editingPerformance ||
+    !hasPerformanceEditChanges(editingPerformance)
+  );
   const baseView = useMemo(() => (
     <AppBaseView
       activeView={activeView}
@@ -2747,6 +3332,87 @@ const App = () => {
       ))}
 
       {!hasRenderedPages ? <BackToTop /> : null}
+
+      <Modal
+        open={Boolean(editingPerformance)}
+        onClose={handleClosePerformanceEdit}
+        title={editingPerformance?.mode === 'create' ? 'Add performance' : 'Edit performance'}
+        subtitle={
+          editingPerformance
+            ? editingPerformance.mode === 'create'
+              ? 'Manual lineup edit'
+              : getEntryMetaLabel(editingPerformance.entry)
+            : ''
+        }
+        controls={(
+          <>
+            <Button variant="ghost" onClick={handleClosePerformanceEdit}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePerformanceEdit} disabled={isPerformanceEditSaveDisabled}>
+              {editingPerformance?.mode === 'create' ? 'Add performance' : 'Save edit'}
+            </Button>
+          </>
+        )}
+      >
+        <Box gap="var(--dq-ui-space-md)">
+          {editingPerformance?.errorMessage ? (
+            <Alert variant="error" title="Performance edit failed">
+              {editingPerformance.errorMessage}
+            </Alert>
+          ) : null}
+          <TextInput
+            label="Artist name"
+            value={editingPerformance?.values.artistName ?? ''}
+            required
+            errorMessage={performanceEditFieldErrors.artistName}
+            onChange={(event) => handleEditingPerformanceChange({ artistName: event.target.value })}
+          />
+          {editingPerformance?.mode === 'create' ? (
+            <>
+              <SelectInput
+                label="Day"
+                value={editingPerformance?.values.daySlug ?? ''}
+                options={performanceEditDayOptions.map((day) => ({
+                  value: day.value,
+                  label: day.label,
+                }))}
+                required
+                errorMessage={performanceEditFieldErrors.daySlug}
+                onChange={(event) => handleEditingPerformanceChange({ daySlug: event.target.value })}
+              />
+              <SelectInput
+                label="Stage"
+                value={editingPerformance?.values.stageSlug ?? ''}
+                options={performanceEditStageOptions}
+                required
+                errorMessage={performanceEditFieldErrors.stageSlug}
+                onChange={(event) => handleEditingPerformanceChange({ stageSlug: event.target.value })}
+              />
+            </>
+          ) : null}
+          <DateTimeInput
+            label="Start"
+            dateValue={editingPerformance?.values.startDate ?? ''}
+            timeValue={editingPerformance?.values.startTime ?? ''}
+            required
+            dateErrorMessage={performanceEditFieldErrors.startDate}
+            timeErrorMessage={performanceEditFieldErrors.startTime}
+            onDateChange={(startDate) => handleEditingPerformanceChange({ startDate })}
+            onTimeChange={(startTime) => handleEditingPerformanceChange({ startTime })}
+          />
+          <DateTimeInput
+            label="End"
+            dateValue={editingPerformance?.values.endDate ?? ''}
+            timeValue={editingPerformance?.values.endTime ?? ''}
+            required
+            dateErrorMessage={performanceEditFieldErrors.endDate}
+            timeErrorMessage={performanceEditFieldErrors.endTime}
+            onDateChange={(endDate) => handleEditingPerformanceChange({ endDate })}
+            onTimeChange={(endTime) => handleEditingPerformanceChange({ endTime })}
+          />
+        </Box>
+      </Modal>
 
       <AuthModal
         open={isAuthModalOpen}

@@ -31,7 +31,7 @@ import Badge from '@/components/primitives/Badge';
 import Button from '../../components/primitives/Button';
 import ChoiceButton from '../../components/primitives/ChoiceButton';
 import Dropdown, { DropdownDrawer } from '../../components/primitives/Dropdown';
-import { CheckboxInput, FileInput, SearchInput, Switch, TextInput } from '../../components/primitives/forms';
+import { CheckboxInput, DateTimeInput, FileInput, SearchInput, SelectInput, Switch, TextInput } from '../../components/primitives/forms';
 import PeopleStack from '@/components/PeopleStack';
 import Tabs from '../../components/primitives/Tabs';
 import Title from '../../components/primitives/Title';
@@ -904,6 +904,62 @@ const StorybookBody = memo(() => {
             <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
               <Badge variant="title">1</Badge>
               <Badge variant="title">12</Badge>
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Select Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <SelectInput
+                label="Festival day"
+                defaultValue="friday"
+                options={[
+                  { value: 'thursday', label: 'Thursday' },
+                  { value: 'friday', label: 'Friday' },
+                  { value: 'saturday', label: 'Saturday' },
+                  { value: 'sunday', label: 'Sunday' },
+                ]}
+              />
+              <SelectInput
+                label="Stage"
+                defaultValue="blue"
+                description="Native select control for constrained form choices."
+                options={[
+                  { value: 'red', label: 'RED' },
+                  { value: 'blue', label: 'BLUE' },
+                  { value: 'black', label: 'BLACK' },
+                ]}
+              />
+            </Box>
+          </Box>
+
+          <Box
+            className="dq-ui-storybook__button-section"
+            background="surface"
+            title="Date Time Input"
+            titleComponent="h3"
+            titleVariant="h4"
+          >
+            <Box gap="var(--dq-ui-space-lg)">
+              <DateTimeInput
+                label="Performance start"
+                dateValue="2026-05-14"
+                timeValue="16:00"
+                onDateChange={() => {}}
+                onTimeChange={() => {}}
+              />
+              <DateTimeInput
+                label="Performance end"
+                dateValue="2026-05-15"
+                timeValue="04:00"
+                onDateChange={() => {}}
+                onTimeChange={() => {}}
+              />
             </Box>
           </Box>
 

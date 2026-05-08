@@ -368,14 +368,6 @@ const ReviewsView = ({
     );
   }
 
-  if (archiveNotice) {
-    return (
-      <Alert variant="warning" title="Archived line-up snapshot">
-        {archiveNotice}
-      </Alert>
-    );
-  }
-
   if (!hasLineup) {
     return (
       <EmptyState text="No lineup has been loaded yet." />
@@ -384,7 +376,7 @@ const ReviewsView = ({
 
   const hasActiveLineupUpdates = activeTab === 'lineup-updates';
   const hasActiveTimetableConflicts = activeTab === 'timetable-conflicts';
-  const shouldShowReviewNotice = hasActiveLineupUpdates && reviewFavorites.length > 0;
+  const shouldShowReviewNotice = !archiveNotice && hasActiveLineupUpdates && reviewFavorites.length > 0;
   const shouldShowConflictNotice = hasActiveTimetableConflicts && conflictEntries.length > 0;
   const shouldShowLineupEmpty = hasActiveLineupUpdates && reviewFavorites.length === 0;
   const shouldShowConflictEmpty = hasActiveTimetableConflicts && conflictEntries.length === 0;
@@ -465,6 +457,12 @@ const ReviewsView = ({
   return (
     <Box gap="var(--dq-ui-space-xl)">
       <FilterBar {...reviewFilterBar} />
+
+      {archiveNotice ? (
+        <Alert variant="warning" title="Lineup preview">
+          {archiveNotice}
+        </Alert>
+      ) : null}
 
       {shouldShowReviewNotice ? (
         <Alert variant="warning" title="A few saved favorites need a quick review">
