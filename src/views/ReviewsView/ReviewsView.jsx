@@ -415,7 +415,11 @@ const ReviewsView = ({
     const favoriteTime = getEntryTimeLabel(favorite);
     const favoriteTheme = getStageTheme(favoriteStage);
     const favoriteColor = favorite.stageColor ?? favoriteTheme.accent;
-    const hasSuggestions = favorite.suggestions?.length > 0;
+    const visibleSuggestions = (favorite.suggestions ?? []).filter((suggestion) => {
+      const suggestionFavoriteKey = getReviewSuggestionFavoriteKey(suggestion, favorite);
+      return !favoriteIdSet.has(suggestion.id) && !favoriteIdSet.has(suggestionFavoriteKey);
+    });
+    const hasSuggestions = visibleSuggestions.length > 0;
 
     return (
       <Card
@@ -431,16 +435,12 @@ const ReviewsView = ({
         onAction={() => removeReviewFavorite?.(favorite.favoriteKey)}
         description={hasSuggestions ? 'You may be looking for this instead' : 'Uh oh... It seems your artist disappeared :('}
       >
-        {favorite.suggestions?.length ? (
+        {visibleSuggestions.length ? (
           <Box gap="var(--dq-ui-space-sm)">
             <Box gap="var(--dq-ui-space-sm)">
-              {favorite.suggestions.map((suggestion) => {
+              {visibleSuggestions.map((suggestion) => {
                 const suggestionTheme = getStageTheme(suggestion.stage);
                 const suggestionColor = suggestion.stageColor ?? suggestionTheme.accent;
-                const suggestionFavoriteKey = getReviewSuggestionFavoriteKey(suggestion, favorite);
-                const isSuggestionFavorite =
-                  favoriteIdSet.has(suggestion.id) ||
-                  favoriteIdSet.has(suggestionFavoriteKey);
 
                 return (
                   <Card
@@ -452,10 +452,8 @@ const ReviewsView = ({
                     meta2={getEntryDayLabel(suggestion)}
                     meta3={getEntryTimeLabel(suggestion)}
                     actionVariant={canManageFavorites ? 'likes' : null}
-                    actionPressed={isSuggestionFavorite}
-                    actionAriaLabel={
-                      isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
-                    }
+                    actionPressed={false}
+                    actionAriaLabel="Add favorite"
                     onAction={() => toggleReviewSuggestionFavorite?.(suggestion, favorite)}
                   />
                 );

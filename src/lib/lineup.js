@@ -541,6 +541,37 @@ function hasScheduleChange(savedFavorite, currentEntry) {
   );
 }
 
+function isSameArtistFavorite(leftItem, rightItem) {
+  const leftSlug = slugifyValue(leftItem?.artistSlug ?? leftItem?.artistName ?? leftItem?.artistRaw);
+  const rightSlug = slugifyValue(rightItem?.artistSlug ?? rightItem?.artistName ?? rightItem?.artistRaw);
+
+  if (leftSlug && rightSlug && leftSlug === rightSlug) {
+    return true;
+  }
+
+  const leftTokens = new Set((leftItem?.artistTokens ?? []).map((token) => String(token).toLowerCase()));
+  const rightTokens = new Set((rightItem?.artistTokens ?? []).map((token) => String(token).toLowerCase()));
+
+  return Array.from(leftTokens).some((token) => rightTokens.has(token));
+}
+
+function getAutomaticUnscheduledFavoriteMatch(favorite, entries) {
+  if (hasScheduledDate(favorite)) {
+    return null;
+  }
+
+  const matches = getReviewSuggestions(favorite, entries).filter((entry) => {
+    const sameArtist = isSameArtistFavorite(favorite, entry);
+    const sameStage = !favorite.stageCanonical ||
+      getComparableStageName(entry.stageCanonical ?? entry.stage) === getComparableStageName(favorite.stageCanonical);
+    const sameDay = !favorite.daySlug || slugsMatch(entry.daySlug, favorite.daySlug);
+
+    return sameArtist && sameStage && sameDay;
+  });
+
+  return matches.length === 1 ? matches[0] : null;
+}
+
 export function filterUndatedEntries(entries) {
   return entries.filter((entry) => hasScheduledDate(entry));
 }
@@ -669,6 +700,13 @@ export function resolveFavoriteItems(entries, favoriteItems) {
       return;
     }
 
+    const automaticMatch = getAutomaticUnscheduledFavoriteMatch(favorite, entries);
+
+    if (automaticMatch) {
+      matchedEntries.push(automaticMatch);
+      return;
+    }
+
     reviewItems.push({
       ...favorite,
       suggestions: getReviewSuggestions(favorite, entries),
@@ -693,6 +731,15 @@ export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
     const favoriteEntryId = favorite.id ? getStableEntryId(favorite.id) : null;
 
     if (!favoriteEntryId || !currentEntriesById.has(favoriteEntryId)) {
+      const automaticMatch = getAutomaticUnscheduledFavoriteMatch(favorite, entries);
+
+      if (automaticMatch) {
+        didChange = true;
+        return buildSnapshotFromEntry(automaticMatch, {
+          savedAt: favorite.savedAt,
+        });
+      }
+
       return favorite;
     }
 
@@ -726,8 +773,7 @@ export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
       hasScheduledDate(currentEntry)
     ) {
       didChange = true;
-      return buildCompactFavoriteSnapshot(currentEntry, {
-        favoriteKey: favorite.favoriteKey,
+      return buildSnapshotFromEntry(currentEntry, {
         savedAt: favorite.savedAt,
       });
     }
