@@ -1,10 +1,11 @@
-import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { CrosshairIcon, MinusIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CircleNotchIcon, CrosshairIcon, MinusIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
 import FilterBar from '@/components/FilterBar';
 import Box from '@/components/layout/Box';
 import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import Button from '@/components/primitives/Button';
+import { buildMapCalibrationTransform, projectGpsToMap } from '@/lib/mapCalibration';
 import './MapsView.css';
 
 const ENV_MAPBOX_ACCESS_TOKEN = String(import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').trim();
@@ -390,7 +391,38 @@ const getFeatureCardPosition = (map, point, cardSize = {}) => {
   return { x, y };
 };
 
-const getTribeLocationGroups = (map, tribeLocations) => {
+const getProjectedTribeLocation = (location, activeCalibrationTransform) => {
+  const hasGpsPosition =
+    Number.isFinite(location.gpsLongitude) &&
+    Number.isFinite(location.gpsLatitude);
+
+  if (hasGpsPosition && activeCalibrationTransform) {
+    const mapPoint = projectGpsToMap({
+      longitude: location.gpsLongitude,
+      latitude: location.gpsLatitude,
+    }, activeCalibrationTransform);
+
+    if (mapPoint) {
+      return {
+        ...location,
+        mapLongitude: mapPoint.longitude,
+        mapLatitude: mapPoint.latitude,
+      };
+    }
+  }
+
+  if (location.locationKind === 'live' && hasGpsPosition) {
+    return null;
+  }
+
+  return {
+    ...location,
+    mapLongitude: location.longitude,
+    mapLatitude: location.latitude,
+  };
+};
+
+const getTribeLocationGroups = (map, tribeLocations, activeCalibrationTransform = null) => {
   if (!map || !Array.isArray(tribeLocations) || tribeLocations.length === 0) {
     return [];
   }
@@ -398,14 +430,20 @@ const getTribeLocationGroups = (map, tribeLocations) => {
   const groups = [];
 
   tribeLocations.forEach((location) => {
-    const point = map.project([location.longitude, location.latitude]);
+    const projectedLocation = getProjectedTribeLocation(location, activeCalibrationTransform);
+
+    if (!projectedLocation) {
+      return;
+    }
+
+    const point = map.project([projectedLocation.mapLongitude, projectedLocation.mapLatitude]);
     const existingGroup = groups.find((group) => {
       const distance = Math.hypot(group.x - point.x, group.y - point.y);
       return distance <= TRIBE_LOCATION_CLUSTER_DISTANCE_PX;
     });
 
     if (existingGroup) {
-      existingGroup.locations.push(location);
+      existingGroup.locations.push(projectedLocation);
       existingGroup.x = (existingGroup.x + point.x) / 2;
       existingGroup.y = (existingGroup.y + point.y) / 2;
       return;
@@ -415,7 +453,7 @@ const getTribeLocationGroups = (map, tribeLocations) => {
       id: location.userId,
       x: point.x,
       y: point.y,
-      locations: [location],
+      locations: [projectedLocation],
     });
   });
 
@@ -615,7 +653,17 @@ const MapsView = ({
   tribeLocations = [],
   currentUserId = null,
   focusTribeLocationUserId = null,
+  calibrationPoints = [],
+  isCalibrationMode = false,
+  calibrationMessage = '',
+  isLiveLocationSharing = false,
+  liveLocationRemainingMinutes = null,
   onFocusTribeLocationHandled,
+  onAddCalibrationPoint,
+  onRemoveCalibrationPoint,
+  onCancelCalibration,
+  onStartLiveLocationSharing,
+  onStopLiveLocationSharing,
   onSetTribeLocation,
   onRemoveTribeLocation,
 }) => {
@@ -628,14 +676,20 @@ const MapsView = ({
   const [tribeLocationGroups, setTribeLocationGroups] = useState([]);
   const [selectedTribeLocationGroup, setSelectedTribeLocationGroup] = useState(null);
   const [locationErrorMessage, setLocationErrorMessage] = useState('');
+  const [calibrationErrorMessage, setCalibrationErrorMessage] = useState('');
+  const [isSavingCalibrationPoint, setIsSavingCalibrationPoint] = useState(false);
+  const [pendingCalibrationPoint, setPendingCalibrationPoint] = useState(null);
+  const [calibrationMarkers, setCalibrationMarkers] = useState([]);
   const featurePopoverTimeoutRef = useRef(0);
   const longPressTimeoutRef = useRef(0);
   const longPressStartRef = useRef(null);
   const shouldIgnoreNextMapClickRef = useRef(false);
   const tribeLocationGroupsSignatureRef = useRef('');
+  const calibrationMarkersSignatureRef = useRef('');
   const featureCardRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const isCalibrationModeRef = useRef(isCalibrationMode);
   const currentStyleUrlRef = useRef('');
   const isMapReadyRef = useRef(false);
   const pendingStyleRequestIdRef = useRef(0);
@@ -646,6 +700,28 @@ const MapsView = ({
   const activeLayer = mapLayers.find((layer) => layer.id === resolvedSelectedLayerId) ?? mapLayers[0] ?? null;
   const { owner: activeOwner } = parseMapboxStyleUrl(activeLayer?.styleUrl);
   const isActiveImageLayer = isImageMapLayer(activeLayer);
+  const activeCalibrationPoints = useMemo(
+    () => calibrationPoints.filter((point) => point.mapLayerId === activeLayer?.id),
+    [activeLayer?.id, calibrationPoints]
+  );
+  const activeCalibrationTransform = useMemo(
+    () => buildMapCalibrationTransform(activeCalibrationPoints),
+    [activeCalibrationPoints]
+  );
+  const mapLayerChoices = useMemo(
+    () => mapLayers.map((layer) => ({
+      id: layer.id,
+      name: 'mapLayer',
+      type: 'radio',
+      value: layer.id,
+      label: layer.label,
+    })),
+    [mapLayers]
+  );
+
+  useEffect(() => {
+    isCalibrationModeRef.current = isCalibrationMode;
+  }, [isCalibrationMode]);
 
   const clearFeaturePopover = () => {
     window.clearTimeout(featurePopoverTimeoutRef.current);
@@ -672,7 +748,7 @@ const MapsView = ({
 
   const updateTribeLocationGroups = useEffectEvent(() => {
     const map = mapRef.current;
-    const nextGroups = getTribeLocationGroups(map, tribeLocations);
+    const nextGroups = getTribeLocationGroups(map, tribeLocations, activeCalibrationTransform);
     const nextSignature = nextGroups
       .map((group) => `${group.id}:${Math.round(group.x)}:${Math.round(group.y)}`)
       .join('|');
@@ -685,6 +761,61 @@ const MapsView = ({
     setTribeLocationGroups(nextGroups);
   });
 
+  const updateCalibrationMarkers = useEffectEvent(() => {
+    const map = mapRef.current;
+
+    if (!map || !isCalibrationModeRef.current) {
+      if (calibrationMarkersSignatureRef.current === '') {
+        return;
+      }
+
+      calibrationMarkersSignatureRef.current = '';
+      setCalibrationMarkers([]);
+      return;
+    }
+
+    const savedMarkers = activeCalibrationPoints.map((point, index) => {
+      const projectedPoint = map.project([point.mapLongitude, point.mapLatitude]);
+
+      return {
+        id: point.id,
+        pointId: point.id,
+        kind: 'saved',
+        label: index + 1,
+        x: projectedPoint.x,
+        y: projectedPoint.y,
+      };
+    });
+
+    const nextMarkers = [...savedMarkers];
+
+    if (pendingCalibrationPoint) {
+      const projectedPendingPoint = map.project([
+        pendingCalibrationPoint.longitude,
+        pendingCalibrationPoint.latitude,
+      ]);
+
+      nextMarkers.push({
+        id: 'pending',
+        kind: 'pending',
+        label: '+',
+        x: projectedPendingPoint.x,
+        y: projectedPendingPoint.y,
+      });
+    }
+
+    const nextSignature = nextMarkers
+      .map((marker) => `${marker.id}:${Math.round(marker.x)}:${Math.round(marker.y)}`)
+      .join('|');
+
+    if (nextSignature === calibrationMarkersSignatureRef.current) {
+      return;
+    }
+
+    calibrationMarkersSignatureRef.current = nextSignature;
+    setCalibrationMarkers(nextMarkers);
+  });
+
   const clearLongPress = () => {
     window.clearTimeout(longPressTimeoutRef.current);
     longPressTimeoutRef.current = 0;
@@ -692,6 +823,11 @@ const MapsView = ({
   };
 
   const handleLongPressStart = useEffectEvent((event) => {
+    if (isCalibrationModeRef.current) {
+      clearLongPress();
+      return;
+    }
+
     if (!isLongPressStartEventAllowed(event)) {
       clearLongPress();
       return;
@@ -916,12 +1052,28 @@ const MapsView = ({
               isMapReadyRef.current = true;
               focusMapOnLayer(map, activeLayer, false);
               updateTribeLocationGroups();
+              updateCalibrationMarkers();
               setViewerState('ready');
             });
 
             map.on('click', (event) => {
               if (shouldIgnoreNextMapClickRef.current) {
                 shouldIgnoreNextMapClickRef.current = false;
+                return;
+              }
+
+              if (isCalibrationModeRef.current) {
+                clearFeaturePopover();
+                setCalibrationErrorMessage('');
+                const droppedLngLat = map.unproject({
+                  x: event.point.x,
+                  y: event.point.y + TRIBE_LOCATION_DROP_OFFSET_Y,
+                });
+
+                setPendingCalibrationPoint({
+                  longitude: droppedLngLat.lng,
+                  latitude: droppedLngLat.lat,
+                });
                 return;
               }
 
@@ -942,6 +1094,8 @@ const MapsView = ({
             map.on('dragstart', clearLongPress);
             map.on('move', updateTribeLocationGroups);
             map.on('zoom', updateTribeLocationGroups);
+            map.on('move', updateCalibrationMarkers);
+            map.on('zoom', updateCalibrationMarkers);
 
             map.on('mousemove', (event) => {
               const feature = getInteractiveFeatureAtPoint(map, event.point);
@@ -981,6 +1135,7 @@ const MapsView = ({
 
               mapRef.current.resize();
               updateTribeLocationGroups();
+              updateCalibrationMarkers();
             };
 
             window.addEventListener('resize', resizeHandler);
@@ -1035,7 +1190,11 @@ const MapsView = ({
 
   useEffect(() => {
     updateTribeLocationGroups();
-  }, [tribeLocations]);
+  }, [activeCalibrationTransform, tribeLocations]);
+
+  useEffect(() => {
+    updateCalibrationMarkers();
+  }, [activeCalibrationPoints, isCalibrationMode, pendingCalibrationPoint]);
 
   useEffect(() => {
     if (!focusTribeLocationUserId || !isMapReadyRef.current || tribeLocationGroups.length === 0) {
@@ -1060,7 +1219,7 @@ const MapsView = ({
       clearFeaturePopover();
       setSelectedTribeLocationGroup(targetGroup);
       mapRef.current?.easeTo({
-        center: [targetLocation.longitude, targetLocation.latitude],
+        center: [targetLocation.mapLongitude, targetLocation.mapLatitude],
         zoom: targetZoom,
         duration: 650,
         essential: true,
@@ -1092,6 +1251,38 @@ const MapsView = ({
     }
 
     event.currentTarget.blur();
+  };
+
+  const handleSaveCalibrationPoint = (scope) => {
+    if (!pendingCalibrationPoint || !activeLayer?.id) {
+      return;
+    }
+
+    const mapLayerIds = scope === 'site'
+      ? mapLayers.map((layer) => layer.id).filter(Boolean)
+      : [activeLayer.id];
+
+    setIsSavingCalibrationPoint(true);
+    setCalibrationErrorMessage('');
+    Promise.resolve(onAddCalibrationPoint?.({
+      mapLayerIds,
+      mapLongitude: pendingCalibrationPoint.longitude,
+      mapLatitude: pendingCalibrationPoint.latitude,
+    }))
+      .then(() => setPendingCalibrationPoint(null))
+      .catch((error) => {
+        setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not save calibration point.');
+      })
+      .finally(() => {
+        setIsSavingCalibrationPoint(false);
+      });
+  };
+
+  const handleRemoveCalibrationPoint = (pointId) => {
+    setCalibrationErrorMessage('');
+    Promise.resolve(onRemoveCalibrationPoint?.(pointId)).catch((error) => {
+      setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not remove calibration point.');
+    });
   };
 
   return (
@@ -1147,6 +1338,37 @@ const MapsView = ({
         })}
       </Box>
 
+      {isCalibrationMode ? (
+        <Box className="dq-maps-view__calibration-layer" aria-label="Map calibration points">
+          {calibrationMarkers.map((marker) => (
+            <button
+              key={marker.id}
+              type="button"
+              className={[
+                'dq-maps-view__calibration-point',
+                marker.kind === 'pending' ? 'dq-maps-view__calibration-point--pending' : '',
+              ].filter(Boolean).join(' ')}
+              style={{
+                '--dq-maps-calibration-x': `${marker.x}px`,
+                '--dq-maps-calibration-y': `${marker.y}px`,
+              }}
+              aria-label={marker.kind === 'pending' ? 'Pending calibration point' : 'Remove calibration point'}
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (marker.kind === 'saved') {
+                  handleRemoveCalibrationPoint(marker.pointId);
+                }
+              }}
+            >
+              {marker.label}
+            </button>
+          ))}
+        </Box>
+      ) : null}
+
       <Box className="dq-maps-view__controls" gap="var(--dq-ui-space-xs)">
         <Button
           className="dq-maps-view__zoom-button"
@@ -1176,6 +1398,61 @@ const MapsView = ({
           onClick={handleResetMap}
         />
       </Box>
+
+      {isCalibrationMode ? (
+        <Box className="dq-maps-view__calibration-panel" gap="var(--dq-ui-space-sm)">
+          <strong>Map calibration</strong>
+          <p>
+            Tap your exact position on the map, then save it with your current GPS location.
+          </p>
+          {calibrationMessage ? <p>{calibrationMessage}</p> : null}
+          {calibrationErrorMessage ? (
+            <p className="dq-maps-view__calibration-error">{calibrationErrorMessage}</p>
+          ) : null}
+          <p>{activeCalibrationPoints.length} / 3 active points on this map</p>
+          <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={isSavingCalibrationPoint ? CircleNotchIcon : null}
+              className={isSavingCalibrationPoint ? 'dq-maps-view__calibration-save--loading' : ''}
+              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint}
+              onClick={() => handleSaveCalibrationPoint('current')}
+            >
+              {isSavingCalibrationPoint ? 'Mapping loc...' : 'Save point'}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || mapLayers.length < 2}
+              onClick={() => handleSaveCalibrationPoint('site')}
+            >
+              Save on all maps
+            </Button>
+            <Button size="sm" variant="danger" onClick={onCancelCalibration}>
+              Done
+            </Button>
+          </Box>
+        </Box>
+      ) : activeCalibrationPoints.length >= 3 ? (
+        <Button
+          className={[
+            'dq-maps-view__live-button',
+            isLiveLocationSharing ? 'dq-maps-view__live-button--sharing' : '',
+          ].filter(Boolean).join(' ')}
+          size="sm"
+          variant="ghost"
+          onClick={() => (
+            isLiveLocationSharing
+              ? onStopLiveLocationSharing?.()
+              : onStartLiveLocationSharing?.({ mapLayerId: activeLayer?.id })
+          )}
+        >
+          {isLiveLocationSharing && Number.isFinite(liveLocationRemainingMinutes)
+            ? `Stop live position (${liveLocationRemainingMinutes}min left)`
+            : isLiveLocationSharing ? 'Stop live position' : 'Share live position'}
+        </Button>
+      ) : null}
 
       {selectedFeature ? (
         <Box
@@ -1224,13 +1501,7 @@ const MapsView = ({
               setSelectedLayerId(nextValue.mapLayer);
             }
           }}
-          choices={mapLayers.map((layer) => ({
-            id: layer.id,
-            name: 'mapLayer',
-            type: 'radio',
-            value: layer.id,
-            label: layer.label,
-          }))}
+          choices={mapLayerChoices}
         />
       ) : null}
 

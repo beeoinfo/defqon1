@@ -41,6 +41,40 @@
   pointer-events: none;
 }
 
+.dq-maps-view__calibration-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.dq-maps-view__calibration-point {
+  position: absolute;
+  top: var(--dq-maps-calibration-y);
+  left: var(--dq-maps-calibration-x);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid var(--dq-ui-color-white);
+  border-radius: 999px;
+  background: var(--dq-ui-success);
+  color: var(--dq-ui-color-black);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
+.dq-maps-view__calibration-point--pending {
+  background: var(--dq-ui-warning);
+  cursor: default;
+}
+
 .dq-maps-view__tribe-marker {
   position: absolute;
   top: var(--dq-maps-marker-y);
@@ -192,6 +226,101 @@
   color: var(--dq-ui-text-soft);
 }
 
+.dq-maps-view__calibration-panel {
+  position: absolute;
+  left: 16px;
+  top:
+    calc(
+      var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 77px)) +
+      var(--dq-ui-space-lg)
+    );
+  z-index: 4;
+  max-width: min(420px, calc(100% - 32px));
+  padding: 14px 16px;
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-lg);
+  background: var(--dq-ui-background-blur-surface);
+  color: var(--dq-ui-text);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-maps-view__live-button {
+  position: absolute;
+  left: 16px;
+  top:
+    calc(
+      var(--dq-layout-header-offset, var(--dq-layout-header-fallback-offset, 77px)) +
+      var(--dq-ui-space-lg)
+    );
+  z-index: 4;
+  --dq-ui-button-bg: var(--dq-ui-background-blur-surface);
+  --dq-ui-button-hover-bg: var(--dq-ui-background-blur-surface-hover);
+  --dq-ui-button-focus-bg: var(--dq-ui-background-blur-surface-hover);
+  --dq-ui-button-focus-border-color: var(--dq-ui-button-hover-border-color);
+  --dq-ui-button-focus-text-color: var(--dq-ui-button-hover-text-color);
+  --dq-ui-button-active-bg: var(--dq-ui-button-focus-bg);
+  --dq-ui-button-active-border-color: var(--dq-ui-button-focus-border-color);
+  --dq-ui-button-active-text-color: var(--dq-ui-button-focus-text-color);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-maps-view__live-button--sharing {
+  --dq-ui-button-bg: rgba(42, 18, 20, 0.86);
+  --dq-ui-button-border-color: rgba(248, 113, 113, 0.42);
+  --dq-ui-button-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-hover-bg: rgba(58, 24, 27, 0.92);
+  --dq-ui-button-hover-border-color: rgba(248, 113, 113, 0.58);
+  --dq-ui-button-hover-text-color: var(--dq-ui-color-white);
+  --dq-ui-button-focus-bg: var(--dq-ui-button-hover-bg);
+  --dq-ui-button-focus-border-color: var(--dq-ui-button-hover-border-color);
+  --dq-ui-button-focus-text-color: var(--dq-ui-button-hover-text-color);
+  --dq-ui-button-active-bg: var(--dq-ui-button-focus-bg);
+  --dq-ui-button-active-border-color: var(--dq-ui-button-focus-border-color);
+  --dq-ui-button-active-text-color: var(--dq-ui-button-focus-text-color);
+}
+
+.dq-maps-view__live-button--sharing::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 999px;
+  background: var(--dq-ui-danger-text-soft);
+  box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.44);
+  animation: dq-maps-view-live-pulse 1.35s ease-out infinite;
+}
+
+.dq-maps-view__calibration-panel p {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+}
+
+.dq-maps-view__calibration-panel .dq-maps-view__calibration-error {
+  color: var(--dq-ui-danger-text-soft);
+}
+
+.dq-maps-view__calibration-save--loading .dq-ui-button__icon {
+  animation: dq-maps-view-spin 780ms linear infinite;
+}
+
+@keyframes dq-maps-view-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes dq-maps-view-live-pulse {
+  70% {
+    box-shadow: 0 0 0 7px rgba(248, 113, 113, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0);
+  }
+}
+
 @media (max-width: 575.98px) {
   .dq-maps-view__controls {
     top:
@@ -222,4 +351,9 @@
     flex-basis: auto;
   }
 
+  .dq-maps-view__calibration-panel,
+  .dq-maps-view__live-button {
+    left: 12px;
+    max-width: min(420px, calc(100% - 24px));
+  }
 }

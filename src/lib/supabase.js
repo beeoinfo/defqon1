@@ -843,10 +843,135 @@ function normalizeTribeLocationRow(row) {
     siteSlug: row.site_slug,
     longitude: Number(row.longitude),
     latitude: Number(row.latitude),
+    locationKind: row.location_kind ?? 'manual',
+    gpsLongitude: row.gps_longitude === null || row.gps_longitude === undefined ? null : Number(row.gps_longitude),
+    gpsLatitude: row.gps_latitude === null || row.gps_latitude === undefined ? null : Number(row.gps_latitude),
+    gpsAccuracyM: row.gps_accuracy_m === null || row.gps_accuracy_m === undefined ? null : Number(row.gps_accuracy_m),
+    expiresAt: row.expires_at ?? null,
     label: row.label ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+function normalizeMapCalibrationPointRow(row) {
+  return {
+    id: row.id,
+    siteSlug: row.site_slug,
+    mapLayerId: row.map_layer_id,
+    mapLongitude: Number(row.map_longitude),
+    mapLatitude: Number(row.map_latitude),
+    gpsLongitude: Number(row.gps_longitude),
+    gpsLatitude: Number(row.gps_latitude),
+    gpsAccuracyM: row.gps_accuracy_m === null || row.gps_accuracy_m === undefined ? null : Number(row.gps_accuracy_m),
+    createdBy: row.created_by,
+    isActive: row.is_active,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function loadMapCalibrationPoints({ siteSlug = ACTIVE_SITE_SLUG, mapLayerId = null } = {}) {
+  const client = ensureSupabase();
+  let query = client
+    .from('map_calibration_points')
+    .select('*')
+    .eq('site_slug', siteSlug)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (mapLayerId) {
+    query = query.eq('map_layer_id', mapLayerId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map(normalizeMapCalibrationPointRow);
+}
+
+export async function addMapCalibrationPoint({
+  siteSlug = ACTIVE_SITE_SLUG,
+  mapLayerId,
+  mapLongitude,
+  mapLatitude,
+  gpsLongitude,
+  gpsLatitude,
+  gpsAccuracyM = null,
+  userId,
+}) {
+  const client = ensureSupabase();
+
+  if (!userId) {
+    throw new Error('Authentication required.');
+  }
+
+  const { data, error } = await client
+    .from('map_calibration_points')
+    .insert({
+      site_slug: siteSlug,
+      map_layer_id: String(mapLayerId ?? '').trim(),
+      map_longitude: Number(mapLongitude),
+      map_latitude: Number(mapLatitude),
+      gps_longitude: Number(gpsLongitude),
+      gps_latitude: Number(gpsLatitude),
+      gps_accuracy_m: gpsAccuracyM === null || gpsAccuracyM === undefined ? null : Number(gpsAccuracyM),
+      created_by: userId,
+      is_active: true,
+    })
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? normalizeMapCalibrationPointRow(data) : null;
+}
+
+export async function deleteMapCalibrationPoint(pointId) {
+  const client = ensureSupabase();
+
+  if (!pointId) {
+    return null;
+  }
+
+  const { error: deleteError } = await client
+    .from('map_calibration_points')
+    .delete()
+    .eq('id', pointId);
+
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  return pointId;
+}
+
+export async function resetMapCalibrationPoints(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data: rows, error: selectError } = await client
+    .from('map_calibration_points')
+    .select('id')
+    .eq('site_slug', siteSlug);
+
+  if (selectError) {
+    throw selectError;
+  }
+
+  const { error: deleteError } = await client
+    .from('map_calibration_points')
+    .delete()
+    .eq('site_slug', siteSlug);
+
+  if (deleteError) {
+    throw deleteError;
+  }
+
+  return rows?.length ?? 0;
 }
 
 export async function loadTribeMemberLocations({ tribeId, siteSlug = ACTIVE_SITE_SLUG }) {
@@ -874,6 +999,11 @@ export async function upsertCurrentUserTribeLocation({
   userId,
   longitude,
   latitude,
+  locationKind = 'manual',
+  gpsLongitude = null,
+  gpsLatitude = null,
+  gpsAccuracyM = null,
+  expiresAt = null,
   label = null,
   siteSlug = ACTIVE_SITE_SLUG,
 }) {
@@ -904,6 +1034,11 @@ export async function upsertCurrentUserTribeLocation({
       site_slug: siteSlug,
       longitude: nextLongitude,
       latitude: nextLatitude,
+      location_kind: locationKind === 'live' ? 'live' : 'manual',
+      gps_longitude: gpsLongitude === null || gpsLongitude === undefined ? null : Number(gpsLongitude),
+      gps_latitude: gpsLatitude === null || gpsLatitude === undefined ? null : Number(gpsLatitude),
+      gps_accuracy_m: gpsAccuracyM === null || gpsAccuracyM === undefined ? null : Number(gpsAccuracyM),
+      expires_at: expiresAt,
       label: label ? String(label).trim().slice(0, 80) : null,
     }, { onConflict: 'tribe_id,user_id,site_slug' })
     .select()

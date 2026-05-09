@@ -221,13 +221,19 @@ alter table public.lineup_import_runs
   alter column updated_at set default now();
 
 -- Voluntary map pins shared inside a tribe. Each user has at most one active
--- location per site and tribe; it is a dropped meeting point, not live tracking.
+-- location per site and tribe. Manual pins store map coordinates directly;
+-- live pins additionally store GPS metadata and expire automatically in app UI.
 create table if not exists public.tribe_member_locations (
   tribe_id uuid not null references public.tribes(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   site_slug text not null default 'defqon1',
   longitude double precision not null,
   latitude double precision not null,
+  location_kind text not null default 'manual',
+  gps_longitude double precision,
+  gps_latitude double precision,
+  gps_accuracy_m double precision,
+  expires_at timestamptz,
   label text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -238,12 +244,62 @@ alter table public.tribe_member_locations
   add column if not exists site_slug text default 'defqon1',
   add column if not exists longitude double precision,
   add column if not exists latitude double precision,
+  add column if not exists location_kind text default 'manual',
+  add column if not exists gps_longitude double precision,
+  add column if not exists gps_latitude double precision,
+  add column if not exists gps_accuracy_m double precision,
+  add column if not exists expires_at timestamptz,
   add column if not exists label text,
   add column if not exists created_at timestamptz default now(),
   add column if not exists updated_at timestamptz default now();
 
 alter table public.tribe_member_locations
   alter column site_slug set default 'defqon1',
+  alter column location_kind set default 'manual',
+  alter column created_at set default now(),
+  alter column updated_at set default now();
+
+alter table public.tribe_member_locations
+  drop constraint if exists tribe_member_locations_location_kind_check;
+
+alter table public.tribe_member_locations
+  add constraint tribe_member_locations_location_kind_check
+  check (location_kind in ('manual', 'live'));
+
+-- Admin-authored control points used to align a non-geographic festival map
+-- with real GPS coordinates. The app only enables GPS-based location features
+-- when at least three active points exist for the selected map layer.
+create table if not exists public.map_calibration_points (
+  id uuid primary key default gen_random_uuid(),
+  site_slug text not null default 'defqon1',
+  map_layer_id text not null,
+  map_longitude double precision not null,
+  map_latitude double precision not null,
+  gps_longitude double precision not null,
+  gps_latitude double precision not null,
+  gps_accuracy_m double precision,
+  created_by uuid not null references public.profiles(id) on delete cascade,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.map_calibration_points
+  add column if not exists site_slug text default 'defqon1',
+  add column if not exists map_layer_id text,
+  add column if not exists map_longitude double precision,
+  add column if not exists map_latitude double precision,
+  add column if not exists gps_longitude double precision,
+  add column if not exists gps_latitude double precision,
+  add column if not exists gps_accuracy_m double precision,
+  add column if not exists created_by uuid references public.profiles(id) on delete cascade,
+  add column if not exists is_active boolean default true,
+  add column if not exists created_at timestamptz default now(),
+  add column if not exists updated_at timestamptz default now();
+
+alter table public.map_calibration_points
+  alter column site_slug set default 'defqon1',
+  alter column is_active set default true,
   alter column created_at set default now(),
   alter column updated_at set default now();
 
@@ -259,6 +315,18 @@ begin
     )
   then
     alter publication supabase_realtime add table public.tribe_member_locations;
+  end if;
+
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'map_calibration_points'
+    )
+  then
+    alter publication supabase_realtime add table public.map_calibration_points;
   end if;
 end;
 $$;
@@ -291,6 +359,13 @@ create index if not exists tribe_members_tribe_id_idx
 
 create index if not exists tribe_member_locations_tribe_site_idx
   on public.tribe_member_locations (tribe_id, site_slug);
+
+create index if not exists tribe_member_locations_expires_idx
+  on public.tribe_member_locations (expires_at)
+  where expires_at is not null;
+
+create index if not exists map_calibration_points_site_layer_active_idx
+  on public.map_calibration_points (site_slug, map_layer_id, is_active, created_at desc);
 
 create unique index if not exists tribe_members_one_owner_per_tribe_idx
   on public.tribe_members (tribe_id)
@@ -740,6 +815,12 @@ execute function public.set_updated_at();
 drop trigger if exists tribe_member_locations_set_updated_at on public.tribe_member_locations;
 create trigger tribe_member_locations_set_updated_at
 before update on public.tribe_member_locations
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists map_calibration_points_set_updated_at on public.map_calibration_points;
+create trigger map_calibration_points_set_updated_at
+before update on public.map_calibration_points
 for each row
 execute function public.set_updated_at();
 
@@ -1504,6 +1585,7 @@ revoke all on table public.tribes from public, anon, authenticated;
 revoke all on table public.tribe_members from public, anon, authenticated;
 revoke all on table public.user_favorites from public, anon, authenticated;
 revoke all on table public.tribe_member_locations from public, anon, authenticated;
+revoke all on table public.map_calibration_points from public, anon, authenticated;
 revoke all on table public.app_admins from public, anon, authenticated;
 revoke all on table public.lineup_versions from public, anon, authenticated;
 revoke all on table public.lineup_import_runs from public, anon, authenticated;
@@ -1514,6 +1596,8 @@ grant select, update on table public.tribes to authenticated;
 grant select on table public.tribe_members to authenticated;
 grant select, insert, update, delete on table public.user_favorites to authenticated;
 grant select, insert, update, delete on table public.tribe_member_locations to authenticated;
+grant select on table public.map_calibration_points to anon, authenticated;
+grant insert, update, delete on table public.map_calibration_points to authenticated;
 grant select on table public.app_admins to authenticated;
 grant select on table public.lineup_versions to anon, authenticated;
 grant select, insert, update on table public.lineup_import_runs to authenticated;
@@ -1523,6 +1607,7 @@ grant all on table public.tribes to service_role;
 grant all on table public.tribe_members to service_role;
 grant all on table public.user_favorites to service_role;
 grant all on table public.tribe_member_locations to service_role;
+grant all on table public.map_calibration_points to service_role;
 grant all on table public.app_admins to service_role;
 grant all on table public.lineup_versions to service_role;
 grant all on table public.lineup_import_runs to service_role;
@@ -1599,6 +1684,7 @@ alter table public.tribes enable row level security;
 alter table public.tribe_members enable row level security;
 alter table public.user_favorites enable row level security;
 alter table public.tribe_member_locations enable row level security;
+alter table public.map_calibration_points enable row level security;
 alter table public.app_admins enable row level security;
 alter table public.lineup_versions enable row level security;
 alter table public.lineup_import_runs enable row level security;
@@ -1730,6 +1816,35 @@ using (
   auth.uid() = user_id
   and public.is_member_of_tribe(tribe_id)
 );
+
+drop policy if exists map_calibration_points_select_public on public.map_calibration_points;
+create policy map_calibration_points_select_public
+on public.map_calibration_points
+for select
+to anon, authenticated
+using (is_active);
+
+drop policy if exists map_calibration_points_insert_admin on public.map_calibration_points;
+create policy map_calibration_points_insert_admin
+on public.map_calibration_points
+for insert
+to authenticated
+with check (public.is_current_user_admin() and auth.uid() = created_by);
+
+drop policy if exists map_calibration_points_update_admin on public.map_calibration_points;
+create policy map_calibration_points_update_admin
+on public.map_calibration_points
+for update
+to authenticated
+using (public.is_current_user_admin())
+with check (public.is_current_user_admin());
+
+drop policy if exists map_calibration_points_delete_admin on public.map_calibration_points;
+create policy map_calibration_points_delete_admin
+on public.map_calibration_points
+for delete
+to authenticated
+using (public.is_current_user_admin());
 
 drop policy if exists app_admins_select_self on public.app_admins;
 create policy app_admins_select_self

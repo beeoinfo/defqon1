@@ -159,6 +159,8 @@ const AdminPage = ({
   onAllowManualLineupEditChange = null,
   hasPublishedLineup = false,
   onAddPerformance = null,
+  onCalibrateMap = null,
+  onResetMapCalibration = null,
   tempLineup = null,
   onDeleteTempLineup = null,
 }) => {
@@ -169,6 +171,7 @@ const AdminPage = ({
   const [fetchResult, setFetchResult] = useState(null);
   const [pendingLineup, setPendingLineup] = useState(null);
   const [lineupToDelete, setLineupToDelete] = useState(null);
+  const [isResetCalibrationModalOpen, setIsResetCalibrationModalOpen] = useState(false);
 
   const lineupsByHash = useMemo(
     () => new Map(lineups.map((lineup) => [lineup.payloadHash, lineup])),
@@ -365,6 +368,20 @@ const AdminPage = ({
     }
   };
 
+  const handleResetMapCalibration = async () => {
+    setIsBusy(true);
+    setErrorMessage('');
+
+    try {
+      await onResetMapCalibration?.();
+      setIsResetCalibrationModalOpen(false);
+    } catch (error) {
+      setErrorMessage(error.message || 'Could not reset map calibration.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
   if (!isAdmin) {
     return (
       <Alert variant="warning" title="Admin access required">
@@ -406,6 +423,30 @@ const AdminPage = ({
               </Button>
             </Box>
           ) : null}
+        </Box>
+      </Box>
+
+      <Box background="surface" title="Map calibration">
+        <Box gap="var(--dq-ui-space-md)">
+          <p className="dq-admin-page__muted">
+            Calibrate festival maps with real GPS points before enabling live position sharing.
+          </p>
+          <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+            <Button
+              variant="ghost"
+              onClick={onCalibrateMap}
+              disabled={isBusy || !onCalibrateMap}
+            >
+              Calibrate map
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setIsResetCalibrationModalOpen(true)}
+              disabled={isBusy || !onResetMapCalibration}
+            >
+              Reset calibration
+            </Button>
+          </Box>
         </Box>
       </Box>
 
@@ -634,6 +675,27 @@ const AdminPage = ({
           {lineupToDelete?.status === 'active'
             ? 'This removes the currently published lineup from Supabase.'
             : 'This removes the selected lineup from Supabase.'}
+        </p>
+      </Modal>
+
+      <Modal
+        open={isResetCalibrationModalOpen}
+        onClose={() => setIsResetCalibrationModalOpen(false)}
+        title="Reset map calibration?"
+        subtitle="This removes every calibration point for this site."
+        controls={(
+          <>
+            <Button variant="ghost" onClick={() => setIsResetCalibrationModalOpen(false)} disabled={isBusy}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleResetMapCalibration} disabled={isBusy}>
+              Reset calibration
+            </Button>
+          </>
+        )}
+      >
+        <p className="dq-admin-page__muted">
+          Live position sharing will be hidden until new calibration points are saved.
         </p>
       </Modal>
     </Box>
