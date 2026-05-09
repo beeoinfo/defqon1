@@ -1,11 +1,24 @@
 import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { CircleNotchIcon, CrosshairIcon, MinusIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
+import {
+  CircleNotchIcon,
+  CrosshairIcon,
+  MinusIcon,
+  NavigationArrowIcon,
+  PlusIcon,
+  TrashIcon,
+  WarningIcon,
+} from '@phosphor-icons/react';
 import FilterBar from '@/components/FilterBar';
 import Box from '@/components/layout/Box';
 import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import Button from '@/components/primitives/Button';
-import { buildMapCalibrationTransform, projectGpsToMap } from '@/lib/mapCalibration';
+import {
+  buildMapCalibrationTransform,
+  getGpsDistanceMeters,
+  projectGpsToMap,
+  projectMapToGps,
+} from '@/lib/mapCalibration';
 import './MapsView.css';
 
 const ENV_MAPBOX_ACCESS_TOKEN = String(import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').trim();
@@ -20,6 +33,11 @@ const LONG_PRESS_MOVE_TOLERANCE_PX = 2;
 const TRIBE_LOCATION_CLUSTER_DISTANCE_PX = 46;
 const TRIBE_LOCATION_DROP_OFFSET_Y = 15;
 const TRIBE_LOCATION_FOCUS_ZOOM_OFFSET = 2.5;
+const DIRECTION_GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 5000,
+};
 
 let mapboxGlLoaderPromise = null;
 const styleDefinitionCache = new Map();
@@ -391,7 +409,63 @@ const getFeatureCardPosition = (map, point, cardSize = {}) => {
   return { x, y };
 };
 
-const getProjectedTribeLocation = (location, activeCalibrationTransform) => {
+const normalizeDegrees = (value) => ((Number(value) % 360) + 360) % 360;
+
+const toRadians = (degrees) => (degrees * Math.PI) / 180;
+
+const toDegrees = (radians) => (radians * 180) / Math.PI;
+
+const getGpsBearingDegrees = (origin, target) => {
+  const originLatitude = toRadians(origin.latitude);
+  const targetLatitude = toRadians(target.latitude);
+  const deltaLongitude = toRadians(target.longitude - origin.longitude);
+  const y = Math.sin(deltaLongitude) * Math.cos(targetLatitude);
+  const x =
+    Math.cos(originLatitude) * Math.sin(targetLatitude) -
+    Math.sin(originLatitude) * Math.cos(targetLatitude) * Math.cos(deltaLongitude);
+
+  return normalizeDegrees(toDegrees(Math.atan2(y, x)));
+};
+
+const getDeviceHeadingDegrees = (event) => {
+  if (Number.isFinite(event.webkitCompassHeading)) {
+    return normalizeDegrees(event.webkitCompassHeading);
+  }
+
+  if (Number.isFinite(event.alpha)) {
+    return normalizeDegrees(360 - event.alpha);
+  }
+
+  return null;
+};
+
+const getTargetGpsPoint = (location, activeCalibrationTransform = null) => {
+  if (Number.isFinite(location?.gpsLongitude) && Number.isFinite(location?.gpsLatitude)) {
+    return {
+      longitude: location.gpsLongitude,
+      latitude: location.gpsLatitude,
+    };
+  }
+
+  if (activeCalibrationTransform) {
+    const mapLongitude = Number(location?.mapLongitude ?? location?.longitude);
+    const mapLatitude = Number(location?.mapLatitude ?? location?.latitude);
+
+    return projectMapToGps({
+      longitude: mapLongitude,
+      latitude: mapLatitude,
+    }, activeCalibrationTransform);
+  }
+
+  return null;
+};
+
+const hasGpsLocation = (location) => (
+  Number.isFinite(location?.gpsLongitude) &&
+  Number.isFinite(location?.gpsLatitude)
+);
+
+const getProjectedTribeLocation = (location, activeCalibrationTransform, activeLayerId) => {
   const hasGpsPosition =
     Number.isFinite(location.gpsLongitude) &&
     Number.isFinite(location.gpsLatitude);
@@ -411,7 +485,15 @@ const getProjectedTribeLocation = (location, activeCalibrationTransform) => {
     }
   }
 
-  if (location.locationKind === 'live' && hasGpsPosition) {
+  if (location.mapLayerId && location.mapLayerId !== activeLayerId) {
+    return null;
+  }
+
+  if (!location.mapLayerId && hasGpsPosition) {
+    return null;
+  }
+
+  if (hasGpsPosition) {
     return null;
   }
 
@@ -422,20 +504,62 @@ const getProjectedTribeLocation = (location, activeCalibrationTransform) => {
   };
 };
 
-const getTribeLocationGroups = (map, tribeLocations, activeCalibrationTransform = null) => {
+const getProjectedLocationPriority = (location, activeLayerId) => {
+  if (!location) {
+    return -1;
+  }
+
+  if (location.locationKind === 'live' && hasGpsLocation(location)) {
+    return 3;
+  }
+
+  if (location.mapLayerId === activeLayerId) {
+    return 2;
+  }
+
+  if (hasGpsLocation(location)) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const getTribeLocationGroups = (map, tribeLocations, activeCalibrationTransform = null, activeLayerId = null) => {
   if (!map || !Array.isArray(tribeLocations) || tribeLocations.length === 0) {
     return [];
   }
 
   const groups = [];
+  const projectedLocationsByUserId = new Map();
 
   tribeLocations.forEach((location) => {
-    const projectedLocation = getProjectedTribeLocation(location, activeCalibrationTransform);
+    const projectedLocation = getProjectedTribeLocation(location, activeCalibrationTransform, activeLayerId);
 
     if (!projectedLocation) {
       return;
     }
 
+    const currentLocation = projectedLocationsByUserId.get(projectedLocation.userId);
+    const currentPriority = getProjectedLocationPriority(currentLocation, activeLayerId);
+    const nextPriority = getProjectedLocationPriority(projectedLocation, activeLayerId);
+
+    if (
+      currentLocation &&
+      (
+        currentPriority > nextPriority ||
+        (
+          currentPriority === nextPriority &&
+          new Date(currentLocation.updatedAt ?? 0).getTime() >= new Date(projectedLocation.updatedAt ?? 0).getTime()
+        )
+      )
+    ) {
+      return;
+    }
+
+    projectedLocationsByUserId.set(projectedLocation.userId, projectedLocation);
+  });
+
+  projectedLocationsByUserId.forEach((projectedLocation) => {
     const point = map.project([projectedLocation.mapLongitude, projectedLocation.mapLatitude]);
     const existingGroup = groups.find((group) => {
       const distance = Math.hypot(group.x - point.x, group.y - point.y);
@@ -450,7 +574,7 @@ const getTribeLocationGroups = (map, tribeLocations, activeCalibrationTransform 
     }
 
     groups.push({
-      id: location.userId,
+      id: projectedLocation.userId,
       x: point.x,
       y: point.y,
       locations: [projectedLocation],
@@ -459,7 +583,10 @@ const getTribeLocationGroups = (map, tribeLocations, activeCalibrationTransform 
 
   return groups.map((group) => ({
     ...group,
-    id: group.locations.map((location) => location.userId).sort().join(':'),
+    id: group.locations
+      .map((location) => `${location.userId}:${location.mapLayerId ?? 'default'}:${location.locationKind}`)
+      .sort()
+      .join(':'),
   }));
 };
 
@@ -653,6 +780,7 @@ const MapsView = ({
   tribeLocations = [],
   currentUserId = null,
   focusTribeLocationUserId = null,
+  focusTribeLocationMapLayerId = null,
   calibrationPoints = [],
   isCalibrationMode = false,
   calibrationMessage = '',
@@ -680,12 +808,20 @@ const MapsView = ({
   const [isSavingCalibrationPoint, setIsSavingCalibrationPoint] = useState(false);
   const [pendingCalibrationPoint, setPendingCalibrationPoint] = useState(null);
   const [calibrationMarkers, setCalibrationMarkers] = useState([]);
+  const [directionPosition, setDirectionPosition] = useState(null);
+  const [directionHeading, setDirectionHeading] = useState(null);
+  const [directionErrorMessage, setDirectionErrorMessage] = useState('');
+  const [isDirectionTracking, setIsDirectionTracking] = useState(false);
+  const [doesDirectionNeedPermission, setDoesDirectionNeedPermission] = useState(false);
+  const [activeDirectionTargetUserId, setActiveDirectionTargetUserId] = useState(null);
   const featurePopoverTimeoutRef = useRef(0);
   const longPressTimeoutRef = useRef(0);
   const longPressStartRef = useRef(null);
   const shouldIgnoreNextMapClickRef = useRef(false);
   const tribeLocationGroupsSignatureRef = useRef('');
   const calibrationMarkersSignatureRef = useRef('');
+  const directionGeolocationWatchIdRef = useRef(null);
+  const directionOrientationHandlerRef = useRef(null);
   const featureCardRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -728,6 +864,85 @@ const MapsView = ({
     setSelectedFeature(null);
   };
 
+  const stopDirectionTracking = () => {
+    if (directionGeolocationWatchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(directionGeolocationWatchIdRef.current);
+    }
+
+    if (directionOrientationHandlerRef.current) {
+      window.removeEventListener('deviceorientationabsolute', directionOrientationHandlerRef.current);
+      window.removeEventListener('deviceorientation', directionOrientationHandlerRef.current);
+    }
+
+    directionGeolocationWatchIdRef.current = null;
+    directionOrientationHandlerRef.current = null;
+    setIsDirectionTracking(false);
+    setDoesDirectionNeedPermission(false);
+    setActiveDirectionTargetUserId(null);
+  };
+
+  const handleStartDirectionTracking = async (targetUserId) => {
+    setDirectionErrorMessage('');
+    setActiveDirectionTargetUserId(targetUserId);
+
+    if (!navigator.geolocation) {
+      setDirectionErrorMessage('GPS is not available on this device.');
+      return;
+    }
+
+    if (directionGeolocationWatchIdRef.current === null) {
+      const handlePosition = (position) => {
+        setDirectionPosition({
+          longitude: position.coords.longitude,
+          latitude: position.coords.latitude,
+          accuracy: position.coords.accuracy,
+        });
+        setIsDirectionTracking(true);
+      };
+
+      navigator.geolocation.getCurrentPosition(handlePosition, (error) => {
+        setDirectionErrorMessage(error.message || 'Could not access your current position.');
+      }, DIRECTION_GPS_OPTIONS);
+
+      directionGeolocationWatchIdRef.current = navigator.geolocation.watchPosition(handlePosition, (error) => {
+        setDirectionErrorMessage(error.message || 'Could not update your current position.');
+      }, DIRECTION_GPS_OPTIONS);
+    }
+
+    if (!('DeviceOrientationEvent' in window)) {
+      setDirectionErrorMessage('Compass is not available here. Distance and bearing still work with GPS.');
+      return;
+    }
+
+    const DeviceOrientation = window.DeviceOrientationEvent;
+
+    if (typeof DeviceOrientation.requestPermission === 'function') {
+      const permission = await DeviceOrientation.requestPermission();
+
+      if (permission !== 'granted') {
+        setDirectionErrorMessage('Compass permission was not granted. Distance and bearing still work with GPS.');
+        setDoesDirectionNeedPermission(true);
+        return;
+      }
+    }
+
+    if (!directionOrientationHandlerRef.current) {
+      const handleOrientation = (event) => {
+        const heading = getDeviceHeadingDegrees(event);
+
+        if (heading !== null) {
+          setDirectionHeading(heading);
+          setDoesDirectionNeedPermission(false);
+        }
+      };
+
+      directionOrientationHandlerRef.current = handleOrientation;
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      setIsDirectionTracking(true);
+    }
+  };
+
   const showFeaturePopover = (feature, point) => {
     const map = mapRef.current;
 
@@ -748,7 +963,7 @@ const MapsView = ({
 
   const updateTribeLocationGroups = useEffectEvent(() => {
     const map = mapRef.current;
-    const nextGroups = getTribeLocationGroups(map, tribeLocations, activeCalibrationTransform);
+    const nextGroups = getTribeLocationGroups(map, tribeLocations, activeCalibrationTransform, activeLayer?.id);
     const nextSignature = nextGroups
       .map((group) => `${group.id}:${Math.round(group.x)}:${Math.round(group.y)}`)
       .join('|');
@@ -864,6 +1079,7 @@ const MapsView = ({
       Promise.resolve(onSetTribeLocation?.({
         longitude: droppedLngLat.lng,
         latitude: droppedLngLat.lat,
+        mapLayerId: activeLayer?.id,
       })).catch((error) => {
         setLocationErrorMessage(
           error instanceof Error ? error.message : 'Could not share this map position.'
@@ -1175,6 +1391,15 @@ const MapsView = ({
       }
 
       window.clearTimeout(featurePopoverTimeoutRef.current);
+      if (directionGeolocationWatchIdRef.current !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(directionGeolocationWatchIdRef.current);
+      }
+
+      if (directionOrientationHandlerRef.current) {
+        window.removeEventListener('deviceorientationabsolute', directionOrientationHandlerRef.current);
+        window.removeEventListener('deviceorientation', directionOrientationHandlerRef.current);
+      }
+
       clearLongPress();
       currentStyleUrlRef.current = '';
     };
@@ -1187,6 +1412,22 @@ const MapsView = ({
 
     syncActiveLayer(true);
   }, [activeLayer]);
+
+  useEffect(() => {
+    if (
+      !focusTribeLocationMapLayerId ||
+      focusTribeLocationMapLayerId === activeLayer?.id ||
+      !mapLayers.some((layer) => layer.id === focusTribeLocationMapLayerId)
+    ) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setSelectedLayerId(focusTribeLocationMapLayerId);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeLayer?.id, focusTribeLocationMapLayerId, mapLayers]);
 
   useEffect(() => {
     updateTribeLocationGroups();
@@ -1285,6 +1526,52 @@ const MapsView = ({
     });
   };
 
+  const handleCloseTribeLocationDrawer = () => {
+    stopDirectionTracking();
+    setDirectionErrorMessage('');
+    setDirectionPosition(null);
+    setDirectionHeading(null);
+    setSelectedTribeLocationGroup(null);
+  };
+
+  const handleOpenTribeLocationGroup = (group) => {
+    const hasActiveTargetInGroup = group.locations.some((location) => (
+      location.userId === activeDirectionTargetUserId
+    ));
+
+    if (!hasActiveTargetInGroup) {
+      stopDirectionTracking();
+      setDirectionErrorMessage('');
+      setDirectionPosition(null);
+      setDirectionHeading(null);
+    }
+
+    clearFeaturePopover();
+    setSelectedTribeLocationGroup(group);
+  };
+
+  const selectedDrawerLocations = selectedTribeLocationGroup?.locations ?? [];
+  const directionTargetLocations = selectedDrawerLocations.filter((location) => (
+    location.userId !== currentUserId && getTargetGpsPoint(location, activeCalibrationTransform)
+  ));
+  const selectedDirectionLocation =
+    directionTargetLocations.find((location) => location.userId === activeDirectionTargetUserId) ??
+    directionTargetLocations[0] ??
+    null;
+  const selectedDirectionTargetGpsPoint = selectedDirectionLocation
+    ? getTargetGpsPoint(selectedDirectionLocation, activeCalibrationTransform)
+    : null;
+  const canShowDirection = Boolean(selectedDirectionTargetGpsPoint && directionPosition);
+  const directionTargetBearing = canShowDirection
+    ? getGpsBearingDegrees(directionPosition, selectedDirectionTargetGpsPoint)
+    : null;
+  const directionRelativeBearing = directionTargetBearing !== null && directionHeading !== null
+    ? normalizeDegrees(directionTargetBearing - directionHeading)
+    : directionTargetBearing;
+  const directionDistanceMeters = canShowDirection
+    ? getGpsDistanceMeters(directionPosition, selectedDirectionTargetGpsPoint)
+    : null;
+
   return (
     <Box component="section" className="dq-maps-view" gap="0">
       <Box
@@ -1318,10 +1605,7 @@ const MapsView = ({
               }}
               aria-label={groupLabel}
               title={groupLabel}
-              onClick={() => {
-                clearFeaturePopover();
-                setSelectedTribeLocationGroup(group);
-              }}
+              onClick={() => handleOpenTribeLocationGroup(group)}
             >
               <img
                 src={primaryLocation.avatarUrl}
@@ -1539,7 +1823,7 @@ const MapsView = ({
 
       <Drawer
         open={Boolean(selectedTribeLocationGroup)}
-        onClose={() => setSelectedTribeLocationGroup(null)}
+        onClose={handleCloseTribeLocationDrawer}
         title="Shared map position"
         subtitle={
           selectedTribeLocationGroup?.locations.length > 1
@@ -1548,38 +1832,92 @@ const MapsView = ({
         }
         ariaLabel="Tribe map position details"
         maxWidth="520px"
+        headerAddon={selectedDirectionLocation ? (
+          <Box className="dq-maps-view__direction-header" align="center" gap="var(--dq-ui-space-xs)">
+            {isDirectionTracking ? (
+              <>
+                <span
+                  className={[
+                    'dq-maps-view__direction-arrow',
+                    'dq-maps-view__direction-arrow--hero',
+                    directionHeading === null ? 'dq-maps-view__direction-arrow--absolute' : '',
+                  ].filter(Boolean).join(' ')}
+                  style={{
+                    '--dq-maps-direction-angle': `${directionRelativeBearing ?? 0}deg`,
+                  }}
+                  aria-hidden="true"
+                >
+                  <NavigationArrowIcon size={32} weight="fill" />
+                </span>
+                <span className="dq-maps-view__direction-copy dq-maps-view__direction-copy--hero">
+                  {canShowDirection ? (
+                    <>
+                      {Math.round(directionDistanceMeters)}m to {selectedDirectionLocation.displayName}
+                      {directionHeading === null && directionTargetBearing !== null
+                        ? ` · ${Math.round(directionTargetBearing)}° bearing`
+                        : ''}
+                    </>
+                  ) : (
+                    `Locating ${selectedDirectionLocation.displayName}...`
+                  )}
+                </span>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={NavigationArrowIcon}
+                onClick={() => handleStartDirectionTracking(selectedDirectionLocation.userId)}
+              >
+                Enable direction to {selectedDirectionLocation.displayName}
+              </Button>
+            )}
+            {directionErrorMessage ? (
+              <p className="dq-maps-view__direction-message">{directionErrorMessage}</p>
+            ) : null}
+            {doesDirectionNeedPermission ? (
+              <p className="dq-maps-view__direction-message">Enable motion/orientation permission in your browser if prompted.</p>
+            ) : null}
+          </Box>
+        ) : null}
       >
         <Box gap="var(--dq-ui-space-md)">
-          {(selectedTribeLocationGroup?.locations ?? []).map((location) => (
-            <PeopleCard
-              key={location.userId}
-              className="dq-maps-view__tribe-person-card"
-              avatarSrc={location.avatarUrl}
-              avatarAlt={location.displayName}
-              name={location.displayName}
-              handle={location.username ? `@${location.username}` : 'Profile unavailable'}
-              meta={location.updatedAt ? `Updated ${formatLocationUpdatedAt(location.updatedAt)}` : null}
-              endSlot={
-                location.userId === currentUserId ? (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    icon={TrashIcon}
-                    ariaLabel="Remove my shared position"
-                    onClick={() => {
-                      Promise.resolve(onRemoveTribeLocation?.())
-                        .then(() => setSelectedTribeLocationGroup(null))
-                        .catch((error) => {
-                          setLocationErrorMessage(
-                            error instanceof Error ? error.message : 'Could not remove your map position.'
-                          );
-                      });
-                    }}
-                  />
-                ) : null
-              }
-            />
-          ))}
+          {selectedDrawerLocations.map((location) => {
+            return (
+              <Box key={location.userId} className="dq-maps-view__tribe-person-direction-card">
+                <PeopleCard
+                  className="dq-maps-view__tribe-person-card"
+                  avatarSrc={location.avatarUrl}
+                  avatarAlt={location.displayName}
+                  name={location.displayName}
+                  handle={location.username ? `@${location.username}` : 'Profile unavailable'}
+                  meta={location.updatedAt ? `Updated ${formatLocationUpdatedAt(location.updatedAt)}` : null}
+                  endSlot={
+                    location.userId === currentUserId ? (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        icon={TrashIcon}
+                        ariaLabel="Remove my shared position"
+                        onClick={() => {
+                          Promise.resolve(onRemoveTribeLocation?.({
+                            mapLayerId: location.mapLayerId ?? activeLayer?.id ?? null,
+                            locationKind: location.locationKind,
+                          }))
+                            .then(handleCloseTribeLocationDrawer)
+                            .catch((error) => {
+                              setLocationErrorMessage(
+                                error instanceof Error ? error.message : 'Could not remove your map position.'
+                              );
+                          });
+                        }}
+                      />
+                    ) : null
+                  }
+                />
+              </Box>
+            );
+          })}
         </Box>
       </Drawer>
     </Box>

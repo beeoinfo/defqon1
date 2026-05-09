@@ -40,6 +40,16 @@ const gpsToLocalMeters = (point, origin) => {
   };
 };
 
+const localMetersToGps = (point, origin) => {
+  const latitudeScale = 111320;
+  const longitudeScale = latitudeScale * Math.cos(toRadians(origin.latitude));
+
+  return {
+    longitude: point.x / longitudeScale + origin.longitude,
+    latitude: point.y / latitudeScale + origin.latitude,
+  };
+};
+
 const solveThreeByThree = (matrix, values) => {
   const rows = matrix.map((row, index) => [...row, values[index]]);
 
@@ -160,6 +170,35 @@ export const projectGpsToMap = (position, transform) => {
       transform.latitudeCoefficients[1] * localPoint.y +
       transform.latitudeCoefficients[2],
   };
+};
+
+export const projectMapToGps = (position, transform) => {
+  if (!position || !transform) {
+    return null;
+  }
+
+  const [a, b, c] = transform.longitudeCoefficients;
+  const [d, e, f] = transform.latitudeCoefficients;
+  const mapLongitude = Number(position.longitude);
+  const mapLatitude = Number(position.latitude);
+  const determinant = a * e - b * d;
+
+  if (
+    !Number.isFinite(mapLongitude) ||
+    !Number.isFinite(mapLatitude) ||
+    Math.abs(determinant) < 1e-12
+  ) {
+    return null;
+  }
+
+  const longitudeDelta = mapLongitude - c;
+  const latitudeDelta = mapLatitude - f;
+  const localPoint = {
+    x: (longitudeDelta * e - b * latitudeDelta) / determinant,
+    y: (a * latitudeDelta - longitudeDelta * d) / determinant,
+  };
+
+  return localMetersToGps(localPoint, transform.origin);
 };
 
 export const hasEnoughCalibrationPoints = (points) => (

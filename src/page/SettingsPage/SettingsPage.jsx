@@ -51,6 +51,7 @@ const SettingsPage = ({
   onShowStyleTagsChange,
   onResetFavorites,
   onProfileUpdated,
+  onBeforeSignOut,
   onSignedOut,
   onCreateTribe,
   onJoinTribe,
@@ -136,6 +137,7 @@ const SettingsPage = ({
     setIsBusy(true);
 
     try {
+      await onBeforeSignOut?.();
       await signOutCurrentUser();
       onSignedOut?.();
     } catch (error) {

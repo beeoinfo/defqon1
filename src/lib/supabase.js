@@ -841,6 +841,7 @@ function normalizeTribeLocationRow(row) {
     tribeId: row.tribe_id,
     userId: row.user_id,
     siteSlug: row.site_slug,
+    mapLayerId: String(row.map_layer_id ?? 'default').trim() || 'default',
     longitude: Number(row.longitude),
     latitude: Number(row.latitude),
     locationKind: row.location_kind ?? 'manual',
@@ -1004,6 +1005,7 @@ export async function upsertCurrentUserTribeLocation({
   gpsLatitude = null,
   gpsAccuracyM = null,
   expiresAt = null,
+  mapLayerId = null,
   label = null,
   siteSlug = ACTIVE_SITE_SLUG,
 }) {
@@ -1032,6 +1034,7 @@ export async function upsertCurrentUserTribeLocation({
       tribe_id: tribeId,
       user_id: userId,
       site_slug: siteSlug,
+      map_layer_id: String(mapLayerId ?? 'default').trim() || 'default',
       longitude: nextLongitude,
       latitude: nextLatitude,
       location_kind: locationKind === 'live' ? 'live' : 'manual',
@@ -1040,7 +1043,7 @@ export async function upsertCurrentUserTribeLocation({
       gps_accuracy_m: gpsAccuracyM === null || gpsAccuracyM === undefined ? null : Number(gpsAccuracyM),
       expires_at: expiresAt,
       label: label ? String(label).trim().slice(0, 80) : null,
-    }, { onConflict: 'tribe_id,user_id,site_slug' })
+    }, { onConflict: 'tribe_id,user_id,site_slug,map_layer_id' })
     .select()
     .maybeSingle();
 
@@ -1054,6 +1057,7 @@ export async function upsertCurrentUserTribeLocation({
 export async function deleteCurrentUserTribeLocation({
   tribeId,
   userId,
+  mapLayerId = null,
   siteSlug = ACTIVE_SITE_SLUG,
 }) {
   const client = ensureSupabase();
@@ -1062,12 +1066,18 @@ export async function deleteCurrentUserTribeLocation({
     return;
   }
 
-  const { error } = await client
+  let query = client
     .from('tribe_member_locations')
     .delete()
     .eq('tribe_id', tribeId)
     .eq('user_id', userId)
     .eq('site_slug', siteSlug);
+
+  if (mapLayerId !== null && mapLayerId !== undefined) {
+    query = query.eq('map_layer_id', String(mapLayerId).trim() || 'default');
+  }
+
+  const { error } = await query;
 
   if (error) {
     throw error;

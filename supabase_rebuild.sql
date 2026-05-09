@@ -221,12 +221,13 @@ alter table public.lineup_import_runs
   alter column updated_at set default now();
 
 -- Voluntary map pins shared inside a tribe. Each user has at most one active
--- location per site and tribe. Manual pins store map coordinates directly;
--- live pins additionally store GPS metadata and expire automatically in app UI.
+-- stored position per map layer, site, and tribe. Raw map coordinates never
+-- cross map layers; calibrated maps may reproject GPS metadata for display.
 create table if not exists public.tribe_member_locations (
   tribe_id uuid not null references public.tribes(id) on delete cascade,
   user_id uuid not null references public.profiles(id) on delete cascade,
   site_slug text not null default 'defqon1',
+  map_layer_id text not null default 'default',
   longitude double precision not null,
   latitude double precision not null,
   location_kind text not null default 'manual',
@@ -237,11 +238,12 @@ create table if not exists public.tribe_member_locations (
   label text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  primary key (tribe_id, user_id, site_slug)
+  primary key (tribe_id, user_id, site_slug, map_layer_id)
 );
 
 alter table public.tribe_member_locations
   add column if not exists site_slug text default 'defqon1',
+  add column if not exists map_layer_id text default 'default',
   add column if not exists longitude double precision,
   add column if not exists latitude double precision,
   add column if not exists location_kind text default 'manual',
@@ -255,9 +257,24 @@ alter table public.tribe_member_locations
 
 alter table public.tribe_member_locations
   alter column site_slug set default 'defqon1',
+  alter column map_layer_id set default 'default',
   alter column location_kind set default 'manual',
   alter column created_at set default now(),
   alter column updated_at set default now();
+
+update public.tribe_member_locations
+set map_layer_id = 'default'
+where map_layer_id is null or btrim(map_layer_id) = '';
+
+alter table public.tribe_member_locations
+  alter column map_layer_id set not null;
+
+alter table public.tribe_member_locations
+  drop constraint if exists tribe_member_locations_pkey;
+
+alter table public.tribe_member_locations
+  add constraint tribe_member_locations_pkey
+  primary key (tribe_id, user_id, site_slug, map_layer_id);
 
 alter table public.tribe_member_locations
   drop constraint if exists tribe_member_locations_location_kind_check;
@@ -359,6 +376,9 @@ create index if not exists tribe_members_tribe_id_idx
 
 create index if not exists tribe_member_locations_tribe_site_idx
   on public.tribe_member_locations (tribe_id, site_slug);
+
+create index if not exists tribe_member_locations_tribe_site_layer_idx
+  on public.tribe_member_locations (tribe_id, site_slug, map_layer_id);
 
 create index if not exists tribe_member_locations_expires_idx
   on public.tribe_member_locations (expires_at)

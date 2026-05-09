@@ -142,6 +142,10 @@
   flex: 0 0 auto;
 }
 
+.dq-layout-drawer__header-addon {
+  margin-top: var(--dq-ui-space-md);
+}
+
 .dq-layout-drawer__body {
   flex: 1 1 auto;
   min-width: 0;

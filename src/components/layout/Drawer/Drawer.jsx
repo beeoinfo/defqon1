@@ -24,6 +24,7 @@ const Drawer = ({
   meta2,
   meta3,
   metaVariant,
+  headerAddon = null,
   ariaLabel = 'Drawer',
   closeLabel = 'Close drawer',
   closeOnOutsideClick = true,
@@ -362,6 +363,12 @@ const Drawer = ({
                 />
               ) : null}
             </Box>
+
+            {headerAddon ? (
+              <Box component="div" className="dq-layout-drawer__header-addon">
+                {headerAddon}
+              </Box>
+            ) : null}
 
             {description ? (
               <>
