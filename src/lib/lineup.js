@@ -25,6 +25,8 @@ const DAY_ORDERS = {
   saturday: 3,
   sunday: 4,
 };
+const DEFAULT_FESTIVAL_DAY_START_HOUR = 6;
+const DEFAULT_FESTIVAL_DAY_END_HOUR = 6;
 const INSANE_SCHEDULE_ID_SUFFIX_PATTERN = /_\d{14,17}$/;
 const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
@@ -55,6 +57,58 @@ function normalizeComparableValue(value) {
 
 function valuesMatch(leftValue, rightValue) {
   return normalizeComparableValue(leftValue) === normalizeComparableValue(rightValue);
+}
+
+function getDateInputValue(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
+function getDateAtHourTimestamp(dateValue, hour, dayOffset = 0) {
+  const date = new Date(`${dateValue}T00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hour, 0, 0, 0);
+
+  return date.getTime();
+}
+
+function getConfiguredDayStartDate(daySlug) {
+  return activeSite.schedule?.dayStartDates?.[String(daySlug ?? '').trim().toLowerCase()] ?? '';
+}
+
+function getFestivalDayRangeFromEntry(entry) {
+  const explicitStartTimestamp = entry?.dayStart ? parseEntryDateTime(entry.dayStart) : null;
+  const explicitEndTimestamp = entry?.dayEnd ? parseEntryDateTime(entry.dayEnd) : null;
+  const baseDate =
+    getDateInputValue(entry?.dayStart) ||
+    getDateInputValue(entry?.dayEnd) ||
+    String(entry?.dayStartDate ?? '').trim() ||
+    getConfiguredDayStartDate(entry?.daySlug);
+  const fallbackStartTimestamp = baseDate
+    ? getDateAtHourTimestamp(baseDate, DEFAULT_FESTIVAL_DAY_START_HOUR)
+    : null;
+  const fallbackEndTimestamp = baseDate
+    ? getDateAtHourTimestamp(
+        baseDate,
+        DEFAULT_FESTIVAL_DAY_END_HOUR,
+        DEFAULT_FESTIVAL_DAY_END_HOUR <= DEFAULT_FESTIVAL_DAY_START_HOUR ? 1 : 0
+      )
+    : null;
+
+  return {
+    start: explicitStartTimestamp ?? fallbackStartTimestamp,
+    end: explicitEndTimestamp ?? fallbackEndTimestamp,
+  };
 }
 
 function slugsMatch(leftValue, rightValue) {
@@ -188,7 +242,6 @@ function buildSnapshotFromEntry(entry, overrides = {}) {
     artistTokens,
     startAt: entry.startAt ?? null,
     endAt: entry.endAt ?? null,
-    timeLabel: entry.timeLabel ?? null,
     savedAt: overrides.savedAt ?? entry.savedAt ?? new Date().toISOString(),
   };
 
@@ -316,10 +369,10 @@ export function getEntryDisplayName(entry) {
 
 export function getEntryMetaLabel(entry) {
   const parts = [entry.stage, getEntryDayLabel(entry)];
-  const timeLabel = getEntryTimeLabel(entry);
+  const scheduleLabel = getEntryTimeLabel(entry);
 
-  if (timeLabel) {
-    parts.push(timeLabel);
+  if (scheduleLabel) {
+    parts.push(scheduleLabel);
   }
 
   return parts.filter(Boolean).join(' • ');
@@ -327,9 +380,10 @@ export function getEntryMetaLabel(entry) {
 
 export function getSavedFavoritePreviousLabel(savedFavorite) {
   const parts = [getDayLabel(savedFavorite.daySlug), savedFavorite.stage];
+  const scheduleLabel = getEntryTimeLabel(savedFavorite);
 
-  if (savedFavorite.timeLabel) {
-    parts.push(savedFavorite.timeLabel);
+  if (scheduleLabel) {
+    parts.push(scheduleLabel);
   }
 
   return parts.filter(Boolean).join(' • ');
@@ -361,31 +415,18 @@ export function getCurrentFestivalDay(entries, referenceTime = Date.now()) {
       return;
     }
 
-    const startTimestamp = parseEntryDateTime(entry.startAt);
-    const endTimestamp = parseEntryDateTime(entry.endAt);
-
-    if (startTimestamp === null && endTimestamp === null) {
+    if (dayRangesBySlug.has(daySlug)) {
       return;
     }
 
-    const currentRange = dayRangesBySlug.get(daySlug) ?? {
+    const dayRange = getFestivalDayRangeFromEntry(entry);
+
+    dayRangesBySlug.set(daySlug, {
       dayOrder: entry.dayOrder ?? 999,
       daySlug,
-      start: null,
-      end: null,
-    };
-
-    if (startTimestamp !== null) {
-      currentRange.start =
-        currentRange.start === null ? startTimestamp : Math.min(currentRange.start, startTimestamp);
-    }
-
-    if (endTimestamp !== null) {
-      currentRange.end =
-        currentRange.end === null ? endTimestamp : Math.max(currentRange.end, endTimestamp);
-    }
-
-    dayRangesBySlug.set(daySlug, currentRange);
+      start: dayRange.start,
+      end: dayRange.end,
+    });
   });
 
   const activeRange = Array.from(dayRangesBySlug.values())
@@ -442,10 +483,6 @@ function parseEntryDateTime(value) {
 }
 
 export function getEntryTimeLabel(entry) {
-  if (entry?.timeLabel) {
-    return entry.timeLabel;
-  }
-
   const startTimestamp = parseEntryDateTime(entry?.startAt);
   const endTimestamp = parseEntryDateTime(entry?.endAt);
 
@@ -704,6 +741,32 @@ export function upsertFavoriteEntry(favoriteItems, entry) {
   });
 
   return [...filteredItems, nextSnapshot];
+}
+
+function getReviewSuggestionFavoriteKey(snapshot, reviewFavorite) {
+  if (reviewFavorite?.favoriteKey && reviewFavorite.favoriteKey === snapshot.favoriteKey) {
+    return `${snapshot.favoriteKey}:review-suggestion`;
+  }
+
+  return snapshot.favoriteKey;
+}
+
+export function toggleReviewSuggestionFavorite(favoriteItems, entry, reviewFavorite) {
+  const nextSnapshot = buildSnapshotFromEntry(entry);
+  const suggestionFavoriteKey = getReviewSuggestionFavoriteKey(nextSnapshot, reviewFavorite);
+  const isAlreadyFavorite = favoriteItems.some((item) => item.favoriteKey === suggestionFavoriteKey);
+
+  if (isAlreadyFavorite) {
+    return favoriteItems.filter((item) => item.favoriteKey !== suggestionFavoriteKey);
+  }
+
+  return [
+    ...favoriteItems.filter((item) => item.favoriteKey !== suggestionFavoriteKey),
+    {
+      ...nextSnapshot,
+      favoriteKey: suggestionFavoriteKey,
+    },
+  ];
 }
 
 export function removeFavoriteByEntryId(favoriteItems, entryId) {

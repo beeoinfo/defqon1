@@ -22,6 +22,9 @@ export const SITE_REGISTRY = {
       primary: '#bc9b5e',
       secondary: '#ef4444',
     },
+    schedule: {
+      dayStartDates: {},
+    },
   },
   insane: {
     slug: 'insane',
@@ -33,6 +36,13 @@ export const SITE_REGISTRY = {
     theme: {
       primary: '#7562ad',
       secondary: '#e99b8b',
+    },
+    schedule: {
+      dayStartDates: {
+        thursday: '2026-05-14',
+        friday: '2026-05-15',
+        saturday: '2026-05-16',
+      },
     },
   },
 };
@@ -58,6 +68,9 @@ export const resolveSiteRegistryEntry = (siteSlug) => {
     theme: {
       ...DEFAULT_SITE_THEME,
       ...(definition.theme ?? {}),
+    },
+    schedule: {
+      ...(definition.schedule ?? {}),
     },
     requestedSlug: normalizedSlug,
   };

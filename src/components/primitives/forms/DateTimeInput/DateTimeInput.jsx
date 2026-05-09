@@ -11,6 +11,7 @@ const DateTimeInput = ({
   onTimeChange,
   required = false,
   disabled = false,
+  hideDateInput = false,
   dateErrorMessage,
   timeErrorMessage,
   className = '',
@@ -40,16 +41,18 @@ const DateTimeInput = ({
       gap="var(--dq-ui-space-sm)"
       className="dq-ui-date-time-input__fields"
     >
-      <TextInput
-        label={label ? `${label} date` : 'Date'}
-        hideLabel
-        type="date"
-        value={dateValue}
-        required={required}
-        disabled={disabled}
-        errorMessage={dateErrorMessage}
-        onChange={(event) => onDateChange?.(event.target.value)}
-      />
+      {hideDateInput ? null : (
+        <TextInput
+          label={label ? `${label} date` : 'Date'}
+          hideLabel
+          type="date"
+          value={dateValue}
+          required={required}
+          disabled={disabled}
+          errorMessage={dateErrorMessage}
+          onChange={(event) => onDateChange?.(event.target.value)}
+        />
+      )}
       <TextInput
         label={label ? `${label} time` : 'Time'}
         hideLabel

@@ -151,33 +151,6 @@ function getStageOrder(stage) {
   return Number.isFinite(order) ? order : null;
 }
 
-function getDayDateRange(stages) {
-  const timestamps = stages.reduce(
-    (range, stage) => {
-      stage.artists.forEach((artist) => {
-        const startTimestamp = artist.startAt ? new Date(artist.startAt).getTime() : Number.NaN;
-        const endTimestamp = artist.endAt ? new Date(artist.endAt).getTime() : Number.NaN;
-
-        if (!Number.isNaN(startTimestamp)) {
-          range.start = Math.min(range.start, startTimestamp);
-        }
-
-        if (!Number.isNaN(endTimestamp)) {
-          range.end = Math.max(range.end, endTimestamp);
-        }
-      });
-
-      return range;
-    },
-    { start: Number.POSITIVE_INFINITY, end: Number.NEGATIVE_INFINITY }
-  );
-
-  return {
-    dayStart: Number.isFinite(timestamps.start) ? new Date(timestamps.start).toISOString() : null,
-    dayEnd: Number.isFinite(timestamps.end) ? new Date(timestamps.end).toISOString() : null,
-  };
-}
-
 function collectUpdatedDates(value, dates = []) {
   if (!value || typeof value !== 'object') return dates;
 
@@ -316,14 +289,15 @@ export async function generateDefqon1Lineup() {
     });
 
     const stages = Array.from(stageMap.values()).sort(compareStages);
-    const { dayStart, dayEnd } = getDayDateRange(stages);
+    const dayDate = day.date ? new Date(day.date) : null;
 
     daysOut.push({
       daySlug,
       dayOrder,
       dayName,
-      dayStart,
-      dayEnd,
+      dayStartDate: dayDate && !Number.isNaN(dayDate.getTime())
+        ? dayDate.toISOString().slice(0, 10)
+        : null,
       stages,
     });
   });

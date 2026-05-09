@@ -15,6 +15,7 @@ import {
   getEntryDayLabel,
   getEntryDisplayName,
   getEntryMetaLabel,
+  getEntryTimeLabel,
 } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
 import './TimetableView.css';
@@ -26,7 +27,6 @@ const MIN_ENTRY_HEIGHT_EXTRA_REM = 0.25;
 const COMPACT_ENTRY_MAX_MINUTES = 45;
 const MS_PER_MINUTE = 60 * 1000;
 const MS_PER_HOUR = 60 * 60 * 1000;
-const TIME_LABEL_PATTERN = /^\s*(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})\s*$/;
 const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
@@ -71,86 +71,6 @@ const formatDuration = (startTimestamp, endTimestamp) => {
   }
 
   return `${minutes}min`;
-};
-
-const parseTimeParts = (hoursValue, minutesValue) => {
-  const hours = Number(hoursValue);
-  const minutes = Number(minutesValue);
-
-  if (
-    !Number.isInteger(hours) ||
-    !Number.isInteger(minutes) ||
-    hours < 0 ||
-    hours > 23 ||
-    minutes < 0 ||
-    minutes > 59
-  ) {
-    return null;
-  }
-
-  return { hours, minutes };
-};
-
-const getTimestampOnDate = (date, timeParts, dayOffset = 0) => (
-  new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() + dayOffset,
-    timeParts.hours,
-    timeParts.minutes,
-    0,
-    0
-  ).getTime()
-);
-
-const getNearestTimestampOnDate = (date, timeParts, referenceTimestamp) => (
-  [-1, 0, 1]
-    .map((dayOffset) => getTimestampOnDate(date, timeParts, dayOffset))
-    .reduce((nearestTimestamp, timestamp) => (
-      Math.abs(timestamp - referenceTimestamp) < Math.abs(nearestTimestamp - referenceTimestamp)
-        ? timestamp
-        : nearestTimestamp
-    ))
-);
-
-const parseTimeLabelRange = (entry, referenceTimestamp) => {
-  const match = typeof entry.timeLabel === 'string'
-    ? entry.timeLabel.match(TIME_LABEL_PATTERN)
-    : null;
-
-  if (!match || referenceTimestamp === null) {
-    return null;
-  }
-
-  const startParts = parseTimeParts(match[1], match[2]);
-  const endParts = parseTimeParts(match[3], match[4]);
-
-  if (!startParts || !endParts) {
-    return null;
-  }
-
-  const startTimestamp = getNearestTimestampOnDate(
-    new Date(referenceTimestamp),
-    startParts,
-    referenceTimestamp
-  );
-  const startDate = new Date(startTimestamp);
-  let endTimestamp = getTimestampOnDate(startDate, endParts);
-
-  if (endTimestamp <= startTimestamp) {
-    endTimestamp = getTimestampOnDate(startDate, endParts, 1);
-  }
-
-  return {
-    startTimestamp,
-    endTimestamp,
-  };
-};
-
-const getTimeLabel = (entry, startTimestamp, endTimestamp) => {
-  const timeLabel = entry.timeLabel || `${formatTime(startTimestamp)} - ${formatTime(endTimestamp)}`;
-
-  return timeLabel;
 };
 
 const getStageSortValue = (stage) => (
@@ -200,12 +120,8 @@ const renderStyleBadges = (styleTags) => {
 const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
   const scheduledEntries = entries
     .map((entry) => {
-      const fallbackStartTimestamp = parseTimestamp(entry.startAt);
-      const fallbackEndTimestamp = parseTimestamp(entry.endAt);
-      const referenceTimestamp = fallbackStartTimestamp ?? fallbackEndTimestamp;
-      const labelRange = parseTimeLabelRange(entry, referenceTimestamp);
-      const startTimestamp = labelRange?.startTimestamp ?? fallbackStartTimestamp;
-      const endTimestamp = labelRange?.endTimestamp ?? fallbackEndTimestamp;
+      const startTimestamp = parseTimestamp(entry.startAt);
+      const endTimestamp = parseTimestamp(entry.endAt);
 
       if (startTimestamp === null || endTimestamp === null || endTimestamp <= startTimestamp) {
         return null;
@@ -274,7 +190,7 @@ const buildTimetableData = ({ entries, selectedDay, hourHeight }) => {
       ),
       durationMinutes,
       displayName: getEntryDisplayName(entry),
-      displayTime: getTimeLabel(entry, entry.startTimestamp, entry.endTimestamp),
+      displayTime: getEntryTimeLabel(entry),
       displayDuration: formatDuration(entry.startTimestamp, entry.endTimestamp),
       isCompact: durationMinutes <= COMPACT_ENTRY_MAX_MINUTES,
     });
@@ -324,7 +240,6 @@ const TimetableView = ({
           entry.stage,
           entry.startAt,
           entry.endAt,
-          entry.timeLabel,
           showStyleTags
             ? (styleTagsByEntryId.get(entry.id) ?? []).map((styleTag) => styleTag.label).join(',')
             : '',

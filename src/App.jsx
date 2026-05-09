@@ -60,6 +60,7 @@ import {
   saveIgnoreSmallConflictsPreference,
   saveShowStyleTagsPreference,
   saveViewPreferences,
+  toggleReviewSuggestionFavorite,
   upsertFavoriteEntry,
   validateLineupPayload,
 } from './lib/lineup';
@@ -129,6 +130,8 @@ const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const getCleanStyleTag = (value) => String(value ?? '').trim();
 const TEMP_LINEUP_SOURCE_KEY = 'temp:manual-lineup-edit';
+const DEFAULT_FESTIVAL_DAY_START_HOUR = 6;
+const DEFAULT_FESTIVAL_DAY_END_HOUR = 6;
 const normalizeLineupText = (value) => String(value ?? '')
   .normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '')
@@ -174,11 +177,156 @@ const getIsoFromDateAndTime = ({ date, time }) => {
 
   return Number.isNaN(timestamp) ? null : new Date(timestamp).toISOString();
 };
+const getLocalDateTimeTimestamp = ({ date, time }) => {
+  const timestamp = new Date(`${date}T${time}`).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
+};
+const getDateInputValueFromTimestamp = (timestamp) => (
+  Number.isFinite(timestamp) ? getDateInputValue(new Date(timestamp).toISOString()) : ''
+);
+const getDateAtHourTimestamp = (dateValue, hour, dayOffset = 0) => {
+  const date = new Date(`${dateValue}T00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hour, 0, 0, 0);
+
+  return date.getTime();
+};
+const getLineupDayFromPayload = (payload, daySlug) => (
+  Array.isArray(payload?.lineup)
+    ? payload.lineup.find((lineupDay) => String(lineupDay.daySlug ?? '') === String(daySlug ?? ''))
+    : null
+);
+const getConfiguredDayStartDate = (daySlug) => (
+  activeSite.schedule?.dayStartDates?.[String(daySlug ?? '').trim().toLowerCase()] ?? ''
+);
+const getFestivalDayRange = (payload, daySlug) => {
+  const day = getLineupDayFromPayload(payload, daySlug);
+  const explicitStartTimestamp = day?.dayStart ? new Date(day.dayStart).getTime() : Number.NaN;
+  const explicitEndTimestamp = day?.dayEnd ? new Date(day.dayEnd).getTime() : Number.NaN;
+  const baseDate =
+    getDateInputValue(day?.dayStart) ||
+    getDateInputValue(day?.dayEnd) ||
+    String(day?.dayStartDate ?? '').trim() ||
+    getConfiguredDayStartDate(daySlug);
+  const fallbackStartTimestamp = baseDate
+    ? getDateAtHourTimestamp(baseDate, DEFAULT_FESTIVAL_DAY_START_HOUR)
+    : null;
+  const fallbackEndTimestamp = baseDate
+    ? getDateAtHourTimestamp(
+        baseDate,
+        DEFAULT_FESTIVAL_DAY_END_HOUR,
+        DEFAULT_FESTIVAL_DAY_END_HOUR <= DEFAULT_FESTIVAL_DAY_START_HOUR ? 1 : 0
+      )
+    : null;
+  const startTimestamp = Number.isNaN(explicitStartTimestamp)
+    ? fallbackStartTimestamp
+    : explicitStartTimestamp;
+  const endTimestamp = Number.isNaN(explicitEndTimestamp)
+    ? fallbackEndTimestamp
+    : explicitEndTimestamp;
+
+  return {
+    startTimestamp,
+    endTimestamp,
+    startDate: getDateInputValueFromTimestamp(startTimestamp),
+    endDate: getDateInputValueFromTimestamp(endTimestamp),
+  };
+};
+const getFestivalDateForTime = ({ payload, daySlug, time, referenceTimestamp = null }) => {
+  if (!time) {
+    return '';
+  }
+
+  const range = getFestivalDayRange(payload, daySlug);
+
+  if (!range.startDate) {
+    return '';
+  }
+
+  const startDateTimestamp = getLocalDateTimeTimestamp({ date: range.startDate, time });
+  const endDateTimestamp = range.endDate
+    ? getLocalDateTimeTimestamp({ date: range.endDate, time })
+    : null;
+  const candidates = [startDateTimestamp, endDateTimestamp]
+    .filter((timestamp) => timestamp !== null)
+    .filter((timestamp) => {
+      if (range.startTimestamp === null || range.endTimestamp === null) {
+        return true;
+      }
+
+      return timestamp >= range.startTimestamp && timestamp <= range.endTimestamp;
+    });
+
+  if (candidates.length === 0) {
+    return range.startDate;
+  }
+
+  const bestTimestamp = referenceTimestamp === null
+    ? candidates[0]
+    : candidates.reduce((bestCandidate, candidate) => (
+        Math.abs(candidate - referenceTimestamp) < Math.abs(bestCandidate - referenceTimestamp)
+          ? candidate
+          : bestCandidate
+      ));
+
+  return getDateInputValueFromTimestamp(bestTimestamp);
+};
+const getFestivalScheduleDates = ({ payload, daySlug, startTime, endTime }) => {
+  const startDate = getFestivalDateForTime({ payload, daySlug, time: startTime });
+  const startTimestamp = startDate
+    ? getLocalDateTimeTimestamp({ date: startDate, time: startTime })
+    : null;
+  let endDate = getFestivalDateForTime({
+    payload,
+    daySlug,
+    time: endTime,
+    referenceTimestamp: startTimestamp,
+  });
+  let endTimestamp = endDate
+    ? getLocalDateTimeTimestamp({ date: endDate, time: endTime })
+    : null;
+
+  if (
+    startTimestamp !== null &&
+    endTimestamp !== null &&
+    endTimestamp <= startTimestamp
+  ) {
+    const nextDate = new Date(startTimestamp);
+    nextDate.setDate(nextDate.getDate() + 1);
+    endDate = getDateInputValue(nextDate.toISOString());
+    endTimestamp = getLocalDateTimeTimestamp({ date: endDate, time: endTime });
+  }
+
+  return {
+    startDate,
+    endDate,
+  };
+};
+const getScheduleValuesWithFestivalDates = ({ payload, values }) => {
+  const scheduleDates = getFestivalScheduleDates({
+    payload,
+    daySlug: values.daySlug,
+    startTime: values.startTime,
+    endTime: values.endTime,
+  });
+
+  return {
+    ...values,
+    ...scheduleDates,
+  };
+};
 const getScheduleTokenFromDateTime = ({ startDate, startTime, endTime }) => (
   `${startDate.replace(/-/g, '')}-${startTime.replace(':', '')}-${endTime.replace(':', '')}`
 );
-const areSameEntryEditValues = ({ entry, artistName, startAt, endAt }) => (
+const areSameEntryEditValues = ({ entry, artistName, daySlug, stageSlug, startAt, endAt }) => (
   normalizeLineupText(entry?.artistName) === normalizeLineupText(artistName) &&
+  String(entry?.daySlug ?? '') === String(daySlug ?? '') &&
+  String(entry?.stageSlug ?? '') === String(stageSlug ?? '') &&
   String(entry?.startAt ?? '') === String(startAt ?? '') &&
   String(entry?.endAt ?? '') === String(endAt ?? '')
 );
@@ -194,14 +342,12 @@ const getPerformanceEditFieldErrors = (editState) => {
     fieldErrors.artistName = 'Required.';
   }
 
-  if (editState.mode === 'create') {
-    if (!String(values.daySlug ?? '').trim()) {
-      fieldErrors.daySlug = 'Required.';
-    }
+  if (!String(values.daySlug ?? '').trim()) {
+    fieldErrors.daySlug = 'Required.';
+  }
 
-    if (!String(values.stageSlug ?? '').trim()) {
-      fieldErrors.stageSlug = 'Required.';
-    }
+  if (!String(values.stageSlug ?? '').trim()) {
+    fieldErrors.stageSlug = 'Required.';
   }
 
   if (!values.startDate) {
@@ -235,6 +381,8 @@ const hasPerformanceEditChanges = (editState) => {
 
   return (
     normalizeLineupText(values.artistName) !== normalizeLineupText(editState.entry?.artistName) ||
+    values.daySlug !== (editState.entry?.daySlug ?? '') ||
+    values.stageSlug !== (editState.entry?.stageSlug ?? '') ||
     values.startDate !== getDateInputValue(editState.entry?.startAt) ||
     values.startTime !== getTimeInputValue(editState.entry?.startAt) ||
     values.endDate !== getDateInputValue(editState.entry?.endAt) ||
@@ -265,7 +413,9 @@ const getLineupDayOptionsFromPayload = (payload) => (
         .map((day) => ({
           value: String(day.daySlug ?? '').trim(),
           label: day.dayName || day.daySlug || 'Untitled day',
+          dayStartDate: day.dayStartDate ?? null,
           dayStart: day.dayStart ?? null,
+          dayEnd: day.dayEnd ?? null,
           stages: Array.isArray(day.stages) ? day.stages : [],
         }))
         .filter((day) => day.value && day.stages.length > 0)
@@ -335,10 +485,6 @@ const getStyleTagItemsFromRecord = (record) => [
   ...item,
   label: getCleanStyleTag(item.label),
 })).filter((item) => item.label);
-
-const getStyleTagsFromRecord = (record) => (
-  getStyleTagItemsFromRecord(record).map((item) => item.label)
-);
 
 const addUniqueStyleTag = (styleTags, tag) => {
   const cleanTag = getCleanStyleTag(tag);
@@ -645,6 +791,9 @@ const extractLineupEntries = (moduleValue) => {
             ...artist,
             daySlug: String(day.daySlug ?? '').trim().toLowerCase(),
             dayOrder: day.dayOrder,
+            dayStartDate: day.dayStartDate ?? null,
+            dayStart: day.dayStart ?? null,
+            dayEnd: day.dayEnd ?? null,
             stageOrder: stage.stageOrder ?? stageIndex + 1,
             stage: stageName,
             stageSlug: stage.stageSlug,
@@ -653,7 +802,6 @@ const extractLineupEntries = (moduleValue) => {
             artistOrder: artist.artistOrder ?? artistIndex + 1,
             artistName,
             artistRaw: artist.artistRaw ?? artistName,
-            timeLabel: artist.timeLabel ?? null,
           };
         })
       )
@@ -683,9 +831,18 @@ const buildLineupSourcesFromVersions = (versions) => (
   }))
 );
 
+const getLineupStageFromPayload = (payload, daySlug, stageSlug) => {
+  const day = getLineupDayFromPayload(payload, daySlug);
+  const stage = day?.stages?.find((lineupStage) => String(lineupStage.stageSlug ?? '') === stageSlug) ?? null;
+
+  return { day, stage };
+};
+
 const updateLineupPayloadEntry = ({ payload, entry, editValues }) => {
   const nextPayload = JSON.parse(JSON.stringify(payload));
   const artistName = editValues.artistName.trim();
+  const daySlug = String(editValues.daySlug ?? '').trim();
+  const stageSlug = String(editValues.stageSlug ?? '').trim();
   const startAt = getIsoFromDateAndTime({
     date: editValues.startDate,
     time: editValues.startTime,
@@ -695,73 +852,97 @@ const updateLineupPayloadEntry = ({ payload, entry, editValues }) => {
     time: editValues.endTime,
   });
 
-  if (!artistName || !startAt || !endAt) {
-    throw new Error('Artist name, start and end are required.');
+  if (!artistName || !daySlug || !stageSlug || !startAt || !endAt) {
+    throw new Error('Artist name, day, stage, start and end are required.');
   }
 
   if (new Date(endAt).getTime() <= new Date(startAt).getTime()) {
     throw new Error('End time must be after start time.');
   }
 
+  const { stage: targetStage } = getLineupStageFromPayload(nextPayload, daySlug, stageSlug);
+
+  if (Array.isArray(nextPayload.lineup) && !targetStage) {
+    throw new Error('Could not find the selected day and stage in the source lineup payload.');
+  }
+
   const artistTags = getArtistTagsFromName(artistName);
   const artistTokens = artistTags.map((tag) => slugifyLineupValue(tag)).filter(Boolean);
   const artistSlug = slugifyLineupValue(artistName);
-  const shouldKeepId = areSameEntryEditValues({ entry, artistName, startAt, endAt });
+  const shouldKeepId = areSameEntryEditValues({ entry, artistName, daySlug, stageSlug, startAt, endAt });
   const nextId = shouldKeepId
     ? entry.id
-    : `${entry.daySlug}_${entry.stageSlug}_${artistSlug}_${getScheduleTokenFromDateTime(editValues)}`;
+    : `${daySlug}_${stageSlug}_${artistSlug}_${getScheduleTokenFromDateTime(editValues)}`;
 
-  const applyArtistEdit = (artist) => {
-    artist.id = nextId;
-    artist.artistName = artistName;
-    artist.artistSlug = artistSlug;
-    artist.artistTags = artistTags.length > 0 ? artistTags : [artistName];
-    artist.artistTokens = artistTokens.length > 0 ? artistTokens : [artistSlug];
-    artist.startAt = startAt;
-    artist.endAt = endAt;
-    artist.timeLabel = `${editValues.startTime} - ${editValues.endTime}`;
-
-    if (!shouldKeepId) {
-      artist.artistId = null;
-    }
-  };
-
-  let didUpdate = false;
-
-  const visitArtists = (artists) => {
-    if (!Array.isArray(artists)) {
-      return;
-    }
-
-    artists.forEach((artist) => {
-      if (!didUpdate && artist?.id === entry.id) {
-        applyArtistEdit(artist);
-        didUpdate = true;
-      }
-    });
-  };
+  const buildEditedArtist = (artist) => ({
+    ...artist,
+    id: nextId,
+    artistName,
+    artistSlug,
+    artistTags: artistTags.length > 0 ? artistTags : [artistName],
+    artistTokens: artistTokens.length > 0 ? artistTokens : [artistSlug],
+    startAt,
+    endAt,
+    ...(!shouldKeepId ? { artistId: null } : {}),
+  });
 
   if (Array.isArray(nextPayload.lineup)) {
+    let editedArtist = null;
+    let sourceStage = null;
+
     nextPayload.lineup.forEach((day) => {
       day.stages?.forEach((stage) => {
-        const wasAlreadyUpdated = didUpdate;
-        visitArtists(stage.artists);
+        if (editedArtist || !Array.isArray(stage.artists)) {
+          return;
+        }
 
-        if (!wasAlreadyUpdated && didUpdate) {
-          sortArtistsBySchedule(stage.artists);
+        const artistIndex = stage.artists.findIndex((artist) => artist?.id === entry.id);
+
+        if (artistIndex >= 0) {
+          editedArtist = buildEditedArtist(stage.artists[artistIndex]);
+          stage.artists.splice(artistIndex, 1);
+          sourceStage = stage;
         }
       });
     });
-  }
 
-  visitArtists(nextPayload.entries);
+    if (!editedArtist) {
+      throw new Error('Could not find this performance in the source lineup payload.');
+    }
 
-  if (Array.isArray(nextPayload)) {
-    visitArtists(nextPayload);
-  }
+    targetStage.artists = Array.isArray(targetStage.artists) ? targetStage.artists : [];
+    targetStage.artists.push(editedArtist);
+    sortArtistsBySchedule(targetStage.artists);
 
-  if (!didUpdate) {
-    throw new Error('Could not find this performance in the source lineup payload.');
+    if (sourceStage && sourceStage !== targetStage) {
+      sortArtistsBySchedule(sourceStage.artists);
+    }
+  } else {
+    const visitArtists = (artists) => {
+      if (!Array.isArray(artists)) {
+        return false;
+      }
+
+      const artistIndex = artists.findIndex((artist) => artist?.id === entry.id);
+
+      if (artistIndex < 0) {
+        return false;
+      }
+
+      artists[artistIndex] = {
+        ...buildEditedArtist(artists[artistIndex]),
+        daySlug,
+        stageSlug,
+      };
+      sortArtistsBySchedule(artists);
+      return true;
+    };
+
+    const didUpdate = visitArtists(nextPayload.entries) || (Array.isArray(nextPayload) && visitArtists(nextPayload));
+
+    if (!didUpdate) {
+      throw new Error('Could not find this performance in the source lineup payload.');
+    }
   }
 
   nextPayload.updatedAt = new Date().toISOString();
@@ -791,10 +972,7 @@ const addLineupPayloadEntry = ({ payload, editValues }) => {
     throw new Error('End time must be after start time.');
   }
 
-  const day = Array.isArray(nextPayload.lineup)
-    ? nextPayload.lineup.find((lineupDay) => String(lineupDay.daySlug ?? '') === daySlug)
-    : null;
-  const stage = day?.stages?.find((lineupStage) => String(lineupStage.stageSlug ?? '') === stageSlug);
+  const { day, stage } = getLineupStageFromPayload(nextPayload, daySlug, stageSlug);
 
   if (!day || !stage) {
     throw new Error('Could not find the selected day and stage in the source lineup payload.');
@@ -816,7 +994,6 @@ const addLineupPayloadEntry = ({ payload, editValues }) => {
     artistTags: artistTags.length > 0 ? artistTags : [artistName],
     artistTokens: artistTokens.length > 0 ? artistTokens : [artistSlug],
     artistOrder: (stage.artists?.length ?? 0) + 1,
-    timeLabel: `${editValues.startTime} - ${editValues.endTime}`,
   };
 
   stage.artists = Array.isArray(stage.artists) ? stage.artists : [];
@@ -1010,6 +1187,8 @@ const App = () => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showTribeOnly, setShowTribeOnly] = useState(false);
   const [showConflictsOnly, setShowConflictsOnly] = useState(false);
+  const [reviewConflictNotificationCount, setReviewConflictNotificationCount] = useState(null);
+  const [ignoredReviewConflictIds, setIgnoredReviewConflictIds] = useState(() => new Set());
   const activeHydrationIdRef = useRef(0);
   const authHydrationTimeoutRef = useRef(0);
   const lastAuthenticatedUserIdRef = useRef(bootUserId);
@@ -1333,7 +1512,7 @@ const App = () => {
     });
 
     return likesByEntryId;
-  }, [authUser, entriesById, selectedEntries, tribe]);
+  }, [authUser, entriesById, tribe]);
 
   const tribeLikedEntryIds = useMemo(
     () => new Set(
@@ -1539,7 +1718,9 @@ const App = () => {
     return timetableEntries.filter((entry) => conflictIds.has(entry.id));
   }, [browseableEntries, favoriteIdSet, ignoreSmallConflicts]);
   const reviewCount = isLatestLineupSelected
-    ? visibleReviewFavorites.length + favoriteTimetableConflictEntries.length
+    ? visibleReviewFavorites.length + (
+        reviewConflictNotificationCount ?? favoriteTimetableConflictEntries.length
+      )
     : 0;
   const baseTimetableEntriesBeforeStyles = useMemo(
     () =>
@@ -2311,6 +2492,38 @@ const App = () => {
     });
   }, [authUser, entriesById, favoritesReadOnly, requestAuth]);
 
+  const handleToggleReviewSuggestionFavorite = useCallback((entryId, reviewFavorite) => {
+    if (favoritesReadOnly || !authUser) {
+      return;
+    }
+
+    const entry = entriesById.get(entryId);
+
+    if (!entry) {
+      return;
+    }
+
+    setFavoriteItems((previousItems) =>
+      toggleReviewSuggestionFavorite(previousItems, entry, reviewFavorite)
+    );
+  }, [authUser, entriesById, favoritesReadOnly]);
+
+  const handleIgnoreReviewConflict = useCallback((conflictId) => {
+    setIgnoredReviewConflictIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      nextIds.add(conflictId);
+      return nextIds;
+    });
+  }, []);
+
+  const handleRestoreReviewConflict = useCallback((conflictId) => {
+    setIgnoredReviewConflictIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      nextIds.delete(conflictId);
+      return nextIds;
+    });
+  }, []);
+
   const removeReviewFavorite = useCallback((favoriteKey) => {
     if (favoritesReadOnly || !authUser) {
       return;
@@ -2481,6 +2694,7 @@ const App = () => {
 
     setSelectedLineupKey(manualLineupEditSource.key);
     setHasTriedPerformanceEditSubmit(false);
+    const firstDayRange = getFestivalDayRange(manualLineupEditSource.payload, firstDay.value);
     setEditingPerformance({
       mode: 'create',
       entry: null,
@@ -2488,9 +2702,9 @@ const App = () => {
         artistName: '',
         daySlug: firstDay.value,
         stageSlug: firstStage.stageSlug ?? '',
-        startDate: getDateInputValue(firstDay.dayStart),
+        startDate: firstDayRange.startDate,
         startTime: '',
-        endDate: getDateInputValue(firstDay.dayStart),
+        endDate: firstDayRange.startDate,
         endTime: '',
       },
       errorMessage: '',
@@ -2510,6 +2724,7 @@ const App = () => {
 
     setHasTriedPerformanceEditSubmit(false);
     setEditingPerformance({
+      mode: 'edit',
       entry,
       values: {
         artistName: entry.artistName ?? '',
@@ -2525,34 +2740,32 @@ const App = () => {
   }, [canEditSelectedLineup, entriesById]);
 
   const handleEditingPerformanceChange = useCallback((nextValues) => {
-    setEditingPerformance((currentEdit) => (
-      currentEdit
-        ? {
-            ...currentEdit,
-            values: {
-              ...currentEdit.values,
-              ...nextValues,
-              ...(currentEdit.mode === 'create' && nextValues.daySlug
-                ? {
-                    stageSlug: getLineupStageOptionsForDay(
-                      selectedLineup?.payload,
-                      nextValues.daySlug
-                    )[0]?.value ?? '',
-                    startDate: getDateInputValue(
-                      getLineupDayOptionsFromPayload(selectedLineup?.payload)
-                        .find((day) => day.value === nextValues.daySlug)?.dayStart
-                    ),
-                    endDate: getDateInputValue(
-                      getLineupDayOptionsFromPayload(selectedLineup?.payload)
-                        .find((day) => day.value === nextValues.daySlug)?.dayStart
-                    ),
-                  }
-                : {}),
-            },
-            errorMessage: '',
-          }
-        : currentEdit
-    ));
+    setEditingPerformance((currentEdit) => {
+      if (!currentEdit) {
+        return currentEdit;
+      }
+
+      const rawValues = {
+        ...currentEdit.values,
+        ...nextValues,
+      };
+      const didChangeDay = Object.prototype.hasOwnProperty.call(nextValues, 'daySlug');
+      const stageOptions = getLineupStageOptionsForDay(selectedLineup?.payload, rawValues.daySlug);
+      const hasSelectedStage = stageOptions.some((stageOption) => stageOption.value === rawValues.stageSlug);
+      const valuesWithStage = {
+        ...rawValues,
+        stageSlug: didChangeDay && !hasSelectedStage ? stageOptions[0]?.value ?? '' : rawValues.stageSlug,
+      };
+
+      return {
+        ...currentEdit,
+        values: getScheduleValuesWithFestivalDates({
+          payload: selectedLineup?.payload,
+          values: valuesWithStage,
+        }),
+        errorMessage: '',
+      };
+    });
   }, [selectedLineup]);
 
   const handleClosePerformanceEdit = useCallback(() => {
@@ -2567,22 +2780,31 @@ const App = () => {
 
     setHasTriedPerformanceEditSubmit(true);
 
-    const fieldErrors = getPerformanceEditFieldErrors(editingPerformance);
+    const nextEditValues = getScheduleValuesWithFestivalDates({
+      payload: selectedLineup.payload,
+      values: editingPerformance.values,
+    });
+    const nextEditingPerformance = {
+      ...editingPerformance,
+      values: nextEditValues,
+    };
+    const fieldErrors = getPerformanceEditFieldErrors(nextEditingPerformance);
 
-    if (Object.keys(fieldErrors).length > 0 || !hasPerformanceEditChanges(editingPerformance)) {
+    if (Object.keys(fieldErrors).length > 0 || !hasPerformanceEditChanges(nextEditingPerformance)) {
+      setEditingPerformance(nextEditingPerformance);
       return;
     }
 
     try {
-      const nextPayload = editingPerformance.mode === 'create'
+      const nextPayload = nextEditingPerformance.mode === 'create'
         ? addLineupPayloadEntry({
             payload: selectedLineup.payload,
-            editValues: editingPerformance.values,
+            editValues: nextEditValues,
           })
         : updateLineupPayloadEntry({
             payload: selectedLineup.payload,
-            entry: editingPerformance.entry,
-            editValues: editingPerformance.values,
+            entry: nextEditingPerformance.entry,
+            editValues: nextEditValues,
           });
       const previewSource = await buildTempLineupPreviewSource(nextPayload);
 
@@ -3066,8 +3288,13 @@ const App = () => {
       conflictEntries: favoriteTimetableConflictEntries,
       favoriteIdSet,
       toggleFavorite,
+      toggleReviewSuggestionFavorite: handleToggleReviewSuggestionFavorite,
       removeReviewFavorite,
       onOpenTimetableConflicts: handleOpenTimetableConflicts,
+      onConflictNotificationCountChange: setReviewConflictNotificationCount,
+      ignoredConflictIds: ignoredReviewConflictIds,
+      onIgnoreConflict: handleIgnoreReviewConflict,
+      onRestoreConflict: handleRestoreReviewConflict,
       tribeLikesByEntryId,
       ignoreSmallConflicts,
       canManageFavorites: !favoritesReadOnly,
@@ -3078,23 +3305,24 @@ const App = () => {
     readOnlyLineupNotice,
     readOnlyLineupNoticeTitle,
     authUser,
+    canEditSelectedLineup,
     favoriteIdSet,
     favoriteTimetableConflictEntries,
     favoritesReadOnly,
     hasLineup,
     groupedVisibleEntries,
     groupedSearchVisibleEntries,
+    handleIgnoreReviewConflict,
     handleOpenPerformanceEdit,
     handleOpenTimetableConflicts,
+    handleRestoreReviewConflict,
+    handleToggleReviewSuggestionFavorite,
+    ignoredReviewConflictIds,
     ignoreSmallConflicts,
-    isLatestLineupSelected,
-    isAdmin,
-    isManualLineupEditAllowed,
     lineupFilterBar,
     removeReviewFavorite,
     defaultBrowseDay,
     selectedMapLayers,
-    selectedLineup?.payload,
     selectedTimetableDayLabel,
     showTribeOnly,
     searchHeaderQuery,
@@ -3368,7 +3596,7 @@ const App = () => {
             errorMessage={performanceEditFieldErrors.artistName}
             onChange={(event) => handleEditingPerformanceChange({ artistName: event.target.value })}
           />
-          {editingPerformance?.mode === 'create' ? (
+          {editingPerformance ? (
             <>
               <SelectInput
                 label="Day"
@@ -3396,6 +3624,7 @@ const App = () => {
             dateValue={editingPerformance?.values.startDate ?? ''}
             timeValue={editingPerformance?.values.startTime ?? ''}
             required
+            hideDateInput
             dateErrorMessage={performanceEditFieldErrors.startDate}
             timeErrorMessage={performanceEditFieldErrors.startTime}
             onDateChange={(startDate) => handleEditingPerformanceChange({ startDate })}
@@ -3406,6 +3635,7 @@ const App = () => {
             dateValue={editingPerformance?.values.endDate ?? ''}
             timeValue={editingPerformance?.values.endTime ?? ''}
             required
+            hideDateInput
             dateErrorMessage={performanceEditFieldErrors.endDate}
             timeErrorMessage={performanceEditFieldErrors.endTime}
             onDateChange={(endDate) => handleEditingPerformanceChange({ endDate })}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowRightIcon, HeartBreakIcon, HeartIcon, LightningIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
@@ -17,6 +17,7 @@ import {
   getEntryDayLabel,
   getEntryDisplayName,
   getEntryMetaLabel,
+  getEntryTimeLabel,
 } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
 import '../TimetableView/TimetableView.css';
@@ -29,27 +30,6 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
 });
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
 const CONFLICT_OVERLAP_THRESHOLD = 0.25;
-
-const formatTimeRange = (startAt, endAt) => {
-  const startDate = startAt ? new Date(startAt) : null;
-  const endDate = endAt ? new Date(endAt) : null;
-  const hasStart = startDate && !Number.isNaN(startDate.getTime());
-  const hasEnd = endDate && !Number.isNaN(endDate.getTime());
-
-  if (hasStart && hasEnd) {
-    return `${TIME_FORMATTER.format(startDate)} - ${TIME_FORMATTER.format(endDate)}`;
-  }
-
-  if (hasStart) {
-    return TIME_FORMATTER.format(startDate);
-  }
-
-  if (hasEnd) {
-    return TIME_FORMATTER.format(endDate);
-  }
-
-  return null;
-};
 
 const getSavedIdParts = (id) => {
   const parts = String(id ?? '').split('_').filter(Boolean);
@@ -89,11 +69,6 @@ const getReviewFavoriteDayLabel = (favorite) => {
   return favoriteIdParts.daySlug ? getDayLabel(favoriteIdParts.daySlug) : 'Unknown day';
 };
 
-const getTimestamp = (value) => {
-  const timestamp = new Date(value).getTime();
-  return Number.isNaN(timestamp) ? null : timestamp;
-};
-
 const compareReviewItems = (leftItem, rightItem) => (
   (leftItem.dayOrder ?? 999) - (rightItem.dayOrder ?? 999) ||
   String(leftItem.startAt ?? '').localeCompare(String(rightItem.startAt ?? '')) ||
@@ -101,22 +76,9 @@ const compareReviewItems = (leftItem, rightItem) => (
   getEntryDisplayName(leftItem).localeCompare(getEntryDisplayName(rightItem))
 );
 
-const entriesOverlap = (leftEntry, rightEntry) => {
-  const leftStart = getTimestamp(leftEntry.startAt);
-  const leftEnd = getTimestamp(leftEntry.endAt);
-  const rightStart = getTimestamp(rightEntry.startAt);
-  const rightEnd = getTimestamp(rightEntry.endAt);
-
-  if (
-    leftStart === null ||
-    leftEnd === null ||
-    rightStart === null ||
-    rightEnd === null
-  ) {
-    return false;
-  }
-
-  return leftStart < rightEnd && rightStart < leftEnd;
+const getTimestamp = (value) => {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? null : timestamp;
 };
 
 const entriesHaveMeaningfulConflict = (leftEntry, rightEntry, ignoreSmallConflicts) => {
@@ -293,8 +255,12 @@ const ReviewsView = ({
   conflictEntries = [],
   favoriteIdSet = new Set(),
   toggleFavorite,
+  toggleReviewSuggestionFavorite,
   removeReviewFavorite,
   onOpenTimetableConflicts,
+  onConflictNotificationCountChange,
+  ignoredConflictIds = new Set(),
+  onIgnoreConflict,
   tribeLikesByEntryId = new Map(),
   ignoreSmallConflicts = false,
   canManageFavorites = true,
@@ -303,6 +269,7 @@ const ReviewsView = ({
 }) => {
   const [activeTab, setActiveTab] = useState('lineup-updates');
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
+  const [shouldShowIgnoredConflicts, setShouldShowIgnoredConflicts] = useState(false);
   const reviewSections = useMemo(() => {
     const favoritesByDay = reviewFavorites.slice().sort(compareReviewItems).reduce((groups, favorite) => {
       const dayLabel = getReviewFavoriteDayLabel(favorite);
@@ -324,6 +291,45 @@ const ReviewsView = ({
     () => getConflictSections(conflictEntries, ignoreSmallConflicts),
     [conflictEntries, ignoreSmallConflicts]
   );
+  const ignoredConflictCount = useMemo(
+    () =>
+      conflictSections.reduce(
+        (count, section) =>
+          count + section.groups.filter((group) => ignoredConflictIds.has(group.id)).length,
+        0
+      ),
+    [conflictSections, ignoredConflictIds]
+  );
+  const visibleConflictSections = useMemo(
+    () =>
+      conflictSections
+        .map((section) => ({
+          ...section,
+          groups: section.groups.filter((group) =>
+            shouldShowIgnoredConflicts
+              ? ignoredConflictIds.has(group.id)
+              : !ignoredConflictIds.has(group.id)
+          ),
+        }))
+        .filter((section) => section.groups.length > 0),
+    [conflictSections, ignoredConflictIds, shouldShowIgnoredConflicts]
+  );
+  const visibleConflictCount = useMemo(
+    () => visibleConflictSections.reduce((count, section) => count + section.groups.length, 0),
+    [visibleConflictSections]
+  );
+  const activeConflictCount = useMemo(
+    () =>
+      conflictSections.reduce(
+        (count, section) =>
+          count + section.groups.filter((group) => !ignoredConflictIds.has(group.id)).length,
+        0
+      ),
+    [conflictSections, ignoredConflictIds]
+  );
+  useEffect(() => {
+    onConflictNotificationCountChange?.(activeConflictCount);
+  }, [activeConflictCount, onConflictNotificationCountChange]);
   const reviewFilterBar = useMemo(() => ({
     width: 'content',
     resetButton: false,
@@ -353,12 +359,12 @@ const ReviewsView = ({
         value: 'timetable-conflicts',
         label: 'Conflicts',
         icon: LightningIcon,
-        tag: conflictEntries.length,
+        tag: activeConflictCount,
         tagVariant: 'count',
         className: 'dq-ui-choice-button--floating-tag',
       },
     ],
-  }), [activeTab, conflictEntries.length, reviewFavorites.length]);
+  }), [activeConflictCount, activeTab, reviewFavorites.length]);
 
   if (!isAuthenticated) {
     return (
@@ -377,9 +383,12 @@ const ReviewsView = ({
   const hasActiveLineupUpdates = activeTab === 'lineup-updates';
   const hasActiveTimetableConflicts = activeTab === 'timetable-conflicts';
   const shouldShowReviewNotice = !archiveNotice && hasActiveLineupUpdates && reviewFavorites.length > 0;
-  const shouldShowConflictNotice = hasActiveTimetableConflicts && conflictEntries.length > 0;
+  const shouldShowConflictNotice =
+    hasActiveTimetableConflicts &&
+    activeConflictCount > 0 &&
+    !shouldShowIgnoredConflicts;
   const shouldShowLineupEmpty = hasActiveLineupUpdates && reviewFavorites.length === 0;
-  const shouldShowConflictEmpty = hasActiveTimetableConflicts && conflictEntries.length === 0;
+  const shouldShowConflictEmpty = hasActiveTimetableConflicts && visibleConflictCount === 0;
   const renderTribeStack = (entry) => {
     const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
     const tribeLikesFromOthers = tribeLikes.filter((member) => !member.isCurrentUser);
@@ -402,7 +411,7 @@ const ReviewsView = ({
     const favoriteIdParts = getSavedIdParts(favorite.id);
     const favoriteStage = getStageLabelFromSlug(favoriteIdParts.stageSlug);
     const favoriteDay = getReviewFavoriteDayLabel(favorite);
-    const favoriteTime = favorite.timeLabel ?? formatTimeRange(favorite.startAt, favorite.endAt);
+    const favoriteTime = getEntryTimeLabel(favorite);
     const favoriteTheme = getStageTheme(favoriteStage);
     const favoriteColor = favorite.stageColor ?? favoriteTheme.accent;
     const hasSuggestions = favorite.suggestions?.length > 0;
@@ -437,13 +446,13 @@ const ReviewsView = ({
                     title={getEntryDisplayName(suggestion)}
                     meta1={suggestion.stage}
                     meta2={getEntryDayLabel(suggestion)}
-                    meta3={suggestion.timeLabel}
+                    meta3={getEntryTimeLabel(suggestion)}
                     actionVariant={canManageFavorites ? 'likes' : null}
                     actionPressed={isSuggestionFavorite}
                     actionAriaLabel={
                       isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
                     }
-                    onAction={() => toggleFavorite?.(suggestion.id)}
+                    onAction={() => toggleReviewSuggestionFavorite?.(suggestion.id, favorite)}
                   />
                 );
               })}
@@ -507,7 +516,7 @@ const ReviewsView = ({
       {hasActiveTimetableConflicts && conflictEntries.length > 0 ? (
         <SlidingColumns
           variant="stacked"
-          sections={conflictSections.map((section) => ({
+          sections={visibleConflictSections.map((section) => ({
             id: section.id,
             label: section.label,
             content: (
@@ -515,116 +524,151 @@ const ReviewsView = ({
                 className="dq-reviews-view__conflict-groups"
                 gap="var(--dq-ui-space-md)"
               >
-                {section.groups.map((group) => (
-                  <Box
-                    key={group.id}
-                    component="article"
-                    background="surface"
-                    className="dq-reviews-view__conflict-group"
-                  >
-                    <Box
-                      slot="content"
-                      className="dq-reviews-view__conflict-group-head"
-                    >
-                      <strong>
-                        {group.entries.length} show{group.entries.length === 1 ? '' : 's'}
-                      </strong>
-                    </Box>
+                {section.groups.map((group) => {
+                  const isIgnoredConflict = ignoredConflictIds.has(group.id);
 
-                    {group.range ? (
+                  return (
+                    <Box
+                      key={group.id}
+                      component="article"
+                      background="surface"
+                      className="dq-reviews-view__conflict-group"
+                    >
                       <Box
-                        className="dq-reviews-view__conflict-time-start"
+                        slot="content"
+                        className="dq-reviews-view__conflict-group-head"
                         direction="row"
-                        justify="flex-start"
+                        justify="space-between"
                         align="center"
+                        gap="var(--dq-ui-space-sm)"
                       >
-                        <time dateTime={new Date(group.range.start).toISOString()}>
-                          {TIME_FORMATTER.format(new Date(group.range.start))}
-                        </time>
+                        <strong>
+                          {group.entries.length} show{group.entries.length === 1 ? '' : 's'}
+                        </strong>
                       </Box>
-                    ) : null}
 
-                    <Box
-                      className="dq-reviews-view__conflict-timeline"
-                      gap="0"
-                    >
-                      {group.entries.map((entry) => {
-                        const stageTheme = getStageTheme(entry.stage);
-                        const entryColor = entry.stageColor ?? stageTheme.accent;
+                      {group.range ? (
+                        <Box
+                          className="dq-reviews-view__conflict-time-start"
+                          direction="row"
+                          justify="flex-start"
+                          align="center"
+                        >
+                          <time dateTime={new Date(group.range.start).toISOString()}>
+                            {TIME_FORMATTER.format(new Date(group.range.start))}
+                          </time>
+                        </Box>
+                      ) : null}
 
-                        return (
-                          <Box
-                            key={entry.id}
-                            className="dq-reviews-view__conflict-show"
-                            style={{
-                              '--dq-reviews-conflict-color': entryColor,
-                              '--dq-reviews-conflict-left': `${entry.conflictLeft}%`,
-                              '--dq-reviews-conflict-width': `${entry.conflictWidth}%`,
-                            }}
-                            gap="3px"
-                          >
+                      <Box
+                        className="dq-reviews-view__conflict-timeline"
+                        gap="0"
+                      >
+                        {group.entries.map((entry) => {
+                          const stageTheme = getStageTheme(entry.stage);
+                          const entryColor = entry.stageColor ?? stageTheme.accent;
+
+                          return (
                             <Box
-                              className="dq-timetable-view__entry-content"
-                              gap="0.125rem"
+                              key={entry.id}
+                              className="dq-reviews-view__conflict-show"
+                              style={{
+                                '--dq-reviews-conflict-color': entryColor,
+                                '--dq-reviews-conflict-left': `${entry.conflictLeft}%`,
+                                '--dq-reviews-conflict-width': `${entry.conflictWidth}%`,
+                              }}
+                              gap="3px"
                             >
-                              <span className="dq-timetable-view__entry-name">
-                                {getEntryDisplayName(entry)}
-                              </span>
-                              <span className="dq-timetable-view__entry-time">
-                                <span>{getEntryDayLabel(entry)}</span>
-                                <span>{entry.stage}</span>
-                                <span>{entry.timeLabel ?? formatTimeRange(entry.startAt, entry.endAt)}</span>
-                              </span>
-                              {renderTribeStack(entry)}
+                              <Box
+                                className="dq-timetable-view__entry-content"
+                                gap="0.125rem"
+                              >
+                                <span className="dq-timetable-view__entry-name">
+                                  {getEntryDisplayName(entry)}
+                                </span>
+                                <span className="dq-timetable-view__entry-time">
+                                  <span>{getEntryDayLabel(entry)}</span>
+                                  <span>{entry.stage}</span>
+                                  <span>{getEntryTimeLabel(entry)}</span>
+                                </span>
+                                {renderTribeStack(entry)}
+                              </Box>
+
+                              {canManageFavorites ? (
+                                <ToggleButton
+                                  className="dq-timetable-view__favorite"
+                                  variant="likes"
+                                  icon={HeartIcon}
+                                  size="sm"
+                                  radius="rounded"
+                                  pressed
+                                  fillOnPress
+                                  ariaLabel="Remove favorite"
+                                  onPressedChange={() => toggleFavorite?.(entry.id)}
+                                />
+                              ) : null}
                             </Box>
-
-                            {canManageFavorites ? (
-                              <ToggleButton
-                                className="dq-timetable-view__favorite"
-                                variant="likes"
-                                icon={HeartIcon}
-                                size="sm"
-                                radius="rounded"
-                                pressed
-                                fillOnPress
-                                ariaLabel="Remove favorite"
-                                onPressedChange={() => toggleFavorite?.(entry.id)}
-                              />
-                            ) : null}
-                          </Box>
-                        );
-                      })}
-                    </Box>
-
-                    {group.range ? (
-                      <Box
-                        className="dq-reviews-view__conflict-time-end"
-                        direction="row"
-                        justify="flex-end"
-                        align="center"
-                      >
-                        <time dateTime={new Date(group.range.end).toISOString()}>
-                          {TIME_FORMATTER.format(new Date(group.range.end))}
-                        </time>
+                          );
+                        })}
                       </Box>
-                    ) : null}
 
-                    <Button
-                      className="dq-reviews-view__show-conflict-button"
-                      icon={ArrowRightIcon}
-                      iconPosition="end"
-                      radius="rounded"
-                      variant="ghost"
-                      onClick={() => onOpenTimetableConflicts?.(section.label)}
-                    >
-                      Show conflict
-                    </Button>
-                  </Box>
-                ))}
+                      {group.range ? (
+                        <Box
+                          className="dq-reviews-view__conflict-time-end"
+                          direction="row"
+                          justify="flex-end"
+                          align="center"
+                        >
+                          <time dateTime={new Date(group.range.end).toISOString()}>
+                            {TIME_FORMATTER.format(new Date(group.range.end))}
+                          </time>
+                        </Box>
+                      ) : null}
+
+                      <Box
+                        className="dq-reviews-view__conflict-actions"
+                        direction="row"
+                        wrap="wrap"
+                        gap="var(--dq-ui-space-sm)"
+                      >
+                        <Button
+                          icon={ArrowRightIcon}
+                          iconPosition="end"
+                          radius="rounded"
+                          variant="ghost"
+                          onClick={() => onOpenTimetableConflicts?.(section.label)}
+                        >
+                          Show conflict
+                        </Button>
+                        {!isIgnoredConflict ? (
+                          <Button
+                            radius="rounded"
+                            variant="ghost"
+                            onClick={() => onIgnoreConflict?.(group.id)}
+                          >
+                            Ignore
+                          </Button>
+                        ): null}
+                      </Box>
+                    </Box>
+                  );
+                })}
               </Box>
             ),
           }))}
         />
+      ) : null}
+
+      {hasActiveTimetableConflicts && ignoredConflictCount > 0 ? (
+        <Box className="dq-reviews-view__ignored-toggle" align="center">
+          <Button
+            radius="rounded"
+            variant="ghost"
+            onClick={() => setShouldShowIgnoredConflicts((currentValue) => !currentValue)}
+          >
+            {shouldShowIgnoredConflicts ? 'Hide ignored conflicts' : 'Show ignored conflicts'}
+          </Button>
+        </Box>
       ) : null}
 
       <Drawer

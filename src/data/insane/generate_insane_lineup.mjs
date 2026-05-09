@@ -414,33 +414,6 @@ function compareStages(leftStage, rightStage) {
   return String(leftStage.stageName ?? '').localeCompare(String(rightStage.stageName ?? ''));
 }
 
-function getDayDateRange(stages) {
-  const timestamps = stages.reduce(
-    (range, stage) => {
-      stage.artists.forEach((artist) => {
-        const startTimestamp = artist.startAt ? new Date(artist.startAt).getTime() : Number.NaN;
-        const endTimestamp = artist.endAt ? new Date(artist.endAt).getTime() : Number.NaN;
-
-        if (!Number.isNaN(startTimestamp)) {
-          range.start = Math.min(range.start, startTimestamp);
-        }
-
-        if (!Number.isNaN(endTimestamp)) {
-          range.end = Math.max(range.end, endTimestamp);
-        }
-      });
-
-      return range;
-    },
-    { start: Number.POSITIVE_INFINITY, end: Number.NEGATIVE_INFINITY }
-  );
-
-  return {
-    dayStart: Number.isFinite(timestamps.start) ? new Date(timestamps.start).toISOString() : null,
-    dayEnd: Number.isFinite(timestamps.end) ? new Date(timestamps.end).toISOString() : null,
-  };
-}
-
 function normalizeChapiStageName(stageName) {
   return String(stageName ?? '').trim().toUpperCase();
 }
@@ -649,14 +622,11 @@ function normalizeLineupForOutput(lineup) {
         artistTokens: artist.artistTokens,
       })),
     }));
-    const { dayStart, dayEnd } = getDayDateRange(stages);
-
     return {
       daySlug: day.daySlug,
       dayOrder: day.dayOrder,
       dayName: day.dayName,
-      dayStart,
-      dayEnd,
+      dayStartDate: day.dayStartDate ?? null,
       stages,
     };
   });
