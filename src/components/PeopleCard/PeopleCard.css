@@ -26,6 +26,13 @@
   flex: 1 1 auto;
 }
 
+.dq-people-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .dq-people-card__name {
   margin: 0;
   display: block;
@@ -38,7 +45,8 @@
   text-overflow: ellipsis;
 }
 
-.dq-people-card__handle {
+.dq-people-card__handle,
+.dq-people-card__meta {
   display: block;
   color: var(--dq-ui-text-soft);
   margin-top: 1px;
@@ -51,8 +59,11 @@
 
 .dq-people-card__owner {
   flex: 0 0 auto;
-  margin-inline-start: auto;
   --dq-ui-badge-bg: rgba(255, 255, 255, 0.08);
   --dq-ui-badge-border: var(--dq-ui-border-subtle);
   --dq-ui-badge-text: var(--dq-ui-text-soft-strong);
+}
+
+.dq-people-card__end-slot {
+  flex: 0 0 auto;
 }

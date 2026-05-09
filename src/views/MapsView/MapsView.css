@@ -34,6 +34,75 @@
   z-index: 2;
 }
 
+.dq-maps-view__tribe-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.dq-maps-view__tribe-marker {
+  position: absolute;
+  top: var(--dq-maps-marker-y);
+  left: var(--dq-maps-marker-x);
+  display: grid;
+  place-items: start center;
+  width: 34px;
+  height: 46px;
+  padding: 3px 3px 15px;
+  border: 0;
+  background: transparent;
+  color: var(--dq-ui-text);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translate(-50%, -100%);
+}
+
+.dq-maps-view__tribe-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #050505;
+  clip-path: path("m17.74 0.39a16.27 15.79 0 0 0-16.83 12.57 16.27 15.79 0 0 0-0.29 3.68c-0.47 8.59 6.33 16.49 12.62 24.81 1.52 1.88 3.65 3.94 3.75 4.19l3.42-4.01c7.78-10.09 19.14-24.82 9.02-35.48a16.27 15.79 0 0 0-9.39-5.48 16.27 15.79 0 0 0-2.29-0.28z");
+}
+
+.dq-maps-view__tribe-marker--self {
+  background: transparent;
+}
+
+.dq-maps-view__tribe-marker-avatar {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.dq-maps-view__tribe-marker-count {
+  position: absolute;
+  right: -7px;
+  top: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid #050505;
+  border-radius: 999px;
+  background: var(--dq-ui-primary);
+  color: var(--dq-ui-on-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  z-index: 2;
+}
+
+.dq-maps-view__tribe-person-card {
+  min-width: 0;
+  width: 100%;
+}
+
 .dq-maps-view__zoom-button {
   --dq-ui-button-bg: var(--dq-ui-background-blur-surface);
   --dq-ui-button-hover-bg: var(--dq-ui-background-blur-surface-hover);
@@ -152,4 +221,5 @@
   .dq-maps-view__feature-row dt {
     flex-basis: auto;
   }
+
 }

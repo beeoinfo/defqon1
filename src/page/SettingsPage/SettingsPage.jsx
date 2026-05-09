@@ -12,6 +12,23 @@ import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/li
 import TribePanel from '@/components/TribePanel';
 import './SettingsPage.css';
 
+const formatDateTime = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+};
+
 const SettingsPage = ({
   user,
   profile,
@@ -39,6 +56,8 @@ const SettingsPage = ({
   onJoinTribe,
   onLeaveTribe,
   onRenameTribe,
+  tribeLocations = [],
+  onShowMemberOnMap,
   isAdmin = false,
   pendingLineupCount = 0,
   onOpenPage = null,
@@ -181,6 +200,8 @@ const SettingsPage = ({
         onJoinTribe={onJoinTribe}
         onLeaveTribe={onLeaveTribe}
         onRenameTribe={onRenameTribe}
+        tribeLocations={tribeLocations}
+        onShowMemberOnMap={onShowMemberOnMap}
       />
 
       <Box background="surface" title="App settings">
@@ -201,8 +222,14 @@ const SettingsPage = ({
                     onCheckedChange={() => onSelectLineup?.(lineup.key)}
                     selectedIcon={CheckIcon}
                     tag={lineup.isLatest ? 'Latest' : null}
+                    size="lg"
+                    subtitle={
+                      lineup.lastPublishedAt
+                        ? `Published at: ${formatDateTime(lineup.lastPublishedAt)}`
+                        : ''
+                    }
                   >
-                    {lineup.label}
+                    {lineup.eventEditionName || lineup.label}
                   </ChoiceButton>
                 ))}
               </Box>

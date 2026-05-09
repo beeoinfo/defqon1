@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Alert from '@/components/Alert';
 import FilterBar from '@/components/FilterBar';
 import PeopleCard from '@/components/PeopleCard';
@@ -17,7 +17,6 @@ import {
   getEntryTimeLabel,
 } from '@/lib/lineup';
 import { getCanonicalStageName, getStageTheme } from '@/lib/stageThemes';
-import { activeSite } from '@/sites/siteDefinitions';
 import './LineUpView.css';
 
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
@@ -127,22 +126,22 @@ const LineUpView = ({
   styleTagsByEntryId = new Map(),
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
-  const getFavoriteActionVariant = (isFavorite) => (
+  const getFavoriteActionVariant = useCallback((isFavorite) => (
     canEditLineup ? 'edit' : canToggleFavorites ? 'likes' : isFavorite ? 'liked' : null
-  );
-  const getActionAriaLabel = (entry, isFavorite) => (
+  ), [canEditLineup, canToggleFavorites]);
+  const getActionAriaLabel = useCallback((entry, isFavorite) => (
     canEditLineup
       ? `Edit ${getEntryDisplayName(entry)}`
       : isFavorite ? 'Remove favorite' : 'Add favorite'
-  );
-  const handleEntryAction = (entry) => {
+  ), [canEditLineup]);
+  const handleEntryAction = useCallback((entry) => {
     if (canEditLineup) {
       onEditEntry?.(entry.id);
       return;
     }
 
     toggleFavorite?.(entry.id);
-  };
+  }, [canEditLineup, onEditEntry, toggleFavorite]);
 
   const alternativeEntriesById = useMemo(() => {
     if (showTribeOnly) {
@@ -241,7 +240,9 @@ const LineUpView = ({
                     {stageSection.entries.map((entry) => {
                       const isFavorite = favoriteIdSet.has(entry.id);
                       const relatedSuggestions = isFavorite
-                        ? (alternativeEntriesById.get(entry.id) ?? []).slice(0, 3)
+                        ? (alternativeEntriesById.get(entry.id) ?? [])
+                          .filter((suggestion) => !favoriteIdSet.has(suggestion.id))
+                          .slice(0, 3)
                         : [];
                       const tribeLikes = tribeLikesByEntryId.get(entry.id) ?? [];
                       const tribeLikesFromOthers = tribeLikes.filter((member) => !member.isCurrentUser);
@@ -253,30 +254,20 @@ const LineUpView = ({
                           title={getEntryDisplayName(entry)}
                           underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
                           {...getEntryCardMetaProps(entry)}
-                          actionVariant={getFavoriteActionVariant(isFavorite)}
-                          actionPressed={isFavorite}
-                          actionAriaLabel={getActionAriaLabel(entry, isFavorite)}
-                          onAction={() => handleEntryAction(entry)}
-                        >
-                          {showTribeOnly && tribeLikesFromOthers.length > 0 ? (
-                            <Box gap="var(--dq-ui-space-sm)">
-                              <p
-                                style={{
-                                  margin: 0,
-                                  color: 'var(--dq-ui-text-soft)',
-                                }}
-                              >
-                                {tribeLikesFromOthers.length} member
-                                {tribeLikesFromOthers.length === 1 ? '' : 's'} from your tribe saved this set.
-                              </p>
+                          underMeta={
+                            tribeLikesFromOthers.length > 0 ? (
                               <PeopleStack
                                 avatars={tribeLikesFromOthers}
                                 maxVisible={MAX_VISIBLE_TRIBE_AVATARS}
                                 onClick={() => setSelectedTribeEntry({ entry, likes: tribeLikesFromOthers })}
                               />
-                            </Box>
-                          ) : null}
-
+                            ) : null
+                          }
+                          actionVariant={getFavoriteActionVariant(isFavorite)}
+                          actionPressed={isFavorite}
+                          actionAriaLabel={getActionAriaLabel(entry, isFavorite)}
+                          onAction={() => handleEntryAction(entry)}
+                        >
                           {showTribeOnly && tribeLikes.length > 0 && tribeLikesFromOthers.length === 0 ? (
                             <p className="dq-lineup-view__tribe-note">
                               Only you saved this set in your tribe.
@@ -329,15 +320,14 @@ const LineUpView = ({
       })),
     [
       alternativeEntriesById,
-      canToggleFavorites,
-      canEditLineup,
       daySections,
       favoriteIdSet,
+      getActionAriaLabel,
+      getFavoriteActionVariant,
+      handleEntryAction,
       showTribeOnly,
       showStyleTags,
       styleTagsByEntryId,
-      toggleFavorite,
-      onEditEntry,
       tribeLikesByEntryId,
     ]
   );

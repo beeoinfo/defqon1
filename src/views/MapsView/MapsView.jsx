@@ -1,7 +1,9 @@
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { CrosshairIcon, MinusIcon, PlusIcon, WarningIcon } from '@phosphor-icons/react';
+import { CrosshairIcon, MinusIcon, PlusIcon, TrashIcon, WarningIcon } from '@phosphor-icons/react';
 import FilterBar from '@/components/FilterBar';
 import Box from '@/components/layout/Box';
+import Drawer from '@/components/layout/Drawer';
+import PeopleCard from '@/components/PeopleCard';
 import Button from '@/components/primitives/Button';
 import './MapsView.css';
 
@@ -12,6 +14,11 @@ const MAPBOX_DEFAULT_CENTER = [5.752004901493724, 52.436729962158665];
 const MAPBOX_DEFAULT_ZOOM = 16;
 const MAPBOX_DEFAULT_BEARING = -36;
 const FEATURE_POPOVER_TIMEOUT_MS = 3000;
+const LONG_PRESS_DELAY_MS = 700;
+const LONG_PRESS_MOVE_TOLERANCE_PX = 2;
+const TRIBE_LOCATION_CLUSTER_DISTANCE_PX = 46;
+const TRIBE_LOCATION_DROP_OFFSET_Y = 15;
+const TRIBE_LOCATION_FOCUS_ZOOM_OFFSET = 2.5;
 
 let mapboxGlLoaderPromise = null;
 const styleDefinitionCache = new Map();
@@ -331,11 +338,22 @@ const getFeatureInfo = (feature) => {
 };
 
 const getInteractiveFeatureAtPoint = (map, point) => {
+  if (!map || !point || !map.isStyleLoaded?.()) {
+    return null;
+  }
+
   const hitbox = [
     [point.x - 12, point.y - 12],
     [point.x + 12, point.y + 12],
   ];
-  const features = map.queryRenderedFeatures(hitbox) ?? [];
+  let features = [];
+
+  try {
+    features = map.queryRenderedFeatures(hitbox) ?? [];
+  } catch {
+    return null;
+  }
+
   const candidates = features
     .map((feature) => ({
       feature,
@@ -372,6 +390,93 @@ const getFeatureCardPosition = (map, point, cardSize = {}) => {
   return { x, y };
 };
 
+const getTribeLocationGroups = (map, tribeLocations) => {
+  if (!map || !Array.isArray(tribeLocations) || tribeLocations.length === 0) {
+    return [];
+  }
+
+  const groups = [];
+
+  tribeLocations.forEach((location) => {
+    const point = map.project([location.longitude, location.latitude]);
+    const existingGroup = groups.find((group) => {
+      const distance = Math.hypot(group.x - point.x, group.y - point.y);
+      return distance <= TRIBE_LOCATION_CLUSTER_DISTANCE_PX;
+    });
+
+    if (existingGroup) {
+      existingGroup.locations.push(location);
+      existingGroup.x = (existingGroup.x + point.x) / 2;
+      existingGroup.y = (existingGroup.y + point.y) / 2;
+      return;
+    }
+
+    groups.push({
+      id: location.userId,
+      x: point.x,
+      y: point.y,
+      locations: [location],
+    });
+  });
+
+  return groups.map((group) => ({
+    ...group,
+    id: group.locations.map((location) => location.userId).sort().join(':'),
+  }));
+};
+
+const formatLocationUpdatedAt = (value) => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(date);
+};
+
+const isPrimaryMouseLongPressEvent = (event) => {
+  const originalEvent = event?.originalEvent;
+
+  if (!originalEvent || originalEvent.type !== 'mousedown') {
+    return false;
+  }
+
+  return originalEvent.button === 0 && (originalEvent.buttons === undefined || originalEvent.buttons === 1);
+};
+
+const isSingleTouchLongPressEvent = (event) => {
+  const originalEvent = event?.originalEvent;
+
+  if (!originalEvent || originalEvent.type !== 'touchstart') {
+    return false;
+  }
+
+  return originalEvent.touches?.length === 1;
+};
+
+const isLongPressStartEventAllowed = (event) => (
+  isPrimaryMouseLongPressEvent(event) || isSingleTouchLongPressEvent(event)
+);
+
+const hasInvalidLongPressMoveEvent = (event, start) => {
+  const originalEvent = event?.originalEvent;
+
+  if (!originalEvent) {
+    return true;
+  }
+
+  if (start.kind === 'touch') {
+    return originalEvent.type !== 'touchmove' || originalEvent.touches?.length !== 1;
+  }
+
+  return originalEvent.type !== 'mousemove' || originalEvent.buttons !== 1;
+};
+
 const normalizeStyleDefinition = (styleDefinition, owner, styleId, layer) => {
   const nextStyleDefinition = cloneStyleDefinition(styleDefinition);
   const spriteValue = String(nextStyleDefinition.sprite ?? '').trim();
@@ -385,7 +490,8 @@ const normalizeStyleDefinition = (styleDefinition, owner, styleId, layer) => {
 
   if (Array.isArray(nextStyleDefinition.layers)) {
     nextStyleDefinition.layers = nextStyleDefinition.layers.map((styleLayer) => {
-      const { scope, ...nextStyleLayer } = styleLayer;
+      const nextStyleLayer = { ...styleLayer };
+      delete nextStyleLayer.scope;
       return nextStyleLayer;
     });
   }
@@ -503,14 +609,30 @@ const focusMapOnLayer = (map, layer, animate = true) => {
   });
 };
 
-const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
+const MapsView = ({
+  mapLayers = [],
+  selectedDay = '',
+  tribeLocations = [],
+  currentUserId = null,
+  focusTribeLocationUserId = null,
+  onFocusTribeLocationHandled,
+  onSetTribeLocation,
+  onRemoveTribeLocation,
+}) => {
   const [selectedLayerId, setSelectedLayerId] = useState(
     () => getDefaultMapLayerId(mapLayers, selectedDay)
   );
   const [viewerState, setViewerState] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedFeature, setSelectedFeature] = useState(null);
+  const [tribeLocationGroups, setTribeLocationGroups] = useState([]);
+  const [selectedTribeLocationGroup, setSelectedTribeLocationGroup] = useState(null);
+  const [locationErrorMessage, setLocationErrorMessage] = useState('');
   const featurePopoverTimeoutRef = useRef(0);
+  const longPressTimeoutRef = useRef(0);
+  const longPressStartRef = useRef(null);
+  const shouldIgnoreNextMapClickRef = useRef(false);
+  const tribeLocationGroupsSignatureRef = useRef('');
   const featureCardRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -518,7 +640,10 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
   const isMapReadyRef = useRef(false);
   const pendingStyleRequestIdRef = useRef(0);
 
-  const activeLayer = mapLayers.find((layer) => layer.id === selectedLayerId) ?? mapLayers[0] ?? null;
+  const resolvedSelectedLayerId = mapLayers.some((layer) => layer.id === selectedLayerId)
+    ? selectedLayerId
+    : getDefaultMapLayerId(mapLayers, selectedDay);
+  const activeLayer = mapLayers.find((layer) => layer.id === resolvedSelectedLayerId) ?? mapLayers[0] ?? null;
   const { owner: activeOwner } = parseMapboxStyleUrl(activeLayer?.styleUrl);
   const isActiveImageLayer = isImageMapLayer(activeLayer);
 
@@ -544,6 +669,92 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
       setSelectedFeature(null);
     }, FEATURE_POPOVER_TIMEOUT_MS);
   };
+
+  const updateTribeLocationGroups = useEffectEvent(() => {
+    const map = mapRef.current;
+    const nextGroups = getTribeLocationGroups(map, tribeLocations);
+    const nextSignature = nextGroups
+      .map((group) => `${group.id}:${Math.round(group.x)}:${Math.round(group.y)}`)
+      .join('|');
+
+    if (nextSignature === tribeLocationGroupsSignatureRef.current) {
+      return;
+    }
+
+    tribeLocationGroupsSignatureRef.current = nextSignature;
+    setTribeLocationGroups(nextGroups);
+  });
+
+  const clearLongPress = () => {
+    window.clearTimeout(longPressTimeoutRef.current);
+    longPressTimeoutRef.current = 0;
+    longPressStartRef.current = null;
+  };
+
+  const handleLongPressStart = useEffectEvent((event) => {
+    if (!isLongPressStartEventAllowed(event)) {
+      clearLongPress();
+      return;
+    }
+
+    if (!event?.lngLat || !event?.point) {
+      return;
+    }
+
+    clearLongPress();
+    longPressStartRef.current = {
+      point: event.point,
+      lngLat: event.lngLat,
+      kind: event.originalEvent.type === 'touchstart' ? 'touch' : 'mouse',
+    };
+    longPressTimeoutRef.current = window.setTimeout(() => {
+      const start = longPressStartRef.current;
+
+      if (!start) {
+        return;
+      }
+
+      clearFeaturePopover();
+      setLocationErrorMessage('');
+      shouldIgnoreNextMapClickRef.current = true;
+      const map = mapRef.current;
+      const droppedLngLat = map?.unproject
+        ? map.unproject({
+            x: start.point.x,
+            y: start.point.y + TRIBE_LOCATION_DROP_OFFSET_Y,
+          })
+        : start.lngLat;
+
+      Promise.resolve(onSetTribeLocation?.({
+        longitude: droppedLngLat.lng,
+        latitude: droppedLngLat.lat,
+      })).catch((error) => {
+        setLocationErrorMessage(
+          error instanceof Error ? error.message : 'Could not share this map position.'
+        );
+      });
+      clearLongPress();
+    }, LONG_PRESS_DELAY_MS);
+  });
+
+  const handleLongPressMove = useEffectEvent((event) => {
+    const start = longPressStartRef.current;
+
+    if (!start || !event?.point) {
+      return;
+    }
+
+    if (hasInvalidLongPressMoveEvent(event, start)) {
+      clearLongPress();
+      return;
+    }
+
+    const distance = Math.hypot(event.point.x - start.point.x, event.point.y - start.point.y);
+
+    if (distance > LONG_PRESS_MOVE_TOLERANCE_PX) {
+      clearLongPress();
+    }
+  });
 
   useLayoutEffect(() => {
     const map = mapRef.current;
@@ -621,6 +832,7 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
           currentStyleUrlRef.current = activeStyleKey;
           focusMapOnLayer(map, activeLayer, animate);
           clearFeaturePopover();
+          updateTribeLocationGroups();
           setViewerState('ready');
         });
 
@@ -637,17 +849,6 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
         setViewerState('error');
       });
   });
-
-  useEffect(() => {
-    if (!mapLayers.length) {
-      setSelectedLayerId('');
-      return;
-    }
-
-    if (!mapLayers.some((layer) => layer.id === selectedLayerId)) {
-      setSelectedLayerId(getDefaultMapLayerId(mapLayers, selectedDay));
-    }
-  }, [mapLayers, selectedDay, selectedLayerId]);
 
   useEffect(() => {
     if (!activeLayer || !mapContainerRef.current || mapRef.current) {
@@ -714,16 +915,33 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
 
               isMapReadyRef.current = true;
               focusMapOnLayer(map, activeLayer, false);
+              updateTribeLocationGroups();
               setViewerState('ready');
             });
 
             map.on('click', (event) => {
+              if (shouldIgnoreNextMapClickRef.current) {
+                shouldIgnoreNextMapClickRef.current = false;
+                return;
+              }
+
               const feature = getInteractiveFeatureAtPoint(map, event.point);
 
               if (feature) {
                 showFeaturePopover(feature, event.point);
               }
             });
+
+            map.on('mousedown', handleLongPressStart);
+            map.on('touchstart', handleLongPressStart);
+            map.on('mousemove', handleLongPressMove);
+            map.on('touchmove', handleLongPressMove);
+            map.on('mouseup', clearLongPress);
+            map.on('touchend', clearLongPress);
+            map.on('touchcancel', clearLongPress);
+            map.on('dragstart', clearLongPress);
+            map.on('move', updateTribeLocationGroups);
+            map.on('zoom', updateTribeLocationGroups);
 
             map.on('mousemove', (event) => {
               const feature = getInteractiveFeatureAtPoint(map, event.point);
@@ -762,6 +980,7 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
               }
 
               mapRef.current.resize();
+              updateTribeLocationGroups();
             };
 
             window.addEventListener('resize', resizeHandler);
@@ -801,6 +1020,7 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
       }
 
       window.clearTimeout(featurePopoverTimeoutRef.current);
+      clearLongPress();
       currentStyleUrlRef.current = '';
     };
   }, [activeLayer, activeOwner, isActiveImageLayer]);
@@ -812,6 +1032,44 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
 
     syncActiveLayer(true);
   }, [activeLayer]);
+
+  useEffect(() => {
+    updateTribeLocationGroups();
+  }, [tribeLocations]);
+
+  useEffect(() => {
+    if (!focusTribeLocationUserId || !isMapReadyRef.current || tribeLocationGroups.length === 0) {
+      return;
+    }
+
+    const targetGroup = tribeLocationGroups.find((group) =>
+      group.locations.some((location) => location.userId === focusTribeLocationUserId)
+    );
+    const targetLocation = targetGroup?.locations.find(
+      (location) => location.userId === focusTribeLocationUserId
+    );
+
+    if (!targetGroup || !targetLocation || !mapRef.current) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const baseZoom = Number(activeLayer?.view?.zoom ?? (isActiveImageLayer ? 8 : MAPBOX_DEFAULT_ZOOM));
+      const targetZoom = Math.max(mapRef.current?.getZoom() ?? baseZoom, baseZoom + TRIBE_LOCATION_FOCUS_ZOOM_OFFSET);
+
+      clearFeaturePopover();
+      setSelectedTribeLocationGroup(targetGroup);
+      mapRef.current?.easeTo({
+        center: [targetLocation.longitude, targetLocation.latitude],
+        zoom: targetZoom,
+        duration: 650,
+        essential: true,
+      });
+      onFocusTribeLocationHandled?.();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeLayer, focusTribeLocationUserId, isActiveImageLayer, onFocusTribeLocationHandled, tribeLocationGroups]);
 
   if (!mapLayers.length) {
     return null;
@@ -846,6 +1104,48 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
       />
 
       <Box className="dq-maps-view__shade" aria-hidden="true" />
+
+      <Box className="dq-maps-view__tribe-layer" aria-label="Tribe map positions">
+        {tribeLocationGroups.map((group) => {
+          const primaryLocation = group.locations.find((location) => location.isCurrentUser) ?? group.locations[0];
+          const groupLabel = group.locations.length === 1
+            ? `${primaryLocation.displayName} position`
+            : `${group.locations.length} tribe members nearby`;
+
+          return (
+            <button
+              key={group.id}
+              type="button"
+              className={[
+                'dq-maps-view__tribe-marker',
+                primaryLocation.isCurrentUser ? 'dq-maps-view__tribe-marker--self' : '',
+                group.locations.length > 1 ? 'dq-maps-view__tribe-marker--group' : '',
+              ].filter(Boolean).join(' ')}
+              style={{
+                '--dq-maps-marker-x': `${group.x}px`,
+                '--dq-maps-marker-y': `${group.y}px`,
+              }}
+              aria-label={groupLabel}
+              title={groupLabel}
+              onClick={() => {
+                clearFeaturePopover();
+                setSelectedTribeLocationGroup(group);
+              }}
+            >
+              <img
+                src={primaryLocation.avatarUrl}
+                alt=""
+                className="dq-maps-view__tribe-marker-avatar"
+              />
+              {group.locations.length > 1 ? (
+                <span className="dq-maps-view__tribe-marker-count">
+                  {group.locations.length}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </Box>
 
       <Box className="dq-maps-view__controls" gap="var(--dq-ui-space-xs)">
         <Button
@@ -949,6 +1249,68 @@ const MapsView = ({ mapLayers = [], selectedDay = '' }) => {
           </Box>
         </Box>
       ) : null}
+
+      {locationErrorMessage ? (
+        <Box
+          className="dq-maps-view__status dq-maps-view__status--error"
+          direction="row"
+          align="center"
+          role="status"
+          aria-live="polite"
+        >
+          <WarningIcon size={18} />
+          <Box gap="0">
+            <strong>Position not shared</strong>
+            <p>{locationErrorMessage}</p>
+          </Box>
+        </Box>
+      ) : null}
+
+      <Drawer
+        open={Boolean(selectedTribeLocationGroup)}
+        onClose={() => setSelectedTribeLocationGroup(null)}
+        title="Shared map position"
+        subtitle={
+          selectedTribeLocationGroup?.locations.length > 1
+            ? `${selectedTribeLocationGroup.locations.length} positions in this area`
+            : ''
+        }
+        ariaLabel="Tribe map position details"
+        maxWidth="520px"
+      >
+        <Box gap="var(--dq-ui-space-md)">
+          {(selectedTribeLocationGroup?.locations ?? []).map((location) => (
+            <PeopleCard
+              key={location.userId}
+              className="dq-maps-view__tribe-person-card"
+              avatarSrc={location.avatarUrl}
+              avatarAlt={location.displayName}
+              name={location.displayName}
+              handle={location.username ? `@${location.username}` : 'Profile unavailable'}
+              meta={location.updatedAt ? `Updated ${formatLocationUpdatedAt(location.updatedAt)}` : null}
+              endSlot={
+                location.userId === currentUserId ? (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    icon={TrashIcon}
+                    ariaLabel="Remove my shared position"
+                    onClick={() => {
+                      Promise.resolve(onRemoveTribeLocation?.())
+                        .then(() => setSelectedTribeLocationGroup(null))
+                        .catch((error) => {
+                          setLocationErrorMessage(
+                            error instanceof Error ? error.message : 'Could not remove your map position.'
+                          );
+                      });
+                    }}
+                  />
+                ) : null
+              }
+            />
+          ))}
+        </Box>
+      </Drawer>
     </Box>
   );
 };

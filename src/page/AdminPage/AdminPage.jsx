@@ -48,10 +48,16 @@ const formatDateTime = (value) => {
     return 'Never';
   }
 
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'Never';
+  }
+
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(value));
+  }).format(date);
 };
 
 const formatLineupStatus = (status) => {
@@ -74,12 +80,26 @@ const formatLineupStatus = (status) => {
   return 'Archived';
 };
 
-const getLineupTitle = (lineup) => (
-  lineup.payload?.updatedAt ||
-  lineup.sourceUpdatedAt ||
-  lineup.activatedAt ||
-  lineup.importedAt ||
-  lineup.createdAt
+const getLineupEventEditionName = (lineup) => (
+  lineup.payload?.eventEditionName ||
+  lineup.versionLabel ||
+  activeSite.name ||
+  'Lineup'
+);
+
+const getLineupPayloadUpdatedAt = (lineup) => lineup.payload?.updatedAt ?? null;
+
+const getLineupTitle = (lineup) => {
+  const payloadUpdatedAt = getLineupPayloadUpdatedAt(lineup);
+  const title = getLineupEventEditionName(lineup);
+
+  return payloadUpdatedAt
+    ? `${title} (${formatDateTime(payloadUpdatedAt)})`
+    : title;
+};
+
+const getLineupPublishedMeta = (lineup) => (
+  lineup.activatedAt ? `Published at: ${formatDateTime(lineup.activatedAt)}` : ''
 );
 
 const getLineupHashLabel = (lineup) => lineup.payloadHash.slice(0, 12);
@@ -406,7 +426,7 @@ const AdminPage = ({
               <Box gap="var(--dq-ui-space-xs)">
                 <Box direction="row" align="center" wrap="wrap" gap="var(--dq-ui-space-sm)">
                   <strong className="dq-admin-page__lineup-title">
-                    {formatDateTime(getLineupTitle(lineup))}
+                    {getLineupTitle(lineup)}
                   </strong>
                   <Badge
                     size="sm"
@@ -437,9 +457,11 @@ const AdminPage = ({
                     {formatLineupStatus(lineup.status)}
                   </Badge>
                 </Box>
-                <span className="dq-admin-page__lineup-hash">
-                  {getLineupHashLabel(lineup)}
-                </span>
+                {getLineupPublishedMeta(lineup) ? (
+                  <span className="dq-admin-page__lineup-meta">
+                    {getLineupPublishedMeta(lineup)}
+                  </span>
+                ) : null}
               </Box>
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
                 {lineup.status === 'temp' ? (
@@ -596,7 +618,7 @@ const AdminPage = ({
         open={Boolean(lineupToDelete)}
         onClose={() => setLineupToDelete(null)}
         title="Delete lineup?"
-        subtitle={lineupToDelete ? `${formatDateTime(getLineupTitle(lineupToDelete))} - ${getLineupHashLabel(lineupToDelete)}` : ''}
+        subtitle={lineupToDelete ? getLineupTitle(lineupToDelete) : ''}
         controls={(
           <>
             <Button variant="ghost" onClick={() => setLineupToDelete(null)} disabled={isBusy}>

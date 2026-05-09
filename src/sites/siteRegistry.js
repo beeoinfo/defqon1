@@ -30,7 +30,7 @@ export const SITE_REGISTRY = {
     slug: 'insane',
     name: 'Insane',
     assets: {
-      logo: 'LOGO_2026_INSANE-150x150.png',
+      logo: 'LOGO_2026_INSANE-256x256.png',
       favicon: 'favicon.ico',
     },
     theme: {

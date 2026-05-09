@@ -836,6 +836,142 @@ export async function loadTribeBundle(userId) {
   };
 }
 
+function normalizeTribeLocationRow(row) {
+  return {
+    tribeId: row.tribe_id,
+    userId: row.user_id,
+    siteSlug: row.site_slug,
+    longitude: Number(row.longitude),
+    latitude: Number(row.latitude),
+    label: row.label ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function loadTribeMemberLocations({ tribeId, siteSlug = ACTIVE_SITE_SLUG }) {
+  const client = ensureSupabase();
+
+  if (!tribeId) {
+    return [];
+  }
+
+  const { data, error } = await client
+    .from('tribe_member_locations')
+    .select('*')
+    .eq('tribe_id', tribeId)
+    .eq('site_slug', siteSlug);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map(normalizeTribeLocationRow);
+}
+
+export async function upsertCurrentUserTribeLocation({
+  tribeId,
+  userId,
+  longitude,
+  latitude,
+  label = null,
+  siteSlug = ACTIVE_SITE_SLUG,
+}) {
+  const client = ensureSupabase();
+  const nextLongitude = Number(longitude);
+  const nextLatitude = Number(latitude);
+
+  if (!tribeId || !userId) {
+    throw new Error('A tribe is required to share a map position.');
+  }
+
+  if (
+    !Number.isFinite(nextLongitude) ||
+    !Number.isFinite(nextLatitude) ||
+    nextLongitude < -180 ||
+    nextLongitude > 180 ||
+    nextLatitude < -90 ||
+    nextLatitude > 90
+  ) {
+    throw new Error('The selected map position is invalid.');
+  }
+
+  const { data, error } = await client
+    .from('tribe_member_locations')
+    .upsert({
+      tribe_id: tribeId,
+      user_id: userId,
+      site_slug: siteSlug,
+      longitude: nextLongitude,
+      latitude: nextLatitude,
+      label: label ? String(label).trim().slice(0, 80) : null,
+    }, { onConflict: 'tribe_id,user_id,site_slug' })
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? normalizeTribeLocationRow(data) : null;
+}
+
+export async function deleteCurrentUserTribeLocation({
+  tribeId,
+  userId,
+  siteSlug = ACTIVE_SITE_SLUG,
+}) {
+  const client = ensureSupabase();
+
+  if (!tribeId || !userId) {
+    return;
+  }
+
+  const { error } = await client
+    .from('tribe_member_locations')
+    .delete()
+    .eq('tribe_id', tribeId)
+    .eq('user_id', userId)
+    .eq('site_slug', siteSlug);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export function subscribeToTribeMemberLocations({
+  tribeId,
+  onChange,
+  siteSlug = ACTIVE_SITE_SLUG,
+}) {
+  if (!supabase || !tribeId) {
+    return null;
+  }
+
+  const channel = supabase
+    .channel(`tribe-member-locations:${siteSlug}:${tribeId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'tribe_member_locations',
+        filter: `tribe_id=eq.${tribeId}`,
+      },
+      (payload) => {
+        if (
+          payload?.new?.site_slug === siteSlug ||
+          payload?.old?.site_slug === siteSlug
+        ) {
+          onChange?.(payload);
+        }
+      }
+    )
+    .subscribe();
+
+  return channel;
+}
+
 export async function updateCurrentUserTribeName({ tribeId, name }) {
   const client = ensureSupabase();
   const user = await getCurrentUser();

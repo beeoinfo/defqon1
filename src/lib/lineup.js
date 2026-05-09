@@ -28,6 +28,7 @@ const DAY_ORDERS = {
 const DEFAULT_FESTIVAL_DAY_START_HOUR = 6;
 const DEFAULT_FESTIVAL_DAY_END_HOUR = 6;
 const INSANE_SCHEDULE_ID_SUFFIX_PATTERN = /_\d{14,17}$/;
+const REVIEW_SUGGESTION_FAVORITE_KEY_SUFFIX = ':review-suggestion';
 const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
@@ -138,7 +139,7 @@ function dedupeBy(items, getKey) {
   });
 }
 
-function getStableEntryId(entryId) {
+export function getStableEntryId(entryId) {
   const value = String(entryId ?? '');
 
   if (activeSite.slug !== 'insane') {
@@ -151,6 +152,10 @@ function getStableEntryId(entryId) {
 function getFavoriteKeyFromEntryId(entryId) {
   const stableEntryId = getStableEntryId(entryId);
   return stableEntryId ? `fav:${stableEntryId}` : null;
+}
+
+function isReviewSuggestionFavoriteKey(favoriteKey) {
+  return String(favoriteKey ?? '').endsWith(REVIEW_SUGGESTION_FAVORITE_KEY_SUFFIX);
 }
 
 function buildCurrentEntriesById(entries) {
@@ -694,10 +699,22 @@ export function reconcileFavoriteItemsWithEntries(entries, favoriteItems) {
     const currentEntry = currentEntriesById.get(favoriteEntryId);
     const hasMigratedEntryId = favorite.id !== currentEntry.id;
     const hasMigratedFavoriteKey = favorite.favoriteKey !== getFavoriteKeyFromEntryId(currentEntry.id);
+    const hasReviewSuggestionFavoriteKey = isReviewSuggestionFavoriteKey(favorite.favoriteKey);
     const missingStageColor = !favorite.stageColor && currentEntry.stageColor;
     const missingArtistTokens = !Array.isArray(favorite.artistTokens) || favorite.artistTokens.length === 0;
 
-    if (hasMigratedEntryId || hasMigratedFavoriteKey) {
+    if (
+      hasReviewSuggestionFavoriteKey &&
+      (hasMigratedEntryId || missingStageColor || missingArtistTokens)
+    ) {
+      didChange = true;
+      return buildSnapshotFromEntry(currentEntry, {
+        favoriteKey: favorite.favoriteKey,
+        savedAt: favorite.savedAt,
+      });
+    }
+
+    if (hasMigratedEntryId || (hasMigratedFavoriteKey && !hasReviewSuggestionFavoriteKey)) {
       didChange = true;
       return buildSnapshotFromEntry(currentEntry, {
         savedAt: favorite.savedAt,
@@ -743,12 +760,23 @@ export function upsertFavoriteEntry(favoriteItems, entry) {
   return [...filteredItems, nextSnapshot];
 }
 
-function getReviewSuggestionFavoriteKey(snapshot, reviewFavorite) {
-  if (reviewFavorite?.favoriteKey && reviewFavorite.favoriteKey === snapshot.favoriteKey) {
-    return `${snapshot.favoriteKey}:review-suggestion`;
+export function getReviewSuggestionFavoriteKey(snapshot, reviewFavorite) {
+  const snapshotFavoriteKey = snapshot?.favoriteKey ?? buildFavoriteKeyFromSnapshot(snapshot ?? {});
+  const reviewFavoriteStableKey = reviewFavorite?.id
+    ? getFavoriteKeyFromEntryId(reviewFavorite.id)
+    : null;
+
+  if (
+    snapshotFavoriteKey &&
+    (
+      reviewFavorite?.favoriteKey === snapshotFavoriteKey ||
+      reviewFavoriteStableKey === snapshotFavoriteKey
+    )
+  ) {
+    return `${snapshotFavoriteKey}${REVIEW_SUGGESTION_FAVORITE_KEY_SUFFIX}`;
   }
 
-  return snapshot.favoriteKey;
+  return snapshotFavoriteKey;
 }
 
 export function toggleReviewSuggestionFavorite(favoriteItems, entry, reviewFavorite) {

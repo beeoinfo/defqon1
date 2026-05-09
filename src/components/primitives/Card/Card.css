@@ -40,6 +40,10 @@
   text-decoration: none;
 }
 
+.dq-layout-card__under-meta {
+  margin-top: 4px;
+}
+
 .dq-layout-card__action {
   flex: 0 0 auto;
 }

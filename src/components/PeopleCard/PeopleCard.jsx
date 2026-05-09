@@ -8,8 +8,10 @@ const PeopleCard = ({
   avatarAlt = '',
   name,
   handle,
+  meta,
   owner = false,
   ownerLabel = 'Owner',
+  endSlot = null,
   className = '',
   style,
   ...props
@@ -45,21 +47,31 @@ const PeopleCard = ({
         gap="0"
         className="dq-people-card__content"
       >
-        <span className="dq-people-card__name">
-          {name}
+        <span className="dq-people-card__name-row">
+          <span className="dq-people-card__name">
+            {name}
+          </span>
+          {owner ? (
+            <Badge
+              size="sm"
+              className="dq-people-card__owner"
+            >
+              {ownerLabel}
+            </Badge>
+          ) : null}
         </span>
         {handle ? (
           <span className="dq-people-card__handle">{handle}</span>
         ) : null}
+        {meta ? (
+          <span className="dq-people-card__meta">{meta}</span>
+        ) : null}
       </Box>
 
-      {owner ? (
-        <Badge
-          size="sm"
-          className="dq-people-card__owner"
-        >
-          {ownerLabel}
-        </Badge>
+      {endSlot ? (
+        <Box component="span" slot="content" className="dq-people-card__end-slot">
+          {endSlot}
+        </Box>
       ) : null}
     </Box>
   );

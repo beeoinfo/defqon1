@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  MapPinIcon,
   PencilSimpleIcon,
   QrCodeIcon,
   ShareNetworkIcon,
@@ -47,6 +48,8 @@ const TribePanel = ({
   onJoinTribe,
   onLeaveTribe,
   onRenameTribe,
+  tribeLocations = [],
+  onShowMemberOnMap,
 }) => {
   const [joinCode, setJoinCode] = useState(() => pendingInviteCode || '');
   const [tribeName, setTribeName] = useState('');
@@ -60,18 +63,26 @@ const TribePanel = ({
   const [leaveConfirmInput, setLeaveConfirmInput] = useState('');
 
   useEffect(() => {
-    setJoinCode(pendingInviteCode || '');
+    const timeout = window.setTimeout(() => {
+      setJoinCode(pendingInviteCode || '');
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [pendingInviteCode]);
 
   useEffect(() => {
-    setTribeName(tribe ? getTribeDisplayName(tribe) : '');
-    setIsEditingName(false);
-    setIsQrModalOpen(false);
-    setIsLeaveModalOpen(false);
-    setLeaveConfirmInput('');
-    setLeaveErrorMessage('');
-    setShareFeedback('');
-    setCopyFeedback('');
+    const timeout = window.setTimeout(() => {
+      setTribeName(tribe ? getTribeDisplayName(tribe) : '');
+      setIsEditingName(false);
+      setIsQrModalOpen(false);
+      setIsLeaveModalOpen(false);
+      setLeaveConfirmInput('');
+      setLeaveErrorMessage('');
+      setShareFeedback('');
+      setCopyFeedback('');
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [tribe]);
 
   const inviteUrl = useMemo(() => getInviteUrl(tribe?.code), [tribe?.code]);
@@ -111,7 +122,11 @@ const TribePanel = ({
       const rightName = `${rightMember.profile?.first_name ?? ''} ${rightMember.profile?.last_name ?? ''}`.trim();
       return leftName.localeCompare(rightName);
     });
-  }, [tribe?.members, user?.id]);
+  }, [tribe, user?.id]);
+  const tribeLocationsByUserId = useMemo(
+    () => new Map(tribeLocations.map((location) => [location.userId, location])),
+    [tribeLocations]
+  );
 
   const handleCreate = async () => {
     setErrorMessage('');
@@ -371,6 +386,8 @@ const TribePanel = ({
                 <Box gap="var(--dq-ui-space-sm)">
                   {sortedMembers.map((member) => {
                     const profile = member.profile ?? {};
+                    const mapLocation = tribeLocationsByUserId.get(member.userId);
+                    const canShowOnMap = member.userId !== user?.id && Boolean(mapLocation);
                     const username = String(profile.username ?? '').trim();
                     const firstName =
                       String(profile.first_name ?? '').trim() ||
@@ -387,6 +404,18 @@ const TribePanel = ({
                         name={fullName}
                         handle={username ? `@${username}` : 'Profile unavailable'}
                         owner={member.role === 'owner'}
+                        endSlot={
+                          canShowOnMap ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              icon={MapPinIcon}
+                              onClick={() => onShowMemberOnMap?.(mapLocation)}
+                            >
+                              Show on map
+                            </Button>
+                          ) : null
+                        }
                       />
                     );
                   })}

@@ -43,6 +43,7 @@ import {
   getDays,
   getDefaultFestivalDay,
   getEntryMetaLabel,
+  getStableEntryId,
   getStages,
   groupEntriesByDayAndStage,
   hasCompleteSchedule,
@@ -77,6 +78,7 @@ import {
 import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
 import {
   createCurrentUserTribe,
+  deleteCurrentUserTribeLocation,
   getStablePayloadHash,
   getCurrentUser,
   isCurrentUserAdmin,
@@ -87,10 +89,13 @@ import {
   loadAdminLineupVersions,
   loadPublishedLineupVersions,
   loadTribeBundle,
+  loadTribeMemberLocations,
   normalizeTribeCode,
+  subscribeToTribeMemberLocations,
   supabase,
   syncFavoriteSnapshots,
   updateCurrentUserTribeName,
+  upsertCurrentUserTribeLocation,
 } from './lib/supabase';
 import { getCanonicalStageName, getStageTheme } from './lib/stageThemes';
 import { PAGE_DEFINITIONS } from './page/pageDefinitions';
@@ -733,6 +738,14 @@ const writeLastAuthenticatedUserId = (userId) => {
   }
 };
 
+const getProfileDisplayName = (profileRecord) => {
+  const firstName = String(profileRecord?.first_name ?? '').trim();
+  const lastName = String(profileRecord?.last_name ?? '').trim();
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  return fullName || String(profileRecord?.username ?? '').trim() || 'Tribe member';
+};
+
 const getBootAccountState = () => {
   const userId = readLastAuthenticatedUserId();
   const account = readCachedAccount(userId);
@@ -819,12 +832,15 @@ const extractLineupMapLayers = (moduleValue) => {
 const buildLineupSourcesFromVersions = (versions) => (
   versions.map((version) => ({
     key: version.id,
-    label: version.versionLabel || `${version.status === 'active' ? 'Active' : 'Archived'} lineup`,
+    label: version.payload?.eventEditionName || version.versionLabel || `${version.status === 'active' ? 'Active' : 'Archived'} lineup`,
     entries: extractLineupEntries(version.payload),
     mapLayers: extractLineupMapLayers(version.payload),
     isLatest: version.status === 'active',
     status: version.status,
     payload: version.payload,
+    eventEditionName: version.payload?.eventEditionName ?? version.versionLabel ?? null,
+    payloadUpdatedAt: version.payload?.updatedAt ?? null,
+    lastPublishedAt: version.activatedAt ?? null,
     versionLabel: version.versionLabel ?? null,
     source: 'supabase',
     payloadHash: version.payloadHash,
@@ -1201,6 +1217,8 @@ const App = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingLineupCount, setPendingLineupCount] = useState(0);
   const [tribe, setTribe] = useState(() => bootAccount?.tribe ?? null);
+  const [tribeMemberLocations, setTribeMemberLocations] = useState([]);
+  const [focusedTribeLocationUserId, setFocusedTribeLocationUserId] = useState(null);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [pendingTribeInviteCode, setPendingTribeInviteCode] = useState(() =>
@@ -1414,7 +1432,20 @@ const App = () => {
     ? 'Lineup preview'
     : 'Archived line-up snapshot';
   const entriesById = useMemo(
-    () => new Map(selectedEntries.map((entry) => [entry.id, entry])),
+    () => {
+      const nextEntriesById = new Map();
+
+      selectedEntries.forEach((entry) => {
+        if (!entry?.id) {
+          return;
+        }
+
+        nextEntriesById.set(entry.id, entry);
+        nextEntriesById.set(getStableEntryId(entry.id), entry);
+      });
+
+      return nextEntriesById;
+    },
     [selectedEntries]
   );
 
@@ -1430,8 +1461,11 @@ const App = () => {
     [selectedEntries, deferredFavoriteItems]
   );
   const favoriteIdSet = useMemo(
-    () => new Set(favoriteResolution.ids),
-    [favoriteResolution]
+    () => new Set([
+      ...favoriteResolution.ids,
+      ...deferredFavoriteItems.map((item) => item.favoriteKey).filter(Boolean),
+    ]),
+    [deferredFavoriteItems, favoriteResolution]
   );
   const reviewFavorites = favoriteResolution.reviewItems;
   const baseVisibleReviewFavorites = useMemo(
@@ -1522,6 +1556,37 @@ const App = () => {
     ),
     [tribeLikesByEntryId]
   );
+  const mapTribeLocations = useMemo(() => {
+    if (!tribe?.members?.length || tribeMemberLocations.length === 0) {
+      return [];
+    }
+
+    const membersById = new Map(tribe.members.map((member) => [member.userId, member]));
+
+    return tribeMemberLocations
+      .map((location) => {
+        const member = membersById.get(location.userId);
+        const profileRecord = member?.profile ?? {};
+        const avatarUrl =
+          resolveProfileAvatarUrl(profileRecord) ||
+          getPresetAvatarUrl(profileRecord?.avatar_preset ?? 1);
+
+        return {
+          ...location,
+          member,
+          profile: profileRecord,
+          displayName: getProfileDisplayName(profileRecord),
+          username: String(profileRecord.username ?? '').trim(),
+          avatarUrl,
+          isCurrentUser: location.userId === authUser?.id,
+        };
+      })
+      .filter((location) => (
+        Number.isFinite(location.longitude) &&
+        Number.isFinite(location.latitude) &&
+        location.member
+      ));
+  }, [authUser?.id, tribe, tribeMemberLocations]);
   const tribeFilterEntryIds = useMemo(
     () => new Set([...tribeLikedEntryIds, ...favoriteIdSet]),
     [favoriteIdSet, tribeLikedEntryIds]
@@ -2077,6 +2142,18 @@ const App = () => {
     openView('maps');
   }, [hasMapsView, openView, resetBrowseState]);
 
+  const handleShowTribeLocationOnMap = useCallback((location) => {
+    if (!hasMapsView || !location?.userId) {
+      return;
+    }
+
+    setFocusedTribeLocationUserId(location.userId);
+    startTransition(() => {
+      resetBrowseState();
+    });
+    openView('maps');
+  }, [hasMapsView, openView, resetBrowseState]);
+
   const handleReviewsNav = useCallback(() => {
     if (!authUser) {
       requestAuth({ type: 'open-reviews' });
@@ -2223,6 +2300,7 @@ const App = () => {
           setAuthUser(null);
           setProfile(null);
           setTribe(null);
+          setTribeMemberLocations([]);
           setIsTribeReady(true);
           setFavoriteItems([]);
           lastSyncedFavoritesRef.current = serializeFavoriteItems([]);
@@ -2337,6 +2415,42 @@ const App = () => {
       console.error(error);
     });
   }, [authUser, favoriteItems, isAccountReady]);
+
+  useEffect(() => {
+    if (!authUser || !tribe?.tribeId || !isSupabaseConfigured()) {
+      setTribeMemberLocations([]);
+      return undefined;
+    }
+
+    let isActive = true;
+
+    const refreshTribeLocations = () => {
+      loadTribeMemberLocations({ tribeId: tribe.tribeId })
+        .then((locations) => {
+          if (isActive) {
+            setTribeMemberLocations(locations);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+
+    refreshTribeLocations();
+
+    const channel = subscribeToTribeMemberLocations({
+      tribeId: tribe.tribeId,
+      onChange: refreshTribeLocations,
+    });
+
+    return () => {
+      isActive = false;
+
+      if (channel) {
+        supabase?.removeChannel(channel);
+      }
+    };
+  }, [authUser, tribe?.tribeId]);
 
   useEffect(() => {
     if (!authUser || !profile) {
@@ -2492,14 +2606,14 @@ const App = () => {
     });
   }, [authUser, entriesById, favoritesReadOnly, requestAuth]);
 
-  const handleToggleReviewSuggestionFavorite = useCallback((entryId, reviewFavorite) => {
+  const handleToggleReviewSuggestionFavorite = useCallback((suggestion, reviewFavorite) => {
     if (favoritesReadOnly || !authUser) {
       return;
     }
 
-    const entry = entriesById.get(entryId);
+    const entry = entriesById.get(suggestion?.id) ?? suggestion;
 
-    if (!entry) {
+    if (!entry?.id) {
       return;
     }
 
@@ -2523,6 +2637,47 @@ const App = () => {
       return nextIds;
     });
   }, []);
+
+  const handleSetTribeMapLocation = useCallback(async ({ longitude, latitude }) => {
+    if (!authUser || !tribe?.tribeId) {
+      requestAuth({ type: 'open-tribe' });
+      return;
+    }
+
+    const nextLocation = await upsertCurrentUserTribeLocation({
+      tribeId: tribe.tribeId,
+      userId: authUser.id,
+      longitude,
+      latitude,
+    });
+
+    if (nextLocation) {
+      setTribeMemberLocations((currentLocations) => {
+        const nextLocations = currentLocations.filter((location) => (
+          location.userId !== nextLocation.userId ||
+          location.tribeId !== nextLocation.tribeId ||
+          location.siteSlug !== nextLocation.siteSlug
+        ));
+
+        return [...nextLocations, nextLocation];
+      });
+    }
+  }, [authUser, requestAuth, tribe?.tribeId]);
+
+  const handleRemoveTribeMapLocation = useCallback(async () => {
+    if (!authUser || !tribe?.tribeId) {
+      return;
+    }
+
+    await deleteCurrentUserTribeLocation({
+      tribeId: tribe.tribeId,
+      userId: authUser.id,
+    });
+
+    setTribeMemberLocations((currentLocations) => (
+      currentLocations.filter((location) => location.userId !== authUser.id)
+    ));
+  }, [authUser, tribe?.tribeId]);
 
   const removeReviewFavorite = useCallback((favoriteKey) => {
     if (favoritesReadOnly || !authUser) {
@@ -3281,6 +3436,12 @@ const App = () => {
     maps: {
       mapLayers: selectedMapLayers,
       selectedDay: defaultBrowseDay,
+      tribeLocations: mapTribeLocations,
+      currentUserId: authUser?.id ?? null,
+      focusTribeLocationUserId: focusedTribeLocationUserId,
+      onFocusTribeLocationHandled: () => setFocusedTribeLocationUserId(null),
+      onSetTribeLocation: handleSetTribeMapLocation,
+      onRemoveTribeLocation: handleRemoveTribeMapLocation,
     },
     reviews: {
       hasLineup,
@@ -3309,17 +3470,21 @@ const App = () => {
     favoriteIdSet,
     favoriteTimetableConflictEntries,
     favoritesReadOnly,
+    focusedTribeLocationUserId,
     hasLineup,
     groupedVisibleEntries,
     groupedSearchVisibleEntries,
     handleIgnoreReviewConflict,
     handleOpenPerformanceEdit,
     handleOpenTimetableConflicts,
+    handleRemoveTribeMapLocation,
     handleRestoreReviewConflict,
+    handleSetTribeMapLocation,
     handleToggleReviewSuggestionFavorite,
     ignoredReviewConflictIds,
     ignoreSmallConflicts,
     lineupFilterBar,
+    mapTribeLocations,
     removeReviewFavorite,
     defaultBrowseDay,
     selectedMapLayers,
@@ -3346,6 +3511,7 @@ const App = () => {
       isTribeHydrating: authUser ? !isTribeReady : false,
       pendingTribeInviteCode,
       tribeInviteAlert,
+      tribeLocations: mapTribeLocations,
       hidePastEvents,
       hideUndatedEvents,
       ignoreSmallConflicts,
@@ -3367,6 +3533,7 @@ const App = () => {
       onJoinTribe: handleJoinTribe,
       onLeaveTribe: handleLeaveTribe,
       onRenameTribe: handleRenameTribe,
+      onShowMemberOnMap: handleShowTribeLocationOnMap,
     },
     admin: {
       isAdmin,
@@ -3397,6 +3564,7 @@ const App = () => {
     handleOpenPerformanceCreate,
     handleDeleteTempLineup,
     handleManualLineupEditAllowedChange,
+    handleShowTribeLocationOnMap,
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,
@@ -3408,6 +3576,7 @@ const App = () => {
     isTribeBusy,
     isTribeReady,
     availableLineupSources,
+    mapTribeLocations,
     pendingLineupCount,
     pendingTribeInviteCode,
     resetFavorites,

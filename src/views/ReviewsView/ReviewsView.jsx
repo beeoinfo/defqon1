@@ -18,6 +18,7 @@ import {
   getEntryDisplayName,
   getEntryMetaLabel,
   getEntryTimeLabel,
+  getReviewSuggestionFavoriteKey,
 } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
 import '../TimetableView/TimetableView.css';
@@ -436,7 +437,10 @@ const ReviewsView = ({
               {favorite.suggestions.map((suggestion) => {
                 const suggestionTheme = getStageTheme(suggestion.stage);
                 const suggestionColor = suggestion.stageColor ?? suggestionTheme.accent;
-                const isSuggestionFavorite = favoriteIdSet.has(suggestion.id);
+                const suggestionFavoriteKey = getReviewSuggestionFavoriteKey(suggestion, favorite);
+                const isSuggestionFavorite =
+                  favoriteIdSet.has(suggestion.id) ||
+                  favoriteIdSet.has(suggestionFavoriteKey);
 
                 return (
                   <Card
@@ -452,7 +456,7 @@ const ReviewsView = ({
                     actionAriaLabel={
                       isSuggestionFavorite ? 'Remove favorite' : 'Add favorite'
                     }
-                    onAction={() => toggleReviewSuggestionFavorite?.(suggestion.id, favorite)}
+                    onAction={() => toggleReviewSuggestionFavorite?.(suggestion, favorite)}
                   />
                 );
               })}

@@ -20,6 +20,7 @@ const Card = ({
   meta3,
   metaVariant,
   underTitle = null,
+  underMeta = null,
   description,
   error,
   actionVariant = 'favorite',
@@ -55,6 +56,7 @@ const Card = ({
   const metaParts = [meta1, meta2, meta3].filter(Boolean);
   const hasMeta = metaParts.length > 0;
   const hasUnderTitle = underTitle !== null && underTitle !== undefined && underTitle !== false;
+  const hasUnderMeta = underMeta !== null && underMeta !== undefined && underMeta !== false;
   const bodyChildren = Children.toArray(children);
   const hasBody = Boolean(description) || bodyChildren.length > 0;
 
@@ -141,6 +143,11 @@ const Card = ({
               {metaParts.map((part, index) => (
                 <span key={index} className="dq-layout-card__meta-item">{part}</span>
               ))}
+            </Box>
+          ) : null}
+          {hasUnderMeta ? (
+            <Box slot="content" className="dq-layout-card__under-meta">
+              {underMeta}
             </Box>
           ) : null}
         </Box>

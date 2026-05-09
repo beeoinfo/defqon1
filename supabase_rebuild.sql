@@ -220,6 +220,49 @@ alter table public.lineup_import_runs
   alter column created_at set default now(),
   alter column updated_at set default now();
 
+-- Voluntary map pins shared inside a tribe. Each user has at most one active
+-- location per site and tribe; it is a dropped meeting point, not live tracking.
+create table if not exists public.tribe_member_locations (
+  tribe_id uuid not null references public.tribes(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  site_slug text not null default 'defqon1',
+  longitude double precision not null,
+  latitude double precision not null,
+  label text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (tribe_id, user_id, site_slug)
+);
+
+alter table public.tribe_member_locations
+  add column if not exists site_slug text default 'defqon1',
+  add column if not exists longitude double precision,
+  add column if not exists latitude double precision,
+  add column if not exists label text,
+  add column if not exists created_at timestamptz default now(),
+  add column if not exists updated_at timestamptz default now();
+
+alter table public.tribe_member_locations
+  alter column site_slug set default 'defqon1',
+  alter column created_at set default now(),
+  alter column updated_at set default now();
+
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'tribe_member_locations'
+    )
+  then
+    alter publication supabase_realtime add table public.tribe_member_locations;
+  end if;
+end;
+$$;
+
 -- Queue of uploaded avatar paths that must be deleted through the Storage API.
 -- This script never mutates storage.objects directly to avoid leaving billed
 -- files behind in the storage provider.
@@ -245,6 +288,9 @@ create unique index if not exists tribes_code_key
 
 create index if not exists tribe_members_tribe_id_idx
   on public.tribe_members (tribe_id);
+
+create index if not exists tribe_member_locations_tribe_site_idx
+  on public.tribe_member_locations (tribe_id, site_slug);
 
 create unique index if not exists tribe_members_one_owner_per_tribe_idx
   on public.tribe_members (tribe_id)
@@ -688,6 +734,12 @@ execute function public.set_updated_at();
 drop trigger if exists lineup_import_runs_set_updated_at on public.lineup_import_runs;
 create trigger lineup_import_runs_set_updated_at
 before update on public.lineup_import_runs
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists tribe_member_locations_set_updated_at on public.tribe_member_locations;
+create trigger tribe_member_locations_set_updated_at
+before update on public.tribe_member_locations
 for each row
 execute function public.set_updated_at();
 
@@ -1451,6 +1503,7 @@ revoke all on table public.profiles from public, anon, authenticated;
 revoke all on table public.tribes from public, anon, authenticated;
 revoke all on table public.tribe_members from public, anon, authenticated;
 revoke all on table public.user_favorites from public, anon, authenticated;
+revoke all on table public.tribe_member_locations from public, anon, authenticated;
 revoke all on table public.app_admins from public, anon, authenticated;
 revoke all on table public.lineup_versions from public, anon, authenticated;
 revoke all on table public.lineup_import_runs from public, anon, authenticated;
@@ -1460,6 +1513,7 @@ grant select, insert, update on table public.profiles to authenticated;
 grant select, update on table public.tribes to authenticated;
 grant select on table public.tribe_members to authenticated;
 grant select, insert, update, delete on table public.user_favorites to authenticated;
+grant select, insert, update, delete on table public.tribe_member_locations to authenticated;
 grant select on table public.app_admins to authenticated;
 grant select on table public.lineup_versions to anon, authenticated;
 grant select, insert, update on table public.lineup_import_runs to authenticated;
@@ -1468,6 +1522,7 @@ grant all on table public.profiles to service_role;
 grant all on table public.tribes to service_role;
 grant all on table public.tribe_members to service_role;
 grant all on table public.user_favorites to service_role;
+grant all on table public.tribe_member_locations to service_role;
 grant all on table public.app_admins to service_role;
 grant all on table public.lineup_versions to service_role;
 grant all on table public.lineup_import_runs to service_role;
@@ -1543,6 +1598,7 @@ alter table public.profiles enable row level security;
 alter table public.tribes enable row level security;
 alter table public.tribe_members enable row level security;
 alter table public.user_favorites enable row level security;
+alter table public.tribe_member_locations enable row level security;
 alter table public.app_admins enable row level security;
 alter table public.lineup_versions enable row level security;
 alter table public.lineup_import_runs enable row level security;
@@ -1633,6 +1689,47 @@ on public.user_favorites
 for select
 to authenticated
 using (public.are_users_in_same_tribe(auth.uid(), public.user_favorites.user_id));
+
+drop policy if exists tribe_locations_select_same_tribe on public.tribe_member_locations;
+create policy tribe_locations_select_same_tribe
+on public.tribe_member_locations
+for select
+to authenticated
+using (public.is_member_of_tribe(tribe_id));
+
+drop policy if exists tribe_locations_insert_own on public.tribe_member_locations;
+create policy tribe_locations_insert_own
+on public.tribe_member_locations
+for insert
+to authenticated
+with check (
+  auth.uid() = user_id
+  and public.is_member_of_tribe(tribe_id)
+);
+
+drop policy if exists tribe_locations_update_own on public.tribe_member_locations;
+create policy tribe_locations_update_own
+on public.tribe_member_locations
+for update
+to authenticated
+using (
+  auth.uid() = user_id
+  and public.is_member_of_tribe(tribe_id)
+)
+with check (
+  auth.uid() = user_id
+  and public.is_member_of_tribe(tribe_id)
+);
+
+drop policy if exists tribe_locations_delete_own on public.tribe_member_locations;
+create policy tribe_locations_delete_own
+on public.tribe_member_locations
+for delete
+to authenticated
+using (
+  auth.uid() = user_id
+  and public.is_member_of_tribe(tribe_id)
+);
 
 drop policy if exists app_admins_select_self on public.app_admins;
 create policy app_admins_select_self
