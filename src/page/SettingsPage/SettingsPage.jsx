@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
-import { CheckIcon } from '@phosphor-icons/react';
+import {
+  CheckIcon,
+  DownloadSimpleIcon,
+  GearSixIcon,
+  UserCircleIcon,
+} from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import Box from '@/components/layout/Box';
 import Modal from '@/components/layout/Modal';
 import Profile from '@/components/Profile';
+import TribePanel from '@/components/TribePanel';
 import Button from '@/components/primitives/Button';
 import ChoiceButton from '@/components/primitives/ChoiceButton';
 import { Switch } from '@/components/primitives/forms';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
-import TribePanel from '@/components/TribePanel';
+import { activeSite } from '@/sites/siteDefinitions';
 import './SettingsPage.css';
 
 const formatDateTime = (value) => {
@@ -59,12 +65,15 @@ const SettingsPage = ({
   onRenameTribe,
   tribeLocations = [],
   onShowMemberOnMap,
+  pwaInstall = null,
   isAdmin = false,
   pendingLineupCount = 0,
   onOpenPage = null,
 }) => {
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [installMessage, setInstallMessage] = useState('');
+  const [isInstallBusy, setIsInstallBusy] = useState(false);
   const [isResetFavoritesModalOpen, setIsResetFavoritesModalOpen] = useState(false);
   const selectableLineups = lineups.filter((lineup) => (
     lineup.status !== 'preview' && lineup.status !== 'temp'
@@ -156,40 +165,70 @@ const SettingsPage = ({
     setIsResetFavoritesModalOpen(false);
   };
 
+  const handleInstallApp = async () => {
+    if (!pwaInstall?.canPromptInstall || isInstallBusy) {
+      return;
+    }
+
+    setInstallMessage('');
+    setIsInstallBusy(true);
+
+    try {
+      const result = await pwaInstall.promptInstall();
+      setInstallMessage(
+        result?.outcome === 'accepted'
+          ? 'Installation started.'
+          : 'Installation was not completed.'
+      );
+    } finally {
+      setIsInstallBusy(false);
+    }
+  };
+
+  const installStatus = pwaInstall?.isInstalled
+    ? 'Installed on this device.'
+    : pwaInstall?.canPromptInstall
+      ? 'Ready to install on this device.'
+      : pwaInstall?.canInstallManually
+        ? 'Use Share, then Add to Home Screen.'
+        : 'Open this site from a supported browser to install it.';
+
   return (
     <Box className="dq-settings-page" gap="var(--dq-settings-page-gap)">
-      <Profile
-        firstName={profile?.first_name ?? ''}
-        lastName={profile?.last_name ?? ''}
-        username={profile?.username ?? ''}
-        avatarSrc={resolveProfileAvatarUrl(profile)}
-        avatarMode={profile?.avatar_kind ?? 'preset'}
-        avatarPreset={profile?.avatar_preset ?? 1}
-        isBusy={isBusy}
-        errorMessage={errorMessage}
-        onCancel={() => setErrorMessage('')}
-        onChangePreset={(currentPreset) => {
-          const nextPreset = getRandomPresetAvatarIndex(currentPreset);
+      <Box title="Profile" titleIcon={UserCircleIcon}>
+        <Profile
+          firstName={profile?.first_name ?? ''}
+          lastName={profile?.last_name ?? ''}
+          username={profile?.username ?? ''}
+          avatarSrc={resolveProfileAvatarUrl(profile)}
+          avatarMode={profile?.avatar_kind ?? 'preset'}
+          avatarPreset={profile?.avatar_preset ?? 1}
+          isBusy={isBusy}
+          errorMessage={errorMessage}
+          onCancel={() => setErrorMessage('')}
+          onChangePreset={(currentPreset) => {
+            const nextPreset = getRandomPresetAvatarIndex(currentPreset);
 
-          return {
-            avatarPreset: nextPreset,
-            avatarSrc: resolveProfileAvatarUrl({
-              avatar_kind: 'preset',
-              avatar_preset: nextPreset,
-            }),
-          };
-        }}
-        onSave={handleProfileSave}
-        actionContent={isAdmin ? (
-          <Button
-            onClick={() => onOpenPage?.('admin')}
-            disabled={isBusy}
-            badge={pendingLineupCount > 0 ? pendingLineupCount : null}
-          >
-            Admin panel
-          </Button>
-        ) : null}
-      />
+            return {
+              avatarPreset: nextPreset,
+              avatarSrc: resolveProfileAvatarUrl({
+                avatar_kind: 'preset',
+                avatar_preset: nextPreset,
+              }),
+            };
+          }}
+          onSave={handleProfileSave}
+          actionContent={isAdmin ? (
+            <Button
+              onClick={() => onOpenPage?.('admin')}
+              disabled={isBusy}
+              badge={pendingLineupCount > 0 ? pendingLineupCount : null}
+            >
+              Admin panel
+            </Button>
+          ) : null}
+        />
+      </Box>
 
       <TribePanel
         user={user}
@@ -206,7 +245,32 @@ const SettingsPage = ({
         onShowMemberOnMap={onShowMemberOnMap}
       />
 
-      <Box background="surface" title="App settings">
+      <Box background="surface" title="Install app" titleIcon={DownloadSimpleIcon}>
+        <Box gap="var(--dq-ui-space-sm)">
+          <p className="dq-settings-page__meta">
+            {installStatus}
+          </p>
+          {installMessage ? (
+            <p className="dq-settings-page__meta">
+              {installMessage}
+            </p>
+          ) : null}
+          <Box direction="row" justify="flex-start" wrap="wrap" gap="var(--dq-ui-space-sm)">
+            <Button
+              onClick={handleInstallApp}
+              disabled={isInstallBusy || !pwaInstall?.canPromptInstall || pwaInstall?.isInstalled}
+            >
+              {pwaInstall?.isInstalled
+                ? 'Installed'
+                : isInstallBusy
+                  ? 'Installing...'
+                  : `Install ${activeSite.name}`}
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box background="surface" title="App settings" titleIcon={GearSixIcon}>
         <Box gap="var(--dq-ui-space-lg)">
           {selectableLineups.length > 0 ? (
             <Box gap="var(--dq-ui-space-sm)">
@@ -227,7 +291,7 @@ const SettingsPage = ({
                     size="lg"
                     subtitle={
                       lineup.lastPublishedAt
-                        ? `Published at: ${formatDateTime(lineup.lastPublishedAt)}`
+                        ? formatDateTime(lineup.lastPublishedAt)
                         : ''
                     }
                   >

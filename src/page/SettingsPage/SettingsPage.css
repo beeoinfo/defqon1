@@ -2,6 +2,11 @@
   --dq-settings-page-gap: 5rem;
 }
 
+.dq-settings-page__meta {
+  margin: 0;
+  color: var(--dq-ui-text-soft);
+}
+
 @media (max-width: 575.98px) {
   .dq-settings-page {
     --dq-settings-page-gap: 2rem;

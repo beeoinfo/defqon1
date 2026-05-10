@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowRightIcon, HeartBreakIcon, HeartIcon, LightningIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import EmptyState from '@/components/EmptyState';
@@ -14,10 +14,12 @@ import ToggleButton from '@/components/primitives/ToggleButton';
 import {
   REVIEW_SECTION_MESSAGE,
   getDayLabel,
+  getConflictGroupId,
   getEntryDayLabel,
   getEntryDisplayName,
   getEntryMetaLabel,
   getEntryTimeLabel,
+  getTimetableConflictGroups,
   getReviewSuggestionFavoriteKey,
 } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
@@ -30,7 +32,6 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hourCycle: 'h23',
 });
 const MAX_VISIBLE_TRIBE_AVATARS = 6;
-const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 
 const getSavedIdParts = (id) => {
   const parts = String(id ?? '').split('_').filter(Boolean);
@@ -80,88 +81,6 @@ const compareReviewItems = (leftItem, rightItem) => (
 const getTimestamp = (value) => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
-};
-
-const entriesHaveMeaningfulConflict = (leftEntry, rightEntry, ignoreSmallConflicts) => {
-  const leftStart = getTimestamp(leftEntry.startAt);
-  const leftEnd = getTimestamp(leftEntry.endAt);
-  const rightStart = getTimestamp(rightEntry.startAt);
-  const rightEnd = getTimestamp(rightEntry.endAt);
-
-  if (
-    leftStart === null ||
-    leftEnd === null ||
-    rightStart === null ||
-    rightEnd === null ||
-    leftEnd <= leftStart ||
-    rightEnd <= rightStart
-  ) {
-    return false;
-  }
-
-  const overlapDuration = Math.min(leftEnd, rightEnd) - Math.max(leftStart, rightStart);
-
-  if (overlapDuration <= 0) {
-    return false;
-  }
-
-  if (!ignoreSmallConflicts) {
-    return true;
-  }
-
-  const largestDuration = Math.max(leftEnd - leftStart, rightEnd - rightStart);
-
-  return largestDuration > 0 && overlapDuration > largestDuration * CONFLICT_OVERLAP_THRESHOLD;
-};
-
-const getConflictKey = (leftId, rightId) => (
-  [leftId, rightId].sort().join('__')
-);
-
-const getMaximalConflictCliques = (entries, ignoreSmallConflicts) => {
-  const conflictKeys = new Set();
-
-  entries.forEach((entry, entryIndex) => {
-    entries.slice(entryIndex + 1).forEach((candidateEntry) => {
-      if (entriesHaveMeaningfulConflict(entry, candidateEntry, ignoreSmallConflicts)) {
-        conflictKeys.add(getConflictKey(entry.id, candidateEntry.id));
-      }
-    });
-  });
-
-  const cliques = [];
-
-  const expandClique = (clique, candidates) => {
-    if (candidates.length === 0) {
-      if (clique.length > 1) {
-        cliques.push(clique);
-      }
-
-      return;
-    }
-
-    candidates.forEach((candidateEntry, candidateIndex) => {
-      const nextClique = [...clique, candidateEntry];
-      const nextCandidates = candidates
-        .slice(candidateIndex + 1)
-        .filter((nextCandidateEntry) => (
-          nextClique.every((cliqueEntry) => (
-            conflictKeys.has(getConflictKey(cliqueEntry.id, nextCandidateEntry.id))
-          ))
-        ));
-
-      expandClique(nextClique, nextCandidates);
-    });
-  };
-
-  expandClique([], entries);
-
-  return cliques.filter((clique) => (
-    !cliques.some((candidateClique) => (
-      candidateClique.length > clique.length &&
-      clique.every((entry) => candidateClique.some((candidateEntry) => candidateEntry.id === entry.id))
-    ))
-  ));
 };
 
 const getConflictGroupRange = (entries) => {
@@ -225,7 +144,7 @@ const getConflictSections = (entries, ignoreSmallConflicts) => {
 
   return Array.from(entriesByDay.entries()).map(([dayLabel, dayEntries]) => {
     const groups = [];
-    const conflictCliques = getMaximalConflictCliques(dayEntries, ignoreSmallConflicts);
+    const conflictCliques = getTimetableConflictGroups(dayEntries, ignoreSmallConflicts);
 
     conflictCliques.forEach((clique) => {
       const sortedGroupEntries = clique.slice().sort(compareReviewItems);
@@ -235,7 +154,7 @@ const getConflictSections = (entries, ignoreSmallConflicts) => {
         getStageTheme(sortedGroupEntries[0]?.stage).accent;
 
       groups.push({
-        id: sortedGroupEntries.map((groupEntry) => groupEntry.id).join('__'),
+        id: getConflictGroupId(sortedGroupEntries),
         entries: layout.entries,
         color: groupColor,
         range,
@@ -259,7 +178,6 @@ const ReviewsView = ({
   toggleReviewSuggestionFavorite,
   removeReviewFavorite,
   onOpenTimetableConflicts,
-  onConflictNotificationCountChange,
   ignoredConflictIds = new Set(),
   onIgnoreConflict,
   tribeLikesByEntryId = new Map(),
@@ -328,9 +246,6 @@ const ReviewsView = ({
       ),
     [conflictSections, ignoredConflictIds]
   );
-  useEffect(() => {
-    onConflictNotificationCountChange?.(activeConflictCount);
-  }, [activeConflictCount, onConflictNotificationCountChange]);
   const reviewFilterBar = useMemo(() => ({
     width: 'content',
     resetButton: false,

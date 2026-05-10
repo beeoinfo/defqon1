@@ -32,14 +32,17 @@ import Button from '@/components/primitives/Button';
 import { DateTimeInput, SearchInput, SelectInput, TextInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
+import usePwaInstallPrompt from '@/hooks/usePwaInstallPrompt';
 import usePullToRefresh from '@/hooks/usePullToRefresh';
 import { ELECTRONIC_FESTIVAL_STYLES_DB } from './data/electronicFestivalStylesDb';
 import {
+  entriesHaveMeaningfulConflict,
   filterExpiredEntries,
   filterExpiredReviewFavorites,
   filterEntries,
   filterUndatedEntries,
   filterUndatedReviewFavorites,
+  getActiveTimetableConflictCount,
   getDays,
   getDefaultFestivalDay,
   getEntryMetaLabel,
@@ -142,7 +145,6 @@ const SITE_MAP_IMAGE_MODULES = import.meta.glob('./data/*/maps/*.{avif,gif,jpeg,
 const getHeaderModeForView = (view) => (view === 'search' ? 'search' : 'default');
 const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favicon}?site=${activeSite.slug}`;
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
-const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const getCleanStyleTag = (value) => String(value ?? '').trim();
 const TEMP_LINEUP_SOURCE_KEY = 'temp:manual-lineup-edit';
 const MAP_CALIBRATION_MIN_DISTANCE_M = 300;
@@ -670,17 +672,7 @@ const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConfl
         break;
       }
 
-      const overlapDuration = Math.min(currentItem.endTimestamp, candidateItem.endTimestamp) -
-        Math.max(currentItem.startTimestamp, candidateItem.startTimestamp);
-      const largestDuration = Math.max(
-        currentItem.endTimestamp - currentItem.startTimestamp,
-        candidateItem.endTimestamp - candidateItem.startTimestamp
-      );
-      const hasMeaningfulOverlap = ignoreSmallConflicts
-        ? largestDuration > 0 && overlapDuration > largestDuration * CONFLICT_OVERLAP_THRESHOLD
-        : overlapDuration > 0;
-
-      if (hasMeaningfulOverlap) {
+      if (entriesHaveMeaningfulConflict(currentItem.entry, candidateItem.entry, ignoreSmallConflicts)) {
         conflictingIds.add(currentItem.entry.id);
         conflictingIds.add(candidateItem.entry.id);
       }
@@ -691,6 +683,8 @@ const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConfl
 };
 
 const ACCOUNT_CACHE_KEY_PREFIX = `account-cache:v1:${activeSite.slug}:`;
+const LINEUP_VERSIONS_CACHE_KEY = `lineup-versions-cache:v1:${activeSite.slug}`;
+const MAP_CALIBRATION_CACHE_KEY = `map-calibration-cache:v1:${activeSite.slug}`;
 const LAST_AUTHENTICATED_USER_ID_KEY = 'last-authenticated-user-id:v1';
 const PENDING_TRIBE_INVITE_KEY = 'pending-tribe-invite:v1';
 const LIVE_LOCATION_SESSION_KEY = `live-location-session:v1:${activeSite.slug}`;
@@ -761,7 +755,14 @@ const sanitizeCachedTribe = (tribe) => {
     role: tribe.role ?? null,
     isOwner: Boolean(tribe.isOwner),
     memberCount: tribe.memberCount ?? 0,
-    members: [],
+    members: Array.isArray(tribe.members)
+      ? tribe.members.map((member) => ({
+          userId: member.userId ?? null,
+          role: member.role ?? null,
+          profile: member.profile ?? null,
+          favorites: Array.isArray(member.favorites) ? member.favorites : [],
+        }))
+      : [],
   };
 };
 
@@ -856,6 +857,32 @@ const writeLastAuthenticatedUserId = (userId) => {
     }
 
     localStorage.setItem(LAST_AUTHENTICATED_USER_ID_KEY, userId);
+  } catch {
+    // Ignore storage errors.
+  }
+};
+
+const readCachedMapCalibrationPoints = () => {
+  try {
+    const rawValue = localStorage.getItem(MAP_CALIBRATION_CACHE_KEY);
+
+    if (!rawValue) {
+      return [];
+    }
+
+    const parsed = JSON.parse(rawValue);
+    return sortMapCalibrationPoints(Array.isArray(parsed?.points) ? parsed.points : []);
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedMapCalibrationPoints = (points) => {
+  try {
+    localStorage.setItem(MAP_CALIBRATION_CACHE_KEY, JSON.stringify({
+      cachedAt: new Date().toISOString(),
+      points: Array.isArray(points) ? sortMapCalibrationPoints(points) : [],
+    }));
   } catch {
     // Ignore storage errors.
   }
@@ -969,6 +996,41 @@ const buildLineupSourcesFromVersions = (versions) => (
     payloadHash: version.payloadHash,
   }))
 );
+
+const readCachedLineupSources = () => {
+  try {
+    const rawValue = localStorage.getItem(LINEUP_VERSIONS_CACHE_KEY);
+
+    if (!rawValue) {
+      return [];
+    }
+
+    const parsed = JSON.parse(rawValue);
+    const cachedVersions = Array.isArray(parsed?.versions) ? parsed.versions : [];
+    const cachedSources = buildLineupSourcesFromVersions(cachedVersions);
+
+    cachedSources.forEach((lineupSource) => {
+      if (lineupSource.entries.length > 0) {
+        validateLineupPayload(lineupSource.entries);
+      }
+    });
+
+    return cachedSources;
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedLineupVersions = (versions) => {
+  try {
+    localStorage.setItem(LINEUP_VERSIONS_CACHE_KEY, JSON.stringify({
+      cachedAt: new Date().toISOString(),
+      versions: Array.isArray(versions) ? versions : [],
+    }));
+  } catch {
+    // Ignore storage errors.
+  }
+};
 
 const getLineupStageFromPayload = (payload, daySlug, stageSlug) => {
   const day = getLineupDayFromPayload(payload, daySlug);
@@ -1282,7 +1344,7 @@ const App = () => {
   const closedPageTypesRef = useRef(new Set());
   const [activeView, setActiveView] = useState(initialRoute.view);
   const [viewRefreshKey, setViewRefreshKey] = useState(0);
-  const [lineupSources, setLineupSources] = useState([]);
+  const [lineupSources, setLineupSources] = useState(() => readCachedLineupSources());
   const [tempLineupSource, setTempLineupSource] = useState(null);
   const [isManualLineupEditAllowed, setIsManualLineupEditAllowed] = useState(false);
   const [editingPerformance, setEditingPerformance] = useState(null);
@@ -1326,13 +1388,14 @@ const App = () => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showTribeOnly, setShowTribeOnly] = useState(false);
   const [showConflictsOnly, setShowConflictsOnly] = useState(false);
-  const [reviewConflictNotificationCount, setReviewConflictNotificationCount] = useState(null);
   const [ignoredReviewConflictIds, setIgnoredReviewConflictIds] = useState(() => new Set());
   const activeHydrationIdRef = useRef(0);
   const authHydrationTimeoutRef = useRef(0);
   const lastAuthenticatedUserIdRef = useRef(bootUserId);
   const hasRemoteAccountBundleRef = useRef(false);
+  const hasPendingFavoriteSyncRef = useRef(false);
   const lastSyncedFavoritesRef = useRef(serializeFavoriteItems(bootAccount?.favorites ?? []));
+  const favoriteItemsRef = useRef(bootAccount?.favorites ?? []);
   const lastHydratedAuthKeyRef = useRef(bootUserId ? `user:${bootUserId}` : 'guest');
   const hydrateAccountRef = useRef(null);
   const [authUser, setAuthUser] = useState(() => (bootUserId ? { id: bootUserId } : null));
@@ -1343,7 +1406,7 @@ const App = () => {
   const [tribeMemberLocations, setTribeMemberLocations] = useState([]);
   const [focusedTribeLocationUserId, setFocusedTribeLocationUserId] = useState(null);
   const [focusedTribeLocationMapLayerId, setFocusedTribeLocationMapLayerId] = useState(null);
-  const [mapCalibrationPoints, setMapCalibrationPoints] = useState([]);
+  const [mapCalibrationPoints, setMapCalibrationPoints] = useState(() => readCachedMapCalibrationPoints());
   const [isMapCalibrationMode, setIsMapCalibrationMode] = useState(false);
   const [mapCalibrationMessage, setMapCalibrationMessage] = useState('');
   const [isLiveLocationSharing, setIsLiveLocationSharing] = useState(false);
@@ -1362,19 +1425,25 @@ const App = () => {
     readPendingTribeInviteCode()
   );
   const [tribeInviteAlert, setTribeInviteAlert] = useState('');
-  const [isAccountReady, setIsAccountReady] = useState(!isSupabaseConfigured());
+  const [isAccountReady, setIsAccountReady] = useState(() => bootAccount !== null || !isSupabaseConfigured());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authDefaultTab, setAuthDefaultTab] = useState('login');
   const [pendingAction, setPendingAction] = useState(null);
   const attemptedInviteJoinKeyRef = useRef('');
+  const pwaInstall = usePwaInstallPrompt();
 
   useDocumentScrollLock(hasRenderedPages);
 
   const refreshLineupSources = useCallback(async ({ selectLatest = false } = {}) => {
     if (!isSupabaseConfigured()) {
-      setLineupSources([]);
-      setSelectedLineupKey(null);
-      return [];
+      const cachedSources = readCachedLineupSources();
+      setLineupSources(cachedSources);
+      setSelectedLineupKey((currentKey) => (
+        !selectLatest && cachedSources.some((lineup) => lineup.key === currentKey)
+          ? currentKey
+          : cachedSources[0]?.key ?? null
+      ));
+      return cachedSources;
     }
 
     const versions = await loadPublishedLineupVersions(activeSite.slug);
@@ -1387,6 +1456,7 @@ const App = () => {
       }
     }
 
+    writeCachedLineupVersions(versions);
     setLineupSources(resolvedSources);
     setSelectedLineupKey((currentKey) => (
       !selectLatest && tempLineupSource && currentKey === tempLineupSource.key
@@ -1420,11 +1490,16 @@ const App = () => {
       setViewRefreshKey((currentKey) => currentKey + 1);
     });
 
-    await refreshLineupSources({ selectLatest: true });
-    await refreshPendingLineupCount();
+    await Promise.allSettled([
+      refreshLineupSources({ selectLatest: true }),
+      refreshPendingLineupCount(),
+    ]);
 
     if (isSupabaseConfigured()) {
-      await hydrateAccountRef.current?.(authUser ?? null, { hasUserOverride: Boolean(authUser) });
+      await hydrateAccountRef.current?.(authUser ?? null, { hasUserOverride: Boolean(authUser) })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   }, [authUser, refreshLineupSources, refreshPendingLineupCount]);
 
@@ -1598,8 +1673,16 @@ const App = () => {
     }
 
     loadMapCalibrationPoints()
-      .then((points) => setMapCalibrationPoints(sortMapCalibrationPoints(points)))
-      .catch(() => setMapCalibrationPoints([]));
+      .then((points) => {
+        const nextPoints = sortMapCalibrationPoints(points);
+        setMapCalibrationPoints(nextPoints);
+        writeCachedMapCalibrationPoints(nextPoints);
+      })
+      .catch(() => {
+        setMapCalibrationPoints((currentPoints) => (
+          currentPoints.length > 0 ? currentPoints : readCachedMapCalibrationPoints()
+        ));
+      });
   }, [selectedLineupKey]);
 
   useEffect(() => () => {
@@ -1630,6 +1713,11 @@ const App = () => {
   }, [isLiveLocationSharing]);
 
   const deferredFavoriteItems = useDeferredValue(favoriteItems);
+
+  useEffect(() => {
+    favoriteItemsRef.current = favoriteItems;
+  }, [favoriteItems]);
+
   const favoriteResolution = useMemo(
     () => resolveFavoriteItems(selectedEntries, deferredFavoriteItems),
     [selectedEntries, deferredFavoriteItems]
@@ -2040,10 +2128,16 @@ const App = () => {
 
     return timetableEntries.filter((entry) => conflictIds.has(entry.id));
   }, [browseableEntries, favoriteIdSet, ignoreSmallConflicts]);
+  const favoriteTimetableConflictCount = useMemo(
+    () => getActiveTimetableConflictCount(
+      favoriteTimetableConflictEntries,
+      ignoreSmallConflicts,
+      ignoredReviewConflictIds
+    ),
+    [favoriteTimetableConflictEntries, ignoredReviewConflictIds, ignoreSmallConflicts]
+  );
   const reviewCount = isLatestLineupSelected
-    ? visibleReviewFavorites.length + (
-        reviewConflictNotificationCount ?? favoriteTimetableConflictEntries.length
-      )
+    ? visibleReviewFavorites.length + favoriteTimetableConflictCount
     : 0;
   const baseTimetableEntriesBeforeStyles = useMemo(
     () =>
@@ -2542,7 +2636,6 @@ const App = () => {
       const hydrationId = activeHydrationIdRef.current + 1;
 
       activeHydrationIdRef.current = hydrationId;
-      setIsAccountReady(false);
       hasRemoteAccountBundleRef.current = false;
 
       try {
@@ -2562,6 +2655,8 @@ const App = () => {
           setTribeMemberLocations([]);
           setIsTribeReady(true);
           setFavoriteItems([]);
+          favoriteItemsRef.current = [];
+          hasPendingFavoriteSyncRef.current = false;
           lastSyncedFavoritesRef.current = serializeFavoriteItems([]);
           lastHydratedAuthKeyRef.current = 'guest';
           setIsAccountReady(true);
@@ -2578,13 +2673,17 @@ const App = () => {
         if (cachedAccount) {
           setProfile(cachedAccount.profile ?? null);
           setFavoriteItems(cachedAccount.favorites ?? []);
+          favoriteItemsRef.current = cachedAccount.favorites ?? [];
           setTribe(cachedAccount.tribe ?? null);
           setIsTribeReady(Boolean(cachedAccount.tribe));
+          setIsAccountReady(true);
         } else {
           setProfile(buildOptimisticProfile(currentUser));
           setFavoriteItems([]);
+          favoriteItemsRef.current = [];
           setTribe(null);
           setIsTribeReady(false);
+          setIsAccountReady(false);
         }
 
         loadTribeBundle(currentUser.id)
@@ -2612,8 +2711,13 @@ const App = () => {
           return;
         }
 
+        const nextFavoriteItems = hasPendingFavoriteSyncRef.current
+          ? favoriteItemsRef.current
+          : bundle.favorites;
+
         setProfile(bundle.profile);
-        setFavoriteItems(bundle.favorites);
+        setFavoriteItems(nextFavoriteItems);
+        favoriteItemsRef.current = nextFavoriteItems;
         lastSyncedFavoritesRef.current = serializeFavoriteItems(bundle.favorites);
         hasRemoteAccountBundleRef.current = true;
       } catch (error) {
@@ -2659,20 +2763,35 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (!authUser || !isAccountReady || !isSupabaseConfigured() || !hasRemoteAccountBundleRef.current) {
+    if (!authUser || !isAccountReady || !isSupabaseConfigured()) {
       return;
     }
 
     const nextSerializedFavorites = serializeFavoriteItems(favoriteItems);
 
-    if (nextSerializedFavorites === lastSyncedFavoritesRef.current) {
+    if (!hasRemoteAccountBundleRef.current) {
+      if (nextSerializedFavorites !== lastSyncedFavoritesRef.current) {
+        hasPendingFavoriteSyncRef.current = true;
+      }
       return;
     }
 
-    lastSyncedFavoritesRef.current = nextSerializedFavorites;
-    syncFavoriteSnapshots(authUser.id, favoriteItems).catch((error) => {
-      console.error(error);
-    });
+    if (
+      nextSerializedFavorites === lastSyncedFavoritesRef.current &&
+      !hasPendingFavoriteSyncRef.current
+    ) {
+      return;
+    }
+
+    syncFavoriteSnapshots(authUser.id, favoriteItems)
+      .then(() => {
+        lastSyncedFavoritesRef.current = nextSerializedFavorites;
+        hasPendingFavoriteSyncRef.current = false;
+      })
+      .catch((error) => {
+        hasPendingFavoriteSyncRef.current = true;
+        console.error(error);
+      });
   }, [authUser, favoriteItems, isAccountReady]);
 
   useEffect(() => {
@@ -3269,7 +3388,11 @@ const App = () => {
 
     if (nextPoints.length > 0) {
       lastCalibrationLocationSyncKeyRef.current = '';
-      setMapCalibrationPoints((currentPoints) => sortMapCalibrationPoints([...currentPoints, ...nextPoints]));
+      setMapCalibrationPoints((currentPoints) => {
+        const updatedPoints = sortMapCalibrationPoints([...currentPoints, ...nextPoints]);
+        writeCachedMapCalibrationPoints(updatedPoints);
+        return updatedPoints;
+      });
       setMapCalibrationMessage(
         targetMapLayerIds.length > 1
           ? 'Calibration point saved on all maps.'
@@ -3294,6 +3417,7 @@ const App = () => {
     calibratedMapLayerTransformsRef.current = nextTransforms;
     lastCalibrationLocationSyncKeyRef.current = '';
     setMapCalibrationPoints(nextCalibrationPoints);
+    writeCachedMapCalibrationPoints(nextCalibrationPoints);
 
     if (lostCalibrationMapLayerIds.length > 0) {
       await downgradeCurrentUserLocationsForMapLayers(lostCalibrationMapLayerIds);
@@ -3334,6 +3458,7 @@ const App = () => {
     calibratedMapLayerTransformsRef.current = [];
     lastCalibrationLocationSyncKeyRef.current = '';
     setMapCalibrationPoints([]);
+    writeCachedMapCalibrationPoints([]);
 
     if (previousCalibratedMapLayerIds.length > 0) {
       await downgradeCurrentUserLocationsForMapLayers(previousCalibratedMapLayerIds);
@@ -4043,6 +4168,9 @@ const App = () => {
     setTribe(null);
     setTribeMemberLocations([]);
     setFavoriteItems([]);
+    favoriteItemsRef.current = [];
+    hasPendingFavoriteSyncRef.current = false;
+    lastSyncedFavoritesRef.current = serializeFavoriteItems([]);
     setIsLiveLocationSharing(false);
     setLiveLocationRemainingMinutes(null);
     resetBrowseState();
@@ -4502,7 +4630,6 @@ const App = () => {
       toggleReviewSuggestionFavorite: handleToggleReviewSuggestionFavorite,
       removeReviewFavorite,
       onOpenTimetableConflicts: handleOpenTimetableConflicts,
-      onConflictNotificationCountChange: setReviewConflictNotificationCount,
       ignoredConflictIds: ignoredReviewConflictIds,
       onIgnoreConflict: handleIgnoreReviewConflict,
       onRestoreConflict: handleRestoreReviewConflict,
@@ -4580,6 +4707,7 @@ const App = () => {
       favoriteCount: favoriteItems.length,
       lineups: availableLineupSources,
       selectedLineupKey,
+      pwaInstall,
       isAdmin,
       pendingLineupCount,
       onSelectLineup: handleSelectLineup,
@@ -4646,6 +4774,7 @@ const App = () => {
     settingsTribeLocations,
     pendingLineupCount,
     pendingTribeInviteCode,
+    pwaInstall,
     resetFavorites,
     selectedLineupKey,
     tempLineupSource,

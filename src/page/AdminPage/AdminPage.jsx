@@ -5,9 +5,13 @@ import {
   CircleNotchIcon,
   DownloadSimpleIcon,
   EyeIcon,
+  MapTrifoldIcon,
+  PencilSimpleIcon,
   PlusIcon,
   ProhibitIcon,
+  StackIcon,
   TrashIcon,
+  UploadSimpleIcon,
 } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import Box from '@/components/layout/Box';
@@ -89,13 +93,12 @@ const getLineupEventEditionName = (lineup) => (
 
 const getLineupPayloadUpdatedAt = (lineup) => lineup.payload?.updatedAt ?? null;
 
-const getLineupTitle = (lineup) => {
-  const payloadUpdatedAt = getLineupPayloadUpdatedAt(lineup);
-  const title = getLineupEventEditionName(lineup);
+const getLineupTitle = (lineup) => getLineupEventEditionName(lineup);
 
-  return payloadUpdatedAt
-    ? `${title} (${formatDateTime(payloadUpdatedAt)})`
-    : title;
+const getLineupUpdatedMeta = (lineup) => {
+  const payloadUpdatedAt = getLineupPayloadUpdatedAt(lineup);
+
+  return payloadUpdatedAt ? `Updated at: ${formatDateTime(payloadUpdatedAt)}` : '';
 };
 
 const getLineupPublishedMeta = (lineup) => (
@@ -398,7 +401,7 @@ const AdminPage = ({
         </Alert>
       ) : null}
 
-      <Box background="surface" title="Manual lineup editing">
+      <Box background="surface" title="Manual lineup editing" titleIcon={PencilSimpleIcon}>
         <Box gap="var(--dq-ui-space-md)">
           <Switch
             label="Allow manual lineup edit"
@@ -426,7 +429,7 @@ const AdminPage = ({
         </Box>
       </Box>
 
-      <Box background="surface" title="Map calibration">
+      <Box background="surface" title="Map calibration" titleIcon={MapTrifoldIcon}>
         <Box gap="var(--dq-ui-space-md)">
           <p className="dq-admin-page__muted">
             Calibrate festival maps with real GPS points before enabling live position sharing.
@@ -450,7 +453,7 @@ const AdminPage = ({
         </Box>
       </Box>
 
-      <Box background="surface" title="Available lineups">
+      <Box background="surface" title="Available lineups" titleIcon={StackIcon}>
         <Box gap="var(--dq-ui-space-sm)">
           {displayedLineups.length === 0 ? (
             <p className="dq-admin-page__muted">No Supabase lineup has been loaded yet.</p>
@@ -498,6 +501,11 @@ const AdminPage = ({
                     {formatLineupStatus(lineup.status)}
                   </Badge>
                 </Box>
+                {getLineupUpdatedMeta(lineup) ? (
+                  <span className="dq-admin-page__lineup-meta">
+                    {getLineupUpdatedMeta(lineup)}
+                  </span>
+                ) : null}
                 {getLineupPublishedMeta(lineup) ? (
                   <span className="dq-admin-page__lineup-meta">
                     {getLineupPublishedMeta(lineup)}
@@ -584,7 +592,7 @@ const AdminPage = ({
         </Box>
       </Box>
 
-      <Box background="surface" title="Manual lineup fetch">
+      <Box background="surface" title="Manual lineup fetch" titleIcon={ArrowClockwiseIcon}>
         <Box gap="var(--dq-ui-space-lg)">
           {fetchResult ? (
             <Alert variant={getFetchResultVariant(fetchResult)} title={getFetchResultTitle(fetchResult)}>
@@ -606,7 +614,7 @@ const AdminPage = ({
         </Box>
       </Box>
 
-      <Box background="surface" title="Manual JSON import">
+      <Box background="surface" title="Manual JSON import" titleIcon={UploadSimpleIcon}>
         <FileInput
           label="Lineup JSON"
           description="Fallback path when the server worker is unavailable. The imported lineup is added as pending."

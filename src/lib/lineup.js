@@ -29,6 +29,7 @@ const DEFAULT_FESTIVAL_DAY_START_HOUR = 6;
 const DEFAULT_FESTIVAL_DAY_END_HOUR = 6;
 const INSANE_SCHEDULE_ID_SUFFIX_PATTERN = /_\d{14,17}$/;
 const REVIEW_SUGGESTION_FAVORITE_KEY_SUFFIX = ':review-suggestion';
+const CONFLICT_OVERLAP_THRESHOLD = 0.25;
 const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
@@ -528,6 +529,125 @@ export function hasScheduledDate(item) {
 
 export function hasCompleteSchedule(item) {
   return parseEntryDateTime(item?.startAt) !== null && parseEntryDateTime(item?.endAt) !== null;
+}
+
+function compareReviewConflictEntries(leftItem, rightItem) {
+  return (
+    (leftItem.dayOrder ?? 999) - (rightItem.dayOrder ?? 999) ||
+    String(leftItem.startAt ?? '').localeCompare(String(rightItem.startAt ?? '')) ||
+    String(leftItem.stage ?? '').localeCompare(String(rightItem.stage ?? '')) ||
+    getEntryDisplayName(leftItem).localeCompare(getEntryDisplayName(rightItem))
+  );
+}
+
+export function entriesHaveMeaningfulConflict(leftEntry, rightEntry, ignoreSmallConflicts) {
+  const leftStart = parseEntryDateTime(leftEntry?.startAt);
+  const leftEnd = parseEntryDateTime(leftEntry?.endAt);
+  const rightStart = parseEntryDateTime(rightEntry?.startAt);
+  const rightEnd = parseEntryDateTime(rightEntry?.endAt);
+
+  if (
+    leftStart === null ||
+    leftEnd === null ||
+    rightStart === null ||
+    rightEnd === null ||
+    leftEnd <= leftStart ||
+    rightEnd <= rightStart
+  ) {
+    return false;
+  }
+
+  const overlapDuration = Math.min(leftEnd, rightEnd) - Math.max(leftStart, rightStart);
+
+  if (overlapDuration <= 0) {
+    return false;
+  }
+
+  if (!ignoreSmallConflicts) {
+    return true;
+  }
+
+  const largestDuration = Math.max(leftEnd - leftStart, rightEnd - rightStart);
+
+  return largestDuration > 0 && overlapDuration > largestDuration * CONFLICT_OVERLAP_THRESHOLD;
+}
+
+export function getConflictGroupId(entries) {
+  return entries.map((entry) => entry.id).join('__');
+}
+
+function getConflictKey(leftId, rightId) {
+  return [leftId, rightId].sort().join('__');
+}
+
+export function getMaximalConflictCliques(entries, ignoreSmallConflicts) {
+  const conflictKeys = new Set();
+
+  entries.forEach((entry, entryIndex) => {
+    entries.slice(entryIndex + 1).forEach((candidateEntry) => {
+      if (entriesHaveMeaningfulConflict(entry, candidateEntry, ignoreSmallConflicts)) {
+        conflictKeys.add(getConflictKey(entry.id, candidateEntry.id));
+      }
+    });
+  });
+
+  const cliques = [];
+
+  const expandClique = (clique, candidates) => {
+    if (candidates.length === 0) {
+      if (clique.length > 1) {
+        cliques.push(clique);
+      }
+
+      return;
+    }
+
+    candidates.forEach((candidateEntry, candidateIndex) => {
+      const nextClique = [...clique, candidateEntry];
+      const nextCandidates = candidates
+        .slice(candidateIndex + 1)
+        .filter((nextCandidateEntry) => (
+          nextClique.every((cliqueEntry) => (
+            conflictKeys.has(getConflictKey(cliqueEntry.id, nextCandidateEntry.id))
+          ))
+        ));
+
+      expandClique(nextClique, nextCandidates);
+    });
+  };
+
+  expandClique([], entries);
+
+  return cliques.filter((clique) => (
+    !cliques.some((candidateClique) => (
+      candidateClique.length > clique.length &&
+      clique.every((entry) => candidateClique.some((candidateEntry) => candidateEntry.id === entry.id))
+    ))
+  ));
+}
+
+export function getTimetableConflictGroups(entries, ignoreSmallConflicts) {
+  const entriesByDay = entries.slice().sort(compareReviewConflictEntries).reduce((groups, entry) => {
+    const dayLabel = getEntryDayLabel(entry);
+    const dayEntries = groups.get(dayLabel) ?? [];
+
+    dayEntries.push(entry);
+    groups.set(dayLabel, dayEntries);
+
+    return groups;
+  }, new Map());
+
+  return Array.from(entriesByDay.values()).flatMap((dayEntries) => (
+    getMaximalConflictCliques(dayEntries, ignoreSmallConflicts).map((clique) => (
+      clique.slice().sort(compareReviewConflictEntries)
+    ))
+  ));
+}
+
+export function getActiveTimetableConflictCount(entries, ignoreSmallConflicts, ignoredConflictIds = new Set()) {
+  return getTimetableConflictGroups(entries, ignoreSmallConflicts)
+    .filter((group) => !ignoredConflictIds.has(getConflictGroupId(group)))
+    .length;
 }
 
 function hasScheduleChange(savedFavorite, currentEntry) {
