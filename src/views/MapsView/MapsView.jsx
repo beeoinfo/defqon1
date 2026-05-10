@@ -13,6 +13,7 @@ import Box from '@/components/layout/Box';
 import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import Button from '@/components/primitives/Button';
+import useCachedImageUrl from '@/hooks/useCachedImageUrl';
 import {
   buildMapCalibrationTransform,
   getGpsDistanceMeters,
@@ -30,6 +31,8 @@ const MAPBOX_DEFAULT_BEARING = -36;
 const IMAGE_MAP_DEFAULT_ZOOM = 15;
 const IMAGE_MAP_MAX_COORDINATE_SPAN = 0.02;
 const FEATURE_POPOVER_TIMEOUT_MS = 3000;
+const MAP_STATUS_AUTO_HIDE_MS = 5000;
+const MAP_IMAGE_CACHE_NAME = 'beeoinfo-map-images-v1';
 const LONG_PRESS_DELAY_MS = 700;
 const LONG_PRESS_MOVE_TOLERANCE_PX = 2;
 const TRIBE_LOCATION_CLUSTER_DISTANCE_PX = 46;
@@ -44,6 +47,7 @@ const DIRECTION_GPS_OPTIONS = {
 let mapboxGlLoaderPromise = null;
 const styleDefinitionCache = new Map();
 const imageDimensionsCache = new Map();
+const imageObjectUrlCache = new Map();
 
 const decodeBase64Url = (value) => {
   if (!value) {
@@ -106,6 +110,108 @@ const parseMapboxStyleUrl = (styleUrl) => {
 };
 
 const isImageMapLayer = (layer) => layer?.type === 'image' && Boolean(layer?.imageUrl);
+const isBrowserOffline = () => (
+  typeof navigator !== 'undefined' && navigator.onLine === false
+);
+
+const MapAvatarImage = ({ src, alt, className }) => {
+  const cachedAvatarSrc = useCachedImageUrl(src);
+
+  if (!cachedAvatarSrc) {
+    return null;
+  }
+
+  return (
+    <img
+      src={cachedAvatarSrc}
+      alt={alt}
+      className={className}
+    />
+  );
+};
+
+const cacheMapImageResponse = async (imageUrl, response) => {
+  if (typeof window === 'undefined' || !window.caches || !response || !response.ok) {
+    return;
+  }
+
+  const cache = await window.caches.open(MAP_IMAGE_CACHE_NAME);
+  await cache.put(imageUrl, response.clone());
+};
+
+const cacheMapLayerImages = async (mapLayers) => {
+  if (typeof window === 'undefined' || !window.caches) {
+    return;
+  }
+
+  const imageUrls = Array.from(new Set(
+    mapLayers
+      .filter(isImageMapLayer)
+      .map((layer) => layer.imageUrl)
+      .filter(Boolean)
+  ));
+
+  if (imageUrls.length === 0) {
+    return;
+  }
+
+  await Promise.allSettled(imageUrls.map((imageUrl) => fetchMapImageResponse(imageUrl)));
+};
+
+const getCachedMapImageResponse = async (imageUrl) => {
+  if (typeof window === 'undefined' || !window.caches) {
+    return null;
+  }
+
+  const cache = await window.caches.open(MAP_IMAGE_CACHE_NAME);
+  return cache.match(imageUrl);
+};
+
+const fetchMapImageResponse = async (imageUrl) => {
+  if (isBrowserOffline()) {
+    return getCachedMapImageResponse(imageUrl);
+  }
+
+  try {
+    const response = await fetch(imageUrl);
+
+    if (response.ok) {
+      await cacheMapImageResponse(imageUrl, response);
+      return response;
+    }
+  } catch {
+    return getCachedMapImageResponse(imageUrl);
+  }
+
+  return getCachedMapImageResponse(imageUrl);
+};
+
+const getMapImageObjectUrl = async (imageUrl) => {
+  if (typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+    return imageUrl;
+  }
+
+  const cachedObjectUrl = imageObjectUrlCache.get(imageUrl);
+
+  if (cachedObjectUrl) {
+    return cachedObjectUrl;
+  }
+
+  const response = await fetchMapImageResponse(imageUrl);
+
+  if (!response) {
+    if (isBrowserOffline()) {
+      throw new Error('This map image is not available offline yet. Open it once while online.');
+    }
+
+    return imageUrl;
+  }
+
+  const objectUrl = URL.createObjectURL(await response.blob());
+  imageObjectUrlCache.set(imageUrl, objectUrl);
+
+  return objectUrl;
+};
 
 const normalizeMapLayerDay = (value) => (
   String(value ?? '')
@@ -679,14 +785,15 @@ const normalizeStyleDefinition = (styleDefinition, owner, styleId, layer) => {
 
 const getStyleDefinition = async (layer) => {
   if (isImageMapLayer(layer)) {
-    const imageDimensions = await loadImageDimensions(layer.imageUrl);
+    const imageSourceUrl = await getMapImageObjectUrl(layer.imageUrl);
+    const imageDimensions = await loadImageDimensions(imageSourceUrl);
 
     return {
       version: 8,
       sources: {
         'map-image': {
           type: 'image',
-          url: layer.imageUrl,
+          url: imageSourceUrl,
           coordinates: getImageMapCoordinates(imageDimensions),
         },
       },
@@ -776,6 +883,7 @@ const focusMapOnLayer = (map, layer, animate = true) => {
 const MapsView = ({
   mapLayers = [],
   selectedDay = '',
+  isOffline = false,
   tribeLocations = [],
   currentUserId = null,
   focusTribeLocationUserId = null,
@@ -799,6 +907,7 @@ const MapsView = ({
   );
   const [viewerState, setViewerState] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  const [hiddenMapStatusKey, setHiddenMapStatusKey] = useState('');
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [tribeLocationGroups, setTribeLocationGroups] = useState([]);
   const [selectedTribeLocationGroup, setSelectedTribeLocationGroup] = useState(null);
@@ -859,6 +968,40 @@ const MapsView = ({
     })),
     [mapLayers]
   );
+  const mapStatusKey = (viewerState === 'error' || viewerState === 'unsupported')
+    ? `${viewerState}:${errorMessage || 'map-unavailable'}`
+    : '';
+  const shouldShowMapStatus = Boolean(mapStatusKey && hiddenMapStatusKey !== mapStatusKey);
+
+  useEffect(() => {
+    cacheMapLayerImages(mapLayers).catch(() => {});
+  }, [mapLayers]);
+
+  useEffect(() => {
+    if (!mapStatusKey) {
+      setHiddenMapStatusKey('');
+      return undefined;
+    }
+
+    setHiddenMapStatusKey('');
+    const timeout = window.setTimeout(() => {
+      setHiddenMapStatusKey(mapStatusKey);
+    }, MAP_STATUS_AUTO_HIDE_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [mapStatusKey]);
+
+  useEffect(() => {
+    if (!locationErrorMessage) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setLocationErrorMessage('');
+    }, MAP_STATUS_AUTO_HIDE_MS);
+
+    return () => window.clearTimeout(timeout);
+  }, [locationErrorMessage]);
 
   useEffect(() => {
     isCalibrationModeRef.current = isCalibrationMode;
@@ -1044,6 +1187,11 @@ const MapsView = ({
 
   const handleLongPressStart = useEffectEvent((event) => {
     if (isCalibrationModeRef.current) {
+      clearLongPress();
+      return;
+    }
+
+    if (isOffline) {
       clearLongPress();
       return;
     }
@@ -1643,7 +1791,7 @@ const MapsView = ({
               title={groupLabel}
               onClick={() => handleOpenTribeLocationGroup(group)}
             >
-              <img
+              <MapAvatarImage
                 src={primaryLocation.avatarUrl}
                 alt=""
                 className="dq-maps-view__tribe-marker-avatar"
@@ -1754,7 +1902,7 @@ const MapsView = ({
             </Button>
           </Box>
         </Box>
-      ) : activeCalibrationPoints.length >= 3 ? (
+      ) : !isOffline && activeCalibrationPoints.length >= 3 ? (
         <Button
           className={[
             'dq-maps-view__live-button',
@@ -1825,7 +1973,7 @@ const MapsView = ({
         />
       ) : null}
 
-      {viewerState === 'error' || viewerState === 'unsupported' ? (
+      {shouldShowMapStatus ? (
         <Box
           className="dq-maps-view__status dq-maps-view__status--error"
           direction="row"

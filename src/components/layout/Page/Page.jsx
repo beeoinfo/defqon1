@@ -19,6 +19,7 @@ const Page = ({
   hideHeaderBrand = false,
   showCloseButton = true,
   inlineCloseButton = false,
+  isOffline = false,
   isHidden = false,
   transitionState = 'open',
   className = '',
@@ -57,6 +58,7 @@ const Page = ({
         inlineCloseButton={inlineCloseButton}
         contentTransitionState={transitionState}
         onClosePage={onClose}
+        isOffline={isOffline}
       />
 
       <Box component="div" className="dq-layout-page__body">

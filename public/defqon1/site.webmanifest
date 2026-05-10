@@ -10,13 +10,25 @@
       "src": "/defqon1/web-app-manifest-192x192.png?v=20260510",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/defqon1/web-app-manifest-512x512.png?v=20260510",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/defqon1/web-app-maskable-192x192.png?v=20260510-maskable",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/defqon1/web-app-maskable-512x512.png?v=20260510-maskable",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "theme_color": "#1b1f21",

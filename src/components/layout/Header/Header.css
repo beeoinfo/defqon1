@@ -7,6 +7,7 @@
 }
 
 .dq-layout-header__surface {
+  padding-top: env(safe-area-inset-top, 0px);
   border-bottom: 1px solid var(--dq-ui-border-subtle);
   background: var(--dq-ui-background-blur-surface);
   backdrop-filter: var(--dq-ui-background-blur-filter-floating);
@@ -184,6 +185,24 @@ button.dq-layout-header__brand {
   background: var(--dq-ui-background-blur-surface);
   backdrop-filter: var(--dq-ui-background-blur-filter-floating);
   -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+}
+
+.dq-layout-header__offline-banner {
+  position: fixed;
+  inset-inline: 0;
+  top: var(--dq-layout-header-surface-offset, var(--dq-layout-header-fallback-offset, 77px));
+  z-index: 119;
+  box-sizing: border-box;
+  min-height: 26px;
+  padding: 4px 16px;
+  color: var(--dq-ui-danger-text-soft);
+  background: var(--dq-ui-danger-surface-strong);
+  backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  -webkit-backdrop-filter: var(--dq-ui-background-blur-filter-floating);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .dq-layout-header__mobile-navbar {

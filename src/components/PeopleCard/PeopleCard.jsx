@@ -1,3 +1,4 @@
+import useCachedImageUrl from '@/hooks/useCachedImageUrl';
 import Badge from '../primitives/Badge';
 import Box from '../layout/Box';
 import './PeopleCard.css';
@@ -16,6 +17,8 @@ const PeopleCard = ({
   style,
   ...props
 }) => {
+  const cachedAvatarSrc = useCachedImageUrl(avatarSrc);
+
   return (
     <Box
       {...props}
@@ -34,11 +37,13 @@ const PeopleCard = ({
         justify="center"
         className="dq-people-card__avatar-shell"
       >
-        <img
-          src={avatarSrc}
-          alt={avatarAlt}
-          className="dq-people-card__avatar"
-        />
+        {cachedAvatarSrc ? (
+          <img
+            src={cachedAvatarSrc}
+            alt={avatarAlt}
+            className="dq-people-card__avatar"
+          />
+        ) : null}
       </Box>
 
       <Box

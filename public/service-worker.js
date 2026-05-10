@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'beeoinfo-pwa';
-const APP_CACHE = `${CACHE_PREFIX}-app-v3`;
+const APP_CACHE = `${CACHE_PREFIX}-app-v4`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-v1`;
 const NAVIGATION_FALLBACK_URL = '/';
 const APP_SHELL_URLS = [
@@ -16,13 +16,26 @@ const isSameOriginRequest = (request) => {
   }
 };
 
+const isMapboxRequest = (request) => {
+  try {
+    const url = new URL(request.url);
+    return url.hostname === 'api.mapbox.com' || url.hostname.endsWith('.tiles.mapbox.com');
+  } catch {
+    return false;
+  }
+};
+
 const cacheResponse = async (cacheName, request, response) => {
   if (!response || response.status >= 400) {
     return;
   }
 
   const cache = await caches.open(cacheName);
-  await cache.put(request, response.clone());
+  try {
+    await cache.put(request, response.clone());
+  } catch {
+    // Some opaque third-party responses are not cacheable in every browser context.
+  }
 };
 
 const networkFirst = async (request, fallbackUrl = null) => {
@@ -79,6 +92,28 @@ const staleWhileRevalidate = async (request) => {
   });
 };
 
+const cacheFirst = async (request) => {
+  const cachedResponse = await caches.match(request);
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const response = await fetch(request);
+    await cacheResponse(RUNTIME_CACHE, request, response);
+    return response;
+  } catch {
+    return new Response('Offline', {
+      status: 503,
+      statusText: 'Offline',
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
+  }
+};
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(APP_CACHE)
@@ -112,18 +147,25 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (!isSameOriginRequest(request)) {
+  if (
+    request.destination === 'image' ||
+    request.destination === 'font' ||
+    isMapboxRequest(request)
+  ) {
+    event.respondWith(cacheFirst(request));
     return;
   }
 
   if (
     request.destination === 'script' ||
     request.destination === 'style' ||
-    request.destination === 'image' ||
-    request.destination === 'font' ||
     request.destination === 'manifest'
   ) {
     event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  if (!isSameOriginRequest(request)) {
     return;
   }
 

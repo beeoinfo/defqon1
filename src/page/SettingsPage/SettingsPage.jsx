@@ -195,7 +195,7 @@ const SettingsPage = ({
 
   return (
     <Box className="dq-settings-page" gap="var(--dq-settings-page-gap)">
-      <Box title="Profile" titleIcon={UserCircleIcon}>
+      <Box>
         <Profile
           firstName={profile?.first_name ?? ''}
           lastName={profile?.last_name ?? ''}

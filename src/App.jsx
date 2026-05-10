@@ -32,6 +32,7 @@ import Button from '@/components/primitives/Button';
 import { DateTimeInput, SearchInput, SelectInput, TextInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
+import useOnlineStatus from '@/hooks/useOnlineStatus';
 import usePwaInstallPrompt from '@/hooks/usePwaInstallPrompt';
 import usePullToRefresh from '@/hooks/usePullToRefresh';
 import { ELECTRONIC_FESTIVAL_STYLES_DB } from './data/electronicFestivalStylesDb';
@@ -84,7 +85,7 @@ import {
   getNextPageStackOnOpen,
   getNextPageStackOnClose,
 } from './lib/pageStack';
-import { getPresetAvatarUrl, resolveProfileAvatarUrl } from './lib/presetAvatars';
+import { getPresetAvatarUrl, presetAvatarUrls, resolveProfileAvatarUrl } from './lib/presetAvatars';
 import {
   createCurrentUserTribe,
   deleteCurrentUserTribeLocation,
@@ -154,6 +155,11 @@ const LIVE_LOCATION_REFRESH_MS = 8000;
 const LIVE_LOCATION_REMAINING_TICK_MS = 30 * 1000;
 const DEFAULT_FESTIVAL_DAY_START_HOUR = 6;
 const DEFAULT_FESTIVAL_DAY_END_HOUR = 6;
+const MAPBOX_GL_ASSET_URLS = [
+  'https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.js',
+  'https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css',
+];
+const MAP_IMAGE_CACHE_NAME = 'beeoinfo-map-images-v1';
 const normalizeLineupText = (value) => String(value ?? '')
   .normalize('NFKD')
   .replace(/[\u0300-\u036f]/g, '')
@@ -547,6 +553,60 @@ const getFallbackMapImageLayers = (siteSlug) => (
     .filter(Boolean)
     .sort((left, right) => left.label.localeCompare(right.label))
 );
+
+const cacheAssetUrl = async (cache, cacheUrl) => {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return;
+  }
+
+  try {
+    const response = await fetch(cacheUrl);
+
+    if (response && response.status < 400) {
+      await cache.put(cacheUrl, response.clone());
+      return;
+    }
+  } catch {
+    // Retry below with no-cors for public third-party images such as uploaded avatars.
+  }
+
+  try {
+    const response = await fetch(cacheUrl, { mode: 'no-cors' });
+
+    if (response) {
+      await cache.put(cacheUrl, response.clone());
+    }
+  } catch {
+    // Ignore assets that cannot be cached from this browser context.
+  }
+};
+
+const cacheMapLayerImages = async (mapLayers, extraUrls = []) => {
+  if (typeof window === 'undefined' || !window.caches) {
+    return;
+  }
+
+  const cacheUrls = Array.from(new Set(
+    [
+      ...MAPBOX_GL_ASSET_URLS,
+      activeSiteAssets.logoSrc,
+      ...presetAvatarUrls,
+      ...extraUrls,
+      ...mapLayers
+        .filter((layer) => layer?.type === 'image' && layer.imageUrl)
+        .map((layer) => layer.imageUrl),
+    ]
+      .filter(Boolean)
+  ));
+
+  if (cacheUrls.length === 0) {
+    return;
+  }
+
+  const cache = await window.caches.open(MAP_IMAGE_CACHE_NAME);
+  await Promise.allSettled(cacheUrls.map((cacheUrl) => cacheAssetUrl(cache, cacheUrl)));
+};
+
 const getEntryTimestamp = (value) => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
@@ -1224,6 +1284,7 @@ const AppBaseView = memo(({
   inlineHeaderCloseButton,
   onCloseHeaderContent,
   headerTransitionState,
+  isOffline,
   isHidden,
   profileName,
   profileSubtitle,
@@ -1261,6 +1322,7 @@ const AppBaseView = memo(({
       closeHeaderButtonAriaLabel="Close search"
       onCloseHeaderContent={onCloseHeaderContent}
       headerTransitionState={headerTransitionState}
+      isOffline={isOffline}
       isHidden={isHidden}
       className={`dq-app-view--${activeView}`}
     >
@@ -1280,6 +1342,7 @@ const AppPageLayer = memo(({
   onClosePage,
   onOpenPage,
   onOpenView,
+  isOffline,
   isHidden,
   transitionState,
   pagePropsByType,
@@ -1308,6 +1371,7 @@ const AppPageLayer = memo(({
       hideHeaderBrand={pageDefinition.hideHeaderBrand === true}
       showCloseButton={pageDefinition.showCloseButton !== false}
       inlineCloseButton={pageDefinition.inlineCloseButton === true}
+      isOffline={isOffline}
       isHidden={isHidden}
       transitionState={transitionState}
       layerIndex={layerIndex}
@@ -1431,6 +1495,8 @@ const App = () => {
   const [pendingAction, setPendingAction] = useState(null);
   const attemptedInviteJoinKeyRef = useRef('');
   const pwaInstall = usePwaInstallPrompt();
+  const isOnline = useOnlineStatus();
+  const isOffline = !isOnline;
 
   useDocumentScrollLock(hasRenderedPages);
 
@@ -1632,6 +1698,11 @@ const App = () => {
     () => selectedMapLayers.length > 0,
     [selectedMapLayers]
   );
+
+  useEffect(() => {
+    cacheMapLayerImages(selectedMapLayers).catch(() => {});
+  }, [selectedMapLayers]);
+
   const hasLineup = Boolean(selectedLineup);
   const isLatestLineupSelected = selectedLineup?.isLatest ?? false;
   const isPreviewLineupSelected = selectedLineup?.status === 'preview' || selectedLineup?.status === 'temp';
@@ -4513,6 +4584,18 @@ const App = () => {
     return resolveProfileAvatarUrl(activeProfile);
   }, [activeProfile, authUser]);
 
+  useEffect(() => {
+    const tribeAvatarUrls = (tribe?.members ?? [])
+      .map((member) => resolveProfileAvatarUrl(member.profile))
+      .filter(Boolean);
+    const mapAvatarUrls = mapTribeLocations
+      .map((location) => location.avatarUrl)
+      .filter(Boolean);
+    const avatarUrls = Array.from(new Set([...tribeAvatarUrls, ...mapAvatarUrls]));
+
+    cacheMapLayerImages([], [profileImageSrc, ...avatarUrls]).catch(() => {});
+  }, [mapTribeLocations, profileImageSrc, tribe?.members]);
+
   const profileBadge = isAdmin && pendingLineupCount > 0 ? pendingLineupCount : null;
 
   const searchHeaderContent = useMemo(() => (
@@ -4600,6 +4683,7 @@ const App = () => {
     maps: {
       mapLayers: selectedMapLayers,
       selectedDay: defaultBrowseDay,
+      isOffline,
       tribeLocations: mapTribeLocations,
       currentUserId: authUser?.id ?? null,
       focusTribeLocationUserId: focusedTribeLocationUserId,
@@ -4666,6 +4750,7 @@ const App = () => {
     handleToggleReviewSuggestionFavorite,
     ignoredReviewConflictIds,
     ignoreSmallConflicts,
+    isOffline,
     isLiveLocationSharing,
     isMapCalibrationMode,
     lineupFilterBar,
@@ -4841,6 +4926,7 @@ const App = () => {
       hideHeaderProfile={isSearchHeaderMode}
       keepMobileNavbarVisible={shouldKeepMobileNavbarVisible}
       headerTransitionState={baseViewHeaderTransitionState}
+      isOffline={isOffline}
       isHidden={shouldHideBaseView}
       profileName={profileName}
       profileSubtitle={profileSubtitle}
@@ -4853,6 +4939,7 @@ const App = () => {
     baseViewHeaderTransitionState,
     handleProfileButtonClick,
     isSearchHeaderMode,
+    isOffline,
     navbarItems,
     openHomeView,
     openSearch,
@@ -4918,6 +5005,7 @@ const App = () => {
           onClosePage={closePage}
           onOpenPage={openPage}
           onOpenView={openView}
+          isOffline={isOffline}
           isHidden={getIsPageHidden(index)}
           transitionState={page.transitionState}
           pagePropsByType={pagePropsByType}

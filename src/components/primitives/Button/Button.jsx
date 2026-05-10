@@ -1,4 +1,5 @@
 import { cloneElement, forwardRef, isValidElement } from 'react';
+import useCachedImageUrl from '@/hooks/useCachedImageUrl';
 import { buildGhostButtonColorVars } from '../../../lib/colorStyles';
 import Badge from '../Badge';
 import './Button.css';
@@ -159,10 +160,11 @@ const Button = forwardRef(({
   style,
   ...props
 }, ref) => {
+  const cachedImageSrc = useCachedImageUrl(imageSrc);
   const visualState = resolveButtonVisualState({
     children,
     icon: Icon,
-    imageSrc,
+    imageSrc: cachedImageSrc,
     subtitle,
     size,
     radius,
@@ -199,7 +201,7 @@ const Button = forwardRef(({
         Icon={visualState.Icon}
         iconWeight={iconWeight}
         iconPosition={iconPosition}
-        imageSrc={imageSrc}
+        imageSrc={cachedImageSrc}
         imageAlt={imageAlt}
         resolvedSubtitle={visualState.resolvedSubtitle}
         hasImage={visualState.hasImage}

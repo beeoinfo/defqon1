@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import useCachedImageUrl from '@/hooks/useCachedImageUrl';
 import Box from '../layout/Box';
 import Button from '../primitives/Button';
 import { FileInput, TextInput } from '../primitives/forms';
@@ -46,6 +47,7 @@ const Profile = ({
   const displayName = getDisplayName(savedProfile.firstName, savedProfile.lastName);
   const displayUsername = String(savedProfile.username).trim() || 'username';
   const resolvedAvatarAlt = avatarAlt || displayName;
+  const cachedDraftAvatarSrc = useCachedImageUrl(draftAvatarSrc);
   const hasFormChanges = useMemo(() => (
     draftFirstName !== savedProfile.firstName ||
     draftLastName !== savedProfile.lastName ||
@@ -168,8 +170,8 @@ const Profile = ({
     <Box className={['dq-profile', className].filter(Boolean).join(' ')} align="center">
       <Box className="dq-profile__summary" align="center" gap="var(--dq-ui-space-lg)">
         <Box component="span" slot="content" className="dq-profile__avatar-shell">
-          {draftAvatarSrc ? (
-            <img src={draftAvatarSrc} alt={resolvedAvatarAlt} className="dq-profile__avatar" />
+          {cachedDraftAvatarSrc ? (
+            <img src={cachedDraftAvatarSrc} alt={resolvedAvatarAlt} className="dq-profile__avatar" />
           ) : null}
           <Button
             className="dq-profile__avatar-action"

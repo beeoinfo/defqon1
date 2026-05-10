@@ -7,6 +7,7 @@ import { resolveSiteRegistryEntry } from './src/sites/siteRegistry.js'
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url))
 const assetVersion = '20260510'
+const maskableAssetVersion = '20260510-maskable'
 
 const getSiteAppName = (site) => `${site.name === 'DEFQON.1' ? 'Defqon.1' : site.name} Companion`
 
@@ -69,13 +70,25 @@ const buildSiteManifest = (site) => {
         src: `/${site.slug}/web-app-manifest-192x192.png?v=${assetVersion}`,
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'any maskable',
+        purpose: 'any',
       },
       {
         src: `/${site.slug}/web-app-manifest-512x512.png?v=${assetVersion}`,
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'any maskable',
+        purpose: 'any',
+      },
+      {
+        src: `/${site.slug}/web-app-maskable-192x192.png?v=${maskableAssetVersion}`,
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: `/${site.slug}/web-app-maskable-512x512.png?v=${maskableAssetVersion}`,
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
       },
     ],
   }

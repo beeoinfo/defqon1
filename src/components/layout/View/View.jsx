@@ -28,6 +28,7 @@ const View = ({
   closeHeaderButtonAriaLabel = 'Close header content',
   onCloseHeaderContent = null,
   headerTransitionState = 'open',
+  isOffline = false,
   isHidden = false,
   className = '',
   children,
@@ -67,6 +68,7 @@ const View = ({
         closeButtonAriaLabel={closeHeaderButtonAriaLabel}
         onClosePage={onCloseHeaderContent}
         contentTransitionState={headerTransitionState}
+        isOffline={isOffline}
       >
         {null}
       </Header>

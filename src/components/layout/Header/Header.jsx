@@ -53,12 +53,14 @@ const Header = ({
   pageTitle = null,
   onClosePage = null,
   onUserClick = null,
+  isOffline = false,
   className = '',
   children,
   ...props
 }) => {
   const Component = component;
   const surfaceRef = useRef(null);
+  const offlineBannerRef = useRef(null);
   const mobileNavRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -69,17 +71,39 @@ const Header = ({
       return undefined;
     }
 
-    const headerBottom = headerSurface.getBoundingClientRect().bottom;
-    const stickyGap = getPixelCustomProperty(layoutRoot, '--dq-layout-sticky-gap', 14);
+    const syncHeaderOffset = () => {
+      const headerBottom = headerSurface.getBoundingClientRect().bottom;
+      const offlineBannerHeight = offlineBannerRef.current?.getBoundingClientRect().height ?? 0;
+      const stickyGap = getPixelCustomProperty(layoutRoot, '--dq-layout-sticky-gap', 14);
+      const headerOffset = headerBottom + offlineBannerHeight;
 
-    layoutRoot.style.setProperty('--dq-layout-header-offset', `${headerBottom}px`);
-    layoutRoot.style.setProperty('--dq-layout-header-content-offset', `${headerBottom + stickyGap}px`);
+      layoutRoot.style.setProperty('--dq-layout-header-surface-offset', `${headerBottom}px`);
+      layoutRoot.style.setProperty('--dq-layout-header-offset', `${headerOffset}px`);
+      layoutRoot.style.setProperty('--dq-layout-header-content-offset', `${headerOffset + stickyGap}px`);
+    };
+
+    syncHeaderOffset();
+    window.addEventListener('resize', syncHeaderOffset, { passive: true });
+
+    const resizeObserver =
+      typeof ResizeObserver === 'function'
+        ? new ResizeObserver(syncHeaderOffset)
+        : null;
+
+    resizeObserver?.observe(headerSurface);
+
+    if (offlineBannerRef.current) {
+      resizeObserver?.observe(offlineBannerRef.current);
+    }
 
     return () => {
+      window.removeEventListener('resize', syncHeaderOffset);
+      resizeObserver?.disconnect();
+      layoutRoot.style.removeProperty('--dq-layout-header-surface-offset');
       layoutRoot.style.removeProperty('--dq-layout-header-offset');
       layoutRoot.style.removeProperty('--dq-layout-header-content-offset');
     };
-  }, []);
+  }, [isOffline]);
 
   useLayoutEffect(() => {
     const scope = getThemeScope(surfaceRef.current);
@@ -143,135 +167,151 @@ const Header = ({
   );
 
   return (
-    <Component
-      {...props}
-      className={['dq-layout-header', className].filter(Boolean).join(' ')}
-      data-content-transition={contentTransitionState}
-      data-keep-mobile-navbar-visible={keepMobileNavbarVisible ? 'true' : undefined}
-    >
-      <Box ref={surfaceRef} className="dq-layout-header__surface" gap="var(--dq-ui-space-lg)">
-        <Box
-          className="dq-layout-container dq-layout-header__row"
-          justify={shouldRenderInlinePageControls ? 'center' : 'space-between'}
-          direction="row"
-          align="center"
-          gap="16px"
-        >
-          {shouldRenderBrand ? (
-            <Box
-              component={isBrandActionable ? 'button' : 'span'}
-              {...(isBrandActionable ? { type: 'button', onClick: onBrandClick } : {})}
-              className="dq-layout-header__brand dq-layout-header__motion-item dq-layout-header__motion-item--1"
-              direction="row"
-              align="center"
-              gap="12px"
-            >
-              {shouldShowPageTitle ? (
-                <Title component="span" variant="h2" className="dq-layout-header__page-title">
-                  {pageTitle}
-                </Title>
-              ) : (
-                <>
-                  {brandLogoSrc ? (
-                    <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
-                  ) : null}
-                  <Title component="span" variant="h2" className="dq-layout-header__brand-title">
-                    {brandTitle}
+    <>
+      <Component
+        {...props}
+        className={['dq-layout-header', className].filter(Boolean).join(' ')}
+        data-content-transition={contentTransitionState}
+        data-keep-mobile-navbar-visible={keepMobileNavbarVisible ? 'true' : undefined}
+      >
+        <Box ref={surfaceRef} className="dq-layout-header__surface" gap="var(--dq-ui-space-lg)">
+          <Box
+            className="dq-layout-container dq-layout-header__row"
+            justify={shouldRenderInlinePageControls ? 'center' : 'space-between'}
+            direction="row"
+            align="center"
+            gap="16px"
+          >
+            {shouldRenderBrand ? (
+              <Box
+                component={isBrandActionable ? 'button' : 'span'}
+                {...(isBrandActionable ? { type: 'button', onClick: onBrandClick } : {})}
+                className="dq-layout-header__brand dq-layout-header__motion-item dq-layout-header__motion-item--1"
+                direction="row"
+                align="center"
+                gap="12px"
+              >
+                {shouldShowPageTitle ? (
+                  <Title component="span" variant="h2" className="dq-layout-header__page-title">
+                    {pageTitle}
                   </Title>
-                </>
-              )}
-            </Box>
-          ) : null}
+                ) : (
+                  <>
+                    {brandLogoSrc ? (
+                      <img src={brandLogoSrc} alt="" className="dq-layout-header__brand-mark" />
+                    ) : null}
+                    <Title component="span" variant="h2" className="dq-layout-header__brand-title">
+                      {brandTitle}
+                    </Title>
+                  </>
+                )}
+              </Box>
+            ) : null}
 
-          {shouldRenderDesktopNavbar ? (
-            <Box
-              className="dq-layout-header__nav-slot--desktop dq-layout-header__motion-item dq-layout-header__motion-item--2"
-              justify="center"
-            >
-              {navbar ? renderNavbar(navbar) : null}
-            </Box>
-          ) : null}
+            {shouldRenderDesktopNavbar ? (
+              <Box
+                className="dq-layout-header__nav-slot--desktop dq-layout-header__motion-item dq-layout-header__motion-item--2"
+                justify="center"
+              >
+                {navbar ? renderNavbar(navbar) : null}
+              </Box>
+            ) : null}
 
-          {shouldRenderCenterContent ? (
-            <Box
-              className={[
-                'dq-layout-header__center-slot',
-                'dq-layout-header__motion-item',
-                'dq-layout-header__motion-item--2',
-                wideCenterContent ? 'dq-layout-header__center-slot--wide' : '',
-                shouldRenderInlinePageControls ? 'dq-layout-header__center-slot--inline-page' : '',
-              ].filter(Boolean).join(' ')}
-              direction="row"
-              align="center"
-              justify="center"
-              gap="var(--dq-ui-space-sm)"
-            >
-              {centerContent}
-              {shouldRenderInlinePageControls ? (
-                <Button
-                  className="dq-layout-header__inline-close-button"
-                  icon={XIcon}
-                  ariaLabel={closeButtonAriaLabel}
-                  variant="ghost"
-                  size="md"
-                  radius="rounded"
-                  onClick={onClosePage}
-                />
-              ) : null}
-            </Box>
-          ) : null}
+            {shouldRenderCenterContent ? (
+              <Box
+                className={[
+                  'dq-layout-header__center-slot',
+                  'dq-layout-header__motion-item',
+                  'dq-layout-header__motion-item--2',
+                  wideCenterContent ? 'dq-layout-header__center-slot--wide' : '',
+                  shouldRenderInlinePageControls ? 'dq-layout-header__center-slot--inline-page' : '',
+                ].filter(Boolean).join(' ')}
+                direction="row"
+                align="center"
+                justify="center"
+                gap="var(--dq-ui-space-sm)"
+              >
+                {centerContent}
+                {shouldRenderInlinePageControls ? (
+                  <Button
+                    className="dq-layout-header__inline-close-button"
+                    icon={XIcon}
+                    ariaLabel={closeButtonAriaLabel}
+                    variant="ghost"
+                    size="md"
+                    radius="rounded"
+                    onClick={onClosePage}
+                  />
+                ) : null}
+              </Box>
+            ) : null}
 
-          {shouldRenderTrailingProfile ? (
-            <Box
-              className="dq-layout-header__profile dq-layout-header__motion-item dq-layout-header__motion-item--3"
-              justify="flex-end"
-            >
-              {isPageView ? (
-                <Button
-                  icon={XIcon}
-                  ariaLabel={closeButtonAriaLabel}
-                  variant="ghost"
-                  size="md"
-                  onClick={onClosePage}
-                />
-              ) : (
-                <Button
-                  size="lg"
-                  radius="rounded"
-                  icon={profileImageSrc ? null : UserIcon}
-                  imageSrc={profileImageSrc}
-                  imageAlt=""
-                  subtitle={profileSubtitle}
-                  badge={profileBadge}
-                  onClick={onUserClick}
-                >
-                  {profileName}
-                </Button>
-              )}
+            {shouldRenderTrailingProfile ? (
+              <Box
+                className="dq-layout-header__profile dq-layout-header__motion-item dq-layout-header__motion-item--3"
+                justify="flex-end"
+              >
+                {isPageView ? (
+                  <Button
+                    icon={XIcon}
+                    ariaLabel={closeButtonAriaLabel}
+                    variant="ghost"
+                    size="md"
+                    onClick={onClosePage}
+                  />
+                ) : (
+                  <Button
+                    size="lg"
+                    radius="rounded"
+                    icon={profileImageSrc ? null : UserIcon}
+                    imageSrc={profileImageSrc}
+                    imageAlt=""
+                    subtitle={profileSubtitle}
+                    badge={profileBadge}
+                    onClick={onUserClick}
+                  >
+                    {profileName}
+                  </Button>
+                )}
+              </Box>
+            ) : null}
+          </Box>
+
+          {!isPageView && children ? (
+            <Box className="dq-layout-container" gap="var(--dq-ui-space-lg)">
+              {children}
             </Box>
           ) : null}
         </Box>
 
-        {!isPageView && children ? (
-          <Box className="dq-layout-container" gap="var(--dq-ui-space-lg)">
-            {children}
+        {navbar ? (
+          <Box ref={mobileNavRef} className="dq-layout-header__mobile-nav" gap="0">
+            <Box
+              className="dq-layout-header__mobile-nav-shell"
+              gap="0"
+            >
+              <Box className="dq-layout-container" gap="0">
+                {renderNavbar(navbar, 'dq-layout-header__mobile-navbar')}
+              </Box>
+            </Box>
           </Box>
         ) : null}
-      </Box>
+      </Component>
 
-      {navbar ? (
-        <Box ref={mobileNavRef} className="dq-layout-header__mobile-nav" gap="0">
-          <Box
-            className="dq-layout-header__mobile-nav-shell"
-            gap="0"
-          >
-            <Box className="dq-layout-container" gap="0">
-              {renderNavbar(navbar, 'dq-layout-header__mobile-navbar')}
-            </Box>
-          </Box>
+      {isOffline ? (
+        <Box
+          ref={offlineBannerRef}
+          className="dq-layout-header__offline-banner"
+          direction="row"
+          align="center"
+          justify="center"
+          role="status"
+          aria-live="polite"
+        >
+          Offline mode
         </Box>
       ) : null}
-    </Component>
+    </>
   );
 };
 

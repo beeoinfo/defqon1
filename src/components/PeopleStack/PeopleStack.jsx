@@ -1,5 +1,27 @@
 import { PlusIcon } from '@phosphor-icons/react';
+import useCachedImageUrl from '@/hooks/useCachedImageUrl';
 import './PeopleStack.css';
+
+const PeopleStackAvatar = ({ avatar, zIndex }) => {
+  const cachedAvatarSrc = useCachedImageUrl(avatar.src);
+
+  if (!cachedAvatarSrc) {
+    return null;
+  }
+
+  return (
+    <span
+      className="dq-ui-people-stack__avatar-shell"
+      style={{ zIndex }}
+    >
+      <img
+        src={cachedAvatarSrc}
+        alt=""
+        className="dq-ui-people-stack__avatar"
+      />
+    </span>
+  );
+};
 
 const PeopleStack = ({
   avatars = [],
@@ -46,17 +68,11 @@ const PeopleStack = ({
     >
       <span className="dq-ui-people-stack__avatars" aria-hidden="true">
         {visibleAvatars.map((avatar, index) => (
-          <span
+          <PeopleStackAvatar
             key={avatar.id ?? index}
-            className="dq-ui-people-stack__avatar-shell"
-            style={{ zIndex: visibleAvatars.length - index }}
-          >
-            <img
-              src={avatar.src}
-              alt=""
-              className="dq-ui-people-stack__avatar"
-            />
-          </span>
+            avatar={avatar}
+            zIndex={visibleAvatars.length - index}
+          />
         ))}
         {hasHiddenAvatars ? (
           <span
