@@ -27,6 +27,8 @@ const MAPBOX_GL_CSS_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl
 const MAPBOX_DEFAULT_CENTER = [5.752004901493724, 52.436729962158665];
 const MAPBOX_DEFAULT_ZOOM = 16;
 const MAPBOX_DEFAULT_BEARING = -36;
+const IMAGE_MAP_DEFAULT_ZOOM = 15;
+const IMAGE_MAP_MAX_COORDINATE_SPAN = 0.02;
 const FEATURE_POPOVER_TIMEOUT_MS = 3000;
 const LONG_PRESS_DELAY_MS = 700;
 const LONG_PRESS_MOVE_TOLERANCE_PX = 2;
@@ -234,8 +236,9 @@ const loadImageDimensions = (imageUrl) => {
 
 const getImageMapCoordinates = ({ width, height }) => {
   const aspectRatio = width / Math.max(height, 1);
-  const halfWidth = aspectRatio >= 1 ? 1 : aspectRatio;
-  const halfHeight = aspectRatio >= 1 ? 1 / aspectRatio : 1;
+  const halfMaxSpan = IMAGE_MAP_MAX_COORDINATE_SPAN / 2;
+  const halfWidth = aspectRatio >= 1 ? halfMaxSpan : halfMaxSpan * aspectRatio;
+  const halfHeight = aspectRatio >= 1 ? halfMaxSpan / aspectRatio : halfMaxSpan;
 
   return [
     [-halfWidth, halfHeight],
@@ -493,10 +496,6 @@ const getProjectedTribeLocation = (location, activeCalibrationTransform, activeL
     return null;
   }
 
-  if (hasGpsPosition) {
-    return null;
-  }
-
   return {
     ...location,
     mapLongitude: location.longitude,
@@ -735,7 +734,7 @@ const focusMapOnLayer = (map, layer, animate = true) => {
   if (isImageMapLayer(layer)) {
     const camera = {
       center: [0, 0],
-      zoom: Number(layer?.view?.zoom ?? 8),
+      zoom: Number(layer?.view?.zoom ?? IMAGE_MAP_DEFAULT_ZOOM),
       bearing: 0,
       pitch: 0,
       essential: true,
@@ -806,6 +805,7 @@ const MapsView = ({
   const [locationErrorMessage, setLocationErrorMessage] = useState('');
   const [calibrationErrorMessage, setCalibrationErrorMessage] = useState('');
   const [isSavingCalibrationPoint, setIsSavingCalibrationPoint] = useState(false);
+  const [isRemovingCalibrationPoint, setIsRemovingCalibrationPoint] = useState(false);
   const [pendingCalibrationPoint, setPendingCalibrationPoint] = useState(null);
   const [calibrationMarkers, setCalibrationMarkers] = useState([]);
   const [directionPosition, setDirectionPosition] = useState(null);
@@ -837,7 +837,12 @@ const MapsView = ({
   const { owner: activeOwner } = parseMapboxStyleUrl(activeLayer?.styleUrl);
   const isActiveImageLayer = isImageMapLayer(activeLayer);
   const activeCalibrationPoints = useMemo(
-    () => calibrationPoints.filter((point) => point.mapLayerId === activeLayer?.id),
+    () => calibrationPoints
+      .filter((point) => point.mapLayerId === activeLayer?.id)
+      .sort((leftPoint, rightPoint) => (
+        new Date(leftPoint.createdAt ?? leftPoint.updatedAt ?? 0).getTime() -
+        new Date(rightPoint.createdAt ?? rightPoint.updatedAt ?? 0).getTime()
+      )),
     [activeLayer?.id, calibrationPoints]
   );
   const activeCalibrationTransform = useMemo(
@@ -1249,7 +1254,7 @@ const MapsView = ({
                 Number(activeLayer?.center?.longitude ?? (isActiveImageLayer ? 0 : MAPBOX_DEFAULT_CENTER[0])),
                 Number(activeLayer?.center?.latitude ?? (isActiveImageLayer ? 0 : MAPBOX_DEFAULT_CENTER[1])),
               ],
-              zoom: Number(activeLayer?.view?.zoom ?? (isActiveImageLayer ? 8 : MAPBOX_DEFAULT_ZOOM)),
+              zoom: Number(activeLayer?.view?.zoom ?? (isActiveImageLayer ? IMAGE_MAP_DEFAULT_ZOOM : MAPBOX_DEFAULT_ZOOM)),
               bearing: Number(activeLayer?.view?.bearing ?? (isActiveImageLayer ? 0 : MAPBOX_DEFAULT_BEARING)),
               pitch: 0,
               projection: 'mercator',
@@ -1438,6 +1443,22 @@ const MapsView = ({
   }, [activeCalibrationPoints, isCalibrationMode, pendingCalibrationPoint]);
 
   useEffect(() => {
+    if (!isCalibrationMode) {
+      const timeout = window.setTimeout(() => {
+        setPendingCalibrationPoint(null);
+        setCalibrationErrorMessage('');
+        setIsSavingCalibrationPoint(false);
+        setIsRemovingCalibrationPoint(false);
+        calibrationMarkersSignatureRef.current = '';
+      }, 0);
+
+      return () => window.clearTimeout(timeout);
+    }
+
+    return undefined;
+  }, [isCalibrationMode]);
+
+  useEffect(() => {
     if (!focusTribeLocationUserId || !isMapReadyRef.current || tribeLocationGroups.length === 0) {
       return;
     }
@@ -1454,7 +1475,7 @@ const MapsView = ({
     }
 
     const timeout = window.setTimeout(() => {
-      const baseZoom = Number(activeLayer?.view?.zoom ?? (isActiveImageLayer ? 8 : MAPBOX_DEFAULT_ZOOM));
+      const baseZoom = Number(activeLayer?.view?.zoom ?? (isActiveImageLayer ? IMAGE_MAP_DEFAULT_ZOOM : MAPBOX_DEFAULT_ZOOM));
       const targetZoom = Math.max(mapRef.current?.getZoom() ?? baseZoom, baseZoom + TRIBE_LOCATION_FOCUS_ZOOM_OFFSET);
 
       clearFeaturePopover();
@@ -1495,7 +1516,7 @@ const MapsView = ({
   };
 
   const handleSaveCalibrationPoint = (scope) => {
-    if (!pendingCalibrationPoint || !activeLayer?.id) {
+    if (!pendingCalibrationPoint || !activeLayer?.id || isSavingCalibrationPoint || isRemovingCalibrationPoint) {
       return;
     }
 
@@ -1520,10 +1541,25 @@ const MapsView = ({
   };
 
   const handleRemoveCalibrationPoint = (pointId) => {
+    if (isSavingCalibrationPoint || isRemovingCalibrationPoint) {
+      return;
+    }
+
+    setIsRemovingCalibrationPoint(true);
     setCalibrationErrorMessage('');
-    Promise.resolve(onRemoveCalibrationPoint?.(pointId)).catch((error) => {
-      setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not remove calibration point.');
-    });
+    setPendingCalibrationPoint(null);
+    calibrationMarkersSignatureRef.current = '';
+    setCalibrationMarkers((currentMarkers) => (
+      currentMarkers.filter((marker) => marker.pointId !== pointId)
+    ));
+    Promise.resolve(onRemoveCalibrationPoint?.(pointId))
+      .catch((error) => {
+        setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not remove calibration point.');
+      })
+      .finally(() => {
+        calibrationMarkersSignatureRef.current = '';
+        setIsRemovingCalibrationPoint(false);
+      });
   };
 
   const handleCloseTribeLocationDrawer = () => {
@@ -1700,7 +1736,7 @@ const MapsView = ({
               variant="ghost"
               icon={isSavingCalibrationPoint ? CircleNotchIcon : null}
               className={isSavingCalibrationPoint ? 'dq-maps-view__calibration-save--loading' : ''}
-              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint}
+              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || isRemovingCalibrationPoint}
               onClick={() => handleSaveCalibrationPoint('current')}
             >
               {isSavingCalibrationPoint ? 'Mapping loc...' : 'Save point'}
@@ -1708,7 +1744,7 @@ const MapsView = ({
             <Button
               size="sm"
               variant="ghost"
-              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || mapLayers.length < 2}
+              disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || isRemovingCalibrationPoint || mapLayers.length < 2}
               onClick={() => handleSaveCalibrationPoint('site')}
             >
               Save on all maps
@@ -1903,6 +1939,7 @@ const MapsView = ({
                           Promise.resolve(onRemoveTribeLocation?.({
                             mapLayerId: location.mapLayerId ?? activeLayer?.id ?? null,
                             locationKind: location.locationKind,
+                            hasGpsPosition: hasGpsLocation(location),
                           }))
                             .then(handleCloseTribeLocationDrawer)
                             .catch((error) => {

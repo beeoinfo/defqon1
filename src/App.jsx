@@ -493,6 +493,30 @@ const hasGpsLocation = (location) => (
   Number.isFinite(location?.gpsLongitude) &&
   Number.isFinite(location?.gpsLatitude)
 );
+const sortMapCalibrationPoints = (points) => (
+  [...(points ?? [])].sort((leftPoint, rightPoint) => (
+    new Date(leftPoint.createdAt ?? leftPoint.updatedAt ?? 0).getTime() -
+    new Date(rightPoint.createdAt ?? rightPoint.updatedAt ?? 0).getTime()
+  ))
+);
+const getCalibratedMapLayerTransforms = (mapLayers, calibrationPoints) => (
+  mapLayers
+    .map((layer) => {
+      const transform = buildMapCalibrationTransform(
+        calibrationPoints.filter((point) => point.mapLayerId === layer.id)
+      );
+
+      return transform ? { mapLayerId: layer.id, transform } : null;
+    })
+    .filter(Boolean)
+);
+const getMapLayerIdsThatLostCalibration = (previousTransforms, nextTransforms) => {
+  const nextMapLayerIds = new Set(nextTransforms.map((item) => item.mapLayerId));
+
+  return previousTransforms
+    .map((item) => item.mapLayerId)
+    .filter((mapLayerId) => !nextMapLayerIds.has(mapLayerId));
+};
 const getFallbackMapImageLayers = (siteSlug) => (
   Object.entries(SITE_MAP_IMAGE_MODULES)
     .map(([path, imageUrl]) => {
@@ -1330,6 +1354,8 @@ const App = () => {
   const liveLocationExpiresAtRef = useRef(null);
   const lastLiveLocationGpsRef = useRef(null);
   const lastLiveMapLocationRef = useRef(null);
+  const lastCalibrationLocationSyncKeyRef = useRef('');
+  const calibratedMapLayerTransformsRef = useRef([]);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
   const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [pendingTribeInviteCode, setPendingTribeInviteCode] = useState(() =>
@@ -1572,7 +1598,7 @@ const App = () => {
     }
 
     loadMapCalibrationPoints()
-      .then(setMapCalibrationPoints)
+      .then((points) => setMapCalibrationPoints(sortMapCalibrationPoints(points)))
       .catch(() => setMapCalibrationPoints([]));
   }, [selectedLineupKey]);
 
@@ -1794,21 +1820,39 @@ const App = () => {
     () => getDefaultFestivalDay(browseableEntries, currentTime),
     [browseableEntries, currentTime]
   );
+  const calibratedMapLayerTransforms = useMemo(
+    () => getCalibratedMapLayerTransforms(selectedMapLayers, mapCalibrationPoints),
+    [mapCalibrationPoints, selectedMapLayers]
+  );
+  useEffect(() => {
+    calibratedMapLayerTransformsRef.current = calibratedMapLayerTransforms;
+  }, [calibratedMapLayerTransforms]);
+  const calibratedMapLayerIds = useMemo(
+    () => new Set(calibratedMapLayerTransforms.map((item) => item.mapLayerId)),
+    [calibratedMapLayerTransforms]
+  );
+  const calibrationSyncSignature = useMemo(() => (
+    mapCalibrationPoints
+      .filter((point) => point?.isActive !== false)
+      .map((point) => [
+        point.mapLayerId,
+        point.id,
+        point.mapLongitude,
+        point.mapLatitude,
+        point.gpsLongitude,
+        point.gpsLatitude,
+        point.updatedAt,
+      ].join(':'))
+      .sort()
+      .join('|')
+  ), [mapCalibrationPoints]);
   const settingsTribeLocations = useMemo(() => {
     if (!mapTribeLocations.length || selectedMapLayers.length === 0) {
       return [];
     }
 
     const preferredMapLayerId = getDefaultMapLayerIdForDay(selectedMapLayers, defaultBrowseDay);
-    const calibratedMapLayerIds = new Set(
-      selectedMapLayers
-        .filter((layer) => (
-          buildMapCalibrationTransform(
-            mapCalibrationPoints.filter((point) => point.mapLayerId === layer.id)
-          )
-        ))
-        .map((layer) => layer.id)
-    );
+    const selectedMapLayerIds = new Set(selectedMapLayers.map((layer) => layer.id));
     const locationsByUserId = new Map();
 
     mapTribeLocations.forEach((location) => {
@@ -1820,7 +1864,7 @@ const App = () => {
         ? preferredMapLayerId
         : exactMapLayerId;
 
-      if (!resolvedMapLayerId) {
+      if (!resolvedMapLayerId || !selectedMapLayerIds.has(resolvedMapLayerId)) {
         return;
       }
 
@@ -1854,7 +1898,7 @@ const App = () => {
     });
 
     return Array.from(locationsByUserId.values());
-  }, [defaultBrowseDay, mapCalibrationPoints, mapTribeLocations, selectedMapLayers]);
+  }, [calibratedMapLayerIds, defaultBrowseDay, mapTribeLocations, selectedMapLayers]);
   const timetableDays = useMemo(
     () => getDays(browseableEntries.filter((entry) => hasCompleteSchedule(entry))),
     [browseableEntries]
@@ -2870,6 +2914,182 @@ const App = () => {
     });
   }, []);
 
+  const upsertCurrentUserGpsLocationAcrossCalibratedMaps = useCallback(async ({
+    gpsPoint,
+    gpsAccuracyM = null,
+    locationKind = 'manual',
+    expiresAt = null,
+  }) => {
+    const targetTransforms = calibratedMapLayerTransformsRef.current;
+
+    if (!authUser?.id || !tribe?.tribeId || !gpsPoint || targetTransforms.length === 0) {
+      return [];
+    }
+
+    const nextLocations = (await Promise.all(targetTransforms.map((item) => {
+      const mapPoint = projectGpsToMap(gpsPoint, item.transform);
+
+      if (!mapPoint) {
+        return null;
+      }
+
+      return upsertCurrentUserTribeLocation({
+        tribeId: tribe.tribeId,
+        userId: authUser.id,
+        longitude: mapPoint.longitude,
+        latitude: mapPoint.latitude,
+        locationKind,
+        mapLayerId: item.mapLayerId,
+        gpsLongitude: gpsPoint.longitude,
+        gpsLatitude: gpsPoint.latitude,
+        gpsAccuracyM,
+        expiresAt,
+      });
+    }))).filter(Boolean);
+
+    nextLocations.forEach(upsertLocalTribeLocation);
+
+    return nextLocations;
+  }, [
+    authUser?.id,
+    tribe?.tribeId,
+    upsertLocalTribeLocation,
+  ]);
+
+  const downgradeCurrentUserLocationsForMapLayers = useCallback(async (mapLayerIds) => {
+    if (!authUser?.id || !tribe?.tribeId || !Array.isArray(mapLayerIds) || mapLayerIds.length === 0) {
+      return [];
+    }
+
+    const targetMapLayerIds = new Set(mapLayerIds.filter(Boolean));
+    const ownLocations = tribeMemberLocations.filter((location) => (
+      location.userId === authUser.id &&
+      location.tribeId === tribe.tribeId &&
+      location.siteSlug === activeSite.slug &&
+      targetMapLayerIds.has(location.mapLayerId)
+    ));
+
+    const nextLocations = (await Promise.all(ownLocations.map((location) => (
+      upsertCurrentUserTribeLocation({
+        tribeId: tribe.tribeId,
+        userId: authUser.id,
+        longitude: location.longitude,
+        latitude: location.latitude,
+        locationKind: 'manual',
+        mapLayerId: location.mapLayerId,
+        gpsLongitude: null,
+        gpsLatitude: null,
+        gpsAccuracyM: null,
+        expiresAt: null,
+      })
+    )))).filter(Boolean);
+
+    nextLocations.forEach(upsertLocalTribeLocation);
+
+    return nextLocations;
+  }, [
+    authUser?.id,
+    tribe?.tribeId,
+    tribeMemberLocations,
+    upsertLocalTribeLocation,
+  ]);
+
+  const stopLiveLocationRuntime = useCallback(() => {
+    if (liveLocationWatchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(liveLocationWatchIdRef.current);
+    }
+
+    window.clearTimeout(liveLocationTimeoutIdRef.current);
+    liveLocationTimeoutIdRef.current = 0;
+    window.clearInterval(liveLocationRefreshIntervalIdRef.current);
+    liveLocationRefreshIntervalIdRef.current = 0;
+    liveLocationWatchIdRef.current = null;
+    liveLocationExpiresAtRef.current = null;
+    lastLiveLocationGpsRef.current = null;
+    lastLiveMapLocationRef.current = null;
+    clearLiveLocationSession();
+    setIsLiveLocationSharing(false);
+    setLiveLocationRemainingMinutes(null);
+  }, []);
+
+  useEffect(() => {
+    if (!authUser?.id || !tribe?.tribeId || calibratedMapLayerTransforms.length === 0) {
+      lastCalibrationLocationSyncKeyRef.current = '';
+      return;
+    }
+
+    const ownActiveLocations = tribeMemberLocations
+      .filter((location) => (
+        location.userId === authUser.id &&
+        location.tribeId === tribe.tribeId &&
+        location.siteSlug === activeSite.slug &&
+        (!location.expiresAt || new Date(location.expiresAt).getTime() > Date.now())
+      ))
+      .sort((leftLocation, rightLocation) => (
+        new Date(rightLocation.updatedAt ?? 0).getTime() -
+        new Date(leftLocation.updatedAt ?? 0).getTime()
+      ));
+    const gpsSource =
+      ownActiveLocations.find((location) => location.locationKind === 'live' && hasGpsLocation(location)) ??
+      ownActiveLocations.find((location) => hasGpsLocation(location)) ??
+      null;
+    const rawCalibratedSource = ownActiveLocations.find((location) => (
+      !hasGpsLocation(location) &&
+      calibratedMapLayerIds.has(location.mapLayerId)
+    ));
+    const rawSourceTransform = rawCalibratedSource
+      ? calibratedMapLayerTransforms.find((item) => item.mapLayerId === rawCalibratedSource.mapLayerId)
+      : null;
+    const gpsPoint = gpsSource
+      ? {
+          longitude: gpsSource.gpsLongitude,
+          latitude: gpsSource.gpsLatitude,
+        }
+      : rawSourceTransform
+        ? projectMapToGps({
+            longitude: rawCalibratedSource.longitude,
+            latitude: rawCalibratedSource.latitude,
+          }, rawSourceTransform.transform)
+        : null;
+
+    if (!gpsPoint || !Number.isFinite(gpsPoint.longitude) || !Number.isFinite(gpsPoint.latitude)) {
+      return;
+    }
+
+    const locationKind = gpsSource?.locationKind === 'live' ? 'live' : 'manual';
+    const syncKey = [
+      authUser.id,
+      tribe.tribeId,
+      calibrationSyncSignature,
+      gpsPoint.longitude,
+      gpsPoint.latitude,
+      locationKind,
+      gpsSource?.expiresAt ?? '',
+    ].join(':');
+
+    if (lastCalibrationLocationSyncKeyRef.current === syncKey) {
+      return;
+    }
+
+    lastCalibrationLocationSyncKeyRef.current = syncKey;
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+      gpsPoint,
+      gpsAccuracyM: gpsSource?.gpsAccuracyM ?? null,
+      locationKind,
+      expiresAt: locationKind === 'live' ? gpsSource?.expiresAt ?? null : null,
+    }).catch(() => {
+      lastCalibrationLocationSyncKeyRef.current = '';
+    });
+  }, [
+    authUser?.id,
+    calibratedMapLayerIds,
+    calibratedMapLayerTransforms,
+    calibrationSyncSignature,
+    tribe?.tribeId,
+    tribeMemberLocations,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps,
+  ]);
+
   useEffect(() => {
     if (!authUser?.id || !tribe?.tribeId) {
       return;
@@ -2887,21 +3107,22 @@ const App = () => {
       return;
     }
 
-    upsertCurrentUserTribeLocation({
-      tribeId: tribe.tribeId,
-      userId: authUser.id,
-      longitude: expiredOwnLiveLocation.longitude,
-      latitude: expiredOwnLiveLocation.latitude,
-      locationKind: 'manual',
-      mapLayerId: expiredOwnLiveLocation.mapLayerId,
-      gpsLongitude: expiredOwnLiveLocation.gpsLongitude,
-      gpsLatitude: expiredOwnLiveLocation.gpsLatitude,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+      gpsPoint: {
+        longitude: expiredOwnLiveLocation.gpsLongitude,
+        latitude: expiredOwnLiveLocation.gpsLatitude,
+      },
       gpsAccuracyM: expiredOwnLiveLocation.gpsAccuracyM,
+      locationKind: 'manual',
       expiresAt: null,
     })
-      .then(upsertLocalTribeLocation)
       .catch(() => {});
-  }, [authUser?.id, tribe?.tribeId, tribeMemberLocations, upsertLocalTribeLocation]);
+  }, [
+    authUser?.id,
+    tribe?.tribeId,
+    tribeMemberLocations,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps,
+  ]);
 
   const handleSetTribeMapLocation = useCallback(async ({ longitude, latitude, mapLayerId }) => {
     if (!authUser || !tribe?.tribeId) {
@@ -2960,6 +3181,15 @@ const App = () => {
           ))
         ));
       }
+
+      await upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+        gpsPoint,
+        locationKind: 'manual',
+        expiresAt: null,
+      });
+
+      lastLiveMapLocationRef.current = null;
+      return;
     }
 
     const nextLocation = await upsertCurrentUserTribeLocation({
@@ -2981,6 +3211,7 @@ const App = () => {
     requestAuth,
     tribe?.tribeId,
     tribeMemberLocations,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps,
     upsertLocalTribeLocation,
   ]);
 
@@ -3037,7 +3268,8 @@ const App = () => {
     )))).filter(Boolean);
 
     if (nextPoints.length > 0) {
-      setMapCalibrationPoints((currentPoints) => [...nextPoints, ...currentPoints]);
+      lastCalibrationLocationSyncKeyRef.current = '';
+      setMapCalibrationPoints((currentPoints) => sortMapCalibrationPoints([...currentPoints, ...nextPoints]));
       setMapCalibrationMessage(
         targetMapLayerIds.length > 1
           ? 'Calibration point saved on all maps.'
@@ -3051,32 +3283,106 @@ const App = () => {
       return;
     }
 
+    const previousTransforms = calibratedMapLayerTransformsRef.current;
     const deletedPointId = await deleteMapCalibrationPoint(pointId);
-    setMapCalibrationPoints((currentPoints) => (
-      currentPoints.filter((point) => point.id !== deletedPointId)
-    ));
+    const nextCalibrationPoints = sortMapCalibrationPoints(
+      mapCalibrationPoints.filter((point) => String(point.id) !== String(deletedPointId))
+    );
+    const nextTransforms = getCalibratedMapLayerTransforms(selectedMapLayers, nextCalibrationPoints);
+    const lostCalibrationMapLayerIds = getMapLayerIdsThatLostCalibration(previousTransforms, nextTransforms);
+
+    calibratedMapLayerTransformsRef.current = nextTransforms;
+    lastCalibrationLocationSyncKeyRef.current = '';
+    setMapCalibrationPoints(nextCalibrationPoints);
+
+    if (lostCalibrationMapLayerIds.length > 0) {
+      await downgradeCurrentUserLocationsForMapLayers(lostCalibrationMapLayerIds);
+    }
+
+    const liveSession = readLiveLocationSession();
+    if (liveSession && lostCalibrationMapLayerIds.includes(liveSession.mapLayerId)) {
+      if (nextTransforms.length > 0 && liveLocationExpiresAtRef.current) {
+        writeLiveLocationSession({
+          userId: liveSession.userId,
+          tribeId: liveSession.tribeId,
+          mapLayerId: nextTransforms[0].mapLayerId,
+          expiresAt: liveLocationExpiresAtRef.current,
+        });
+      } else {
+        stopLiveLocationRuntime();
+      }
+    }
+
     setMapCalibrationMessage('Calibration point removed.');
-  }, [isAdmin]);
+  }, [
+    downgradeCurrentUserLocationsForMapLayers,
+    isAdmin,
+    mapCalibrationPoints,
+    selectedMapLayers,
+    stopLiveLocationRuntime,
+  ]);
 
   const handleResetMapCalibration = useCallback(async () => {
     if (!isAdmin) {
       return;
     }
 
-    await resetMapCalibrationPoints(activeSite.slug);
-    setMapCalibrationPoints([]);
-    setMapCalibrationMessage('Map calibration reset.');
-  }, [isAdmin]);
+    const previousTransforms = calibratedMapLayerTransformsRef.current;
+    const previousCalibratedMapLayerIds = previousTransforms.map((item) => item.mapLayerId);
 
-  const handleStartMapCalibration = useCallback(() => {
+    await resetMapCalibrationPoints(activeSite.slug);
+    calibratedMapLayerTransformsRef.current = [];
+    lastCalibrationLocationSyncKeyRef.current = '';
+    setMapCalibrationPoints([]);
+
+    if (previousCalibratedMapLayerIds.length > 0) {
+      await downgradeCurrentUserLocationsForMapLayers(previousCalibratedMapLayerIds);
+    }
+
+    stopLiveLocationRuntime();
+    setMapCalibrationMessage('Map calibration reset.');
+  }, [
+    downgradeCurrentUserLocationsForMapLayers,
+    isAdmin,
+    stopLiveLocationRuntime,
+  ]);
+
+  const handleStartMapCalibration = useCallback(async () => {
     if (!isAdmin || !hasMapsView) {
       return;
+    }
+
+    if (isLiveLocationSharing || liveLocationWatchIdRef.current !== null) {
+      const lastLocation = lastLiveMapLocationRef.current;
+
+      stopLiveLocationRuntime();
+
+      if (authUser && tribe?.tribeId && lastLocation && hasGpsLocation(lastLocation)) {
+        await upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+          gpsPoint: {
+            longitude: lastLocation.gpsLongitude,
+            latitude: lastLocation.gpsLatitude,
+          },
+          gpsAccuracyM: lastLocation.gpsAccuracyM,
+          locationKind: 'manual',
+          expiresAt: null,
+        });
+      }
     }
 
     setIsMapCalibrationMode(true);
     setMapCalibrationMessage('Place a calibration point where you are standing, then save it with GPS.');
     openView('maps');
-  }, [hasMapsView, isAdmin, openView]);
+  }, [
+    authUser,
+    hasMapsView,
+    isAdmin,
+    isLiveLocationSharing,
+    openView,
+    stopLiveLocationRuntime,
+    tribe?.tribeId,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps,
+  ]);
 
   const handleStopMapCalibration = useCallback(() => {
     setIsMapCalibrationMode(false);
@@ -3104,22 +3410,20 @@ const App = () => {
 
     if (preserveLastKnown && authUser && tribe?.tribeId && lastLiveMapLocationRef.current) {
       const lastLocation = lastLiveMapLocationRef.current;
-      const nextLocation = await upsertCurrentUserTribeLocation({
-        tribeId: tribe.tribeId,
-        userId: authUser.id,
-        longitude: lastLocation.longitude,
-        latitude: lastLocation.latitude,
+      const nextLocations = await upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+        gpsPoint: {
+          longitude: lastLocation.gpsLongitude,
+          latitude: lastLocation.gpsLatitude,
+        },
         locationKind: 'manual',
-        mapLayerId: lastLocation.mapLayerId,
-        gpsLongitude: lastLocation.gpsLongitude,
-        gpsLatitude: lastLocation.gpsLatitude,
         gpsAccuracyM: lastLocation.gpsAccuracyM,
         expiresAt: null,
       });
 
-      lastLiveMapLocationRef.current = nextLocation;
-      upsertLocalTribeLocation(nextLocation);
-      setMapCalibrationMessage(message);
+      lastLiveMapLocationRef.current = nextLocations[0] ?? null;
+      if (message) {
+        setMapCalibrationMessage(message);
+      }
       return;
     }
 
@@ -3129,7 +3433,7 @@ const App = () => {
         ? 'Live position stopped before a location could be shared.'
         : 'Live position stopped.'
     );
-  }, [authUser, tribe?.tribeId, upsertLocalTribeLocation]);
+  }, [authUser, tribe?.tribeId, upsertCurrentUserGpsLocationAcrossCalibratedMaps]);
 
   const handleStartLiveLocationSharing = useCallback(({ mapLayerId, expiresAt: resumedExpiresAt = null } = {}) => {
     if (!authUser || !tribe?.tribeId) {
@@ -3147,10 +3451,9 @@ const App = () => {
       return;
     }
 
-    const layerPoints = mapCalibrationPoints.filter((point) => point.mapLayerId === mapLayerId);
-    const transform = buildMapCalibrationTransform(layerPoints);
+    const sourceTransform = calibratedMapLayerTransforms.find((item) => item.mapLayerId === mapLayerId);
 
-    if (!transform) {
+    if (!sourceTransform) {
       setMapCalibrationMessage('Live location needs at least 3 calibration points on this map.');
       return;
     }
@@ -3206,27 +3509,17 @@ const App = () => {
       }
 
       lastLiveLocationGpsRef.current = nextGps;
-      const mapPoint = projectGpsToMap(nextGps, transform);
-
-      if (!mapPoint) {
-        return;
-      }
-
-      upsertCurrentUserTribeLocation({
-        tribeId: tribe.tribeId,
-        userId: authUser.id,
-        longitude: mapPoint.longitude,
-        latitude: mapPoint.latitude,
+      upsertCurrentUserGpsLocationAcrossCalibratedMaps({
+        gpsPoint: nextGps,
         locationKind: 'live',
-        mapLayerId,
-        gpsLongitude: nextGps.longitude,
-        gpsLatitude: nextGps.latitude,
         gpsAccuracyM: position.coords.accuracy,
         expiresAt,
       })
-        .then((nextLocation) => {
-          lastLiveMapLocationRef.current = nextLocation;
-          upsertLocalTribeLocation(nextLocation);
+        .then((nextLocations) => {
+          lastLiveMapLocationRef.current =
+            nextLocations.find((location) => location.mapLayerId === mapLayerId) ??
+            nextLocations[0] ??
+            null;
         })
         .catch((error) => {
           setMapCalibrationMessage(error.message || 'Could not share live location.');
@@ -3283,15 +3576,15 @@ const App = () => {
     }, remainingDurationMs);
   }, [
     authUser,
+    calibratedMapLayerTransforms,
     handleStopLiveLocationSharing,
-    mapCalibrationPoints,
     requestAuth,
     tribe?.tribeId,
-    upsertLocalTribeLocation,
+    upsertCurrentUserGpsLocationAcrossCalibratedMaps,
   ]);
 
   useEffect(() => {
-    if (!authUser?.id || !tribe?.tribeId || isLiveLocationSharing || mapCalibrationPoints.length === 0) {
+    if (!authUser?.id || !tribe?.tribeId || isLiveLocationSharing || calibratedMapLayerIds.size === 0) {
       return;
     }
 
@@ -3307,11 +3600,7 @@ const App = () => {
       return;
     }
 
-    const hasCalibrationForLayer = mapCalibrationPoints.some((point) => (
-      point.mapLayerId === session.mapLayerId
-    ));
-
-    if (!hasCalibrationForLayer) {
+    if (!calibratedMapLayerIds.has(session.mapLayerId)) {
       return;
     }
 
@@ -3321,15 +3610,16 @@ const App = () => {
     });
   }, [
     authUser?.id,
+    calibratedMapLayerIds,
     handleStartLiveLocationSharing,
     isLiveLocationSharing,
-    mapCalibrationPoints,
     tribe?.tribeId,
   ]);
 
   const handleRemoveTribeMapLocation = useCallback(async ({
     mapLayerId = null,
     locationKind = 'manual',
+    hasGpsPosition = false,
   } = {}) => {
     if (!authUser || !tribe?.tribeId) {
       return;
@@ -3360,21 +3650,34 @@ const App = () => {
       setLiveLocationRemainingMinutes(null);
     }
 
-    await deleteCurrentUserTribeLocation({
-      tribeId: tribe.tribeId,
-      userId: authUser.id,
-      mapLayerId,
-    });
+    const targetMapLayerIds = hasGpsPosition
+      ? calibratedMapLayerTransforms.map((item) => item.mapLayerId)
+      : [mapLayerId];
+    const cleanTargetMapLayerIds = targetMapLayerIds.filter(Boolean);
+
+    if (cleanTargetMapLayerIds.length === 0) {
+      return;
+    }
+
+    await Promise.all(cleanTargetMapLayerIds.map((targetMapLayerId) => (
+      deleteCurrentUserTribeLocation({
+        tribeId: tribe.tribeId,
+        userId: authUser.id,
+        mapLayerId: targetMapLayerId,
+      })
+    )));
+
+    const targetMapLayerIdSet = new Set(cleanTargetMapLayerIds);
 
     setTribeMemberLocations((currentLocations) => (
       currentLocations.filter((location) => (
         location.userId !== authUser.id ||
         location.tribeId !== tribe.tribeId ||
         location.siteSlug !== activeSite.slug ||
-        (mapLayerId !== null && location.mapLayerId !== mapLayerId)
+        !targetMapLayerIdSet.has(location.mapLayerId)
       ))
     ));
-  }, [authUser, tribe?.tribeId]);
+  }, [authUser, calibratedMapLayerTransforms, tribe?.tribeId]);
 
   const removeReviewFavorite = useCallback((favoriteKey) => {
     if (favoritesReadOnly || !authUser) {
