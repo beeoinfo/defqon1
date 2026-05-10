@@ -18,3 +18,30 @@
   font-size: 0.625rem;
   line-height: 1;
 }
+
+.dq-lineup-view__joke-shell {
+  width: min(100%, 640px);
+  margin: 0 auto;
+}
+
+.dq-lineup-view__joke-card {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--dq-ui-border-subtle);
+  border-radius: var(--dq-ui-radius-lg);
+  background: var(--dq-ui-panel);
+}
+
+.dq-lineup-view__joke-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.dq-lineup-view__joke-action {
+  position: absolute;
+  top: var(--dq-ui-space-md);
+  right: var(--dq-ui-space-md);
+}

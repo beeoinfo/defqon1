@@ -1,10 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { HeartIcon } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import FilterBar from '@/components/FilterBar';
 import PeopleCard from '@/components/PeopleCard';
 import EmptyState from '@/components/EmptyState';
 import Box from '@/components/layout/Box';
 import Card from '@/components/primitives/Card';
+import ToggleButton from '@/components/primitives/ToggleButton';
 import Drawer from '@/components/layout/Drawer';
 import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
@@ -30,6 +32,13 @@ const STAGE_PRIORITY_ORDER = ['BLUE', 'BLACK', 'RED', 'U.V.', 'GREEN', 'YELLOW']
 const STAGE_PRIORITY_INDEX = new Map(
   STAGE_PRIORITY_ORDER.map((stageName, index) => [stageName, index])
 );
+const JOKE_IMAGE_MODULES = import.meta.glob('../../assets/joke/*.{avif,gif,jpeg,jpg,png,webp}', {
+  eager: true,
+  import: 'default',
+});
+const JOKE_IMAGE_URLS = Object.entries(JOKE_IMAGE_MODULES)
+  .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath, undefined, { numeric: true }))
+  .map(([, imageUrl]) => imageUrl);
 
 const compareStages = (leftStage, rightStage) => {
   const leftCanonical = getCanonicalStageName(leftStage);
@@ -124,8 +133,12 @@ const LineUpView = ({
   filterBar = null,
   showStyleTags = false,
   styleTagsByEntryId = new Map(),
+  shouldShowJokeLineup = false,
+  jokeLineupSearchKey = '',
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
+  const [jokeImageUrl, setJokeImageUrl] = useState('');
+  const [isJokeLiked, setIsJokeLiked] = useState(false);
   const getFavoriteActionVariant = useCallback((isFavorite) => (
     canEditLineup ? 'edit' : canToggleFavorites ? 'likes' : isFavorite ? 'liked' : null
   ), [canEditLineup, canToggleFavorites]);
@@ -332,6 +345,18 @@ const LineUpView = ({
     ]
   );
 
+  useEffect(() => {
+    if (!shouldShowJokeLineup || JOKE_IMAGE_URLS.length === 0) {
+      setJokeImageUrl('');
+      setIsJokeLiked(false);
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * JOKE_IMAGE_URLS.length);
+    setJokeImageUrl(JOKE_IMAGE_URLS[randomIndex]);
+    setIsJokeLiked(false);
+  }, [jokeLineupSearchKey, shouldShowJokeLineup]);
+
   return (
     <Box gap="0">
       {filterBar ? <FilterBar {...filterBar} /> : null}
@@ -343,7 +368,27 @@ const LineUpView = ({
           </Alert>
         ) : null}
 
-        {sections.length === 0 ? (
+        {shouldShowJokeLineup ? (
+          <Box className="dq-lineup-view__joke-shell">
+            <Box component="article" className="dq-lineup-view__joke-card">
+              <img
+                className="dq-lineup-view__joke-image"
+                src={jokeImageUrl || JOKE_IMAGE_URLS[0] || ''}
+                alt="Joke lineup"
+              />
+              <Box className="dq-lineup-view__joke-action" component="span">
+                <ToggleButton
+                  variant="likes"
+                  icon={HeartIcon}
+                  pressed={isJokeLiked}
+                  fillOnPress
+                  ariaLabel={isJokeLiked ? 'Unlike joke lineup' : 'Like joke lineup'}
+                  onPressedChange={setIsJokeLiked}
+                />
+              </Box>
+            </Box>
+          </Box>
+        ) : sections.length === 0 ? (
           <EmptyState
             text={hasLineup ? 'No shows match the current filters.' : 'No lineup has been loaded yet.'}
           />

@@ -380,6 +380,80 @@ export async function isCurrentUserAdmin() {
   return Boolean(data);
 }
 
+function normalizeAppSetting(row) {
+  return {
+    siteSlug: row.site_slug,
+    key: row.setting_key,
+    value: row.setting_value,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function loadAppSettings(siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client
+    .from('app_settings')
+    .select('site_slug, setting_key, setting_value, updated_at')
+    .eq('site_slug', siteSlug);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []).map(normalizeAppSetting);
+}
+
+export async function setJokeLineupEnabled(value, siteSlug = ACTIVE_SITE_SLUG) {
+  const client = ensureSupabase();
+  const { data, error } = await client
+    .from('app_settings')
+    .upsert({
+      site_slug: siteSlug,
+      setting_key: 'joke_lineup_enabled',
+      setting_value: Boolean(value),
+    }, { onConflict: 'site_slug,setting_key' })
+    .select('site_slug, setting_key, setting_value, updated_at')
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ? normalizeAppSetting(data) : null;
+}
+
+export function subscribeToAppSettings({
+  siteSlug = ACTIVE_SITE_SLUG,
+  onChange,
+}) {
+  if (!supabase) {
+    return null;
+  }
+
+  const channel = supabase
+    .channel(`app-settings:${siteSlug}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'app_settings',
+        filter: `site_slug=eq.${siteSlug}`,
+      },
+      (payload) => {
+        if (
+          payload?.new?.site_slug === siteSlug ||
+          payload?.old?.site_slug === siteSlug
+        ) {
+          onChange?.(payload);
+        }
+      }
+    )
+    .subscribe();
+
+  return channel;
+}
+
 function normalizeLineupVersion(row) {
   return {
     id: row.id,

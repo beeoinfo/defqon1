@@ -98,6 +98,7 @@ import {
   joinCurrentUserTribeByCode,
   leaveCurrentUserTribe,
   loadAccountBundle,
+  loadAppSettings,
   loadAdminLineupVersions,
   loadPublishedLineupVersions,
   loadMapCalibrationPoints,
@@ -105,6 +106,8 @@ import {
   loadTribeMemberLocations,
   normalizeTribeCode,
   resetMapCalibrationPoints,
+  setJokeLineupEnabled,
+  subscribeToAppSettings,
   subscribeToTribeMemberLocations,
   supabase,
   syncFavoriteSnapshots,
@@ -149,6 +152,7 @@ const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const getCleanStyleTag = (value) => String(value ?? '').trim();
 const TEMP_LINEUP_SOURCE_KEY = 'temp:manual-lineup-edit';
 const MAP_CALIBRATION_MIN_DISTANCE_M = 200;
+const JOKE_LINEUP_SEARCH_TERMS = new Set(['charlottebtrnd', 'lineup']);
 const LIVE_LOCATION_DURATION_MS = 30 * 60 * 1000;
 const LIVE_LOCATION_MIN_UPDATE_DISTANCE_M = 10;
 const LIVE_LOCATION_REFRESH_MS = 8000;
@@ -740,6 +744,39 @@ const getConflictingFavoriteEntryIds = (entries, favoriteIdSet, ignoreSmallConfl
   });
 
   return conflictingIds;
+};
+
+const getFavoriteConflictPairCount = (entries, favoriteIdSet, ignoreSmallConflicts) => {
+  const scheduledFavorites = entries
+    .filter((entry) => favoriteIdSet.has(entry.id))
+    .map((entry) => ({
+      entry,
+      startTimestamp: getEntryTimestamp(entry.startAt),
+      endTimestamp: getEntryTimestamp(entry.endAt),
+    }))
+    .filter((item) => (
+      item.startTimestamp !== null &&
+      item.endTimestamp !== null &&
+      item.endTimestamp > item.startTimestamp
+    ))
+    .sort((leftItem, rightItem) => leftItem.startTimestamp - rightItem.startTimestamp);
+  let conflictCount = 0;
+
+  scheduledFavorites.forEach((currentItem, currentIndex) => {
+    for (let index = currentIndex + 1; index < scheduledFavorites.length; index += 1) {
+      const candidateItem = scheduledFavorites[index];
+
+      if (candidateItem.startTimestamp >= currentItem.endTimestamp) {
+        break;
+      }
+
+      if (entriesHaveMeaningfulConflict(currentItem.entry, candidateItem.entry, ignoreSmallConflicts)) {
+        conflictCount += 1;
+      }
+    }
+  });
+
+  return conflictCount;
 };
 
 const ACCOUNT_CACHE_KEY_PREFIX = `account-cache:v1:${activeSite.slug}:`;
@@ -1447,6 +1484,8 @@ const App = () => {
     loadIgnoreSmallConflictsPreference()
   );
   const [showStyleTags, setShowStyleTags] = useState(() => loadShowStyleTagsPreference());
+  const [isJokeLineupEnabled, setIsJokeLineupEnabled] = useState(false);
+  const [isJokeLineupSaving, setIsJokeLineupSaving] = useState(false);
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [favoriteItems, setFavoriteItems] = useState(() => bootAccount?.favorites ?? []);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -2188,6 +2227,14 @@ const App = () => {
     () => groupEntriesByDayAndStage(searchVisibleEntries),
     [searchVisibleEntries]
   );
+  const jokeLineupSearchKey = useMemo(
+    () => normalizeLineupText(searchHeaderQuery),
+    [searchHeaderQuery]
+  );
+  const isJokeLineupSearchActive = (
+    isJokeLineupEnabled &&
+    JOKE_LINEUP_SEARCH_TERMS.has(jokeLineupSearchKey)
+  );
   const selectedTimetableDayLabel = selectedTimetableDay || defaultTimetableDay;
   const favoriteTimetableConflictEntries = useMemo(() => {
     const timetableEntries = browseableEntries.filter((entry) => hasCompleteSchedule(entry));
@@ -2237,7 +2284,10 @@ const App = () => {
     () => getConflictingFavoriteEntryIds(baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts),
     [baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts]
   );
-  const conflictCount = conflictingFavoriteEntryIds.size;
+  const conflictCount = useMemo(
+    () => getFavoriteConflictPairCount(baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts),
+    [baseTimetableEntries, favoriteIdSet, ignoreSmallConflicts]
+  );
   const conflictingFavoriteEntryIdsBeforeStyles = useMemo(
     () => getConflictingFavoriteEntryIds(
       baseTimetableEntriesBeforeStyles,
@@ -2609,6 +2659,42 @@ const App = () => {
   useEffect(() => {
     saveShowStyleTagsPreference(showStyleTags);
   }, [showStyleTags]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      return undefined;
+    }
+
+    let isMounted = true;
+    const refreshAppSettings = async () => {
+      const settings = await loadAppSettings(activeSite.slug);
+      const jokeLineupSetting = settings.find((setting) => (
+        setting.key === 'joke_lineup_enabled'
+      ));
+
+      if (isMounted) {
+        setIsJokeLineupEnabled(jokeLineupSetting?.value === true);
+      }
+    };
+
+    refreshAppSettings().catch((error) => {
+      console.error(error);
+    });
+
+    const channel = subscribeToAppSettings({
+      siteSlug: activeSite.slug,
+      onChange: () => {
+        refreshAppSettings().catch((error) => {
+          console.error(error);
+        });
+      },
+    });
+
+    return () => {
+      isMounted = false;
+      channel?.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const shouldReplaceLineup = activeView === 'lineup' && hasTimetableView;
@@ -4197,6 +4283,26 @@ const App = () => {
     }
   }, [hasPublishedLineup, manualLineupEditSource]);
 
+  const handleJokeLineupEnabledChange = useCallback(async (nextValue) => {
+    if (!isAdmin || !isSupabaseConfigured()) {
+      return;
+    }
+
+    const previousValue = isJokeLineupEnabled;
+    setIsJokeLineupEnabled(nextValue);
+    setIsJokeLineupSaving(true);
+
+    try {
+      const setting = await setJokeLineupEnabled(nextValue, activeSite.slug);
+      setIsJokeLineupEnabled(setting?.value === true);
+    } catch (error) {
+      console.error(error);
+      setIsJokeLineupEnabled(previousValue);
+    } finally {
+      setIsJokeLineupSaving(false);
+    }
+  }, [isAdmin, isJokeLineupEnabled]);
+
   const handleProfileUpdated = useCallback((nextProfile) => {
     setProfile(nextProfile);
   }, []);
@@ -4663,6 +4769,8 @@ const App = () => {
       stackDays: Boolean(searchHeaderQuery.trim()),
       showStyleTags,
       styleTagsByEntryId,
+      shouldShowJokeLineup: isJokeLineupSearchActive,
+      jokeLineupSearchKey,
     },
     timetable: {
       hasLineup,
@@ -4753,6 +4861,8 @@ const App = () => {
     isOffline,
     isLiveLocationSharing,
     isMapCalibrationMode,
+    isJokeLineupSearchActive,
+    jokeLineupSearchKey,
     lineupFilterBar,
     liveLocationRemainingMinutes,
     mapCalibrationMessage,
@@ -4816,6 +4926,9 @@ const App = () => {
       onPreviewLineup: handlePreviewLineup,
       allowManualLineupEdit: isManualLineupEditAllowed,
       onAllowManualLineupEditChange: handleManualLineupEditAllowedChange,
+      isJokeLineupEnabled,
+      isJokeLineupSaving,
+      onJokeLineupEnabledChange: handleJokeLineupEnabledChange,
       hasPublishedLineup,
       onAddPerformance: handleOpenPerformanceCreate,
       onCalibrateMap: handleStartMapCalibration,
@@ -4844,12 +4957,15 @@ const App = () => {
     handleResetMapCalibration,
     handleDeleteTempLineup,
     handleManualLineupEditAllowedChange,
+    handleJokeLineupEnabledChange,
     handleShowTribeLocationOnMap,
     hidePastEvents,
     hideUndatedEvents,
     ignoreSmallConflicts,
     showStyleTags,
     isAdmin,
+    isJokeLineupEnabled,
+    isJokeLineupSaving,
     isManualLineupEditAllowed,
     hasPublishedLineup,
     favoriteItems.length,

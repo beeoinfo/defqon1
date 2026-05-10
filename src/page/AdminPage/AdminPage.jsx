@@ -160,6 +160,9 @@ const AdminPage = ({
   onPreviewLineup = null,
   allowManualLineupEdit = false,
   onAllowManualLineupEditChange = null,
+  isJokeLineupEnabled = false,
+  isJokeLineupSaving = false,
+  onJokeLineupEnabledChange = null,
   hasPublishedLineup = false,
   onAddPerformance = null,
   onCalibrateMap = null,
@@ -427,6 +430,16 @@ const AdminPage = ({
             </Box>
           ) : null}
         </Box>
+      </Box>
+
+      <Box background="surface" title="Joke Lineup" titleIcon={StackIcon}>
+        <Switch
+          label="Activate lineup joke"
+          description="When active, matching searches can show a random joke photo instead of artist cards."
+          checked={isJokeLineupEnabled}
+          onCheckedChange={onJokeLineupEnabledChange}
+          disabled={isBusy || isJokeLineupSaving}
+        />
       </Box>
 
       <Box background="surface" title="Map calibration" titleIcon={MapTrifoldIcon}>

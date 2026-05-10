@@ -127,6 +127,43 @@ alter table public.app_admins
   alter column created_at set default now(),
   alter column updated_at set default now();
 
+-- Public app settings. Values in this table are runtime feature/config flags
+-- readable by everyone, but only admins may change them.
+create table if not exists public.app_settings (
+  site_slug text not null,
+  setting_key text not null,
+  setting_value jsonb not null default 'false'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (site_slug, setting_key)
+);
+
+alter table public.app_settings
+  add column if not exists site_slug text,
+  add column if not exists setting_key text,
+  add column if not exists setting_value jsonb default 'false'::jsonb,
+  add column if not exists created_at timestamptz default now(),
+  add column if not exists updated_at timestamptz default now();
+
+alter table public.app_settings
+  alter column setting_value set default 'false'::jsonb,
+  alter column created_at set default now(),
+  alter column updated_at set default now();
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.app_settings'::regclass
+      and conname = 'app_settings_pkey'
+  ) then
+    alter table public.app_settings
+      add constraint app_settings_pkey primary key (site_slug, setting_key);
+  end if;
+end;
+$$;
+
 -- Runtime lineup storage. Payload intentionally stays jsonb so the app can
 -- query and export the canonical lineup without opaque compression.
 create table if not exists public.lineup_versions (
@@ -492,6 +529,20 @@ where
   or created_at is null
   or updated_at is null;
 
+update public.app_settings
+set
+  site_slug = lower(trim(coalesce(site_slug, ''))),
+  setting_key = lower(trim(coalesce(setting_key, ''))),
+  setting_value = coalesce(setting_value, 'false'::jsonb),
+  created_at = coalesce(created_at, now()),
+  updated_at = coalesce(updated_at, now())
+where
+  site_slug is distinct from lower(trim(coalesce(site_slug, '')))
+  or setting_key is distinct from lower(trim(coalesce(setting_key, '')))
+  or setting_value is null
+  or created_at is null
+  or updated_at is null;
+
 update public.lineup_versions
 set
   site_slug = lower(trim(coalesce(site_slug, ''))),
@@ -572,6 +623,13 @@ alter table public.user_favorites
 
 alter table public.app_admins
   alter column is_active set not null,
+  alter column created_at set not null,
+  alter column updated_at set not null;
+
+alter table public.app_settings
+  alter column site_slug set not null,
+  alter column setting_key set not null,
+  alter column setting_value set not null,
   alter column created_at set not null,
   alter column updated_at set not null;
 
@@ -817,6 +875,12 @@ execute function public.set_updated_at();
 drop trigger if exists app_admins_set_updated_at on public.app_admins;
 create trigger app_admins_set_updated_at
 before update on public.app_admins
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists app_settings_set_updated_at on public.app_settings;
+create trigger app_settings_set_updated_at
+before update on public.app_settings
 for each row
 execute function public.set_updated_at();
 
@@ -1607,6 +1671,7 @@ revoke all on table public.user_favorites from public, anon, authenticated;
 revoke all on table public.tribe_member_locations from public, anon, authenticated;
 revoke all on table public.map_calibration_points from public, anon, authenticated;
 revoke all on table public.app_admins from public, anon, authenticated;
+revoke all on table public.app_settings from public, anon, authenticated;
 revoke all on table public.lineup_versions from public, anon, authenticated;
 revoke all on table public.lineup_import_runs from public, anon, authenticated;
 revoke all on table public.avatar_cleanup_queue from public, anon, authenticated;
@@ -1619,6 +1684,8 @@ grant select, insert, update, delete on table public.tribe_member_locations to a
 grant select on table public.map_calibration_points to anon, authenticated;
 grant insert, update, delete on table public.map_calibration_points to authenticated;
 grant select on table public.app_admins to authenticated;
+grant select on table public.app_settings to anon, authenticated;
+grant insert, update, delete on table public.app_settings to authenticated;
 grant select on table public.lineup_versions to anon, authenticated;
 grant select, insert, update on table public.lineup_import_runs to authenticated;
 
@@ -1629,6 +1696,7 @@ grant all on table public.user_favorites to service_role;
 grant all on table public.tribe_member_locations to service_role;
 grant all on table public.map_calibration_points to service_role;
 grant all on table public.app_admins to service_role;
+grant all on table public.app_settings to service_role;
 grant all on table public.lineup_versions to service_role;
 grant all on table public.lineup_import_runs to service_role;
 grant all on table public.avatar_cleanup_queue to service_role;
@@ -1706,6 +1774,7 @@ alter table public.user_favorites enable row level security;
 alter table public.tribe_member_locations enable row level security;
 alter table public.map_calibration_points enable row level security;
 alter table public.app_admins enable row level security;
+alter table public.app_settings enable row level security;
 alter table public.lineup_versions enable row level security;
 alter table public.lineup_import_runs enable row level security;
 
@@ -1877,6 +1946,35 @@ drop policy if exists app_admins_select_admin on public.app_admins;
 create policy app_admins_select_admin
 on public.app_admins
 for select
+to authenticated
+using (public.is_current_user_admin());
+
+drop policy if exists app_settings_select_public on public.app_settings;
+create policy app_settings_select_public
+on public.app_settings
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists app_settings_insert_admin on public.app_settings;
+create policy app_settings_insert_admin
+on public.app_settings
+for insert
+to authenticated
+with check (public.is_current_user_admin());
+
+drop policy if exists app_settings_update_admin on public.app_settings;
+create policy app_settings_update_admin
+on public.app_settings
+for update
+to authenticated
+using (public.is_current_user_admin())
+with check (public.is_current_user_admin());
+
+drop policy if exists app_settings_delete_admin on public.app_settings;
+create policy app_settings_delete_admin
+on public.app_settings
+for delete
 to authenticated
 using (public.is_current_user_admin());
 

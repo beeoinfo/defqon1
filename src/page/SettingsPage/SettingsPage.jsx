@@ -12,14 +12,25 @@ import Profile from '@/components/Profile';
 import TribePanel from '@/components/TribePanel';
 import Button from '@/components/primitives/Button';
 import ChoiceButton from '@/components/primitives/ChoiceButton';
-import Link from '@/components/primitives/Link';
 import { Switch } from '@/components/primitives/forms';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
 import { activeSite } from '@/sites/siteDefinitions';
 import './SettingsPage.css';
 
-const ANDROID_APK_DOWNLOAD_PATH = '/apk/Insane%20Companion.apk';
+const ANDROID_APK_DOWNLOAD_PATHS_BY_SITE = {
+  defqon1: '/apk/Defqon.1%20Companion.apk',
+  insane: '/apk/Insane%20Companion.apk',
+};
+
+const isAndroidDevice = () => (
+  typeof window !== 'undefined' &&
+  /android/i.test(window.navigator.userAgent)
+);
+
+const getAndroidApkDownloadPath = () => (
+  ANDROID_APK_DOWNLOAD_PATHS_BY_SITE[activeSite.slug] ?? null
+);
 
 const formatDateTime = (value) => {
   if (!value) {
@@ -78,6 +89,8 @@ const SettingsPage = ({
   const [installMessage, setInstallMessage] = useState('');
   const [isInstallBusy, setIsInstallBusy] = useState(false);
   const [isResetFavoritesModalOpen, setIsResetFavoritesModalOpen] = useState(false);
+  const [shouldShowAndroidApkDownload] = useState(isAndroidDevice);
+  const androidApkDownloadPath = getAndroidApkDownloadPath();
   const selectableLineups = lineups.filter((lineup) => (
     lineup.status !== 'preview' && lineup.status !== 'temp'
   ));
@@ -188,6 +201,20 @@ const SettingsPage = ({
     }
   };
 
+  const handleDownloadAndroidApk = () => {
+    const downloadLink = document.createElement('a');
+
+    if (!androidApkDownloadPath) {
+      return;
+    }
+
+    downloadLink.href = androidApkDownloadPath;
+    downloadLink.download = '';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+  };
+
   const installStatus = pwaInstall?.isInstalled
     ? 'Installed on this device.'
     : pwaInstall?.canPromptInstall
@@ -269,9 +296,14 @@ const SettingsPage = ({
                   ? 'Installing...'
                   : `Install ${activeSite.name}`}
             </Button>
-            <Link href={ANDROID_APK_DOWNLOAD_PATH} download>
-              Download Android APK
-            </Link>
+            {shouldShowAndroidApkDownload && androidApkDownloadPath ? (
+              <Button
+                icon={DownloadSimpleIcon}
+                onClick={handleDownloadAndroidApk}
+              >
+                Download Android APK
+              </Button>
+            ) : null}
           </Box>
         </Box>
       </Box>
