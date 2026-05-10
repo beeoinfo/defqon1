@@ -12,11 +12,14 @@ import Profile from '@/components/Profile';
 import TribePanel from '@/components/TribePanel';
 import Button from '@/components/primitives/Button';
 import ChoiceButton from '@/components/primitives/ChoiceButton';
+import Link from '@/components/primitives/Link';
 import { Switch } from '@/components/primitives/forms';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
 import { activeSite } from '@/sites/siteDefinitions';
 import './SettingsPage.css';
+
+const ANDROID_APK_DOWNLOAD_PATH = '/apk/Insane%20Companion.apk';
 
 const formatDateTime = (value) => {
   if (!value) {
@@ -266,6 +269,9 @@ const SettingsPage = ({
                   ? 'Installing...'
                   : `Install ${activeSite.name}`}
             </Button>
+            <Link href={ANDROID_APK_DOWNLOAD_PATH} download>
+              Download Android APK
+            </Link>
           </Box>
         </Box>
       </Box>

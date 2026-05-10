@@ -148,7 +148,7 @@ const getSiteFaviconHref = () => `/${activeSite.slug}/${activeSite.assets.favico
 const getComparableLabel = (value) => String(value ?? '').trim().toLowerCase();
 const getCleanStyleTag = (value) => String(value ?? '').trim();
 const TEMP_LINEUP_SOURCE_KEY = 'temp:manual-lineup-edit';
-const MAP_CALIBRATION_MIN_DISTANCE_M = 300;
+const MAP_CALIBRATION_MIN_DISTANCE_M = 200;
 const LIVE_LOCATION_DURATION_MS = 30 * 60 * 1000;
 const LIVE_LOCATION_MIN_UPDATE_DISTANCE_M = 10;
 const LIVE_LOCATION_REFRESH_MS = 8000;

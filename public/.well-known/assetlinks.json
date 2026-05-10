@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "info.beeo.insane.twa",
+        "sha256_cert_fingerprints": ["CA:14:72:72:2A:14:5A:A3:12:D2:15:8B:94:E2:9B:B5:48:3C:65:3E:AB:12:58:B1:5D:D1:75:5F:36:93:14:4A"]
+      }
+    }]

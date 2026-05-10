@@ -25,3 +25,8 @@ dist-ssr
 *.sw?
 
 src/data/*/*.json
+
+# Android build/signing outputs
+*.aab
+*.keystore
+*signing-key-info*.txt
