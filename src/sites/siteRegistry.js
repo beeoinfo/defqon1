@@ -14,6 +14,7 @@ export const SITE_REGISTRY = {
   defqon1: {
     slug: 'defqon1',
     name: 'DEFQON.1',
+    defaultLanguage: 'en',
     assets: {
       logo: 'logo.svg',
       favicon: 'favicon.svg',
@@ -29,6 +30,7 @@ export const SITE_REGISTRY = {
   insane: {
     slug: 'insane',
     name: 'Insane',
+    defaultLanguage: 'fr',
     assets: {
       logo: 'LOGO_2026_INSANE-256x256.png',
       favicon: 'favicon.ico',
@@ -72,6 +74,7 @@ export const resolveSiteRegistryEntry = (siteSlug) => {
     schedule: {
       ...(definition.schedule ?? {}),
     },
+    defaultLanguage: definition.defaultLanguage ?? 'en',
     requestedSlug: normalizedSlug,
   };
 };

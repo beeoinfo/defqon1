@@ -29,6 +29,7 @@ const siteHtmlPlugin = (mode) => {
     name: 'site-html',
     transformIndexHtml(html) {
       return html
+        .replaceAll('__SITE_LANG__', site.defaultLanguage)
         .replaceAll('__SITE_NAME__', site.name)
         .replaceAll('__SITE_APP_NAME__', appName)
         .replaceAll('__SITE_FAVICON_PNG__', getAssetPath('favicon-96x96.png'))
@@ -56,6 +57,8 @@ const buildSiteManifest = (site) => {
     name: getSiteAppName(site),
     short_name: getSiteAppName(site),
     description: `${site.name} festival companion for line-ups, favorites, tribe activity and maps.`,
+    lang: site.defaultLanguage,
+    dir: 'ltr',
     start_url: '/',
     scope: '/',
     display: 'standalone',

@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const SITE_SLUG = 'insane';
 const EVENT_EDITION_NAME = 'Insane Festival';
-const DEFAULT_SOURCE1_URL = 'https://insanefestival.com/line-up/';
+const DEFAULT_SOURCE1_URL = 'https://insanefestival.com/Lineup/';
 const DEFAULT_SOURCE2_URL = 'https://insanefestival.chapi.to/api/versionData/43/9/2025?lang=fr';
 const SOURCE1_NAME = 'site';
 const SOURCE2_NAME = 'chapi';
@@ -194,7 +194,7 @@ function getLineupHeadings(html) {
     match = headingPattern.exec(html);
   }
 
-  const lineupIndex = headings.findIndex((heading) => heading.text.toUpperCase() === 'LINE UP');
+  const lineupIndex = headings.findIndex((heading) => heading.text.toUpperCase() === 'Lineup');
 
   return lineupIndex >= 0 ? headings.slice(lineupIndex + 1) : headings;
 }

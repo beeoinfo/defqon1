@@ -3,7 +3,6 @@ import {
   CheckIcon,
   DownloadSimpleIcon,
   GearSixIcon,
-  UserCircleIcon,
 } from '@phosphor-icons/react';
 import Alert from '@/components/Alert';
 import Box from '@/components/layout/Box';
@@ -13,6 +12,7 @@ import TribePanel from '@/components/TribePanel';
 import Button from '@/components/primitives/Button';
 import ChoiceButton from '@/components/primitives/ChoiceButton';
 import { Switch } from '@/components/primitives/forms';
+import useI18n from '@/hooks/useI18n';
 import { getRandomPresetAvatarIndex, resolveProfileAvatarUrl } from '@/lib/presetAvatars';
 import { signOutCurrentUser, updateProfileAccount, validateUsername } from '@/lib/supabase';
 import { activeSite } from '@/sites/siteDefinitions';
@@ -31,6 +31,11 @@ const isAndroidDevice = () => (
 const getAndroidApkDownloadPath = () => (
   ANDROID_APK_DOWNLOAD_PATHS_BY_SITE[activeSite.slug] ?? null
 );
+
+const LANGUAGE_OPTIONS = [
+  { value: 'fr', label: 'French', flag: '🇫🇷' },
+  { value: 'en', label: 'English', flag: '🇬🇧' },
+];
 
 const formatDateTime = (value) => {
   if (!value) {
@@ -82,8 +87,11 @@ const SettingsPage = ({
   pwaInstall = null,
   isAdmin = false,
   pendingLineupCount = 0,
+  language = activeSite.defaultLanguage,
+  onLanguageChange,
   onOpenPage = null,
 }) => {
+  const { t } = useI18n();
   const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [installMessage, setInstallMessage] = useState('');
@@ -95,6 +103,7 @@ const SettingsPage = ({
   const selectableLineups = lineups.filter((lineup) => (
     lineup.status !== 'preview' && lineup.status !== 'temp'
   ));
+  const [languageErrorMessage, setLanguageErrorMessage] = useState('');
 
   useEffect(() => {
     setErrorMessage('');
@@ -123,8 +132,8 @@ const SettingsPage = ({
 
   if (!user) {
     return (
-      <Alert variant="neutral" title="Sign in required">
-        Log in to manage your synced profile, saved snapshots and app preferences.
+      <Alert variant="neutral" title={t('Sign in required')}>
+        {t('Log in to manage your synced profile, saved snapshots and app preferences.')}
       </Alert>
     );
   }
@@ -140,13 +149,13 @@ const SettingsPage = ({
     setErrorMessage('');
 
     if (!firstName.trim() || !lastName.trim()) {
-      setErrorMessage('First name and last name are required.');
+      setErrorMessage(t('First name and last name are required.'));
       return;
     }
 
     if (!validateUsername(username)) {
       setErrorMessage(
-        'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
+        t('Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.')
       );
       return;
     }
@@ -167,7 +176,7 @@ const SettingsPage = ({
 
       onProfileUpdated?.(nextProfile);
     } catch (error) {
-      setErrorMessage(error.message || 'Could not update the profile.');
+      setErrorMessage(error.message || t('Could not update the profile.'));
       throw error;
     } finally {
       setIsBusy(false);
@@ -182,7 +191,7 @@ const SettingsPage = ({
       await signOutCurrentUser();
       onSignedOut?.();
     } catch (error) {
-      setErrorMessage(error.message || 'Could not sign out.');
+      setErrorMessage(error.message || t('Could not sign out.'));
     } finally {
       setIsBusy(false);
     }
@@ -209,8 +218,8 @@ const SettingsPage = ({
       const result = await pwaInstall.promptInstall();
       setInstallMessage(
         result?.outcome === 'accepted'
-          ? 'Installation started.'
-          : 'Installation was not completed.'
+          ? t('Installation started.')
+          : t('Installation was not completed.')
       );
     } finally {
       setIsInstallBusy(false);
@@ -232,12 +241,28 @@ const SettingsPage = ({
   };
 
   const installStatus = pwaInstall?.isInstalled
-    ? 'Installed on this device.'
+    ? t('Installed on this device.')
     : pwaInstall?.canPromptInstall
-      ? 'Ready to install on this device.'
+      ? t('Ready to install on this device.')
       : pwaInstall?.canInstallManually
-        ? 'Use Share, then Add to Home Screen.'
-        : 'Open this site from a supported browser to install it.';
+        ? t('Use Share, then Add to Home Screen.')
+        : t('Open this site from a supported browser to install it.');
+  const handleLanguageSelect = async (nextLanguage) => {
+    if (nextLanguage === language) {
+      return;
+    }
+
+    setLanguageErrorMessage('');
+    setIsBusy(true);
+
+    try {
+      await onLanguageChange?.(nextLanguage);
+    } catch (error) {
+      setLanguageErrorMessage(error.message || t('Could not update language.'));
+    } finally {
+      setIsBusy(false);
+    }
+  };
 
   return (
     <Box className="dq-settings-page" gap="var(--dq-settings-page-gap)">
@@ -270,7 +295,7 @@ const SettingsPage = ({
               disabled={isBusy}
               badge={pendingLineupCount > 0 ? pendingLineupCount : null}
             >
-              Admin panel
+              {t('Admin panel')}
             </Button>
           ) : null}
         />
@@ -292,7 +317,7 @@ const SettingsPage = ({
         onShowMemberOnMap={onShowMemberOnMap}
       />
 
-      <Box background="surface" title="Install app" titleIcon={DownloadSimpleIcon}>
+      <Box background="surface" title={t('Install app')} titleIcon={DownloadSimpleIcon}>
         <Box gap="var(--dq-ui-space-sm)">
           <p className="dq-settings-page__meta">
             {installStatus}
@@ -308,30 +333,56 @@ const SettingsPage = ({
               disabled={isInstallBusy || !pwaInstall?.canPromptInstall || pwaInstall?.isInstalled}
             >
               {pwaInstall?.isInstalled
-                ? 'Installed'
+                ? t('Installed')
                 : isInstallBusy
-                  ? 'Installing...'
-                  : `Install ${activeSite.name}`}
+                  ? t('Installing...')
+                  : t('Install {siteName}', { siteName: activeSite.name })}
             </Button>
             {shouldShowAndroidApkDownload && androidApkDownloadPath ? (
               <Button
                 icon={DownloadSimpleIcon}
                 onClick={handleDownloadAndroidApk}
               >
-                Download Android APK
+                {t('Download Android APK')}
               </Button>
             ) : null}
           </Box>
         </Box>
       </Box>
 
-      <Box background="surface" title="App settings" titleIcon={GearSixIcon}>
+      <Box background="surface" title={t('Language')}>
+        <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
+          {LANGUAGE_OPTIONS.map((languageOption) => (
+            <ChoiceButton
+              key={languageOption.value}
+              type="radio"
+              name="language"
+              checked={language === languageOption.value}
+              onCheckedChange={() => handleLanguageSelect(languageOption.value)}
+              disabled={isBusy}
+              className="dq-settings-page__language-choice"
+            >
+              <span className="dq-settings-page__language-flag" aria-hidden="true">
+                {languageOption.flag}
+              </span>
+              <span>{t(languageOption.label)}</span>
+            </ChoiceButton>
+          ))}
+        </Box>
+        {languageErrorMessage ? (
+          <Alert variant="error" title={t('Language update failed')}>
+            {languageErrorMessage}
+          </Alert>
+        ) : null}
+      </Box>
+
+      <Box background="surface" title={t('App settings')} titleIcon={GearSixIcon}>
         <Box gap="var(--dq-ui-space-lg)">
           {selectableLineups.length > 0 ? (
             <Box gap="var(--dq-ui-space-sm)">
-              <strong>Line-up backup</strong>
+              <strong>{t('Lineup backup')}</strong>
               <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-                Switch temporarily between available snapshots.
+                {t('Switch temporarily between available snapshots.')}
               </p>
               <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
                 {selectableLineups.map((lineup) => (
@@ -342,7 +393,7 @@ const SettingsPage = ({
                     checked={lineup.key === selectedLineupKey}
                     onCheckedChange={() => onSelectLineup?.(lineup.key)}
                     selectedIcon={CheckIcon}
-                    tag={lineup.isLatest ? 'Latest' : null}
+                    tag={lineup.isLatest ? t('Latest') : null}
                     size="lg"
                     subtitle={
                       lineup.lastPublishedAt
@@ -358,37 +409,37 @@ const SettingsPage = ({
           ) : null}
 
           <Switch
-            label="Hide past events"
-            description="Keep the line-up focused on what is still ahead."
+            label={t('Hide past events')}
+            description={t('Keep the lineup focused on what is still ahead.')}
             checked={hidePastEvents}
             onCheckedChange={onHidePastEventsChange}
           />
 
           <Switch
-            label="Hide events without date"
-            description="Hide entries that still do not have a confirmed timeslot."
+            label={t('Hide events without date')}
+            description={t('Hide entries that still do not have a confirmed timeslot.')}
             checked={hideUndatedEvents}
             onCheckedChange={onHideUndatedEventsChange}
           />
 
           <Switch
-            label="Ignore small favorite conflicts"
-            description="Ignore overlaps that are 25% or less of the shorter favorite set."
+            label={t('Ignore small favorite conflicts')}
+            description={t('Ignore overlaps that are 25% or less of the shorter favorite set.')}
             checked={ignoreSmallConflicts}
             onCheckedChange={onIgnoreSmallConflictsChange}
           />
 
           <Switch
-            label="Show style tags"
-            description="Display compact style badges on artist cards."
+            label={t('Show style tags')}
+            description={t('Display compact style badges on artist cards.')}
             checked={showStyleTags}
             onCheckedChange={onShowStyleTagsChange}
           />
 
           <Box gap="var(--dq-ui-space-sm)">
-            <strong>Favorites</strong>
+            <strong>{t('Favorites')}</strong>
             <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-              Reset all saved favorites attached to this account.
+              {t('Reset all saved favorites attached to this account.')}
             </p>
             <Box direction="row" justify="flex-start" wrap="wrap" gap="var(--dq-ui-space-sm)">
               <Button
@@ -396,14 +447,14 @@ const SettingsPage = ({
                 onClick={() => setIsResetFavoritesModalOpen(true)}
                 disabled={isBusy || favoriteCount <= 0}
               >
-                Reset favorites ({favoriteCount})
+                {t('Reset favorites')} ({favoriteCount})
               </Button>
             </Box>
           </Box>
 
           <Box direction="row" justify="flex-end">
             <Button variant="danger" onClick={handleSignOut} disabled={isBusy}>
-              Sign out
+              {t('Sign out')}
             </Button>
           </Box>
         </Box>
@@ -412,8 +463,8 @@ const SettingsPage = ({
       <Modal
         open={isResetFavoritesModalOpen}
         onClose={() => setIsResetFavoritesModalOpen(false)}
-        title="Reset favorites?"
-        subtitle="This will remove every saved favorite attached to your account."
+        title={t('Reset favorites?')}
+        subtitle={t('This will remove every saved favorite attached to your account.')}
         controls={(
           <>
             <Button
@@ -421,20 +472,23 @@ const SettingsPage = ({
               onClick={() => setIsResetFavoritesModalOpen(false)}
               disabled={isBusy}
             >
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button
               variant="danger"
               onClick={handleResetFavorites}
               disabled={isBusy || favoriteCount <= 0}
             >
-              Reset favorites
+              {t('Reset favorites')}
             </Button>
           </>
         )}
       >
         <p style={{ margin: 0, color: 'var(--dq-ui-text-soft)' }}>
-          You currently have {favoriteCount} saved favorite{favoriteCount === 1 ? '' : 's'}.
+          {t('You currently have {count} saved favorite{plural}.', {
+            count: favoriteCount,
+            plural: favoriteCount === 1 ? '' : 's',
+          })}
         </p>
       </Modal>
     </Box>

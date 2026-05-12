@@ -19,6 +19,7 @@ import Modal from '@/components/layout/Modal';
 import Badge from '@/components/primitives/Badge';
 import Button from '@/components/primitives/Button';
 import { FileInput, Switch } from '@/components/primitives/forms';
+import useI18n from '@/hooks/useI18n';
 import {
   activateLineupVersion,
   deleteLineupVersion,
@@ -95,14 +96,14 @@ const getLineupPayloadUpdatedAt = (lineup) => lineup.payload?.updatedAt ?? null;
 
 const getLineupTitle = (lineup) => getLineupEventEditionName(lineup);
 
-const getLineupUpdatedMeta = (lineup) => {
+const getLineupUpdatedMeta = (lineup, t) => {
   const payloadUpdatedAt = getLineupPayloadUpdatedAt(lineup);
 
-  return payloadUpdatedAt ? `Updated at: ${formatDateTime(payloadUpdatedAt)}` : '';
+  return payloadUpdatedAt ? t('Updated at: {time}', { time: formatDateTime(payloadUpdatedAt) }) : '';
 };
 
-const getLineupPublishedMeta = (lineup) => (
-  lineup.activatedAt ? `Published at: ${formatDateTime(lineup.activatedAt)}` : ''
+const getLineupPublishedMeta = (lineup, t) => (
+  lineup.activatedAt ? t('Published at: {time}', { time: formatDateTime(lineup.activatedAt) }) : ''
 );
 
 const getLineupHashLabel = (lineup) => lineup.payloadHash.slice(0, 12);
@@ -170,6 +171,7 @@ const AdminPage = ({
   tempLineup = null,
   onDeleteTempLineup = null,
 }) => {
+  const { t } = useI18n();
   const [lineups, setLineups] = useState([]);
   const [isBusy, setIsBusy] = useState(false);
   const [isFetchBusy, setIsFetchBusy] = useState(false);
@@ -199,9 +201,9 @@ const AdminPage = ({
 
   useEffect(() => {
     refreshAdminData().catch((error) => {
-      setErrorMessage(error.message || 'Could not load admin data.');
+      setErrorMessage(t(error.message || 'Could not load admin data.'));
     });
-  }, [refreshAdminData]);
+  }, [refreshAdminData, t]);
 
   const handleManualFilesChange = async (files) => {
     const file = files?.[0];
@@ -220,7 +222,10 @@ const AdminPage = ({
 
       if (existingLineup) {
         setErrorMessage(
-          `This JSON is already loaded as ${formatLineupStatus(existingLineup.status).toLowerCase()} lineup "${getLineupTitle(existingLineup)}".`
+          t('This JSON is already loaded as {status} lineup "{name}".', {
+            status: t(formatLineupStatus(existingLineup.status)).toLowerCase(),
+            name: getLineupTitle(existingLineup),
+          })
         );
         return;
       }
@@ -236,7 +241,7 @@ const AdminPage = ({
         },
       });
     } catch (error) {
-      setErrorMessage(error.message || 'Could not prepare this lineup.');
+      setErrorMessage(t(error.message || 'Could not prepare this lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -259,7 +264,7 @@ const AdminPage = ({
       await refreshAdminData();
       await onLineupsChanged?.();
     } catch (error) {
-      setErrorMessage(error.message || 'Could not load this lineup.');
+      setErrorMessage(t(error.message || 'Could not load this lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -278,7 +283,7 @@ const AdminPage = ({
       await refreshAdminData();
       await onLineupsChanged?.({ selectLatest: true });
     } catch (error) {
-      setErrorMessage(error.message || 'Could not publish this lineup.');
+      setErrorMessage(t(error.message || 'Could not publish this lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -308,7 +313,7 @@ const AdminPage = ({
       await refreshAdminData();
       await onLineupsChanged?.({ selectLatest: true });
     } catch (error) {
-      setErrorMessage(error.message || 'Could not publish this temporary lineup.');
+      setErrorMessage(t(error.message || 'Could not publish this temporary lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -323,7 +328,7 @@ const AdminPage = ({
       await refreshAdminData();
       await onLineupsChanged?.();
     } catch (error) {
-      setErrorMessage(error.message || 'Could not ignore this lineup.');
+      setErrorMessage(t(error.message || 'Could not ignore this lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -343,7 +348,7 @@ const AdminPage = ({
       setFetchResult({
         status: 'error',
         action: 'failed',
-        message: error.message || 'Could not run the manual lineup fetch.',
+        message: t(error.message || 'Could not run the manual lineup fetch.'),
       });
     } finally {
       setIsFetchBusy(false);
@@ -368,7 +373,7 @@ const AdminPage = ({
       await refreshAdminData();
       await onLineupsChanged?.({ selectLatest: shouldSelectLatest });
     } catch (error) {
-      setErrorMessage(error.message || 'Could not delete this lineup.');
+      setErrorMessage(t(error.message || 'Could not delete this lineup.'));
     } finally {
       setIsBusy(false);
     }
@@ -382,7 +387,7 @@ const AdminPage = ({
       await onResetMapCalibration?.();
       setIsResetCalibrationModalOpen(false);
     } catch (error) {
-      setErrorMessage(error.message || 'Could not reset map calibration.');
+      setErrorMessage(t(error.message || 'Could not reset map calibration.'));
     } finally {
       setIsBusy(false);
     }
@@ -390,8 +395,8 @@ const AdminPage = ({
 
   if (!isAdmin) {
     return (
-      <Alert variant="warning" title="Admin access required">
-        This area is reserved for project admins.
+      <Alert variant="warning" title={t('Admin access required')}>
+        {t('This area is reserved for project admins.')}
       </Alert>
     );
   }
@@ -399,19 +404,19 @@ const AdminPage = ({
   return (
     <Box className="dq-admin-page" gap="var(--dq-ui-space-xl)">
       {errorMessage ? (
-        <Alert variant="error" title="Admin action failed">
+        <Alert variant="error" title={t('Admin action failed')}>
           {errorMessage}
         </Alert>
       ) : null}
 
-      <Box background="surface" title="Manual lineup editing" titleIcon={PencilSimpleIcon}>
+      <Box background="surface" title={t('Manual lineup editing')} titleIcon={PencilSimpleIcon}>
         <Box gap="var(--dq-ui-space-md)">
           <Switch
-            label="Allow manual lineup edit"
+            label={t('Enable manual lineup edit')}
             description={
               hasPublishedLineup
-                ? 'Replace favorite actions with edit buttons on the line-up and timetable. Edits create a local temp lineup preview until you publish or delete it.'
-                : 'Manual edits require a published lineup to use as the source.'
+                ? t('Replace favorite actions with edit buttons on the lineup and timetable. Edits create a local temp lineup preview until you publish or delete it.')
+                : t('Manual edits require a published lineup to use as the source.')
             }
             checked={hasPublishedLineup && allowManualLineupEdit}
             onCheckedChange={onAllowManualLineupEditChange}
@@ -425,27 +430,27 @@ const AdminPage = ({
                 onClick={onAddPerformance}
                 disabled={isBusy}
               >
-                Add performance
+                {t('Add show')}
               </Button>
             </Box>
           ) : null}
         </Box>
       </Box>
 
-      <Box background="surface" title="Joke Lineup" titleIcon={StackIcon}>
+      <Box background="surface" title={t('Joke lineup')} titleIcon={StackIcon}>
         <Switch
-          label="Activate lineup joke"
-          description="When active, matching searches can show a random joke photo instead of artist cards."
+          label={t('Activate lineup joke')}
+          description={t('When active, matching searches can show a random joke photo instead of artist cards.')}
           checked={isJokeLineupEnabled}
           onCheckedChange={onJokeLineupEnabledChange}
           disabled={isBusy || isJokeLineupSaving}
         />
       </Box>
 
-      <Box background="surface" title="Map calibration" titleIcon={MapTrifoldIcon}>
+      <Box background="surface" title={t('Map calibration')} titleIcon={MapTrifoldIcon}>
         <Box gap="var(--dq-ui-space-md)">
           <p className="dq-admin-page__muted">
-            Calibrate festival maps with real GPS points before enabling live position sharing.
+            {t('Calibrate festival maps with real GPS points before enabling live position sharing.')}
           </p>
           <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
             <Button
@@ -453,23 +458,23 @@ const AdminPage = ({
               onClick={onCalibrateMap}
               disabled={isBusy || !onCalibrateMap}
             >
-              Calibrate map
+              {t('Calibrate map')}
             </Button>
             <Button
               variant="danger"
               onClick={() => setIsResetCalibrationModalOpen(true)}
               disabled={isBusy || !onResetMapCalibration}
             >
-              Reset calibration
+              {t('Reset calibration')}
             </Button>
           </Box>
         </Box>
       </Box>
 
-      <Box background="surface" title="Available lineups" titleIcon={StackIcon}>
+      <Box background="surface" title={t('Available lineups')} titleIcon={StackIcon}>
         <Box gap="var(--dq-ui-space-sm)">
           {displayedLineups.length === 0 ? (
-            <p className="dq-admin-page__muted">No Supabase lineup has been loaded yet.</p>
+            <p className="dq-admin-page__muted">{t('No Supabase lineup has been loaded yet.')}</p>
           ) : displayedLineups.map((lineup) => (
             <Box
               key={lineup.id}
@@ -511,17 +516,17 @@ const AdminPage = ({
                           : undefined
                     }
                   >
-                    {formatLineupStatus(lineup.status)}
+                    {t(formatLineupStatus(lineup.status))}
                   </Badge>
                 </Box>
-                {getLineupUpdatedMeta(lineup) ? (
+                {getLineupUpdatedMeta(lineup, t) ? (
                   <span className="dq-admin-page__lineup-meta">
-                    {getLineupUpdatedMeta(lineup)}
+                    {getLineupUpdatedMeta(lineup, t)}
                   </span>
                 ) : null}
-                {getLineupPublishedMeta(lineup) ? (
+                {getLineupPublishedMeta(lineup, t) ? (
                   <span className="dq-admin-page__lineup-meta">
-                    {getLineupPublishedMeta(lineup)}
+                    {getLineupPublishedMeta(lineup, t)}
                   </span>
                 ) : null}
               </Box>
@@ -534,7 +539,7 @@ const AdminPage = ({
                       onClick={() => handlePreviewLineup(lineup)}
                       disabled={isBusy}
                     >
-                      Preview
+                      {t('Preview')}
                     </Button>
                     <Button
                       icon={CheckIcon}
@@ -542,7 +547,7 @@ const AdminPage = ({
                       onClick={handlePublishTempLineup}
                       disabled={isBusy}
                     >
-                      Publish
+                      {t('Publish')}
                     </Button>
                   </>
                 ) : null}
@@ -554,7 +559,7 @@ const AdminPage = ({
                       onClick={() => handlePreviewLineup(lineup)}
                       disabled={isBusy}
                     >
-                      Preview
+                      {t('Preview')}
                     </Button>
                     <Button
                       icon={ProhibitIcon}
@@ -562,7 +567,7 @@ const AdminPage = ({
                       onClick={() => handleIgnoreLineup(lineup.id)}
                       disabled={isBusy}
                     >
-                      Ignore
+                      {t('Ignore')}
                     </Button>
                     <Button
                       icon={CheckIcon}
@@ -570,7 +575,7 @@ const AdminPage = ({
                       onClick={() => handlePublishLineup(lineup.id)}
                       disabled={isBusy}
                     >
-                      Publish
+                      {t('Publish')}
                     </Button>
                   </>
                 ) : null}
@@ -584,7 +589,7 @@ const AdminPage = ({
                     })}
                     disabled={isBusy}
                   >
-                    Export
+                    {t('Export')}
                   </Button>
                 ) : null}
                 <Button
@@ -597,7 +602,7 @@ const AdminPage = ({
                   )}
                   disabled={isBusy}
                 >
-                  Delete
+                  {t('Delete')}
                 </Button>
               </Box>
             </Box>
@@ -605,11 +610,11 @@ const AdminPage = ({
         </Box>
       </Box>
 
-      <Box background="surface" title="Manual lineup fetch" titleIcon={ArrowClockwiseIcon}>
+      <Box background="surface" title={t('Manual lineup fetch')} titleIcon={ArrowClockwiseIcon}>
         <Box gap="var(--dq-ui-space-lg)">
           {fetchResult ? (
-            <Alert variant={getFetchResultVariant(fetchResult)} title={getFetchResultTitle(fetchResult)}>
-              {getFetchResultMessage(fetchResult)}
+            <Alert variant={getFetchResultVariant(fetchResult)} title={t(getFetchResultTitle(fetchResult))}>
+              {t(getFetchResultMessage(fetchResult))}
             </Alert>
           ) : null}
           <Button
@@ -622,16 +627,16 @@ const AdminPage = ({
             onClick={handleRunManualFetch}
             disabled={isBusy || isFetchBusy}
           >
-            {isFetchBusy ? 'Running lineup fetch...' : 'Run lineup fetch'}
+            {isFetchBusy ? t('Running lineup fetch...') : t('Run lineup fetch')}
           </Button>
         </Box>
       </Box>
 
-      <Box background="surface" title="Manual JSON import" titleIcon={UploadSimpleIcon}>
+      <Box background="surface" title={t('Manual JSON import')} titleIcon={UploadSimpleIcon}>
         <FileInput
-          label="Lineup JSON"
-          description="Fallback path when the server worker is unavailable. The imported lineup is added as pending."
-          buttonLabel="Choose lineup JSON"
+          label={t('Lineup JSON')}
+          description={t('Fallback path when the server worker is unavailable. The imported lineup is added as pending.')}
+          buttonLabel={t('Choose lineup JSON')}
           accept="application/json,.json"
           disabled={isBusy}
           onFilesChange={handleManualFilesChange}
@@ -641,12 +646,12 @@ const AdminPage = ({
       <Modal
         open={Boolean(pendingLineup)}
         onClose={() => setPendingLineup(null)}
-        title="Load new lineup?"
+        title={t('Load new lineup?')}
         subtitle={pendingLineup ? `Hash ${pendingLineup.payloadHash.slice(0, 12)}` : ''}
         controls={(
           <>
             <Button variant="ghost" onClick={() => setPendingLineup(null)} disabled={isBusy}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button
               variant="ghost"
@@ -658,17 +663,17 @@ const AdminPage = ({
               })}
               disabled={isBusy || !pendingLineup}
             >
-              Preview
+              {t('Preview')}
             </Button>
             <Button onClick={handleLoadPendingLineup} disabled={isBusy}>
-              Add pending lineup
+              {t('Add pending lineup')}
             </Button>
           </>
         )}
       >
         <Box gap="var(--dq-ui-space-sm)">
           <p className="dq-admin-page__muted">
-            This will load the JSON as a pending lineup. It stays admin-only until you publish it.
+            {t('This will load the JSON as a pending lineup. It stays admin-only until you publish it.')}
           </p>
           <pre className="dq-admin-page__changes-preview">
             {JSON.stringify(pendingLineup?.detectedChanges ?? {}, null, 2)}
@@ -679,44 +684,44 @@ const AdminPage = ({
       <Modal
         open={Boolean(lineupToDelete)}
         onClose={() => setLineupToDelete(null)}
-        title="Delete lineup?"
+        title={t('Delete lineup?')}
         subtitle={lineupToDelete ? getLineupTitle(lineupToDelete) : ''}
         controls={(
           <>
             <Button variant="ghost" onClick={() => setLineupToDelete(null)} disabled={isBusy}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button variant="danger" icon={TrashIcon} onClick={handleDeleteLineup} disabled={isBusy}>
-              Delete lineup
+              {t('Delete lineup')}
             </Button>
           </>
         )}
       >
         <p className="dq-admin-page__muted">
           {lineupToDelete?.status === 'active'
-            ? 'This removes the currently published lineup from Supabase.'
-            : 'This removes the selected lineup from Supabase.'}
+            ? t('This removes the currently published lineup from Supabase.')
+            : t('This removes the selected lineup from Supabase.')}
         </p>
       </Modal>
 
       <Modal
         open={isResetCalibrationModalOpen}
         onClose={() => setIsResetCalibrationModalOpen(false)}
-        title="Reset map calibration?"
-        subtitle="This removes every calibration point for this site."
+        title={t('Reset map calibration?')}
+        subtitle={t('This removes every calibration point for this site.')}
         controls={(
           <>
             <Button variant="ghost" onClick={() => setIsResetCalibrationModalOpen(false)} disabled={isBusy}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button variant="danger" onClick={handleResetMapCalibration} disabled={isBusy}>
-              Reset calibration
+              {t('Reset calibration')}
             </Button>
           </>
         )}
       >
         <p className="dq-admin-page__muted">
-          Live position sharing will be hidden until new calibration points are saved.
+          {t('Live position sharing will be hidden until new calibration points are saved.')}
         </p>
       </Modal>
     </Box>

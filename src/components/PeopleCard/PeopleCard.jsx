@@ -1,4 +1,5 @@
 import useCachedImageUrl from '@/hooks/useCachedImageUrl';
+import useI18n from '@/hooks/useI18n';
 import Badge from '../primitives/Badge';
 import Box from '../layout/Box';
 import './PeopleCard.css';
@@ -17,6 +18,7 @@ const PeopleCard = ({
   style,
   ...props
 }) => {
+  const { t } = useI18n();
   const cachedAvatarSrc = useCachedImageUrl(avatarSrc);
 
   return (
@@ -61,7 +63,7 @@ const PeopleCard = ({
               size="sm"
               className="dq-people-card__owner"
             >
-              {ownerLabel}
+              {t(ownerLabel)}
             </Badge>
           ) : null}
         </span>

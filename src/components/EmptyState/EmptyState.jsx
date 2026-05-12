@@ -1,4 +1,5 @@
 import React from 'react';
+import useI18n from '@/hooks/useI18n';
 import Alert from '../Alert';
 import './EmptyState.css';
 
@@ -7,8 +8,10 @@ const EmptyState = ({
   text = null,
   className = '',
 }) => {
+  const { t } = useI18n();
+
   return (
-    <Alert variant="neutral" title={title} className={className}>
+    <Alert variant="neutral" title={t(title)} className={className}>
       {text}
     </Alert>
   );

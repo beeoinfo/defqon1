@@ -28,6 +28,8 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HIDDEN_AUTH_EMAIL_DOMAIN = 'auth.beeoinfo.local';
 const ACTIVE_SITE_SLUG = activeSite.slug;
+const DEFAULT_LANGUAGE = activeSite.defaultLanguage ?? 'en';
+const SUPPORTED_PROFILE_LANGUAGES = new Set(['en', 'fr']);
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 const stableStringify = (value) => {
@@ -164,6 +166,16 @@ export function validateEmail(value) {
   return EMAIL_REGEX.test(normalizeEmail(value));
 }
 
+export function normalizeProfileLanguage(value, fallback = DEFAULT_LANGUAGE) {
+  const normalizedLanguage = String(value ?? '').trim().toLowerCase().slice(0, 2);
+
+  if (SUPPORTED_PROFILE_LANGUAGES.has(normalizedLanguage)) {
+    return normalizedLanguage;
+  }
+
+  return SUPPORTED_PROFILE_LANGUAGES.has(fallback) ? fallback : 'en';
+}
+
 export function buildHiddenAuthEmail(username) {
   const normalizedUsername = normalizeUsername(username);
   if (!normalizedUsername) {
@@ -214,6 +226,7 @@ export async function signUpWithUsername({ firstName, lastName, username, passwo
         username: normalizedUsername,
         avatar_kind: 'preset',
         avatar_preset: avatarPreset,
+        preferred_language: DEFAULT_LANGUAGE,
       },
     },
   });
@@ -313,6 +326,7 @@ function buildProfilePayloadFromUser(user) {
     ),
     avatar_kind: 'preset',
     avatar_preset: Number(metadata.avatar_preset) || getRandomPresetAvatarIndex(),
+    preferred_language: normalizeProfileLanguage(metadata.preferred_language),
   };
 }
 
@@ -728,6 +742,7 @@ export async function updateProfileAccount({
   avatarMode,
   avatarPreset,
   avatarFile,
+  preferredLanguage,
 }) {
   const client = ensureSupabase();
   const normalizedUsername = normalizeUsername(username);
@@ -777,6 +792,11 @@ export async function updateProfileAccount({
     avatar_path: avatarPayload.avatar_path,
     avatar_url: avatarPayload.avatar_url,
   };
+
+  if (preferredLanguage !== undefined) {
+    updatePayload.preferred_language = normalizeProfileLanguage(preferredLanguage);
+  }
+
   const { error: profileError } = await client
     .from('profiles')
     .update(updatePayload)
@@ -792,6 +812,7 @@ export async function updateProfileAccount({
       avatar_kind: updatePayload.avatar_kind,
       avatar_preset: updatePayload.avatar_preset,
       avatar_url: updatePayload.avatar_url,
+      preferred_language: updatePayload.preferred_language ?? currentProfile?.preferred_language ?? DEFAULT_LANGUAGE,
     },
   });
   if (authError) {
@@ -806,6 +827,33 @@ export async function updateProfileAccount({
     throw refreshedProfileError;
   }
   return refreshedProfile;
+}
+
+export async function updateProfileLanguage({ userId, preferredLanguage }) {
+  const client = ensureSupabase();
+  const nextLanguage = normalizeProfileLanguage(preferredLanguage);
+  const { data, error } = await client
+    .from('profiles')
+    .update({ preferred_language: nextLanguage })
+    .eq('id', userId)
+    .select('*')
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const { error: authError } = await client.auth.updateUser({
+    data: {
+      preferred_language: nextLanguage,
+    },
+  });
+
+  if (authError) {
+    throw authError;
+  }
+
+  return data;
 }
 
 export function normalizeTribeCode(value) {

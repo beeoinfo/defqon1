@@ -5,7 +5,7 @@ export const isStorybookViewEnabled = import.meta.env.DEV && Boolean(import.meta
 export const APP_DOCUMENT_TITLE = activeSite.name;
 
 export const VIEW_TITLES = {
-  lineup: 'Line-up',
+  lineup: 'Lineup',
   maps: 'Maps',
   reviews: 'Reviews',
   search: 'Search',

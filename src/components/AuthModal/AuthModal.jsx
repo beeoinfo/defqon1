@@ -5,6 +5,7 @@ import Modal from '../layout/Modal';
 import Button from '../primitives/Button';
 import Title from '../primitives/Title';
 import { TextInput } from '../primitives/forms';
+import useI18n from '../../hooks/useI18n';
 import {
   isSupabaseConfigured,
   signInWithUsername,
@@ -16,6 +17,7 @@ import {
 import './AuthModal.css';
 
 export default function AuthModal({ open, defaultTab = 'login', onClose, onSuccess }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState(defaultTab);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -44,7 +46,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
     setSuccessMessage('');
 
     if (!isSupabaseConfigured()) {
-      setErrorMessage('Supabase is not configured.');
+      setErrorMessage(t('Supabase is not configured.'));
       return;
     }
 
@@ -52,30 +54,30 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
 
     if (isSignup && !validateUsername(username)) {
       setErrorMessage(
-        'Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.'
+        t('Username must contain 3 to 30 characters: lowercase letters, numbers, dot, underscore or dash.')
       );
       return;
     }
 
     if (!isSignup && !isValidLoginIdentifier) {
-      setErrorMessage('Enter a valid username or email address.');
+      setErrorMessage(t('Enter a valid username or email address.'));
       return;
     }
 
     if (!password) {
-      setErrorMessage('Password is required.');
+      setErrorMessage(t('Password is required.'));
       return;
     }
 
     if (isSignup && !validatePassword(password)) {
       setErrorMessage(
-        'Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.'
+        t('Password must contain at least 8 characters, including uppercase, lowercase, number and symbol.')
       );
       return;
     }
 
     if (isSignup && (!firstName.trim() || !lastName.trim())) {
-      setErrorMessage('First name and last name are required.');
+      setErrorMessage(t('First name and last name are required.'));
       return;
     }
 
@@ -88,7 +90,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
           onSuccess?.(result.user);
           return;
         }
-        setSuccessMessage('Account created. You can now log in with your username and password.');
+        setSuccessMessage(t('Account created. You can now log in with your username and password.'));
         setTab('login');
         setUsername('');
         setPassword('');
@@ -98,7 +100,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
       const user = await signInWithUsername({ username, password });
       onSuccess?.(user);
     } catch (error) {
-      setErrorMessage(error.message || 'Something went wrong.');
+      setErrorMessage(error.message || t('Something went wrong.'));
     } finally {
       setIsBusy(false);
     }
@@ -108,11 +110,11 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
     <Modal
       open={open}
       onClose={onClose}
-      title={isSignup ? 'Create your account' : 'Welcome back'}
+      title={isSignup ? t('Create your account') : t('Welcome back')}
       subtitle={
         isSignup
-          ? 'Create an account to sync favorites, tribe activity and profile settings.'
-          : 'Log in to recover your synced profile, tribe and saved favorites.'
+          ? t('Create an account to sync favorites, tribe activity and profile settings.')
+          : t('Log in to recover your synced profile, tribe and saved favorites.')
       }
       maxWidth="560px"
     >
@@ -126,7 +128,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
               setSuccessMessage('');
             }}
           >
-            Login
+            {t('Login')}
           </Button>
           <Button
             selected={tab === 'signup'}
@@ -136,7 +138,7 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
               setSuccessMessage('');
             }}
           >
-            Sign up
+            {t('Sign up')}
           </Button>
         </Box>
 
@@ -144,14 +146,14 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
           {isSignup ? (
             <Box direction="row" wrap="wrap" maxColumns={2}>
               <TextInput
-                label="First name"
+                label={t('First name')}
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 autoComplete="given-name"
                 required
               />
               <TextInput
-                label="Last name"
+                label={t('Last name')}
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 autoComplete="family-name"
@@ -161,40 +163,40 @@ export default function AuthModal({ open, defaultTab = 'login', onClose, onSucce
           ) : null}
 
           <TextInput
-            label={isSignup ? 'Username' : 'Username or email'}
+            label={isSignup ? t('Username') : t('Username or email')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
-            description={isSignup ? 'Use lowercase letters, numbers, dots, underscores or dashes.' : undefined}
+            description={isSignup ? t('Use lowercase letters, numbers, dots, underscores or dashes.') : undefined}
             required
           />
 
           <TextInput
-            label="Password"
+            label={t('Password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isSignup ? 'new-password' : 'current-password'}
-            description={isSignup ? 'Minimum 8 characters with uppercase, lowercase, number and symbol.' : undefined}
+            description={isSignup ? t('Minimum 8 characters with uppercase, lowercase, number and symbol.') : undefined}
             required
           />
 
           {successMessage ? (
-            <Alert variant="success" title="Account created">{successMessage}</Alert>
+            <Alert variant="success" title={t('Account created')}>{successMessage}</Alert>
           ) : null}
 
           {errorMessage ? (
-            <Alert variant="error" title="Authentication failed">{errorMessage}</Alert>
+            <Alert variant="error" title={t('Authentication failed')}>{errorMessage}</Alert>
           ) : null}
 
           <Box direction="row" justify="space-between" align="center" wrap="wrap">
             <Title component="span" variant="h6">
               {isSignup
-                ? 'Your synced profile is ready right after sign-up.'
-                : 'Your favorites and tribe stay attached to your account.'}
+                ? t('Your synced profile is ready right after sign-up.')
+                : t('Your favorites and tribe stay attached to your account.')}
             </Title>
             <Button type="submit" disabled={isBusy}>
-              {isBusy ? 'Please wait...' : isSignup ? 'Create account' : 'Login'}
+              {isBusy ? t('Please wait...') : isSignup ? t('Create account') : t('Login')}
             </Button>
           </Box>
         </Box>

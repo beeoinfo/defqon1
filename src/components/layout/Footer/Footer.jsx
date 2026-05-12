@@ -1,6 +1,7 @@
 import { isStorybookViewEnabled } from '../../../routes/AppRoutes';
 import Link from '../../primitives/Link';
 import Box from '@/components/layout/Box';
+import useI18n from '@/hooks/useI18n';
 import './Footer.css';
 
 const Footer = ({
@@ -10,6 +11,7 @@ const Footer = ({
   className = '',
   ...props
 }) => {
+  const { t } = useI18n();
   const Component = component;
   const shouldShowStorybookLink = isStorybookViewEnabled && typeof onOpenView === 'function';
 
@@ -43,7 +45,7 @@ const Footer = ({
         style={{ paddingBlock: 'var(--dq-ui-layout-block-padding-top)' }}
       >
         <p className="dq-layout-footer__signature">
-          Made with 🩷 by <strong>Dylan Bergozza</strong>
+          {t('Made 🩷 love by')} <strong>Dylan B.</strong>
         </p>
         <p className="dq-layout-footer__version">
           <em>v2.1.0</em>
@@ -51,7 +53,7 @@ const Footer = ({
         <Box className="dq-layout-footer__links" direction="row" wrap="wrap" gap={0}>
           {footerLinks.map((link) => (
             <span key={link.id} className="dq-layout-footer__link-item">
-              <Link onClick={link.onClick}>{link.label}</Link>
+              <Link onClick={link.onClick}>{t(link.label)}</Link>
             </span>
           ))}
         </Box>

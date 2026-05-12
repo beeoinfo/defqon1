@@ -212,7 +212,7 @@ const STORYBOOK_MODAL_SCROLL_ITEMS = [
 ];
 
 const STORYBOOK_DRAWER_SCROLL_ITEMS = [
-  'Line-up filters',
+  'Lineup filters',
   'Live now',
   'Favorites only',
   'Red stage',
@@ -412,10 +412,10 @@ const STORYBOOK_PEOPLE_STACK_AVATARS = presetAvatarOptions.map((avatar) => ({
 const STORYBOOK_DROPDOWN_DRAWER_ITEMS = [
   {
     value: 'lineup',
-    label: 'Line-up',
+    label: 'Lineup',
     content: (
       <Box background="surface">
-        <Element>Line-up panel</Element>
+        <Element>Lineup panel</Element>
       </Box>
     ),
   },
@@ -442,10 +442,10 @@ const STORYBOOK_DROPDOWN_DRAWER_ITEMS = [
 const STORYBOOK_TABS_ITEMS = [
   {
     value: 'lineup',
-    label: 'Line-up',
+    label: 'Lineup',
     content: (
       <Box background="surface">
-        <Element>Line-up panel</Element>
+        <Element>Lineup panel</Element>
       </Box>
     ),
   },
@@ -623,7 +623,7 @@ const StorybookModalSection = memo(() => {
       <Modal
         open={openModalDemo === 'wide'}
         onClose={handleCloseModal}
-        title="Line-up comparison"
+        title="Lineup comparison"
         subtitle="Outside click is disabled here, so use the close button or footer actions."
         closeOnOutsideClick={false}
         maxWidth="720px"
@@ -806,7 +806,7 @@ const StorybookPeopleSection = memo(() => {
           <Box gap="var(--dq-ui-space-lg)">
             <PeopleCard
               avatarSrc={getPresetAvatarUrl(1)}
-              name="Dylan Bergozza"
+              name="Dylan B."
               handle="@daddydi"
               owner
             />
@@ -947,14 +947,14 @@ const StorybookBody = memo(() => {
           >
             <Box gap="var(--dq-ui-space-lg)">
               <DateTimeInput
-                label="Performance start"
+                label="Show start"
                 dateValue="2026-05-14"
                 timeValue="16:00"
                 onDateChange={() => {}}
                 onTimeChange={() => {}}
               />
               <DateTimeInput
-                label="Performance end"
+                label="Show end"
                 dateValue="2026-05-15"
                 timeValue="04:00"
                 onDateChange={() => {}}
@@ -1139,7 +1139,7 @@ const StorybookBody = memo(() => {
       >
         <Profile
           firstName="Dylan"
-          lastName="Bergozza"
+          lastName="B."
           username="daddydi"
           avatarSrc={profileAvatarSrc}
           onChangePreset={() => {
@@ -1334,7 +1334,7 @@ const StorybookBody = memo(() => {
           >
             <Box className="dq-ui-storybook__buttons" direction="row" wrap="wrap" gap="var(--dq-ui-space-lg)">
               <Dropdown label="Stages">
-                <Element>Line-up</Element>
+                <Element>Lineup</Element>
                 <Element>Favorites</Element>
                 <Element>My tribe</Element>
               </Dropdown>
@@ -1427,7 +1427,7 @@ const StorybookBody = memo(() => {
               </>
             )}
           >
-            A fresh data bundle is waiting with the latest line-up corrections and tribe updates.
+            A fresh data bundle is waiting with the latest Lineup corrections and tribe updates.
           </Alert>
         </Box>
       </Box>
@@ -1461,7 +1461,7 @@ const StorybookBody = memo(() => {
             <Box gap="var(--dq-ui-space-lg)">
               <SearchInput
                 ariaLabel="Search"
-                placeholder="Search artist, duo, show..."
+                placeholder="Search an artist, duo, show..."
               />
             </Box>
           </Box>
@@ -1547,7 +1547,7 @@ const StorybookBody = memo(() => {
             <Box gap="var(--dq-ui-space-lg)">
               <Switch
                 label="Hide past sets"
-                description="Keep the line-up focused on what is still ahead."
+                description="Keep the Lineup focused on what is still ahead."
                 defaultChecked
               />
               <Switch

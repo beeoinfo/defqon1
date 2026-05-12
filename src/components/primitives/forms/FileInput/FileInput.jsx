@@ -1,19 +1,20 @@
 import { useId, useState } from 'react';
 import { FileArrowUpIcon } from '@phosphor-icons/react';
+import useI18n from '@/hooks/useI18n';
 import Box from '../../../layout/Box';
 import { buildFieldId, joinFieldIds } from '../fieldUtils';
 import '../forms.css';
 import './FileInput.css';
 
-const formatSelectedFiles = (files, multiple) => {
+const formatSelectedFiles = (files, multiple, t) => {
   const fileList = Array.from(files ?? []);
 
   if (fileList.length === 0) {
-    return 'No file selected';
+    return t('No file selected');
   }
 
   if (multiple && fileList.length > 1) {
-    return `${fileList.length} files selected`;
+    return t('{count} files selected', { count: fileList.length });
   }
 
   return fileList.map((file) => file.name).join(', ');
@@ -34,15 +35,17 @@ const FileInput = ({
   className = '',
   ...props
 }) => {
+  const { t } = useI18n();
   const generatedId = useId();
   const inputId = buildFieldId({ id, generatedId, prefix: 'dq-ui-file-input' });
   const descriptionId = description ? `${inputId}-description` : undefined;
-  const [selectedSummary, setSelectedSummary] = useState(() => formatSelectedFiles([], multiple));
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const selectedSummary = formatSelectedFiles(selectedFiles, multiple, t);
 
   const handleChange = (event) => {
     const nextFiles = event.target.files;
 
-    setSelectedSummary(formatSelectedFiles(nextFiles, multiple));
+    setSelectedFiles(Array.from(nextFiles ?? []));
     onFilesChange?.(nextFiles, event);
     onChange?.(event);
   };
@@ -99,7 +102,7 @@ const FileInput = ({
         />
         <span className="dq-ui-file-input__button" aria-hidden="true">
           <FileArrowUpIcon size={18} />
-          <span>{buttonLabel}</span>
+          <span>{t(buttonLabel)}</span>
         </span>
         <span className="dq-ui-file-input__value">
           {selectedSummary}

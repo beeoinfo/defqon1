@@ -14,6 +14,7 @@ import Drawer from '@/components/layout/Drawer';
 import PeopleCard from '@/components/PeopleCard';
 import Button from '@/components/primitives/Button';
 import useCachedImageUrl from '@/hooks/useCachedImageUrl';
+import useI18n from '@/hooks/useI18n';
 import {
   buildMapCalibrationTransform,
   getGpsDistanceMeters,
@@ -926,6 +927,7 @@ const MapsView = ({
   onSetTribeLocation,
   onRemoveTribeLocation,
 }) => {
+  const { t } = useI18n();
   const [selectedLayerId, setSelectedLayerId] = useState(
     () => getDefaultMapLayerId(mapLayers, selectedDay)
   );
@@ -1758,7 +1760,7 @@ const MapsView = ({
     }))
       .then(() => setPendingCalibrationPoint(null))
       .catch((error) => {
-        setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not save calibration point.');
+        setCalibrationErrorMessage(error instanceof Error ? error.message : t('Could not save calibration point.'));
       })
       .finally(() => {
         setIsSavingCalibrationPoint(false);
@@ -1779,7 +1781,7 @@ const MapsView = ({
     ));
     Promise.resolve(onRemoveCalibrationPoint?.(pointId))
       .catch((error) => {
-        setCalibrationErrorMessage(error instanceof Error ? error.message : 'Could not remove calibration point.');
+        setCalibrationErrorMessage(error instanceof Error ? error.message : t('Could not remove calibration point.'));
       })
       .finally(() => {
         calibrationMarkersSignatureRef.current = '';
@@ -1839,17 +1841,17 @@ const MapsView = ({
         ref={mapContainerRef}
         className="dq-maps-view__canvas"
         role="application"
-        aria-label={`Interactive festival map for ${activeLayer?.label ?? 'Defqon.1'}`}
+        aria-label={t('Interactive festival map for {name}', { name: activeLayer?.label ?? 'Defqon.1' })}
       />
 
       <Box className="dq-maps-view__shade" aria-hidden="true" />
 
-      <Box className="dq-maps-view__tribe-layer" aria-label="Tribe map positions">
+      <Box className="dq-maps-view__tribe-layer" aria-label={t('Tribe map positions')}>
         {tribeLocationGroups.map((group) => {
           const primaryLocation = group.locations.find((location) => location.isCurrentUser) ?? group.locations[0];
           const groupLabel = group.locations.length === 1
-            ? `${primaryLocation.displayName} position`
-            : `${group.locations.length} tribe members nearby`;
+            ? t('{name} position', { name: primaryLocation.displayName })
+            : t('{count} tribe members nearby', { count: group.locations.length });
 
           return (
             <button
@@ -1884,7 +1886,7 @@ const MapsView = ({
       </Box>
 
       {isCalibrationMode ? (
-        <Box className="dq-maps-view__calibration-layer" aria-label="Map calibration points">
+        <Box className="dq-maps-view__calibration-layer" aria-label={t('Map calibration points')}>
           {calibrationMarkers.map((marker) => (
             <button
               key={marker.id}
@@ -1897,7 +1899,7 @@ const MapsView = ({
                 '--dq-maps-calibration-x': `${marker.x}px`,
                 '--dq-maps-calibration-y': `${marker.y}px`,
               }}
-              aria-label={marker.kind === 'pending' ? 'Pending calibration point' : 'Remove calibration point'}
+              aria-label={marker.kind === 'pending' ? t('Pending calibration point') : t('Remove calibration point')}
               onPointerDown={(event) => {
                 event.stopPropagation();
               }}
@@ -1946,15 +1948,15 @@ const MapsView = ({
 
       {isCalibrationMode ? (
         <Box className="dq-maps-view__calibration-panel" gap="var(--dq-ui-space-sm)">
-          <strong>Map calibration</strong>
+          <strong>{t('Map calibration')}</strong>
           <p>
-            Tap your exact position on the map, then save it with your current GPS location.
+            {t('Tap your exact position on the map, then save it with your current GPS location.')}
           </p>
           {calibrationMessage ? <p>{calibrationMessage}</p> : null}
           {calibrationErrorMessage ? (
             <p className="dq-maps-view__calibration-error">{calibrationErrorMessage}</p>
           ) : null}
-          <p>{activeCalibrationPoints.length} / 3 active points on this map</p>
+          <p>{t('{count} / 3 active points on this map', { count: activeCalibrationPoints.length })}</p>
           <Box direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)">
             <Button
               size="sm"
@@ -1964,7 +1966,7 @@ const MapsView = ({
               disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || isRemovingCalibrationPoint}
               onClick={() => handleSaveCalibrationPoint('current')}
             >
-              {isSavingCalibrationPoint ? 'Mapping loc...' : 'Save point'}
+              {isSavingCalibrationPoint ? t('Mapping loc...') : t('Save point')}
             </Button>
             <Button
               size="sm"
@@ -1972,10 +1974,10 @@ const MapsView = ({
               disabled={!pendingCalibrationPoint || isSavingCalibrationPoint || isRemovingCalibrationPoint || mapLayers.length < 2}
               onClick={() => handleSaveCalibrationPoint('site')}
             >
-              Save on all maps
+              {t('Save on all maps')}
             </Button>
             <Button size="sm" variant="danger" onClick={onCancelCalibration}>
-              Done
+              {t('Done')}
             </Button>
           </Box>
         </Box>
@@ -1994,8 +1996,8 @@ const MapsView = ({
           )}
         >
           {isLiveLocationSharing && Number.isFinite(liveLocationRemainingMinutes)
-            ? `Stop live position (${liveLocationRemainingMinutes}min left)`
-            : isLiveLocationSharing ? 'Stop live position' : 'Share live position'}
+            ? t('Stop live position ({minutes}min left)', { minutes: liveLocationRemainingMinutes })
+            : isLiveLocationSharing ? t('Stop live position') : t('Share live position')}
         </Button>
       ) : null}
 
@@ -2010,7 +2012,7 @@ const MapsView = ({
           }}
         >
           <Box direction="row" align="center" justify="space-between" gap="var(--dq-ui-space-md)">
-            <strong>{selectedFeature.title || 'Map item'}</strong>
+            <strong>{selectedFeature.title || t('Map item')}</strong>
           </Box>
 
           {selectedFeature.details.length > 0 ? (
@@ -2039,7 +2041,7 @@ const MapsView = ({
           hideOnScroll={false}
           width="content"
           resetButton={false}
-          ariaLabel="Select festival day"
+          ariaLabel={t('Select festival day')}
           value={{ mapLayer: activeLayer?.id ?? '' }}
           onChange={(nextValue) => {
             if (nextValue.mapLayer && nextValue.mapLayer !== activeLayer?.id) {
@@ -2060,8 +2062,8 @@ const MapsView = ({
         >
           <WarningIcon size={18} />
           <Box gap="0">
-            <strong>Map unavailable</strong>
-            <p>{errorMessage || 'The selected Mapbox style could not be loaded.'}</p>
+            <strong>{t('Map unavailable')}</strong>
+            <p>{errorMessage || t('The selected Mapbox style could not be loaded.')}</p>
           </Box>
         </Box>
       ) : null}
@@ -2076,7 +2078,7 @@ const MapsView = ({
         >
           <WarningIcon size={18} />
           <Box gap="0">
-            <strong>Position not shared</strong>
+            <strong>{t('Position not shared')}</strong>
             <p>{locationErrorMessage}</p>
           </Box>
         </Box>
@@ -2085,13 +2087,13 @@ const MapsView = ({
       <Drawer
         open={Boolean(selectedTribeLocationGroup)}
         onClose={handleCloseTribeLocationDrawer}
-        title="Shared map position"
+        title={t('Shared map position')}
         subtitle={
           selectedTribeLocationGroup?.locations.length > 1
-            ? `${selectedTribeLocationGroup.locations.length} positions in this area`
+            ? t('{count} positions in this area', { count: selectedTribeLocationGroup.locations.length })
             : ''
         }
-        ariaLabel="Tribe map position details"
+        ariaLabel={t('Tribe map position details')}
         maxWidth="520px"
         headerAddon={selectedDirectionLocation ? (
           <Box className="dq-maps-view__direction-header" align="center" gap="var(--dq-ui-space-xs)">
@@ -2113,7 +2115,7 @@ const MapsView = ({
                 <span className="dq-maps-view__direction-copy dq-maps-view__direction-copy--hero">
                   {canShowDirection ? (
                     <>
-                      {Math.round(directionDistanceMeters)}m to{' '}
+                      {t('{distance}m to', { distance: Math.round(directionDistanceMeters) })}{' '}
                       <span translate="no">{selectedDirectionLocation.displayName}</span>
                       {directionHeading === null && directionTargetBearing !== null
                         ? ` · ${Math.round(directionTargetBearing)}° bearing`
@@ -2121,7 +2123,7 @@ const MapsView = ({
                     </>
                   ) : (
                     <>
-                      Locating <span translate="no">{selectedDirectionLocation.displayName}</span>...
+                      {t('Locating')} <span translate="no">{selectedDirectionLocation.displayName}</span>...
                     </>
                   )}
                 </span>
@@ -2133,14 +2135,14 @@ const MapsView = ({
                 icon={NavigationArrowIcon}
                 onClick={() => handleStartDirectionTracking(selectedDirectionLocation.userId)}
               >
-                Enable direction to <span translate="no">{selectedDirectionLocation.displayName}</span>
+                {t('Enable direction to')}&nbsp;<span translate="no">{selectedDirectionLocation.displayName}</span>
               </Button>
             )}
             {directionErrorMessage ? (
               <p className="dq-maps-view__direction-message">{directionErrorMessage}</p>
             ) : null}
             {doesDirectionNeedPermission ? (
-              <p className="dq-maps-view__direction-message">Enable motion/orientation permission in your browser if prompted.</p>
+              <p className="dq-maps-view__direction-message">{t('Enable motion/orientation permission in your browser if prompted.')}</p>
             ) : null}
           </Box>
         ) : null}
@@ -2154,15 +2156,15 @@ const MapsView = ({
                   avatarSrc={location.avatarUrl}
                   avatarAlt={location.displayName}
                   name={location.displayName}
-                  handle={location.username ? `@${location.username}` : 'Profile unavailable'}
-                  meta={location.updatedAt ? `Updated ${formatLocationUpdatedAt(location.updatedAt)}` : null}
+                  handle={location.username ? `@${location.username}` : t('Profile unavailable')}
+                  meta={location.updatedAt ? t('Updated {time}', { time: formatLocationUpdatedAt(location.updatedAt) }) : null}
                   endSlot={
                     location.userId === currentUserId ? (
                       <Button
                         size="sm"
                         variant="danger"
                         icon={TrashIcon}
-                        ariaLabel="Remove my shared position"
+                        ariaLabel={t('Remove my shared position')}
                         onClick={() => {
                           Promise.resolve(onRemoveTribeLocation?.({
                             mapLayerId: location.mapLayerId ?? activeLayer?.id ?? null,
@@ -2172,7 +2174,7 @@ const MapsView = ({
                             .then(handleCloseTribeLocationDrawer)
                             .catch((error) => {
                               setLocationErrorMessage(
-                                error instanceof Error ? error.message : 'Could not remove your map position.'
+                                error instanceof Error ? error.message : t('Could not remove your map position.')
                               );
                           });
                         }}

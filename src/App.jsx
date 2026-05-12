@@ -32,9 +32,12 @@ import Button from '@/components/primitives/Button';
 import { DateTimeInput, SearchInput, SelectInput, TextInput } from '@/components/primitives/forms';
 import useAnimatedPageStack from '@/hooks/useAnimatedPageStack';
 import useDocumentScrollLock from '@/hooks/useDocumentScrollLock';
+import useI18n from '@/hooks/useI18n';
 import useOnlineStatus from '@/hooks/useOnlineStatus';
 import usePwaInstallPrompt from '@/hooks/usePwaInstallPrompt';
 import usePullToRefresh from '@/hooks/usePullToRefresh';
+import I18nProvider from '@/i18n/I18nContext';
+import { getTranslation, normalizeLanguage } from '@/i18n/translations';
 import { ELECTRONIC_FESTIVAL_STYLES_DB } from './data/electronicFestivalStylesDb';
 import {
   entriesHaveMeaningfulConflict,
@@ -111,6 +114,7 @@ import {
   subscribeToTribeMemberLocations,
   supabase,
   syncFavoriteSnapshots,
+  updateProfileLanguage,
   updateCurrentUserTribeName,
   upsertCurrentUserTribeLocation,
 } from './lib/supabase';
@@ -362,7 +366,7 @@ const areSameEntryEditValues = ({ entry, artistName, daySlug, stageSlug, startAt
   String(entry?.startAt ?? '') === String(startAt ?? '') &&
   String(entry?.endAt ?? '') === String(endAt ?? '')
 );
-const getPerformanceEditFieldErrors = (editState) => {
+const getPerformanceEditFieldErrors = (editState, t = (value) => value) => {
   if (!editState) {
     return {};
   }
@@ -371,31 +375,31 @@ const getPerformanceEditFieldErrors = (editState) => {
   const fieldErrors = {};
 
   if (!String(values.artistName ?? '').trim()) {
-    fieldErrors.artistName = 'Required.';
+    fieldErrors.artistName = t('Required.');
   }
 
   if (!String(values.daySlug ?? '').trim()) {
-    fieldErrors.daySlug = 'Required.';
+    fieldErrors.daySlug = t('Required.');
   }
 
   if (!String(values.stageSlug ?? '').trim()) {
-    fieldErrors.stageSlug = 'Required.';
+    fieldErrors.stageSlug = t('Required.');
   }
 
   if (!values.startDate) {
-    fieldErrors.startDate = 'Required.';
+    fieldErrors.startDate = t('Required.');
   }
 
   if (!values.startTime) {
-    fieldErrors.startTime = 'Required.';
+    fieldErrors.startTime = t('Required.');
   }
 
   if (!values.endDate) {
-    fieldErrors.endDate = 'Required.';
+    fieldErrors.endDate = t('Required.');
   }
 
   if (!values.endTime) {
-    fieldErrors.endTime = 'Required.';
+    fieldErrors.endTime = t('Required.');
   }
 
   return fieldErrors;
@@ -1206,7 +1210,7 @@ const updateLineupPayloadEntry = ({ payload, entry, editValues }) => {
     });
 
     if (!editedArtist) {
-      throw new Error('Could not find this performance in the source lineup payload.');
+      throw new Error('Could not find this show in the source lineup payload.');
     }
 
     targetStage.artists = Array.isArray(targetStage.artists) ? targetStage.artists : [];
@@ -1240,7 +1244,7 @@ const updateLineupPayloadEntry = ({ payload, entry, editValues }) => {
     const didUpdate = visitArtists(nextPayload.entries) || (Array.isArray(nextPayload) && visitArtists(nextPayload));
 
     if (!didUpdate) {
-      throw new Error('Could not find this performance in the source lineup payload.');
+      throw new Error('Could not find this show in the source lineup payload.');
     }
   }
 
@@ -1330,6 +1334,7 @@ const AppBaseView = memo(({
   profileBadge,
   brandLogoSrc,
 }) => {
+  const { t } = useI18n();
   const ActiveViewComponent = VIEW_COMPONENTS[activeView];
 
   if (!ActiveViewComponent) {
@@ -1357,7 +1362,7 @@ const AppBaseView = memo(({
       hideHeaderProfile={hideHeaderProfile}
       keepMobileNavbarVisible={keepMobileNavbarVisible}
       inlineHeaderCloseButton={inlineHeaderCloseButton}
-      closeHeaderButtonAriaLabel="Close search"
+      closeHeaderButtonAriaLabel={t('Close search')}
       onCloseHeaderContent={onCloseHeaderContent}
       headerTransitionState={headerTransitionState}
       isOffline={isOffline}
@@ -1385,6 +1390,7 @@ const AppPageLayer = memo(({
   transitionState,
   pagePropsByType,
 }) => {
+  const { t } = useI18n();
   const pageDefinition = PAGE_DEFINITIONS[page.type];
 
   if (!pageDefinition) {
@@ -1397,7 +1403,7 @@ const AppPageLayer = memo(({
 
   return (
     <Page
-      title={pageDefinition.title}
+      title={t(pageDefinition.title)}
       brandTitle={APP_DOCUMENT_TITLE}
       brandLogoSrc={activeSiteAssets.logoSrc}
       onClose={() => onClosePage(page.id)}
@@ -1791,11 +1797,11 @@ const App = () => {
   const shouldHidePastEvents = hidePastEvents && isLatestLineupSelected;
   const favoritesReadOnly = hasLineup && !isLatestLineupSelected;
   const readOnlyLineupNotice = isPreviewLineupSelected
-    ? 'You are previewing a pending line-up in read-only mode. Favorites and reviews are shown for checking only, and nothing is saved.'
-    : 'You are browsing an older line-up snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
+    ? 'You are previewing a pending lineup in read-only mode. Favorites and reviews are shown for checking only, and nothing is saved.'
+    : 'You are browsing an older lineup snapshot in read-only mode, so favorites cannot be added, removed or updated here. Switch back to the latest snapshot in Settings to edit them again.';
   const readOnlyLineupNoticeTitle = isPreviewLineupSelected
     ? 'Lineup preview'
-    : 'Archived line-up snapshot';
+    : 'Archived lineup snapshot';
   const entriesById = useMemo(
     () => {
       const nextEntriesById = new Map();
@@ -1906,6 +1912,15 @@ const App = () => {
     [baseBrowseableEntries, currentTime, shouldHidePastEvents]
   );
   const activeProfile = profile ?? buildOptimisticProfile(authUser);
+  const language = normalizeLanguage(activeProfile?.preferred_language, activeSite.defaultLanguage);
+  const t = useCallback((message, replacements = {}) => (
+    getTranslation(language, message, replacements)
+  ), [language]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.translate = false;
+  }, [language]);
 
   useEffect(() => {
     if (!isLatestLineupSelected) {
@@ -4348,7 +4363,7 @@ const App = () => {
         currentEdit
           ? {
               ...currentEdit,
-              errorMessage: error.message || 'Could not update this performance.',
+              errorMessage: error.message || 'Could not update this show.',
             }
           : currentEdit
       ));
@@ -4400,6 +4415,27 @@ const App = () => {
   const handleProfileUpdated = useCallback((nextProfile) => {
     setProfile(nextProfile);
   }, []);
+
+  const handleLanguageChange = useCallback(async (nextLanguage) => {
+    const normalizedLanguage = normalizeLanguage(nextLanguage, activeSite.defaultLanguage);
+
+    if (!authUser?.id) {
+      setProfile((currentProfile) => ({
+        ...(currentProfile ?? {}),
+        preferred_language: normalizedLanguage,
+      }));
+      return;
+    }
+
+    const nextProfile = await updateProfileLanguage({
+      userId: authUser.id,
+      preferredLanguage: normalizedLanguage,
+    });
+
+    if (nextProfile) {
+      setProfile(nextProfile);
+    }
+  }, [authUser?.id]);
 
   const handleBeforeSignedOut = useCallback(async () => {
     if (isLiveLocationSharing || liveLocationWatchIdRef.current !== null) {
@@ -4459,22 +4495,22 @@ const App = () => {
     () => [
       {
         value: '__all-days__',
-        label: 'All days',
+        label: t('All days'),
         reset: true,
       },
       ...days.map((day) => ({
         value: day,
-        label: day,
+        label: t(day),
       })),
     ],
-    [days]
+    [days, t]
   );
 
   const stageDrawerOptions = useMemo(
     () => [
       {
         value: '__all-stages__',
-        label: 'All stages',
+        label: t('All stages'),
         reset: true,
       },
       ...stages.map((stage) => ({
@@ -4483,14 +4519,14 @@ const App = () => {
         color: stageColorsByName.get(getComparableLabel(stage)) ?? getStageTheme(stage).accent,
       })),
     ],
-    [stageColorsByName, stages]
+    [stageColorsByName, stages, t]
   );
 
   const timetableDayDrawerOptions = useMemo(
     () =>
       timetableDays.map((day, index) => ({
         value: day,
-        label: day,
+        label: t(day),
         defaultChecked: getComparableLabel(day) === getComparableLabel(defaultTimetableDay) || (!defaultTimetableDay && index === 0),
       })),
     [defaultTimetableDay, timetableDays]
@@ -4516,38 +4552,38 @@ const App = () => {
   const lineupChoices = useMemo(() => [
     ...(isLatestLineupSelected && authUser && hasFavoriteEntries ? [{
       id: 'favorites',
-      label: 'My favorites',
+      label: t('Favorites'),
       icon: HeartIcon,
       fillOnPress: true,
       variant: 'likes',
     }] : []),
     ...(isLatestLineupSelected && authUser && tribe && hasTribeEntries ? [{
       id: 'tribe',
-      label: 'My tribe',
+      label: t('My tribe'),
       icon: UsersIcon,
       fillOnPress: true,
       variant: 'favorite',
     }] : []),
-  ], [authUser, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, tribe]);
+  ], [authUser, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, t, tribe]);
   const lineupDrawers = useMemo(() => [
     ...(days.length > 1 ? [{
       id: 'day',
-      label: 'All days',
+      label: t('All days'),
       options: dayDrawerOptions,
     }] : []),
     ...(stages.length > 1 ? [{
       id: 'stage',
-      label: 'All stages',
+      label: t('All stages'),
       options: stageDrawerOptions,
     }] : []),
     ...(lineupStyleOptions.length > 0 ? [{
       id: 'styles',
-      label: 'Styles',
+      label: t('Styles'),
       placement: 'end',
       type: 'checkbox',
       options: lineupStyleOptions,
     }] : []),
-  ], [dayDrawerOptions, days.length, lineupStyleOptions, stageDrawerOptions, stages.length]);
+  ], [dayDrawerOptions, days.length, lineupStyleOptions, stageDrawerOptions, stages.length, t]);
 
   const lineupFilterBar = useMemo(() => (lineupChoices.length > 0 || lineupDrawers.length > 0 ? {
     value: {
@@ -4597,7 +4633,7 @@ const App = () => {
   const timetableChoices = useMemo(() => [
     ...(isLatestLineupSelected && authUser && conflictCount > 0 ? [{
       id: 'conflicts',
-      label: 'Conflicts',
+      label: t('Conflicts'),
       icon: LightningIcon,
       fillOnPress: true,
       variant: 'favorite',
@@ -4607,36 +4643,36 @@ const App = () => {
     }] : []),
     ...(isLatestLineupSelected && authUser && hasFavoriteEntries ? [{
       id: 'favorites',
-      label: 'My favorites',
+      label: t('Favorites'),
       icon: HeartIcon,
       fillOnPress: true,
       variant: 'likes',
     }] : []),
     ...(isLatestLineupSelected && authUser && tribe && hasTribeEntries ? [{
       id: 'tribe',
-      label: 'My tribe',
+      label: t('My tribe'),
       icon: UsersIcon,
       fillOnPress: true,
       variant: 'favorite',
     }] : []),
-  ], [authUser, conflictCount, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, tribe]);
+  ], [authUser, conflictCount, hasFavoriteEntries, hasTribeEntries, isLatestLineupSelected, t, tribe]);
   const timetableDrawers = useMemo(() => (timetableDayDrawerOptions.length > 1
     ? [{
         id: 'day',
-        label: 'Day',
+        label: t('Day'),
         options: timetableDayDrawerOptions,
       }]
-    : []), [timetableDayDrawerOptions]);
+    : []), [t, timetableDayDrawerOptions]);
   const timetableDrawersWithStyles = useMemo(() => [
     ...timetableDrawers,
     ...(timetableStyleOptions.length > 0 ? [{
       id: 'styles',
-      label: 'Styles',
+      label: t('Styles'),
       placement: 'end',
       type: 'checkbox',
       options: timetableStyleOptions,
     }] : []),
-  ], [timetableDrawers, timetableStyleOptions]);
+  ], [t, timetableDrawers, timetableStyleOptions]);
 
   const timetableFilterBar = useMemo(() => (timetableChoices.length > 0 || timetableDrawersWithStyles.length > 0 ? {
     defaultValue: {
@@ -4701,28 +4737,28 @@ const App = () => {
     () => [
       ...(!hasTimetableView ? [{
         id: 'lineup',
-        label: 'Line-up',
+        label: t('Lineup'),
         icon: MusicNoteIcon,
         active: activeView === 'lineup',
         onClick: handleLineupNav,
       }] : []),
       ...(hasTimetableView ? [{
         id: 'timetable',
-        label: 'Timetable',
+        label: t('Timetable'),
         icon: MusicNoteIcon,
         active: activeView === 'timetable',
         onClick: handleTimetableNav,
       }] : []),
       ...(hasMapsView ? [{
         id: 'maps',
-        label: 'Maps',
+        label: t('Maps'),
         icon: MapTrifoldIcon,
         active: activeView === 'maps',
         onClick: handleMapsNav,
       }] : []),
       {
         id: 'reviews',
-        label: 'Reviews',
+        label: t('Reviews'),
         icon: HeartBreakIcon,
         active: activeView === 'reviews',
         badge: authUser && reviewCount > 0 ? <Badge variant="count">{reviewCount}</Badge> : null,
@@ -4731,7 +4767,7 @@ const App = () => {
       },
       {
         id: 'search',
-        label: 'Search',
+        label: t('Search'),
         icon: MagnifyingGlassIcon,
         active: activeView === 'search',
         showIconDesktop: true,
@@ -4749,12 +4785,13 @@ const App = () => {
       hasTimetableView,
       openSearch,
       reviewCount,
+      t,
     ]
   );
 
   const profileName = useMemo(() => {
     if (!authUser) {
-      return 'Login';
+      return t('Login');
     }
 
     const firstName = String(activeProfile?.first_name ?? '').trim();
@@ -4765,17 +4802,17 @@ const App = () => {
       return fullName;
     }
 
-    return String(activeProfile?.username ?? '').trim() || 'Your profile';
-  }, [activeProfile, authUser]);
+    return String(activeProfile?.username ?? '').trim() || t('Your profile');
+  }, [activeProfile, authUser, t]);
 
   const profileSubtitle = useMemo(() => {
     if (!authUser) {
-      return 'Sync favorites and tribe';
+      return t('Sync favorites and tribe');
     }
 
     const username = String(activeProfile?.username ?? '').trim();
-    return username ? `@${username}` : 'Account';
-  }, [activeProfile, authUser]);
+    return username ? `@${username}` : t('Account');
+  }, [activeProfile, authUser, t]);
 
   const profileImageSrc = useMemo(() => {
     if (!authUser || !activeProfile) {
@@ -4809,20 +4846,20 @@ const App = () => {
       <Button
         className="dq-app-search-header__previous"
         icon={ArrowLeftIcon}
-        ariaLabel="Previous view"
+        ariaLabel={t('Previous view')}
         size="lg"
         radius="rounded"
         onClick={handleReturnFromSearch}
       />
       <SearchInput
-        ariaLabel="Search"
+        ariaLabel={t('Search')}
         value={searchHeaderQuery}
         onChange={(event) => setSearchHeaderQuery(event.target.value)}
         onClear={() => setSearchHeaderQuery('')}
-        placeholder="Search artist, duo, show..."
+        placeholder={t('Search an artist, duo, show...')}
       />
     </Box>
-  ), [handleReturnFromSearch, searchHeaderQuery]);
+  ), [handleReturnFromSearch, searchHeaderQuery, t]);
 
   const handleLineupsChanged = useCallback(async ({ selectLatest = false } = {}) => {
     await refreshLineupSources({ selectLatest });
@@ -5000,7 +5037,10 @@ const App = () => {
       pwaInstall,
       isAdmin,
       pendingLineupCount,
+      language,
+      defaultLanguage: activeSite.defaultLanguage,
       onSelectLineup: handleSelectLineup,
+      onLanguageChange: handleLanguageChange,
       onHidePastEventsChange: setHidePastEvents,
       onHideUndatedEventsChange: setHideUndatedEvents,
       onIgnoreSmallConflictsChange: setIgnoreSmallConflicts,
@@ -5038,6 +5078,7 @@ const App = () => {
     activeProfile,
     authUser,
     handleProfileUpdated,
+    handleLanguageChange,
     handleBeforeSignedOut,
     handleCreateTribe,
     handleJoinTribe,
@@ -5070,6 +5111,7 @@ const App = () => {
     settingsTribeLocations,
     pendingLineupCount,
     pendingTribeInviteCode,
+    language,
     pwaInstall,
     resetFavorites,
     selectedLineupKey,
@@ -5108,8 +5150,8 @@ const App = () => {
     [editingPerformance?.values.daySlug, selectedLineup]
   );
   const performanceEditValidationErrors = useMemo(
-    () => getPerformanceEditFieldErrors(editingPerformance),
-    [editingPerformance]
+    () => getPerformanceEditFieldErrors(editingPerformance, t),
+    [editingPerformance, t]
   );
 
   const performanceEditFieldErrors = hasTriedPerformanceEditSubmit
@@ -5171,7 +5213,8 @@ const App = () => {
   }
 
   return (
-    <UiThemeScope>
+    <I18nProvider language={language} defaultLanguage={activeSite.defaultLanguage}>
+      <UiThemeScope>
       <Box
         className="dq-pull-refresh"
         component="div"
@@ -5228,33 +5271,33 @@ const App = () => {
       <Modal
         open={Boolean(editingPerformance)}
         onClose={handleClosePerformanceEdit}
-        title={editingPerformance?.mode === 'create' ? 'Add performance' : 'Edit performance'}
+        title={editingPerformance?.mode === 'create' ? t('Add show') : t('Edit show')}
         subtitle={
           editingPerformance
             ? editingPerformance.mode === 'create'
-              ? 'Manual lineup edit'
+              ? t('Manual lineup edit')
               : getEntryMetaLabel(editingPerformance.entry)
             : ''
         }
         controls={(
           <>
             <Button variant="ghost" onClick={handleClosePerformanceEdit}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button onClick={handleSavePerformanceEdit} disabled={isPerformanceEditSaveDisabled}>
-              {editingPerformance?.mode === 'create' ? 'Add performance' : 'Save edit'}
+              {editingPerformance?.mode === 'create' ? t('Add show') : t('Save edit')}
             </Button>
           </>
         )}
       >
         <Box gap="var(--dq-ui-space-md)">
           {editingPerformance?.errorMessage ? (
-            <Alert variant="error" title="Performance edit failed">
+            <Alert variant="error" title={t('Show edit failed')}>
               {editingPerformance.errorMessage}
             </Alert>
           ) : null}
           <TextInput
-            label="Artist name"
+            label={t('Artist name')}
             value={editingPerformance?.values.artistName ?? ''}
             required
             errorMessage={performanceEditFieldErrors.artistName}
@@ -5263,7 +5306,7 @@ const App = () => {
           {editingPerformance ? (
             <>
               <SelectInput
-                label="Day"
+                label={t('Day')}
                 value={editingPerformance?.values.daySlug ?? ''}
                 options={performanceEditDayOptions.map((day) => ({
                   value: day.value,
@@ -5274,7 +5317,7 @@ const App = () => {
                 onChange={(event) => handleEditingPerformanceChange({ daySlug: event.target.value })}
               />
               <SelectInput
-                label="Stage"
+                label={t('Stage')}
                 value={editingPerformance?.values.stageSlug ?? ''}
                 options={performanceEditStageOptions}
                 required
@@ -5284,7 +5327,7 @@ const App = () => {
             </>
           ) : null}
           <DateTimeInput
-            label="Start"
+            label={t('Start')}
             dateValue={editingPerformance?.values.startDate ?? ''}
             timeValue={editingPerformance?.values.startTime ?? ''}
             required
@@ -5295,7 +5338,7 @@ const App = () => {
             onTimeChange={(startTime) => handleEditingPerformanceChange({ startTime })}
           />
           <DateTimeInput
-            label="End"
+            label={t('End')}
             dateValue={editingPerformance?.values.endDate ?? ''}
             timeValue={editingPerformance?.values.endTime ?? ''}
             required
@@ -5320,7 +5363,8 @@ const App = () => {
           hydrateAccountRef.current?.(user ?? null);
         }}
       />
-    </UiThemeScope>
+      </UiThemeScope>
+    </I18nProvider>
   );
 };
 

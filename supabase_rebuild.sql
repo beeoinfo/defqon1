@@ -21,7 +21,8 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   avatar_kind text not null default 'preset',
-  avatar_preset integer not null default 1
+  avatar_preset integer not null default 1,
+  preferred_language text not null default 'en'
 );
 
 alter table public.profiles
@@ -34,13 +35,15 @@ alter table public.profiles
   add column if not exists created_at timestamptz default now(),
   add column if not exists updated_at timestamptz default now(),
   add column if not exists avatar_kind text default 'preset',
-  add column if not exists avatar_preset integer default 1;
+  add column if not exists avatar_preset integer default 1,
+  add column if not exists preferred_language text default 'en';
 
 alter table public.profiles
   alter column first_name set default '',
   alter column last_name set default '',
   alter column avatar_kind set default 'preset',
   alter column avatar_preset set default 1,
+  alter column preferred_language set default 'en',
   alter column created_at set default now(),
   alter column updated_at set default now();
 
@@ -465,6 +468,11 @@ set
     when coalesce(avatar_preset, 0) >= 1 then avatar_preset
     else 1
   end,
+  preferred_language = case
+    when lower(trim(coalesce(preferred_language, ''))) in ('en', 'fr')
+      then lower(trim(preferred_language))
+    else 'en'
+  end,
   created_at = coalesce(created_at, now()),
   updated_at = coalesce(updated_at, now())
 where
@@ -478,6 +486,8 @@ where
     else 'preset'
   end
   or coalesce(avatar_preset, 0) < 1
+  or preferred_language is null
+  or preferred_language not in ('en', 'fr')
   or created_at is null
   or updated_at is null;
 
@@ -602,6 +612,7 @@ alter table public.profiles
   alter column username set not null,
   alter column avatar_kind set not null,
   alter column avatar_preset set not null,
+  alter column preferred_language set not null,
   alter column created_at set not null,
   alter column updated_at set not null;
 
@@ -684,6 +695,13 @@ alter table public.profiles
 alter table public.profiles
   add constraint profiles_username_format_check
   check (username ~ '^[a-z0-9._-]{3,30}$');
+
+alter table public.profiles
+  drop constraint if exists profiles_preferred_language_check;
+
+alter table public.profiles
+  add constraint profiles_preferred_language_check
+  check (preferred_language in ('en', 'fr'));
 
 alter table public.tribes
   drop constraint if exists tribes_code_format_check;
@@ -784,7 +802,8 @@ begin
     last_name,
     username,
     avatar_kind,
-    avatar_preset
+    avatar_preset,
+    preferred_language
   )
   values (
     new.id,
@@ -798,7 +817,12 @@ begin
       )
     ),
     'preset',
-    1
+    1,
+    case
+      when lower(trim(coalesce(new.raw_user_meta_data ->> 'preferred_language', ''))) in ('en', 'fr')
+        then lower(trim(new.raw_user_meta_data ->> 'preferred_language'))
+      else 'en'
+    end
   )
   on conflict (id) do nothing;
 
@@ -931,7 +955,8 @@ insert into public.profiles (
   last_name,
   username,
   avatar_kind,
-  avatar_preset
+  avatar_preset,
+  preferred_language
 )
 select
   u.id,
@@ -948,6 +973,13 @@ select
   case
     when coalesce(p.avatar_preset, 0) >= 1 then p.avatar_preset
     else 1
+  end,
+  case
+    when lower(trim(coalesce(p.preferred_language, ''))) in ('en', 'fr')
+      then lower(trim(p.preferred_language))
+    when lower(trim(coalesce(u.raw_user_meta_data ->> 'preferred_language', ''))) in ('en', 'fr')
+      then lower(trim(u.raw_user_meta_data ->> 'preferred_language'))
+    else 'en'
   end
 from auth.users u
 left join public.profiles p
@@ -971,6 +1003,10 @@ set
   avatar_preset = case
     when coalesce(public.profiles.avatar_preset, 0) >= 1 then public.profiles.avatar_preset
     else excluded.avatar_preset
+  end,
+  preferred_language = case
+    when public.profiles.preferred_language in ('en', 'fr') then public.profiles.preferred_language
+    else excluded.preferred_language
   end;
 
 -- Secondary FKs to profiles keep the app-level model coherent if a profile is

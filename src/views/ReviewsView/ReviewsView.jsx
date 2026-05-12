@@ -11,13 +11,13 @@ import PeopleStack from '@/components/PeopleStack';
 import Button from '@/components/primitives/Button';
 import Card from '@/components/primitives/Card';
 import ToggleButton from '@/components/primitives/ToggleButton';
+import useI18n from '@/hooks/useI18n';
 import {
   REVIEW_SECTION_MESSAGE,
   getDayLabel,
   getConflictGroupId,
   getEntryDayLabel,
   getEntryDisplayName,
-  getEntryMetaLabel,
   getEntryTimeLabel,
   getTimetableConflictGroups,
   getReviewSuggestionFavoriteKey,
@@ -69,6 +69,17 @@ const getReviewFavoriteDayLabel = (favorite) => {
 
   const favoriteIdParts = getSavedIdParts(favorite.id);
   return favoriteIdParts.daySlug ? getDayLabel(favoriteIdParts.daySlug) : 'Unknown day';
+};
+
+const getTranslatedEntryMetaLabel = (entry, t) => {
+  const parts = [entry.stage, t(getEntryDayLabel(entry))];
+  const scheduleLabel = getEntryTimeLabel(entry);
+
+  if (scheduleLabel) {
+    parts.push(scheduleLabel);
+  }
+
+  return parts.filter(Boolean).join(' • ');
 };
 
 const compareReviewItems = (leftItem, rightItem) => (
@@ -186,6 +197,7 @@ const ReviewsView = ({
   archiveNotice = null,
   isAuthenticated = true,
 }) => {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('lineup-updates');
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
   const [shouldShowIgnoredConflicts, setShouldShowIgnoredConflicts] = useState(false);
@@ -249,7 +261,7 @@ const ReviewsView = ({
   const reviewFilterBar = useMemo(() => ({
     width: 'content',
     resetButton: false,
-    ariaLabel: 'Review type',
+    ariaLabel: t('Review type'),
     value: {
       reviewType: activeTab,
     },
@@ -262,7 +274,7 @@ const ReviewsView = ({
         name: 'reviewType',
         type: 'radio',
         value: 'lineup-updates',
-        label: 'Updates',
+        label: t('Updates'),
         icon: HeartBreakIcon,
         tag: reviewFavorites.length,
         tagVariant: 'count',
@@ -273,26 +285,26 @@ const ReviewsView = ({
         name: 'reviewType',
         type: 'radio',
         value: 'timetable-conflicts',
-        label: 'Conflicts',
+        label: t('Conflicts'),
         icon: LightningIcon,
         tag: activeConflictCount,
         tagVariant: 'count',
         className: 'dq-ui-choice-button--floating-tag',
       },
     ],
-  }), [activeConflictCount, activeTab, reviewFavorites.length]);
+  }), [activeConflictCount, activeTab, reviewFavorites.length, t]);
 
   if (!isAuthenticated) {
     return (
-      <Alert variant="neutral" title="Sign in to review saved favorites">
-        Reviews become useful once your favorites are synced to your account.
+      <Alert variant="neutral" title={t('Sign in to review saved favorites')}>
+        {t('Reviews become useful once your favorites are synced to your account.')}
       </Alert>
     );
   }
 
   if (!hasLineup) {
     return (
-      <EmptyState text="No lineup has been loaded yet." />
+      <EmptyState text={t('No lineup has been loaded yet.')} />
     );
   }
 
@@ -318,7 +330,10 @@ const ReviewsView = ({
         avatars={tribeLikesFromOthers}
         maxVisible={MAX_VISIBLE_TRIBE_AVATARS}
         className="dq-reviews-view__people-stack"
-        ariaLabel={`Open tribe details for ${tribeLikesFromOthers.length} member${tribeLikesFromOthers.length === 1 ? '' : 's'}`}
+        ariaLabel={t('Open tribe details for {count} member{plural}', {
+          count: tribeLikesFromOthers.length,
+          plural: tribeLikesFromOthers.length === 1 ? '' : 's',
+        })}
         onClick={() => setSelectedTribeEntry({ entry, likes: tribeLikesFromOthers })}
       />
     );
@@ -342,13 +357,13 @@ const ReviewsView = ({
         color={favoriteColor}
         title={getEntryDisplayName(favorite)}
         meta1={favoriteStage}
-        meta2={favoriteDay}
+        meta2={t(favoriteDay)}
         meta3={favoriteTime}
         metaVariant="strikethrough"
         actionVariant={canManageFavorites ? 'close' : null}
-        actionAriaLabel="Dismiss review"
+        actionAriaLabel={t('Dismiss review')}
         onAction={() => removeReviewFavorite?.(favorite.favoriteKey)}
-        description={hasSuggestions ? 'You may be looking for this instead' : 'Uh oh... It seems your artist disappeared :('}
+        description={hasSuggestions ? t('You may be looking for this instead') : t('Uh oh... It seems your artist disappeared :(')}
       >
         {visibleSuggestions.length ? (
           <Box gap="var(--dq-ui-space-sm)">
@@ -364,11 +379,11 @@ const ReviewsView = ({
                     color={suggestionColor}
                     title={getEntryDisplayName(suggestion)}
                     meta1={suggestion.stage}
-                    meta2={getEntryDayLabel(suggestion)}
+                    meta2={t(getEntryDayLabel(suggestion))}
                     meta3={getEntryTimeLabel(suggestion)}
                     actionVariant={canManageFavorites ? 'likes' : null}
                     actionPressed={false}
-                    actionAriaLabel="Add favorite"
+                    actionAriaLabel={t('Add favorite')}
                     onAction={() => toggleReviewSuggestionFavorite?.(suggestion, favorite)}
                   />
                 );
@@ -385,29 +400,29 @@ const ReviewsView = ({
       <FilterBar {...reviewFilterBar} />
 
       {archiveNotice ? (
-        <Alert variant="warning" title="Lineup preview">
-          {archiveNotice}
+        <Alert variant="warning" title={t('Lineup preview')}>
+          {t(archiveNotice)}
         </Alert>
       ) : null}
 
       {shouldShowReviewNotice ? (
-        <Alert variant="warning" title="A few saved favorites need a quick review">
-          {REVIEW_SECTION_MESSAGE}
+        <Alert variant="warning" title={t('A few saved favorites need a quick review')}>
+          {t(REVIEW_SECTION_MESSAGE)}
         </Alert>
       ) : null}
 
       {shouldShowConflictNotice ? (
-        <Alert variant="warning" title="Some saved sets overlap in the timetable">
-          Review the linked conflict groups below, then open the filtered timetable for the matching day.
+        <Alert variant="warning" title={t('Some saved sets overlap in the timetable')}>
+          {t('Review the linked conflict groups below, then open the filtered timetable for the matching day.')}
         </Alert>
       ) : null}
 
       {shouldShowLineupEmpty ? (
-        <EmptyState text="No favorite line-up updates require a review right now." />
+        <EmptyState text={t('No favorite lineup updates require a review right now.')} />
       ) : null}
 
       {shouldShowConflictEmpty ? (
-        <EmptyState text="No favorite timetable conflicts require a review right now." />
+        <EmptyState text={t('No favorite timetable conflicts require a review right now.')} />
       ) : null}
 
       {hasActiveLineupUpdates && reviewFavorites.length > 0 ? (
@@ -415,7 +430,7 @@ const ReviewsView = ({
           variant="stacked"
           sections={reviewSections.map((section) => ({
             id: section.id,
-            label: section.label,
+            label: t(section.label),
             content: (
               <Box
                 layout="columns"
@@ -435,7 +450,7 @@ const ReviewsView = ({
           variant="stacked"
           sections={visibleConflictSections.map((section) => ({
             id: section.id,
-            label: section.label,
+            label: t(section.label),
             content: (
               <Box
                 className="dq-reviews-view__conflict-groups"
@@ -460,7 +475,10 @@ const ReviewsView = ({
                         gap="var(--dq-ui-space-sm)"
                       >
                         <strong>
-                          {group.entries.length} show{group.entries.length === 1 ? '' : 's'}
+                          {t('{count} show{plural}', {
+                            count: group.entries.length,
+                            plural: group.entries.length === 1 ? '' : 's',
+                          })}
                         </strong>
                       </Box>
 
@@ -520,7 +538,7 @@ const ReviewsView = ({
                                   radius="rounded"
                                   pressed
                                   fillOnPress
-                                  ariaLabel="Remove favorite"
+                                  ariaLabel={t('Remove favorite')}
                                   onPressedChange={() => toggleFavorite?.(entry.id)}
                                 />
                               ) : null}
@@ -555,7 +573,7 @@ const ReviewsView = ({
                           variant="ghost"
                           onClick={() => onOpenTimetableConflicts?.(section.label)}
                         >
-                          Show conflict
+                          {t('Show conflict')}
                         </Button>
                         {!isIgnoredConflict ? (
                           <Button
@@ -563,7 +581,7 @@ const ReviewsView = ({
                             variant="ghost"
                             onClick={() => onIgnoreConflict?.(group.id)}
                           >
-                            Ignore
+                            {t('Ignore')}
                           </Button>
                         ): null}
                       </Box>
@@ -583,7 +601,7 @@ const ReviewsView = ({
             variant="ghost"
             onClick={() => setShouldShowIgnoredConflicts((currentValue) => !currentValue)}
           >
-            {shouldShowIgnoredConflicts ? 'Hide ignored conflicts' : 'Show ignored conflicts'}
+            {shouldShowIgnoredConflicts ? t('Hide ignored conflicts') : t('Show ignored conflicts')}
           </Button>
         </Box>
       ) : null}
@@ -591,8 +609,8 @@ const ReviewsView = ({
       <Drawer
         open={Boolean(selectedTribeEntry)}
         onClose={() => setSelectedTribeEntry(null)}
-        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
-        subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
+        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : t('Tribe likes')}
+        subtitle={selectedTribeEntry ? getTranslatedEntryMetaLabel(selectedTribeEntry.entry, t) : ''}
       >
         <Box gap="var(--dq-ui-space-md)">
           {selectedTribeEntry?.likes.map((member) => {
@@ -604,7 +622,7 @@ const ReviewsView = ({
                 avatarSrc={member.avatarUrl}
                 avatarAlt={fullName}
                 name={fullName}
-                handle={member.username ? `@${member.username}` : 'Profile unavailable'}
+                handle={member.username ? `@${member.username}` : t('Profile unavailable')}
               />
             );
           })}

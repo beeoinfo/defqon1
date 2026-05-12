@@ -7,6 +7,23 @@
   color: var(--dq-ui-text-soft);
 }
 
+.dq-settings-page__language-choice .dq-ui-button__content {
+  align-items: center;
+}
+
+.dq-settings-page__language-flag {
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--dq-ui-elevated-surface);
+  font-size: 1rem;
+  line-height: 1;
+}
+
 @media (max-width: 575.98px) {
   .dq-settings-page {
     --dq-settings-page-gap: 2rem;

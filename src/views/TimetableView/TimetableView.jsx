@@ -10,11 +10,11 @@ import PeopleStack from '@/components/PeopleStack';
 import Badge from '@/components/primitives/Badge';
 import Button from '@/components/primitives/Button';
 import ToggleButton from '@/components/primitives/ToggleButton';
+import useI18n from '@/hooks/useI18n';
 import {
   compareLineupEntries,
   getEntryDayLabel,
   getEntryDisplayName,
-  getEntryMetaLabel,
   getEntryTimeLabel,
 } from '@/lib/lineup';
 import { getStageTheme } from '@/lib/stageThemes';
@@ -83,6 +83,17 @@ const getPixelValue = (value) => Number.parseFloat(value) || 0;
 const getMemberDisplayName = (member) => (
   [member.firstName, member.lastName].filter(Boolean).join(' ').trim() || 'Tribe member'
 );
+
+const getTranslatedEntryMetaLabel = (entry, t) => {
+  const parts = [entry.stage, t(getEntryDayLabel(entry))];
+  const scheduleLabel = getEntryTimeLabel(entry);
+
+  if (scheduleLabel) {
+    parts.push(scheduleLabel);
+  }
+
+  return parts.filter(Boolean).join(' • ');
+};
 
 const renderStyleBadges = (styleTags) => {
   if (!styleTags?.length) {
@@ -222,11 +233,12 @@ const TimetableView = ({
   onEditEntry = null,
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
-  archiveNoticeTitle = 'Archived line-up snapshot',
+  archiveNoticeTitle = 'Archived lineup snapshot',
   filterBar = null,
   showStyleTags = false,
   styleTagsByEntryId = new Map(),
 }) => {
+  const { t } = useI18n();
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
   const shellRef = useRef(null);
   const headerScrollRef = useRef(null);
@@ -376,7 +388,10 @@ const TimetableView = ({
         avatars={tribeLikesFromOthers}
         maxVisible={MAX_VISIBLE_TRIBE_AVATARS}
         className="dq-timetable-view__people-stack"
-        ariaLabel={`Open tribe details for ${tribeLikesFromOthers.length} member${tribeLikesFromOthers.length === 1 ? '' : 's'}`}
+        ariaLabel={t('Open tribe details for {count} member{plural}', {
+          count: tribeLikesFromOthers.length,
+          plural: tribeLikesFromOthers.length === 1 ? '' : 's',
+        })}
         onClick={() => setSelectedTribeEntry({ entry, likes: tribeLikesFromOthers })}
       />
     );
@@ -388,14 +403,14 @@ const TimetableView = ({
 
       <Box gap="var(--dq-ui-space-xl)">
         {archiveNotice ? (
-          <Alert variant="warning" title={archiveNoticeTitle}>
-            {archiveNotice}
+          <Alert variant="warning" title={t(archiveNoticeTitle)}>
+            {t(archiveNotice)}
           </Alert>
         ) : null}
 
         {timetableData.stages.length === 0 ? (
           <EmptyState
-            text={hasLineup ? 'No scheduled artists match the current filters.' : 'No lineup has been loaded yet.'}
+            text={hasLineup ? t('No scheduled artists match the current filters.') : t('No lineup has been loaded yet.')}
           />
         ) : (
           <Box
@@ -463,7 +478,7 @@ const TimetableView = ({
                             icon={PencilSimpleIcon}
                             size="sm"
                             radius="rounded"
-                            ariaLabel={`Edit ${entry.displayName}`}
+                            ariaLabel={t('Edit {name}', { name: entry.displayName })}
                           />
                         ) : canToggleFavorites ? (
                           <ToggleButton
@@ -474,10 +489,10 @@ const TimetableView = ({
                             radius="rounded"
                             pressed={isFavorite}
                             fillOnPress
-                            ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
+                            ariaLabel={isFavorite ? t('Remove favorite') : t('Add favorite')}
                           />
                         ) : isFavorite ? (
-                          <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label="Liked">
+                          <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label={t('Liked')}>
                             <HeartIcon weight="fill" />
                           </span>
                         ) : null}
@@ -534,7 +549,10 @@ const TimetableView = ({
                     >
                       <span className="dq-timetable-view__stage-name" translate="no">{stage.label}</span>
                       <span className="dq-timetable-view__stage-count">
-                        {stage.entries.length} show{stage.entries.length === 1 ? '' : 's'}
+                        {t('{count} show{plural}', {
+                          count: stage.entries.length,
+                          plural: stage.entries.length === 1 ? '' : 's',
+                        })}
                       </span>
                     </Box>
                   ))}
@@ -579,7 +597,7 @@ const TimetableView = ({
                             '--dq-timetable-entry-height': `${entry.height}px`,
                           }}
                           data-duration-minutes={entry.durationMinutes}
-                          aria-label={getEntryMetaLabel(entry)}
+                          aria-label={getTranslatedEntryMetaLabel(entry, t)}
                         >
                           <Box
                             className="dq-timetable-view__entry-content"
@@ -605,7 +623,7 @@ const TimetableView = ({
                               icon={PencilSimpleIcon}
                               size="sm"
                               radius="rounded"
-                              ariaLabel={`Edit ${entry.displayName}`}
+                              ariaLabel={t('Edit {name}', { name: entry.displayName })}
                               onClick={() => onEditEntry?.(entry.id)}
                             />
                           ) : canToggleFavorites ? (
@@ -617,11 +635,11 @@ const TimetableView = ({
                               radius="rounded"
                               pressed={isFavorite}
                               fillOnPress
-                              ariaLabel={isFavorite ? 'Remove favorite' : 'Add favorite'}
+                              ariaLabel={isFavorite ? t('Remove favorite') : t('Add favorite')}
                               onPressedChange={() => toggleFavorite?.(entry.id)}
                             />
                           ) : isFavorite ? (
-                            <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label="Liked">
+                            <span className="dq-timetable-view__favorite dq-timetable-view__favorite--readonly" aria-label={t('Liked')}>
                               <HeartIcon weight="fill" />
                             </span>
                           ) : null}
@@ -641,9 +659,9 @@ const TimetableView = ({
       <Drawer
         open={Boolean(selectedTribeEntry)}
         onClose={() => setSelectedTribeEntry(null)}
-        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
+        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : t('Tribe likes')}
         titleTranslate={selectedTribeEntry ? 'no' : undefined}
-        subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
+        subtitle={selectedTribeEntry ? getTranslatedEntryMetaLabel(selectedTribeEntry.entry, t) : ''}
         subtitleTranslate={selectedTribeEntry ? 'no' : undefined}
       >
         <Box gap="var(--dq-ui-space-md)">
@@ -656,7 +674,7 @@ const TimetableView = ({
                 avatarSrc={member.avatarUrl}
                 avatarAlt={fullName}
                 name={fullName}
-                handle={member.username ? `@${member.username}` : 'Profile unavailable'}
+                handle={member.username ? `@${member.username}` : t('Profile unavailable')}
               />
             );
           })}

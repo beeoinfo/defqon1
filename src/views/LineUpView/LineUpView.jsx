@@ -11,6 +11,7 @@ import Drawer from '@/components/layout/Drawer';
 import SlidingColumns from '@/components/layout/SlidingColumns';
 import PeopleStack from '@/components/PeopleStack';
 import Badge from '@/components/primitives/Badge';
+import useI18n from '@/hooks/useI18n';
 import {
   compareLineupEntries,
   getEntryDayLabel,
@@ -77,9 +78,9 @@ const compareStageSections = (leftStage, rightStage) => {
   return compareStages(leftStage.stage, rightStage.stage);
 };
 
-const getEntryCardMetaProps = (entry) => ({
+const getEntryCardMetaProps = (entry, t) => ({
   meta1: entry.stage,
-  meta2: getEntryDayLabel(entry),
+  meta2: t(getEntryDayLabel(entry)),
   meta3: getEntryTimeLabel(entry),
 });
 
@@ -129,7 +130,7 @@ const LineUpView = ({
   showTribeOnly = false,
   tribeLikesByEntryId = new Map(),
   archiveNotice = null,
-  archiveNoticeTitle = 'Archived line-up snapshot',
+  archiveNoticeTitle = 'Archived lineup snapshot',
   stackDays = false,
   filterBar = null,
   showStyleTags = false,
@@ -137,6 +138,7 @@ const LineUpView = ({
   shouldShowJokeLineup = false,
   jokeLineupSearchKey = '',
 }) => {
+  const { t } = useI18n();
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
   const [isJokeLiked, setIsJokeLiked] = useState(false);
   const jokeImageUrl = useMemo(() => {
@@ -153,8 +155,8 @@ const LineUpView = ({
   const getActionAriaLabel = useCallback((entry, isFavorite) => (
     canEditLineup
       ? `Edit ${getEntryDisplayName(entry)}`
-      : isFavorite ? 'Remove favorite' : 'Add favorite'
-  ), [canEditLineup]);
+      : isFavorite ? t('Remove favorite') : t('Add favorite')
+  ), [canEditLineup, t]);
   const handleEntryAction = useCallback((entry) => {
     if (canEditLineup) {
       onEditEntry?.(entry.id);
@@ -214,7 +216,7 @@ const LineUpView = ({
       Object.entries(groupedEntries)
         .map(([day, dayStages]) => ({
           id: day.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          label: day,
+          label: t(day),
           day,
           stages: Object.entries(dayStages)
             .map(([stage, stageEntries]) => ({
@@ -226,7 +228,7 @@ const LineUpView = ({
             .sort(compareStageSections),
         }))
         .filter((section) => section.stages.length > 0),
-    [groupedEntries]
+    [groupedEntries, t]
   );
 
   const sections = useMemo(
@@ -249,7 +251,7 @@ const LineUpView = ({
                   color={stageColor}
                   titleBadge={stageSection.stage}
                   titleCount={stageSection.entries.length}
-                  titleCountLabel={stageSection.entries.length === 1 ? 'show' : 'shows'}
+                  titleCountLabel={stageSection.entries.length === 1 ? t('show') : t('shows')}
                   className="dq-lineup-view__stage-section"
                 >
                   <Box
@@ -274,7 +276,7 @@ const LineUpView = ({
                           color={entry.stageColor ?? stageColor}
                           title={getEntryDisplayName(entry)}
                           underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
-                          {...getEntryCardMetaProps(entry)}
+                          {...getEntryCardMetaProps(entry, t)}
                           underMeta={
                             tribeLikesFromOthers.length > 0 ? (
                               <PeopleStack
@@ -291,19 +293,16 @@ const LineUpView = ({
                         >
                           {showTribeOnly && tribeLikes.length > 0 && tribeLikesFromOthers.length === 0 ? (
                             <p className="dq-lineup-view__tribe-note">
-                              Only you saved this set in your tribe.
+                              {t('Only you saved this set in your tribe.')}
                             </p>
                           ) : null}
 
                           {!showTribeOnly && relatedSuggestions.length > 0 ? (
                             <Box gap="var(--dq-ui-space-sm)">
                               <p
-                                style={{
-                                  margin: 0,
-                                  color: 'var(--dq-ui-text-soft)',
-                                }}
+                                className="dq-layout-card__description"
                               >
-                                This artist also appears elsewhere in the lineup.
+                                {t('This artist also appears elsewhere in the lineup.')}
                               </p>
                               <Box gap="var(--dq-ui-space-sm)">
                                 {relatedSuggestions.map((suggestion) => {
@@ -318,7 +317,7 @@ const LineUpView = ({
                                       color={suggestionColor}
                                       title={getEntryDisplayName(suggestion)}
                                       underTitle={showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(suggestion.id)) : null}
-                                      {...getEntryCardMetaProps(suggestion)}
+                                      {...getEntryCardMetaProps(suggestion, t)}
                                       actionVariant={getFavoriteActionVariant(isSuggestionFavorite)}
                                       actionPressed={isSuggestionFavorite}
                                       actionAriaLabel={getActionAriaLabel(suggestion, isSuggestionFavorite)}
@@ -349,6 +348,7 @@ const LineUpView = ({
       showTribeOnly,
       showStyleTags,
       styleTagsByEntryId,
+      t,
       tribeLikesByEntryId,
     ]
   );
@@ -363,8 +363,8 @@ const LineUpView = ({
 
       <Box gap="var(--dq-ui-space-xl)">
         {archiveNotice ? (
-          <Alert variant="warning" title={archiveNoticeTitle}>
-            {archiveNotice}
+          <Alert variant="warning" title={t(archiveNoticeTitle)}>
+            {t(archiveNotice)}
           </Alert>
         ) : null}
 
@@ -376,7 +376,7 @@ const LineUpView = ({
                   key={jokeImageUrl}
                   className="dq-lineup-view__joke-image"
                   src={jokeImageUrl}
-                  alt="Joke lineup"
+                  alt={t('Joke lineup')}
                 />
               ) : null}
               <Box className="dq-lineup-view__joke-action" component="span">
@@ -385,7 +385,7 @@ const LineUpView = ({
                   icon={HeartIcon}
                   pressed={isJokeLiked}
                   fillOnPress
-                  ariaLabel={isJokeLiked ? 'Unlike joke lineup' : 'Like joke lineup'}
+                  ariaLabel={isJokeLiked ? t('Unlike joke lineup') : t('Like joke lineup')}
                   onPressedChange={setIsJokeLiked}
                 />
               </Box>
@@ -393,7 +393,7 @@ const LineUpView = ({
           </Box>
         ) : sections.length === 0 ? (
           <EmptyState
-            text={hasLineup ? 'No shows match the current filters.' : 'No lineup has been loaded yet.'}
+            text={hasLineup ? t('No shows match the current filters.') : t('No lineup has been loaded yet.')}
           />
         ) : (
           <SlidingColumns sections={sections} variant={stackDays ? 'stacked' : 'responsive'} />
@@ -403,14 +403,14 @@ const LineUpView = ({
       <Drawer
         open={Boolean(selectedTribeEntry)}
         onClose={() => setSelectedTribeEntry(null)}
-        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
+        title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : t('Tribe likes')}
         titleTranslate={selectedTribeEntry ? 'no' : undefined}
         subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
         subtitleTranslate={selectedTribeEntry ? 'no' : undefined}
       >
         <Box gap="var(--dq-ui-space-md)">
           {selectedTribeEntry?.likes.map((member) => {
-            const fullName = [member.firstName, member.lastName].filter(Boolean).join(' ').trim() || 'Tribe member';
+            const fullName = [member.firstName, member.lastName].filter(Boolean).join(' ').trim() || t('Tribe member');
 
             return (
               <PeopleCard
@@ -418,7 +418,7 @@ const LineUpView = ({
                 avatarSrc={member.avatarUrl}
                 avatarAlt={fullName}
                 name={fullName}
-                handle={member.username ? `@${member.username}` : 'Profile unavailable'}
+                handle={member.username ? `@${member.username}` : t('Profile unavailable')}
               />
             );
           })}

@@ -7,7 +7,7 @@ import './Navbar.css';
 const DEFAULT_NAVBAR_ITEMS = [
   {
     id: 'lineup',
-    label: 'Line-up',
+    label: 'Lineup',
     icon: MusicNoteIcon,
   },
   {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import useCachedImageUrl from '@/hooks/useCachedImageUrl';
+import useI18n from '@/hooks/useI18n';
 import Box from '../layout/Box';
 import Button from '../primitives/Button';
 import { FileInput, TextInput } from '../primitives/forms';
@@ -26,6 +27,7 @@ const Profile = ({
   onCancel,
   className = '',
 }) => {
+  const { t } = useI18n();
   const [savedProfile, setSavedProfile] = useState(() => ({
     firstName,
     lastName,
@@ -179,7 +181,7 @@ const Profile = ({
             size="sm"
             radius="rounded"
             ariaLabel="Change preset avatar"
-            title="Change preset avatar"
+            title={t('Change preset avatar')}
             onClick={handlePresetChange}
           />
         </Box>
@@ -194,7 +196,7 @@ const Profile = ({
         {!isEditing && !hasPresetChange ? (
           <Box className="dq-profile__actions" direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)" justify="center">
             <Button onClick={() => setIsEditing(true)}>
-              Edit profile
+              {t('Edit profile')}
             </Button>
             {actionContent}
           </Box>
@@ -203,10 +205,10 @@ const Profile = ({
         {!isEditing && hasPresetChange ? (
           <Box className="dq-profile__actions" direction="row" wrap="wrap" gap="var(--dq-ui-space-sm)" justify="center">
             <Button onClick={handleCancel} disabled={isBusy}>
-              Cancel
+              {t('Cancel')}
             </Button>
             <Button onClick={handleSave} disabled={isBusy || !hasFormChanges}>
-              {isBusy ? 'Saving...' : 'Save changes'}
+              {isBusy ? t('Saving...') : t('Save changes')}
             </Button>
           </Box>
         ) : null}
@@ -221,14 +223,14 @@ const Profile = ({
           >
             <Box direction="row" wrap="wrap" maxColumns={2}>
               <TextInput
-                label="First name"
+                label={t('First name')}
                 value={draftFirstName}
                 onChange={(event) => setDraftFirstName(event.target.value)}
                 autoComplete="given-name"
                 required
               />
               <TextInput
-                label="Last name"
+                label={t('Last name')}
                 value={draftLastName}
                 onChange={(event) => setDraftLastName(event.target.value)}
                 autoComplete="family-name"
@@ -237,17 +239,17 @@ const Profile = ({
             </Box>
 
             <TextInput
-              label="Username"
+              label={t('Username')}
               value={draftUsername}
               onChange={(event) => setDraftUsername(event.target.value)}
               autoComplete="username"
-              description="Lowercase letters, numbers, dots, underscores and dashes."
+              description={t('Lowercase letters, numbers, dots, underscores and dashes.')}
               required
             />
 
             <FileInput
-              label="Avatar upload"
-              description="PNG, JPG, GIF or WEBP."
+              label={t('Avatar upload')}
+              description={t('PNG, JPG, GIF or WEBP.')}
               accept="image/png,image/jpeg,image/gif,image/webp"
               onFilesChange={handleAvatarFilesChange}
             />
@@ -260,10 +262,10 @@ const Profile = ({
 
             <Box direction="row" justify="flex-end" wrap="wrap" gap="var(--dq-ui-space-sm)">
               <Button onClick={handleCancel} disabled={isBusy}>
-                Cancel
+                {t('Cancel')}
               </Button>
               <Button type="submit" disabled={isBusy || !hasFormChanges}>
-                {isBusy ? 'Saving...' : 'Save changes'}
+                {isBusy ? t('Saving...') : t('Save changes')}
               </Button>
             </Box>
           </Box>
