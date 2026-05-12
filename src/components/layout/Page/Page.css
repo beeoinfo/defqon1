@@ -8,7 +8,6 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
   opacity: 1;
-  background: var(--dq-ui-app-background);
   transition: opacity var(--dq-ui-transition-fast);
 }
 

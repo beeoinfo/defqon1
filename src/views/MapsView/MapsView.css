@@ -1,11 +1,8 @@
 .dq-maps-view {
   position: relative;
   width: 100%;
-  height: 100dvh;
+  height: 100vh;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(12, 16, 22, 0.86), rgba(7, 10, 14, 0.98)),
-    var(--dq-ui-surface);
 }
 
 .dq-maps-view__canvas {
@@ -14,12 +11,15 @@
   min-height: 0;
 }
 
+@supports (height: 100svh) {
+  .dq-maps-view {
+    height: 100svh;
+  }
+}
+
 .dq-maps-view__shade {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(9, 12, 16, 0.58), rgba(9, 12, 16, 0.12) 28%, rgba(9, 12, 16, 0.34)),
-    radial-gradient(circle at top left, var(--dq-ui-primary-surface), transparent 36%);
   pointer-events: none;
 }
 
