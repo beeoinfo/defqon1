@@ -43,6 +43,10 @@ const DIRECTION_GPS_OPTIONS = {
   timeout: 15000,
   maximumAge: 5000,
 };
+const DIRECTION_HEADING_COMMIT_MS = 80;
+const DIRECTION_HEADING_MIN_DELTA_DEGREES = 0.7;
+const DIRECTION_HEADING_SMOOTHING = 0.22;
+const DIRECTION_ORIENTATION_SOURCE_STALE_MS = 800;
 
 let mapboxGlLoaderPromise = null;
 const styleDefinitionCache = new Map();
@@ -520,6 +524,26 @@ const getFeatureCardPosition = (map, point, cardSize = {}) => {
 
 const normalizeDegrees = (value) => ((Number(value) % 360) + 360) % 360;
 
+const getShortestAngleDelta = (target, current) => (
+  ((Number(target) - Number(current) + 540) % 360) - 180
+);
+
+const getContinuousAngle = (angle, referenceAngle) => {
+  if (!Number.isFinite(referenceAngle)) {
+    return normalizeDegrees(angle);
+  }
+
+  return referenceAngle + getShortestAngleDelta(angle, referenceAngle);
+};
+
+const getOrientationEventPriority = (event) => {
+  if (Number.isFinite(event.webkitCompassHeading)) {
+    return 3;
+  }
+
+  return event.type === 'deviceorientationabsolute' || event.absolute ? 2 : 1;
+};
+
 const toRadians = (degrees) => (degrees * Math.PI) / 180;
 
 const toDegrees = (radians) => (radians * 180) / Math.PI;
@@ -931,6 +955,11 @@ const MapsView = ({
   const calibrationMarkersSignatureRef = useRef('');
   const directionGeolocationWatchIdRef = useRef(null);
   const directionOrientationHandlerRef = useRef(null);
+  const directionOrientationSourceRef = useRef({ priority: 0, updatedAt: 0 });
+  const directionRawHeadingRef = useRef(null);
+  const directionSmoothedHeadingRef = useRef(null);
+  const directionCommittedHeadingRef = useRef(null);
+  const directionHeadingCommitTimeRef = useRef(0);
   const featureCardRef = useRef(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
@@ -1024,6 +1053,11 @@ const MapsView = ({
 
     directionGeolocationWatchIdRef.current = null;
     directionOrientationHandlerRef.current = null;
+    directionOrientationSourceRef.current = { priority: 0, updatedAt: 0 };
+    directionRawHeadingRef.current = null;
+    directionSmoothedHeadingRef.current = null;
+    directionCommittedHeadingRef.current = null;
+    directionHeadingCommitTimeRef.current = 0;
     setIsDirectionTracking(false);
     setDoesDirectionNeedPermission(false);
     setActiveDirectionTargetUserId(null);
@@ -1079,7 +1113,44 @@ const MapsView = ({
         const heading = getDeviceHeadingDegrees(event);
 
         if (heading !== null) {
-          setDirectionHeading(heading);
+          const now = performance.now();
+          const priority = getOrientationEventPriority(event);
+          const currentSource = directionOrientationSourceRef.current;
+          const canUseSource =
+            priority >= currentSource.priority ||
+            now - currentSource.updatedAt > DIRECTION_ORIENTATION_SOURCE_STALE_MS;
+
+          if (!canUseSource) {
+            return;
+          }
+
+          directionOrientationSourceRef.current = { priority, updatedAt: now };
+
+          const rawReference = directionRawHeadingRef.current ?? directionSmoothedHeadingRef.current;
+          const continuousHeading = getContinuousAngle(heading, rawReference);
+          const previousSmoothedHeading = directionSmoothedHeadingRef.current ?? continuousHeading;
+          const smoothedDelta = getShortestAngleDelta(continuousHeading, previousSmoothedHeading);
+          const nextSmoothedHeading =
+            Math.abs(smoothedDelta) <= DIRECTION_HEADING_MIN_DELTA_DEGREES
+              ? previousSmoothedHeading
+              : previousSmoothedHeading + smoothedDelta * DIRECTION_HEADING_SMOOTHING;
+          const committedHeading = directionCommittedHeadingRef.current;
+
+          directionRawHeadingRef.current = continuousHeading;
+          directionSmoothedHeadingRef.current = nextSmoothedHeading;
+
+          if (
+            committedHeading === null ||
+            (
+              now - directionHeadingCommitTimeRef.current >= DIRECTION_HEADING_COMMIT_MS &&
+              Math.abs(getShortestAngleDelta(nextSmoothedHeading, committedHeading)) >= DIRECTION_HEADING_MIN_DELTA_DEGREES
+            )
+          ) {
+            directionCommittedHeadingRef.current = nextSmoothedHeading;
+            directionHeadingCommitTimeRef.current = now;
+            setDirectionHeading(nextSmoothedHeading);
+          }
+
           setDoesDirectionNeedPermission(false);
         }
       };
@@ -1553,6 +1624,12 @@ const MapsView = ({
         window.removeEventListener('deviceorientation', directionOrientationHandlerRef.current);
       }
 
+      directionOrientationSourceRef.current = { priority: 0, updatedAt: 0 };
+      directionRawHeadingRef.current = null;
+      directionSmoothedHeadingRef.current = null;
+      directionCommittedHeadingRef.current = null;
+      directionHeadingCommitTimeRef.current = 0;
+
       clearLongPress();
       currentStyleUrlRef.current = '';
     };
@@ -1750,7 +1827,7 @@ const MapsView = ({
     ? getGpsBearingDegrees(directionPosition, selectedDirectionTargetGpsPoint)
     : null;
   const directionRelativeBearing = directionTargetBearing !== null && directionHeading !== null
-    ? normalizeDegrees(directionTargetBearing - directionHeading)
+    ? directionTargetBearing - directionHeading
     : directionTargetBearing;
   const directionDistanceMeters = canShowDirection
     ? getGpsDistanceMeters(directionPosition, selectedDirectionTargetGpsPoint)
@@ -2036,13 +2113,16 @@ const MapsView = ({
                 <span className="dq-maps-view__direction-copy dq-maps-view__direction-copy--hero">
                   {canShowDirection ? (
                     <>
-                      {Math.round(directionDistanceMeters)}m to {selectedDirectionLocation.displayName}
+                      {Math.round(directionDistanceMeters)}m to{' '}
+                      <span translate="no">{selectedDirectionLocation.displayName}</span>
                       {directionHeading === null && directionTargetBearing !== null
                         ? ` · ${Math.round(directionTargetBearing)}° bearing`
                         : ''}
                     </>
                   ) : (
-                    `Locating ${selectedDirectionLocation.displayName}...`
+                    <>
+                      Locating <span translate="no">{selectedDirectionLocation.displayName}</span>...
+                    </>
                   )}
                 </span>
               </>
@@ -2053,7 +2133,7 @@ const MapsView = ({
                 icon={NavigationArrowIcon}
                 onClick={() => handleStartDirectionTracking(selectedDirectionLocation.userId)}
               >
-                Enable direction to {selectedDirectionLocation.displayName}
+                Enable direction to <span translate="no">{selectedDirectionLocation.displayName}</span>
               </Button>
             )}
             {directionErrorMessage ? (

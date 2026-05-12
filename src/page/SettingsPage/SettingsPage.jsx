@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CheckIcon,
   DownloadSimpleIcon,
@@ -90,6 +90,7 @@ const SettingsPage = ({
   const [isInstallBusy, setIsInstallBusy] = useState(false);
   const [isResetFavoritesModalOpen, setIsResetFavoritesModalOpen] = useState(false);
   const [shouldShowAndroidApkDownload] = useState(isAndroidDevice);
+  const tribeSectionRef = useRef(null);
   const androidApkDownloadPath = getAndroidApkDownloadPath();
   const selectableLineups = lineups.filter((lineup) => (
     lineup.status !== 'preview' && lineup.status !== 'temp'
@@ -104,6 +105,21 @@ const SettingsPage = ({
       setIsResetFavoritesModalOpen(false);
     }
   }, [favoriteCount]);
+
+  useEffect(() => {
+    if (!user || (!pendingTribeInviteCode && !tribeInviteAlert)) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => {
+      tribeSectionRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [pendingTribeInviteCode, tribeInviteAlert, user]);
 
   if (!user) {
     return (
@@ -261,6 +277,7 @@ const SettingsPage = ({
       </Box>
 
       <TribePanel
+        ref={tribeSectionRef}
         user={user}
         tribe={tribe}
         isBusy={isTribeBusy}

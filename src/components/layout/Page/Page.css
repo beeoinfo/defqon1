@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: calc(200 + var(--dq-layout-page-layer-index, 0));
-  min-height: 100dvh;
+  min-height: 100vh;
   overflow-x: clip;
   overflow-y: auto;
   -ms-overflow-style: none;
@@ -26,9 +26,16 @@
 }
 
 .dq-layout-page__body {
-  min-height: 100dvh;
+  min-height: 100vh;
 }
 
 .dq-layout-page__main {
   min-height: 0;
+}
+
+@supports (height: 100lvh) {
+  .dq-layout-page,
+  .dq-layout-page__body {
+    min-height: 100lvh;
+  }
 }

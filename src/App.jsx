@@ -670,6 +670,7 @@ const getStyleOptionsFromEntries = (entries, styleTagsByArtistToken, styleTagsBy
     .map((tag) => ({
       value: tag,
       label: tag,
+      labelTranslate: 'no',
     }));
 };
 
@@ -1523,6 +1524,7 @@ const App = () => {
   const lastCalibrationLocationSyncKeyRef = useRef('');
   const calibratedMapLayerTransformsRef = useRef([]);
   const [isTribeReady, setIsTribeReady] = useState(() => bootAccount !== null);
+  const [isCurrentTribeChecked, setIsCurrentTribeChecked] = useState(() => !isSupabaseConfigured());
   const [isTribeBusy, setIsTribeBusy] = useState(false);
   const [pendingTribeInviteCode, setPendingTribeInviteCode] = useState(() =>
     readPendingTribeInviteCode()
@@ -1533,6 +1535,7 @@ const App = () => {
   const [authDefaultTab, setAuthDefaultTab] = useState('login');
   const [pendingAction, setPendingAction] = useState(null);
   const attemptedInviteJoinKeyRef = useRef('');
+  const promptedTribeInviteAuthRef = useRef(false);
   const pwaInstall = usePwaInstallPrompt();
   const isOnline = useOnlineStatus();
   const isOffline = !isOnline;
@@ -2763,6 +2766,7 @@ const App = () => {
 
     const nextCode = writePendingTribeInviteCode(inviteCode);
     setPendingTribeInviteCode(nextCode);
+    setTribeInviteAlert('');
     searchParams.delete('tribe');
 
     const nextSearch = searchParams.toString();
@@ -2772,7 +2776,29 @@ const App = () => {
       url: nextUrl,
       pageStack: pageStackRef.current,
     });
-  }, []);
+
+    openSettings();
+
+    if (!authUser) {
+      promptedTribeInviteAuthRef.current = true;
+      requestAuth({ type: 'open-tribe' }, 'login');
+    }
+  }, [authUser, openSettings, requestAuth]);
+
+  useEffect(() => {
+    if (
+      !pendingTribeInviteCode ||
+      authUser ||
+      !isAccountReady ||
+      promptedTribeInviteAuthRef.current
+    ) {
+      return;
+    }
+
+    promptedTribeInviteAuthRef.current = true;
+    openSettings();
+    requestAuth({ type: 'open-tribe' }, 'login');
+  }, [authUser, isAccountReady, openSettings, pendingTribeInviteCode, requestAuth]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -2811,6 +2837,7 @@ const App = () => {
           setTribe(null);
           setTribeMemberLocations([]);
           setIsTribeReady(true);
+          setIsCurrentTribeChecked(true);
           setFavoriteItems([]);
           favoriteItemsRef.current = [];
           hasPendingFavoriteSyncRef.current = false;
@@ -2833,6 +2860,7 @@ const App = () => {
           favoriteItemsRef.current = cachedAccount.favorites ?? [];
           setTribe(cachedAccount.tribe ?? null);
           setIsTribeReady(Boolean(cachedAccount.tribe));
+          setIsCurrentTribeChecked(false);
           setIsAccountReady(true);
         } else {
           setProfile(buildOptimisticProfile(currentUser));
@@ -2840,6 +2868,7 @@ const App = () => {
           favoriteItemsRef.current = [];
           setTribe(null);
           setIsTribeReady(false);
+          setIsCurrentTribeChecked(false);
           setIsAccountReady(false);
         }
 
@@ -2851,6 +2880,7 @@ const App = () => {
 
             setTribe(tribeBundle);
             setIsTribeReady(true);
+            setIsCurrentTribeChecked(true);
           })
           .catch((error) => {
             console.error(error);
@@ -2860,6 +2890,7 @@ const App = () => {
             }
 
             setIsTribeReady(true);
+            setIsCurrentTribeChecked(true);
           });
 
         const bundle = await loadAccountBundle(currentUser.id, currentUser);
@@ -3022,7 +3053,14 @@ const App = () => {
   }, [isLatestLineupSelected]);
 
   useEffect(() => {
-    if (!authUser || !isAccountReady || !pendingTribeInviteCode || tribe || isTribeBusy) {
+    if (
+      !authUser ||
+      !isAccountReady ||
+      !isCurrentTribeChecked ||
+      !pendingTribeInviteCode ||
+      tribe ||
+      isTribeBusy
+    ) {
       return;
     }
 
@@ -3038,26 +3076,42 @@ const App = () => {
     joinCurrentUserTribeByCode(pendingTribeInviteCode)
       .then((nextTribe) => {
         setTribe(nextTribe);
+        setTribeInviteAlert('');
         openSettings();
         writePendingTribeInviteCode('');
         setPendingTribeInviteCode('');
+        promptedTribeInviteAuthRef.current = false;
       })
       .catch((error) => {
         console.error(error);
+        writePendingTribeInviteCode('');
+        setPendingTribeInviteCode('');
+        promptedTribeInviteAuthRef.current = false;
+        setTribeInviteAlert(error.message || 'Could not join this tribe invite.');
+        openSettings();
       })
       .finally(() => {
         setIsTribeBusy(false);
       });
-  }, [authUser, isAccountReady, isTribeBusy, openSettings, pendingTribeInviteCode, tribe]);
+  }, [
+    authUser,
+    isAccountReady,
+    isCurrentTribeChecked,
+    isTribeBusy,
+    openSettings,
+    pendingTribeInviteCode,
+    tribe,
+  ]);
 
   const clearPendingTribeInvite = useCallback(() => {
     writePendingTribeInviteCode('');
     setPendingTribeInviteCode('');
     attemptedInviteJoinKeyRef.current = '';
+    promptedTribeInviteAuthRef.current = false;
   }, []);
 
   useEffect(() => {
-    if (!pendingTribeInviteCode || !tribe) {
+    if (!isCurrentTribeChecked || !pendingTribeInviteCode || !tribe) {
       return;
     }
 
@@ -3067,9 +3121,9 @@ const App = () => {
     }
 
     clearPendingTribeInvite();
-    setTribeInviteAlert('Leave your current tribe before joining another one.');
+    setTribeInviteAlert('You are already in a tribe. Leave it before joining another one.');
     openSettings();
-  }, [clearPendingTribeInvite, openSettings, pendingTribeInviteCode, tribe]);
+  }, [clearPendingTribeInvite, isCurrentTribeChecked, openSettings, pendingTribeInviteCode, tribe]);
 
   useEffect(() => {
     if (!authUser || !isAccountReady || !pendingAction) {
@@ -4343,6 +4397,7 @@ const App = () => {
     setAuthUser(null);
     setProfile(null);
     setTribe(null);
+    setIsCurrentTribeChecked(true);
     setTribeMemberLocations([]);
     setFavoriteItems([]);
     favoriteItemsRef.current = [];

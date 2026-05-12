@@ -1,8 +1,22 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "info.beeo.insane.twa",
-        "sha256_cert_fingerprints": ["CA:14:72:72:2A:14:5A:A3:12:D2:15:8B:94:E2:9B:B5:48:3C:65:3E:AB:12:58:B1:5D:D1:75:5F:36:93:14:4A"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "info.beeo.insane.twa",
+      "sha256_cert_fingerprints": [
+        "CA:14:72:72:2A:14:5A:A3:12:D2:15:8B:94:E2:9B:B5:48:3C:65:3E:AB:12:58:B1:5D:D1:75:5F:36:93:14:4A"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "info.beeo.app_1.defqon.twa",
+      "sha256_cert_fingerprints": [
+        "6C:87:EA:E7:FF:18:E7:45:E5:8B:3D:02:4A:D5:34:98:6E:AE:02:91:74:1E:A4:1A:E2:1E:79:1E:D4:78:14:64"
+      ]
+    }
+  }
+]

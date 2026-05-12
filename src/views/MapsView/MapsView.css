@@ -142,7 +142,7 @@
 }
 
 .dq-maps-view__direction-header {
-  padding-right: 54px;
+  width: 100%;
   text-align: center;
 }
 
@@ -158,7 +158,8 @@
   background: rgba(42, 18, 20, 0.86);
   color: var(--dq-ui-color-white);
   transform: rotate(var(--dq-maps-direction-angle, 0deg));
-  transition: transform 180ms ease;
+  transition: transform 90ms linear;
+  will-change: transform;
 }
 
 .dq-maps-view__direction-arrow--hero {

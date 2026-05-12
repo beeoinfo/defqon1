@@ -500,12 +500,12 @@ const ReviewsView = ({
                                 className="dq-timetable-view__entry-content"
                                 gap="0.125rem"
                               >
-                                <span className="dq-timetable-view__entry-name">
+                                <span className="dq-timetable-view__entry-name" translate="no">
                                   {getEntryDisplayName(entry)}
                                 </span>
                                 <span className="dq-timetable-view__entry-time">
                                   <span>{getEntryDayLabel(entry)}</span>
-                                  <span>{entry.stage}</span>
+                                  <span translate="no">{entry.stage}</span>
                                   <span>{getEntryTimeLabel(entry)}</span>
                                 </span>
                                 {renderTribeStack(entry)}

@@ -732,6 +732,7 @@ const FilterBar = ({
                     tag={choice.tag}
                     tagVariant={choice.tagVariant}
                     className={choice.className}
+                    labelTranslate={choice.labelTranslate}
                   >
                     {choice.label}
                   </ChoiceButton>
@@ -780,6 +781,7 @@ const FilterBar = ({
                   icon={option.icon}
                   fillOnPress={option.fillOnPress}
                   variant={option.variant ?? 'ghost'}
+                  labelTranslate={option.labelTranslate}
                 >
                   {option.label}
                 </ChoiceButton>

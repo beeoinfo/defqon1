@@ -107,6 +107,7 @@ const renderStyleBadges = (styleTags) => {
             backgroundColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND : STYLE_TAG_BADGE_BACKGROUND}
             borderColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BORDER : STYLE_TAG_BADGE_BORDER}
             textColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_TEXT : STYLE_TAG_BADGE_TEXT}
+            translate="no"
           >
             {label}
           </Badge>
@@ -137,8 +138,15 @@ const LineUpView = ({
   jokeLineupSearchKey = '',
 }) => {
   const [selectedTribeEntry, setSelectedTribeEntry] = useState(null);
-  const [jokeImageUrl, setJokeImageUrl] = useState('');
   const [isJokeLiked, setIsJokeLiked] = useState(false);
+  const jokeImageUrl = useMemo(() => {
+    if (!shouldShowJokeLineup || JOKE_IMAGE_URLS.length === 0) {
+      return '';
+    }
+
+    const randomIndex = Math.floor(Math.random() * JOKE_IMAGE_URLS.length);
+    return JOKE_IMAGE_URLS[randomIndex];
+  }, [jokeLineupSearchKey, shouldShowJokeLineup]);
   const getFavoriteActionVariant = useCallback((isFavorite) => (
     canEditLineup ? 'edit' : canToggleFavorites ? 'likes' : isFavorite ? 'liked' : null
   ), [canEditLineup, canToggleFavorites]);
@@ -346,16 +354,8 @@ const LineUpView = ({
   );
 
   useEffect(() => {
-    if (!shouldShowJokeLineup || JOKE_IMAGE_URLS.length === 0) {
-      setJokeImageUrl('');
-      setIsJokeLiked(false);
-      return;
-    }
-
-    const randomIndex = Math.floor(Math.random() * JOKE_IMAGE_URLS.length);
-    setJokeImageUrl(JOKE_IMAGE_URLS[randomIndex]);
     setIsJokeLiked(false);
-  }, [jokeLineupSearchKey, shouldShowJokeLineup]);
+  }, [jokeImageUrl]);
 
   return (
     <Box gap="0">
@@ -371,11 +371,14 @@ const LineUpView = ({
         {shouldShowJokeLineup ? (
           <Box className="dq-lineup-view__joke-shell">
             <Box component="article" className="dq-lineup-view__joke-card">
-              <img
-                className="dq-lineup-view__joke-image"
-                src={jokeImageUrl || JOKE_IMAGE_URLS[0] || ''}
-                alt="Joke lineup"
-              />
+              {jokeImageUrl ? (
+                <img
+                  key={jokeImageUrl}
+                  className="dq-lineup-view__joke-image"
+                  src={jokeImageUrl}
+                  alt="Joke lineup"
+                />
+              ) : null}
               <Box className="dq-lineup-view__joke-action" component="span">
                 <ToggleButton
                   variant="likes"
@@ -401,7 +404,9 @@ const LineUpView = ({
         open={Boolean(selectedTribeEntry)}
         onClose={() => setSelectedTribeEntry(null)}
         title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
+        titleTranslate={selectedTribeEntry ? 'no' : undefined}
         subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
+        subtitleTranslate={selectedTribeEntry ? 'no' : undefined}
       >
         <Box gap="var(--dq-ui-space-md)">
           {selectedTribeEntry?.likes.map((member) => {

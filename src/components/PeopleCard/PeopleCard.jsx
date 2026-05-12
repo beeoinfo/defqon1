@@ -53,7 +53,7 @@ const PeopleCard = ({
         className="dq-people-card__content"
       >
         <span className="dq-people-card__name-row">
-          <span className="dq-people-card__name">
+          <span className="dq-people-card__name" translate="no">
             {name}
           </span>
           {owner ? (
@@ -66,7 +66,7 @@ const PeopleCard = ({
           ) : null}
         </span>
         {handle ? (
-          <span className="dq-people-card__handle">{handle}</span>
+          <span className="dq-people-card__handle" translate="no">{handle}</span>
         ) : null}
         {meta ? (
           <span className="dq-people-card__meta">{meta}</span>

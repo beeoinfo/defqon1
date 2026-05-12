@@ -126,6 +126,7 @@ const Card = ({
               component={titleComponent}
               variant={titleVariant}
               className="dq-layout-card__title"
+              translate="no"
             >
               {title}
             </Title>
@@ -141,7 +142,13 @@ const Card = ({
               className={['dq-layout-card__meta', metaVariant === 'strikethrough' ? 'dq-layout-card__meta--strikethrough' : ''].filter(Boolean).join(' ')}
             >
               {metaParts.map((part, index) => (
-                <span key={index} className="dq-layout-card__meta-item">{part}</span>
+                <span
+                  key={index}
+                  className="dq-layout-card__meta-item"
+                  translate={index === 0 ? 'no' : undefined}
+                >
+                  {part}
+                </span>
               ))}
             </Box>
           ) : null}

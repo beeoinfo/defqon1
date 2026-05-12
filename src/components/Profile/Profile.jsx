@@ -185,8 +185,8 @@ const Profile = ({
         </Box>
 
         <Box align="center" gap="var(--dq-ui-space-xs)">
-          <strong className="dq-profile__name">{displayName}</strong>
-          <span className="dq-profile__username">@{displayUsername}</span>
+          <strong className="dq-profile__name" translate="no">{displayName}</strong>
+          <span className="dq-profile__username" translate="no">@{displayUsername}</span>
         </Box>
       </Box>
 

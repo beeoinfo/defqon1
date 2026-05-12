@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
 import {
   MapPinIcon,
   PencilSimpleIcon,
@@ -37,7 +37,7 @@ const getTribeDisplayName = (tribe) => {
   return `Tribe ${tribe?.code ?? ''}`.trim();
 };
 
-const TribePanel = ({
+const TribePanel = forwardRef(({
   user,
   tribe,
   isBusy,
@@ -50,7 +50,7 @@ const TribePanel = ({
   onRenameTribe,
   tribeLocations = [],
   onShowMemberOnMap,
-}) => {
+}, ref) => {
   const [joinCode, setJoinCode] = useState(() => pendingInviteCode || '');
   const [tribeName, setTribeName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -236,7 +236,7 @@ const TribePanel = ({
   }
 
   return (
-    <Box gap="var(--dq-ui-space-xl)">
+    <Box ref={ref} gap="var(--dq-ui-space-xl)">
       {inviteConflictMessage ? (
         <Alert variant="error" title="Join blocked">
           {inviteConflictMessage}
@@ -410,10 +410,9 @@ const TribePanel = ({
                               size="sm"
                               variant="ghost"
                               icon={MapPinIcon}
+                              ariaLabel={`Show ${fullName} on map`}
                               onClick={() => onShowMemberOnMap?.(mapLocation)}
-                            >
-                              Show on map
-                            </Button>
+                            />
                           ) : null
                         }
                       />
@@ -431,7 +430,11 @@ const TribePanel = ({
               setLeaveErrorMessage('');
             }}
             title="Leave tribe"
-            subtitle={`Type "${user?.user_metadata?.username ?? user?.username ?? ''}" to confirm.`}
+            subtitle={(
+              <>
+                Type "<span translate="no">{user?.user_metadata?.username ?? user?.username ?? ''}</span>" to confirm.
+              </>
+            )}
             maxWidth="520px"
           >
             <Box gap="var(--dq-ui-space-lg)">
@@ -512,6 +515,8 @@ const TribePanel = ({
       )}
     </Box>
   );
-};
+});
+
+TribePanel.displayName = 'TribePanel';
 
 export default TribePanel;

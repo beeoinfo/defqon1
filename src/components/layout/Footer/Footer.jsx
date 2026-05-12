@@ -20,11 +20,6 @@ const Footer = ({
       onClick: () => onOpenPage?.('about'),
     },
     {
-      id: 'roadmap',
-      label: 'Roadmap',
-      onClick: () => onOpenPage?.('roadmap'),
-    },
-    {
       id: 'legal',
       label: 'Legal',
       onClick: () => onOpenPage?.('legal'),

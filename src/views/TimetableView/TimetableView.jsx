@@ -108,6 +108,7 @@ const renderStyleBadges = (styleTags) => {
             backgroundColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BACKGROUND : STYLE_TAG_BADGE_BACKGROUND}
             borderColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_BORDER : STYLE_TAG_BADGE_BORDER}
             textColor={isAdditional ? ADDITIONAL_STYLE_TAG_BADGE_TEXT : STYLE_TAG_BADGE_TEXT}
+            translate="no"
           >
             {label}
           </Badge>
@@ -442,7 +443,7 @@ const TimetableView = ({
                           className="dq-timetable-view__entry-content"
                           gap="0.125rem"
                         >
-                          <span className="dq-timetable-view__entry-name">
+                          <span className="dq-timetable-view__entry-name" translate="no">
                             {entry.displayName}
                           </span>
                           {showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
@@ -531,7 +532,7 @@ const TimetableView = ({
                         '--dq-timetable-stage-color': stage.color,
                       }}
                     >
-                      <span className="dq-timetable-view__stage-name">{stage.label}</span>
+                      <span className="dq-timetable-view__stage-name" translate="no">{stage.label}</span>
                       <span className="dq-timetable-view__stage-count">
                         {stage.entries.length} show{stage.entries.length === 1 ? '' : 's'}
                       </span>
@@ -584,7 +585,7 @@ const TimetableView = ({
                             className="dq-timetable-view__entry-content"
                             gap="0.125rem"
                           >
-                            <span className="dq-timetable-view__entry-name">
+                            <span className="dq-timetable-view__entry-name" translate="no">
                               {entry.displayName}
                             </span>
                             {showStyleTags ? renderStyleBadges(styleTagsByEntryId.get(entry.id)) : null}
@@ -641,7 +642,9 @@ const TimetableView = ({
         open={Boolean(selectedTribeEntry)}
         onClose={() => setSelectedTribeEntry(null)}
         title={selectedTribeEntry ? getEntryDisplayName(selectedTribeEntry.entry) : 'Tribe likes'}
+        titleTranslate={selectedTribeEntry ? 'no' : undefined}
         subtitle={selectedTribeEntry ? getEntryMetaLabel(selectedTribeEntry.entry) : ''}
+        subtitleTranslate={selectedTribeEntry ? 'no' : undefined}
       >
         <Box gap="var(--dq-ui-space-md)">
           {selectedTribeEntry?.likes.map((member) => {

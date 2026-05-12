@@ -13,6 +13,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--dq-ui-app-background);
 }
 
 *,
@@ -25,7 +26,7 @@ html,
 body,
 #root {
   margin: 0;
-  min-height: 100dvh;
+  min-height: 100vh;
 }
 
 html,
@@ -43,20 +44,23 @@ body::-webkit-scrollbar {
 
 html {
   background: var(--dq-ui-app-background);
+  min-height: 100%;
 }
 
 body {
   position: relative;
   isolation: isolate;
+  min-height: 100vh;
   min-width: 320px;
   color: rgba(255, 255, 255, 0.92);
-  background: transparent;
+  background: var(--dq-ui-app-background);
 }
 
 body::before {
   content: "";
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto;
+  min-height: 100vh;
   z-index: -2;
   pointer-events: none;
   background: var(--dq-ui-app-background);
@@ -73,6 +77,15 @@ body::after {
   background: var(--dq-ui-app-background-glow);
   filter: var(--dq-ui-app-background-glow-filter);
   -webkit-filter: var(--dq-ui-app-background-glow-filter);
+}
+
+@supports (height: 100lvh) {
+  html,
+  body,
+  #root,
+  body::before {
+    min-height: 100lvh;
+  }
 }
 
 button,

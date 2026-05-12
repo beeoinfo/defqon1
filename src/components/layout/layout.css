@@ -33,11 +33,17 @@
       (var(--dq-ui-space-lg) * 2) +
       1px
     );
-  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   width: 100%;
+}
+
+@supports (height: 100lvh) {
+  .dq-layout-main {
+    min-height: 100lvh;
+  }
 }
 
 .dq-layout-main-shell {

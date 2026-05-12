@@ -180,7 +180,7 @@ const Box = forwardRef(({
               className="dq-layout-box__title-leading"
             >
               {hasTitleBadge ? (
-                <Badge variant="plain" color={color} className="dq-layout-box__title-badge">
+                <Badge variant="plain" color={color} className="dq-layout-box__title-badge" translate="no">
                   {titleBadge}
                 </Badge>
               ) : null}

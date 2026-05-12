@@ -36,6 +36,7 @@ const ChoiceButton = ({
   className = '',
   ariaLabel,
   title,
+  labelTranslate,
   ...props
 }) => {
   const [internalChecked, setInternalChecked] = useState(() => Boolean(defaultChecked));
@@ -128,6 +129,7 @@ const ChoiceButton = ({
           } : {}),
         }}
         title={visualState.resolvedTitle}
+        translate={labelTranslate}
       >
         {selectedIcon ? (
           <span

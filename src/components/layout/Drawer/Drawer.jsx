@@ -16,7 +16,9 @@ const Drawer = ({
   open = false,
   onClose,
   title,
+  titleTranslate,
   subtitle,
+  subtitleTranslate,
   description,
   titleComponent = 'h2',
   titleVariant = 'h3',
@@ -323,6 +325,7 @@ const Drawer = ({
                       component={titleComponent}
                       variant={titleVariant}
                       className="dq-layout-drawer__title"
+                      translate={titleTranslate}
                     >
                       {title}
                     </Title>
@@ -346,7 +349,7 @@ const Drawer = ({
                     </Box>
                   ) : null}
                   {subtitle ? (
-                    <p id={subtitleId} className="dq-layout-drawer__subtitle">
+                    <p id={subtitleId} className="dq-layout-drawer__subtitle" translate={subtitleTranslate}>
                       {subtitle}
                     </p>
                   ) : null}
