@@ -8,6 +8,7 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
   opacity: 1;
+  background: var(--dq-ui-app-background);
   transition: opacity var(--dq-ui-transition-fast);
 }
 
@@ -33,9 +34,9 @@
   min-height: 0;
 }
 
-@supports (height: 100lvh) {
+@supports (height: 100svh) {
   .dq-layout-page,
   .dq-layout-page__body {
-    min-height: 100lvh;
+    min-height: 100svh;
   }
 }

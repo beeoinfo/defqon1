@@ -79,12 +79,28 @@ body::after {
   -webkit-filter: var(--dq-ui-app-background-glow-filter);
 }
 
-@supports (height: 100lvh) {
+@supports (height: 100svh) {
   html,
   body,
-  #root,
+  #root {
+    min-height: 100svh;
+  }
+}
+
+@supports (height: 100lvh) {
   body::before {
     min-height: 100lvh;
+  }
+}
+
+@supports (height: 100lvh) and (width: 100lvw) {
+  body::after {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: 152lvw;
+    height: 176lvh;
+    transform: translate3d(-50%, -50%, 0) scale(1.22);
   }
 }
 

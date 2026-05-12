@@ -1542,6 +1542,46 @@ const App = () => {
 
   useDocumentScrollLock(hasRenderedPages);
 
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    let animationFrameId = 0;
+
+    const updateViewportHeight = () => {
+      animationFrameId = 0;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+
+      if (Number.isFinite(viewportHeight) && viewportHeight > 0) {
+        rootElement.style.setProperty('--dq-viewport-height', `${Math.round(viewportHeight)}px`);
+      }
+    };
+
+    const scheduleViewportHeightUpdate = () => {
+      if (animationFrameId !== 0) {
+        return;
+      }
+
+      animationFrameId = window.requestAnimationFrame(updateViewportHeight);
+    };
+
+    updateViewportHeight();
+    window.addEventListener('resize', scheduleViewportHeightUpdate);
+    window.addEventListener('orientationchange', scheduleViewportHeightUpdate);
+    window.visualViewport?.addEventListener('resize', scheduleViewportHeightUpdate);
+    window.visualViewport?.addEventListener('scroll', scheduleViewportHeightUpdate);
+
+    return () => {
+      if (animationFrameId !== 0) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+
+      window.removeEventListener('resize', scheduleViewportHeightUpdate);
+      window.removeEventListener('orientationchange', scheduleViewportHeightUpdate);
+      window.visualViewport?.removeEventListener('resize', scheduleViewportHeightUpdate);
+      window.visualViewport?.removeEventListener('scroll', scheduleViewportHeightUpdate);
+      rootElement.style.removeProperty('--dq-viewport-height');
+    };
+  }, []);
+
   const refreshLineupSources = useCallback(async ({ selectLatest = false } = {}) => {
     if (!isSupabaseConfigured()) {
       const cachedSources = readCachedLineupSources();
